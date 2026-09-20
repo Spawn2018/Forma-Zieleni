@@ -127,6 +127,18 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 
 ---
 
+## ADR-010 — Grok Bot collaboration model (manual handoff)
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-20 |
+| Status | Accepted |
+| Decyzja | Encode verified Cursor OS ↔ Grok Bot roles in `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md`. Manual owner handoff is the current Cursor→Grok path. Custom bridges NOT APPROVED. Cursor SDK is not a Grok Bot API. |
+| Kontekst | Capability discovery: Grok→CloudAgent and Grok↔Grok available; Cursor local→named Grok Bot programmatic invoke+return not available. |
+| Konsekwencje | Use skill `grok-research-handoff` for structured briefs; Grok memory never overrides Canon; CloudAgent from Grok must not silently override main-only; SDK/Orchestrate/Supermemory/Continual Learning/custom bridge require DECISION. |
+
+---
+
 ## Szablon kolejnego ADR
 
 ```markdown

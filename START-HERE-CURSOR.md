@@ -29,4 +29,4 @@ Rules:
 - Before push to `main`, run the applicable pre-push gate and independent reviewers.
 
 ## Cursor OS 2026 extension
-Before autonomous implementation, read `docs/cursor-os/CURSOR-OS-2026.md` and the applicable orchestration documents. Use project Skills/subagents rather than improvising workflows. External AI/Bots are independent helpers, not canonical authorities. Before every push use `docs/cursor-os/PRE-PUSH-ORCHESTRATION.md`.
+Before autonomous implementation, read `docs/cursor-os/CURSOR-OS-2026.md` and the applicable orchestration documents. Use project Skills/subagents rather than improvising workflows. External AI/Bots are independent helpers, not canonical authorities. Grok collaboration: `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md` (manual handoff via skill `grok-research-handoff`). Before every push use `docs/cursor-os/PRE-PUSH-ORCHESTRATION.md`.

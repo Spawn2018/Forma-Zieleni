@@ -9,7 +9,7 @@ Cursor is the engineering coordinator for Forma Zieleni. It must execute approve
 3. Local Cursor Agent/CLI is the default interactive engineering surface.
 4. Project skills and rules are version-controlled and are the durable operating instructions.
 5. Independent reviewers do not silently rewrite requirements; they report blocking findings and evidence.
-6. Grok Bot is an additional independent research/review/operations teammate, not the source of truth and not an uncontrolled production operator.
+6. Grok Bot is an additional independent research/review teammate under [`GROK-BOT-OPERATING-MODEL.md`](./GROK-BOT-OPERATING-MODEL.md) — not the source of truth and not an uncontrolled production operator. Manual owner handoff is the current Cursor→Grok path.
 7. Deterministic tools (tests, linters, type checks, contract checks, benchmarks, migration checks) decide mechanical gates whenever possible; LLM judgment supplements them.
 
 ## Canon loading order
@@ -66,3 +66,5 @@ Do not reclassify a DECISION/DANGEROUS item as AUTO merely to keep the loop movi
 ### Related protocol documents
 - Slice recording / autonomy rules (short index): `docs/workflows/AUTONOMOUS-SLICES.md`
 - Action classes: `docs/workflows/DECISION-GATES.md`
+- Grok Bot collaboration (binding): `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md`
+- Grok handoff skill: `.cursor/skills/grok-research-handoff/SKILL.md`

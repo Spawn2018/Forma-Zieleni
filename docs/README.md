@@ -123,7 +123,7 @@ There is **no** approved current OpenAPI file in the active tree yet.
 | [`cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md`](./cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md) | Orchestration / model routing |
 | [`cursor-os/PRE-PUSH-ORCHESTRATION.md`](./cursor-os/PRE-PUSH-ORCHESTRATION.md) | Pre-push orchestration |
 | [`cursor-os/HOOKS-MCP-AUTOMATIONS.md`](./cursor-os/HOOKS-MCP-AUTOMATIONS.md) | Hooks / MCP / automations policy |
-| [`cursor-os/GROK-BOT-OPERATING-MODEL.md`](./cursor-os/GROK-BOT-OPERATING-MODEL.md) | Grok Bot as helper, not Canon |
+| [`cursor-os/GROK-BOT-OPERATING-MODEL.md`](./cursor-os/GROK-BOT-OPERATING-MODEL.md) | Binding Cursor ↔ Grok Bot collaboration model |
 | [`cursor-os/PROJECTS-AND-LOCAL-EXECUTION.md`](./cursor-os/PROJECTS-AND-LOCAL-EXECUTION.md) | Projects / local execution |
 | [`cursor-os/SETUP-FOR-NONTECHNICAL-OWNER.md`](./cursor-os/SETUP-FOR-NONTECHNICAL-OWNER.md) | Owner setup guide |
 | [`cursor-os/CURSOR-2026-SOURCE-NOTES.md`](./cursor-os/CURSOR-2026-SOURCE-NOTES.md) | Source notes for Cursor OS layer |
