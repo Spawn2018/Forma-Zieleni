@@ -1,0 +1,52 @@
+---
+description: Zasady projektu formazieleni.pl. Stosuj przy każdej zmianie.
+globs:
+alwaysApply: true
+---
+
+# Kontekst
+
+Strona pracowni architektury krajobrazu Forma Zieleni. Jedyny cel biznesowy: zakwalifikowane zapytania o projekt i szybka reakcja na nie.
+
+Źródła prawdy, w tej kolejności:
+0. `docs/00-DANE.md`: fakty potwierdzone przez właściciela
+1. `docs/01-SPEC.md`: co budujemy i dlaczego (dowody E1–E11)
+2. `docs/02-DESIGN.md`: jak wygląda
+3. `docs/03-COPY.md`: jakie są teksty
+4. `docs/07-WIEDZA-2026.md`: decyzje z 2026; przy sprzeczności z plikami 01–06 wygrywa ten plik
+
+Gdy zadanie koliduje z tymi dokumentami, zatrzymaj się i zapytaj, zamiast zgadywać.
+
+# Stack (bez zmian bez mojej decyzji)
+
+Astro 6 + TypeScript strict, Tailwind CSS v4, React wyłącznie w `src/islands/`, Sanity, Cloudflare Workers + D1 + R2 + Turnstile + Access, Resend, SMSAPI.pl, Cal.com, Vitest, Playwright, Lighthouse CI.
+
+# Twarde zasady
+
+1. **Fakty.** Nie wymyślaj liczb, cen, opinii, nagród, kwalifikacji, terminów ani nazw realizacji. Brakujące dane zapisuj jako `{{NAZWA}}`. Build produkcyjny z placeholderem ma się nie udać.
+2. **Teksty.** Tylko z `docs/03-COPY.md` albo z CMS. Polski, forma „Ty”, CTA zaczyna się czasownikiem, ta sama nazwa akcji w całej ścieżce.
+3. **Wydajność.** Budżety z SPEC §12 są twarde. Domyślnie 0 KB JS. Wyspy: `client:visible` lub `client:idle`; `client:load` tylko na `/quiz/` i `/wycena/`. Każdy nowy pakiet npm uzasadnij rozmiarem gzip i alternatywą bez pakietu.
+4. **Obrazy.** Wyłącznie przez `src/components/Photo.astro`: srcset, width/height, LQIP, `alt` wymagany, `loading="lazy"` poza hero.
+5. **Prywatność.** Zero cookies, localStorage, sessionStorage i fingerprintingu. Wyjątki: tagi reklamowe i zapamiętanie UTM wyłącznie po zgodzie w banerze zgód (F11); ciasteczko sesji portalu i strefy partnera (niezbędne); pamięć przeglądarki dla „Mój ogród” wyłącznie po kliknięciu „Zapisz” (M15). Dane osobowe tylko w D1 `leads` i R2. Nigdy w URL-ach, logach, zdarzeniach analitycznych ani komunikatach błędów.
+6. **Bezpieczeństwo.** Walidacja zod po stronie serwera, Turnstile na każdym formularzu, limity uploadu i zgłoszeń, sekrety tylko w zmiennych środowiskowych, prywatny bucket R2.
+7. **Dostępność.** WCAG 2.2 AA: `<label>` przy każdym polu, widoczny focus, pełna obsługa klawiatury, `aria-live` dla błędów, `prefers-reduced-motion`.
+8. **Design.** Tylko tokeny z `02-DESIGN.md`. Zakazane: kapitaliki z rozstrzeleniem nad nagłówkami, akcent jednego słowa w nagłówku, „→” w przyciskach, pojawianie się sekcji przy przewijaniu, cienie na kartach, karuzele przewijające się same, wielkie liczby ze statystykami w hero, kremowe tło z terakotą.
+9. **SEO.** Jeden H1 na stronę, unikalny title i description, JSON-LD przez komponenty z `src/components/seo/`, `trailingSlash: 'always'`, treść dostępna w HTML bez JS.
+10a. **Zgodność 2026.** Asystent AI zawsze z etykietą, obrazy AI z widocznym i maszynowym oznaczeniem, wpis w `ai_content_log` (AI Act art. 50). Wysyłki tylko po sprawdzeniu `email_suppressions`; nagłówki RFC 8058 w każdej wiadomości marketingowej. Strona nie wystawia faktur. Publiczne pliki JSON i serwer MCP bez danych osobowych.
+10b. **AI i opinie.** Każdy obraz AI ma trwały napis „Wizualizacja AI: inspiracja, nie projekt”. O opinię Google prosimy wszystkich klientów; ankiety satysfakcji nie filtrują próśb o opinię. Odpowiedzi na opinie nigdy nie są publikowane automatycznie.
+10. **Analityka.** Tylko zdarzenia z białej listy SPEC §14 przez `src/lib/track.ts`.
+
+# Sposób pracy
+
+- Najpierw plan w punktach, potem kod. Przy zadaniach dotykających więcej niż 3 plików czekaj na akceptację planu.
+- Małe, spójne zmiany. Po każdej: `npm run check`, `npm run build`, testy dotkniętego obszaru.
+- Nowa logika biznesowa (punktacja quizu, widełki cen, termin kontaktu, retencja) = czyste funkcje w `src/lib/` z testami Vitest.
+- Obsługa błędów po stronie klienta zawsze daje drogę dalej: ponów albo zadzwoń 514 220 155.
+- Identyfikatory, nazwy plików i komentarze w kodzie po angielsku; teksty dla użytkownika po polsku.
+
+# Styl kodu
+
+- Komponenty Astro: propsy typowane interfejsem `Props`, bez logiki w szablonie powyżej kilku linii.
+- React: komponenty funkcyjne, bez globalnego stanu, bez bibliotek formularzy, jeśli wystarczy natywna walidacja + zod.
+- CSS: klasy Tailwind z tokenów; własny CSS tylko dla komponentów, których nie da się sensownie opisać klasami (HeroPlan, BeforeAfter).
+- Zapytania do D1 przez przygotowane zapytania z parametrami, nigdy przez sklejanie stringów.

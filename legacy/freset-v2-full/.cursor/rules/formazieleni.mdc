@@ -1,0 +1,37 @@
+---
+description: Kanoniczne zasady projektu Forma Zieleni po F-RESET.
+globs:
+alwaysApply: true
+---
+
+# Źródła prawdy
+1. `docs/00-DANE.md` — potwierdzone dane biznesowe.
+2. `docs/00-MASTER-PLAN.md` — kolejność A→B→C→D i architektura.
+3. `docs/25-MASTER-CONTEXT-2026-09-20.md` — skonsolidowany kontekst.
+4. `docs/26-DECISION-REGISTER.md` — decyzje/ADR.
+5. `contracts/openapi.yaml` — kontrakt API.
+6. `AGENTS.md` i pozostałe `.cursor/rules/` — zasady wykonawcze.
+
+`01-SPEC`, design/copy i starsze F0–F33 są wymaganiami/INPUT dla odpowiednich produktów, a nie nadrzędną roadmapą.
+
+# Twarde zasady po F-RESET
+- Kolejność: A Security/Infrastructure Lab → B OpenAPI 3.0 + generated typed clients → C Core Domain → D Products.
+- Hosting/backend/storage/database nie są jeszcze wybrane. Wzmianki o Workers/D1/R2 w starszych dokumentach oznaczają historycznego kandydata, nie decyzję.
+- Cloudflare jest publiczną warstwą ochronną/ingress. Origin ma być prywatny i nieakceptujący ruchu omijającego Cloudflare; preferowany Tunnel.
+- Modular monolith/API-first. Nie twórz mikroserwisów bez nowej decyzji ADR.
+- OpenAPI jest source of truth dla API; nie duplikuj DTO. Web/portal/admin/mobile używają jednego generowanego klienta TS; SketchUp adaptera zgodnego z tym samym kontraktem.
+- Core Domain: Auth → CRM → Sales → Capacity → Projects → Offers → Payments → Files → Events → Automation.
+- ETAP D: WWW → Portal → Mobile → SketchUp → Garden OS → AI → XR dopiero po Gate C.
+- Wszystkie obiekty i pliki autoryzuj obiektowo (BOLA/BFLA/BOPLA). Pliki prywatne; brak zgadywalnych publicznych URL.
+- Mutacje wymagające odporności na retry używają idempotency. Webhooki: podpis, timestamp/replay protection, idempotency i audit.
+- Events przez transactional outbox; consumers idempotentni.
+- Google/Meta są adapterami, nie source of truth. Konto Sebastiana = test/integration; produkcyjnie Agnieszka przez OAuth; brak hard-coded account IDs; multi-account-ready.
+- AI nie jest źródłem prawdy. FZ MCP READ oddzielone od ACTIONS; działania wysokiego ryzyka wymagają auth/approval/audit.
+- Background agents bez produkcyjnych sekretów i danych klientów.
+- Każda zmiana decyzji/architektury/funkcji aktualizuje dokumentację, Decision Register i CHECKPOINT w tym samym change-set.
+
+# Fakty i prywatność
+- Nie wymyślaj cen, opinii, kwalifikacji, terminów ani nazw realizacji. Braki oznacz `{{...}}`.
+- PII nie może trafiać do URL, telemetryki ani logów aplikacyjnych.
+- Sekrety wyłącznie przez bezpieczny secret store/zmienne środowiskowe wybranej infrastruktury; nigdy w repo.
+- WCAG 2.2 AA i privacy-by-design pozostają wymaganiami produktów.

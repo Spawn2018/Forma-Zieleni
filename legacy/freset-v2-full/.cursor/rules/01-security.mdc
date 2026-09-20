@@ -1,0 +1,5 @@
+---
+description: Security: Cloudflare-only ingress/private origin; BOLA/BFLA/BOPLA/SSRF/uploads/webhooks/rate limits; no prod secrets in agents; least privilege.
+alwaysApply: true
+---
+Security: Cloudflare-only ingress/private origin; BOLA/BFLA/BOPLA/SSRF/uploads/webhooks/rate limits; no prod secrets in agents; least privilege.

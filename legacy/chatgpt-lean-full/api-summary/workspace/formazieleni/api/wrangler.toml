@@ -1,0 +1,32 @@
+name = "formazieleni-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "formazieleni"
+database_id = "00000000-0000-0000-0000-000000000001"
+migrations_dir = "migrations"
+
+[vars]
+EMAIL_MODE = "log"
+APP_ORIGIN = "http://127.0.0.1:8790"
+EXPO_SCHEME = "formazieleni"
+
+# Production is intentionally configured with placeholders only. Never commit
+# API keys or provider credentials; use `wrangler secret put` in the target env.
+[env.production]
+name = "formazieleni-api-production"
+
+[env.production.vars]
+# `resend` requires RESEND_API_KEY and NOTIFY_FROM as Wrangler secrets/vars.
+EMAIL_MODE = "resend"
+APP_ORIGIN = "https://formazieleni.pl"
+EXPO_SCHEME = "formazieleni"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "formazieleni-production"
+# TODO: replace with the real Cloudflare D1 database ID before deploy.
+database_id = "TODO_REPLACE_WITH_PRODUCTION_D1_DATABASE_ID"
+migrations_dir = "migrations"

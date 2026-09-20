@@ -1,0 +1,456 @@
+{
+  "version": 1,
+  "styles": {
+    "naturalistic": {
+      "name": "Naturalistyczny",
+      "description": "Trawy ozdobne i byliny posadzone swobodnie, jak na łące. Ogród zmienia się z miesiąca na miesiąc, przyciąga owady i ma swój urok także zimą, gdy zostawisz suche kwiatostany."
+    },
+    "modern": {
+      "name": "Nowoczesny",
+      "description": "Czyste linie, wyraźne strefy i ograniczona paleta roślin. Taras, trawnik i rabaty tworzą porządek, który dobrze łączy się z nowoczesną architekturą domu."
+    },
+    "forest": {
+      "name": "Leśny",
+      "description": "Drzewa jako główny motyw, a pod nimi paprocie, byliny cieniolubne i rośliny okrywowe. Dobry kierunek dla działek z dużą ilością cienia, na których trawnik nie chce rosnąć."
+    },
+    "family": {
+      "name": "Rodzinny",
+      "description": "Ogród zaplanowany wokół codziennego życia: miejsce do zabawy, warzywnik, strefa grilla i rośliny bezpieczne dla dzieci i zwierząt. Wszystko w zasięgu wzroku z tarasu."
+    },
+    "classic": {
+      "name": "Rabatowy",
+      "description": "Rabaty bylinowe zaplanowane tak, żeby coś kwitło od wiosny do jesieni, z żywopłotami i ścieżkami. Dla osób, które lubią spędzać czas przy roślinach."
+    }
+  },
+  "maintenance_levels": {
+    "low": "Niski: do godziny tygodniowo",
+    "medium": "Średni: 1–3 godziny tygodniowo",
+    "high": "Wyższy: ogród jako hobby"
+  },
+  "default_maintenance": "medium",
+  "criteria_labels": {
+    "stage": "etap prac",
+    "use": "sposób korzystania z ogrodu",
+    "look": "wybrane zdjęcie",
+    "form": "ulubione formy",
+    "maintenance": "czas na pielęgnację",
+    "sun": "nasłonecznienie",
+    "area": "wielkość terenu"
+  },
+  "questions": [
+    {
+      "id": "stage",
+      "title": "Co chcesz zaprojektować?",
+      "type": "single",
+      "affects": [
+        "package",
+        "project_type"
+      ],
+      "options": [
+        {
+          "id": "new_plot",
+          "label": "Ogród na działce po budowie",
+          "project_type": "garden",
+          "scores": {}
+        },
+        {
+          "id": "existing_garden",
+          "label": "Istniejący ogród do zmiany",
+          "project_type": "garden",
+          "scores": {}
+        },
+        {
+          "id": "balcony_terrace",
+          "label": "Balkon lub taras",
+          "project_type": "balcony_terrace",
+          "scores": {}
+        },
+        {
+          "id": "public_space",
+          "label": "Przestrzeń dla firmy, osiedla lub gminy",
+          "project_type": "public_space",
+          "scores": {}
+        }
+      ]
+    },
+    {
+      "id": "use",
+      "title": "Do czego najczęściej będziesz używać tej przestrzeni?",
+      "type": "single",
+      "affects": [
+        "style"
+      ],
+      "skip_if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "options": [
+        {
+          "id": "relax",
+          "label": "Odpoczynek w ciszy",
+          "scores": {
+            "naturalistic": 2,
+            "forest": 2,
+            "classic": 1
+          }
+        },
+        {
+          "id": "gatherings",
+          "label": "Spotkania i grill ze znajomymi",
+          "scores": {
+            "modern": 2,
+            "family": 1
+          }
+        },
+        {
+          "id": "kids_pets",
+          "label": "Zabawa dzieci i zwierząt",
+          "scores": {
+            "family": 3
+          }
+        },
+        {
+          "id": "growing",
+          "label": "Zioła, warzywa i owoce",
+          "scores": {
+            "family": 2,
+            "classic": 1,
+            "naturalistic": 1
+          }
+        },
+        {
+          "id": "flowers",
+          "label": "Podziwianie kwitnących roślin",
+          "scores": {
+            "classic": 3,
+            "naturalistic": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "look",
+      "title": "Które zdjęcie najbardziej Ci się podoba?",
+      "type": "image",
+      "affects": [
+        "style"
+      ],
+      "skip_if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "image_source": "Sanity: po jednym zdjęciu realizacji z polem style równym style_tag; alt z CMS",
+      "options": [
+        {
+          "id": "look_naturalistic",
+          "style_tag": "naturalistic",
+          "label": "Zdjęcie 1",
+          "scores": {
+            "naturalistic": 3
+          }
+        },
+        {
+          "id": "look_modern",
+          "style_tag": "modern",
+          "label": "Zdjęcie 2",
+          "scores": {
+            "modern": 3
+          }
+        },
+        {
+          "id": "look_forest",
+          "style_tag": "forest",
+          "label": "Zdjęcie 3",
+          "scores": {
+            "forest": 3
+          }
+        },
+        {
+          "id": "look_family",
+          "style_tag": "family",
+          "label": "Zdjęcie 4",
+          "scores": {
+            "family": 3
+          }
+        },
+        {
+          "id": "look_classic",
+          "style_tag": "classic",
+          "label": "Zdjęcie 5",
+          "scores": {
+            "classic": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "form",
+      "title": "Jakie formy lubisz najbardziej?",
+      "type": "single",
+      "affects": [
+        "style"
+      ],
+      "skip_if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "options": [
+        {
+          "id": "free",
+          "label": "Swobodne, jak na łące",
+          "scores": {
+            "naturalistic": 3
+          }
+        },
+        {
+          "id": "geometric",
+          "label": "Geometryczne i uporządkowane",
+          "scores": {
+            "modern": 3
+          }
+        },
+        {
+          "id": "soft_beds",
+          "label": "Miękkie rabaty i kręte ścieżki",
+          "scores": {
+            "classic": 2,
+            "family": 1
+          }
+        },
+        {
+          "id": "dense_green",
+          "label": "Gęsta zieleń i półcień",
+          "scores": {
+            "forest": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "maintenance",
+      "title": "Ile czasu w tygodniu chcesz poświęcać na pielęgnację?",
+      "type": "single",
+      "affects": [
+        "maintenance",
+        "style"
+      ],
+      "skip_if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "options": [
+        {
+          "id": "lt1",
+          "label": "Mniej niż godzinę",
+          "maintenance": "low",
+          "scores": {
+            "modern": 1,
+            "naturalistic": 1
+          }
+        },
+        {
+          "id": "1_3",
+          "label": "1–3 godziny",
+          "maintenance": "medium",
+          "scores": {}
+        },
+        {
+          "id": "gt3",
+          "label": "Więcej, to moja przyjemność",
+          "maintenance": "high",
+          "scores": {
+            "classic": 1,
+            "family": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "sun",
+      "title": "Ile słońca dociera do tej przestrzeni?",
+      "type": "single",
+      "affects": [
+        "style"
+      ],
+      "skip_if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "options": [
+        {
+          "id": "full",
+          "label": "Słońce przez większość dnia",
+          "scores": {
+            "naturalistic": 1,
+            "modern": 1,
+            "classic": 1
+          }
+        },
+        {
+          "id": "partial",
+          "label": "Słońce tylko przez część dnia",
+          "scores": {
+            "classic": 1,
+            "family": 1
+          }
+        },
+        {
+          "id": "shade",
+          "label": "Głównie cień od drzew lub budynków",
+          "scores": {
+            "forest": 3
+          }
+        },
+        {
+          "id": "unknown",
+          "label": "Nie wiem",
+          "scores": {}
+        }
+      ]
+    },
+    {
+      "id": "area",
+      "title": "Jaka jest orientacyjna powierzchnia?",
+      "type": "single",
+      "affects": [
+        "package"
+      ],
+      "skip_if": {
+        "stage": [
+          "balcony_terrace",
+          "public_space"
+        ]
+      },
+      "options": [
+        {
+          "id": "lt100",
+          "label": "do 100 m²",
+          "scores": {}
+        },
+        {
+          "id": "100_300",
+          "label": "100–300 m²",
+          "scores": {}
+        },
+        {
+          "id": "300_800",
+          "label": "300–800 m²",
+          "scores": {}
+        },
+        {
+          "id": "gt800",
+          "label": "ponad 800 m²",
+          "scores": {}
+        },
+        {
+          "id": "unknown",
+          "label": "Nie wiem",
+          "scores": {}
+        }
+      ]
+    }
+  ],
+  "package_rules": [
+    {
+      "if": {
+        "stage": [
+          "public_space"
+        ]
+      },
+      "result": "b2b"
+    },
+    {
+      "if": {
+        "stage": [
+          "balcony_terrace"
+        ]
+      },
+      "package": "balcony_terrace"
+    },
+    {
+      "if": {
+        "stage": [
+          "existing_garden"
+        ],
+        "area": [
+          "lt100"
+        ]
+      },
+      "package": "consultation"
+    },
+    {
+      "if": {
+        "area": [
+          "gt800"
+        ]
+      },
+      "package": "comprehensive"
+    },
+    {
+      "if": {
+        "stage": [
+          "new_plot"
+        ],
+        "area": [
+          "300_800"
+        ]
+      },
+      "package": "comprehensive"
+    },
+    {
+      "if": {},
+      "package": "concept"
+    }
+  ],
+  "package_ids_note": "consultation, concept, comprehensive, balcony_terrace muszą odpowiadać dokumentom package w Sanity (pole slug). Nazwy i ceny zawsze z CMS.",
+  "special_results": {
+    "b2b": {
+      "title": "Przestrzeń dla firmy lub gminy",
+      "description": "Takie projekty wyceniamy indywidualnie, na podstawie zakresu i lokalizacji. Zobacz, jak pracujemy z firmami i samorządami, i wyślij zapytanie ofertowe.",
+      "cta_label": "Zobacz ofertę dla firm i samorządów",
+      "cta_href": "/dla-firm-i-samorzadow/"
+    }
+  },
+  "tie_break": [
+    "naturalistic",
+    "classic",
+    "modern",
+    "family",
+    "forest"
+  ],
+  "scoring_rules": [
+    "Sumuj scores z wybranych opcji pytań, które nie zostały pominięte przez skip_if.",
+    "Styl = najwyższa suma; przy remisie wygrywa styl wcześniejszy w tie_break.",
+    "Poziom pielęgnacji = maintenance z odpowiedzi na pytanie maintenance, a przy braku odpowiedzi default_maintenance.",
+    "Pakiet = pierwsza pasująca reguła z package_rules (wszystkie warunki w if muszą być spełnione; pusty if pasuje zawsze).",
+    "criteriaUsed = etykiety z criteria_labels dla pytań, na które padła odpowiedź i które wpływają na wynik.",
+    "resultNotes = notatki z result_notes, których wszystkie warunki if są spełnione (pokazywane pod wynikiem)."
+  ],
+  "result_notes": [
+    {
+      "if": {
+        "sun": [
+          "full"
+        ],
+        "maintenance": [
+          "lt1"
+        ]
+      },
+      "note": "Proponujemy rośliny odporne na suszę i ściółkowanie, żeby ograniczyć podlewanie."
+    },
+    {
+      "if": {
+        "stage": [
+          "new_plot",
+          "existing_garden"
+        ]
+      },
+      "note": "Warto zaplanować zatrzymanie deszczówki na działce. Sprawdź program Mikroretencja."
+    }
+  ]
+}

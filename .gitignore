@@ -25,7 +25,9 @@ Thumbs.db
 *.sqlite3
 *.db
 *.dump
-*.sql
+*_dump.sql
+*.backup.sql
+*.bak.sql
 backups/
 tmp/
 temp/
@@ -34,3 +36,4 @@ uploads/
 exports/
 customer-data/
 client-data/
+.source-materials/

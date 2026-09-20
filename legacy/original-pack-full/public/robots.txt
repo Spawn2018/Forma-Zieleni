@@ -1,0 +1,13 @@
+# formazieleni.pl
+# Wyszukiwarki i asystenci AI mają dostęp do wszystkich treści publicznych.
+# Strony z meta noindex (/dziekujemy/, /quiz/wynik/) nie są tu blokowane,
+# żeby roboty mogły odczytać noindex.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /panel/
+Disallow: /portal/
+Disallow: /partner/
+
+Sitemap: https://formazieleni.pl/sitemap-index.xml

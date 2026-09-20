@@ -1,0 +1,5 @@
+---
+description: Architecture: A→B→C→D; modular monolith; OpenAPI/Core source of truth; ETAP D frozen until Gate C.
+alwaysApply: true
+---
+Architecture: A→B→C→D; modular monolith; OpenAPI/Core source of truth; ETAP D frozen until Gate C.

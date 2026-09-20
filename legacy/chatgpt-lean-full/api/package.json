@@ -1,0 +1,19 @@
+{
+  "name": "formazieleni-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply formazieleni --local",
+    "db:seed:local": "wrangler d1 execute formazieleni --local --file=./seed.sql",
+    "db:reset:local": "npm run db:migrate:local && npm run db:seed:local",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20240925.0",
+    "typescript": "5.6.3",
+    "wrangler": "3.90.0"
+  }
+}

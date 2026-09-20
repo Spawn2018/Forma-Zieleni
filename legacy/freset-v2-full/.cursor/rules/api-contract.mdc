@@ -1,0 +1,11 @@
+---
+description: Canonical API contract and Core Domain rules
+alwaysApply: true
+---
+- contracts/openapi.yaml is the API source of truth (OpenAPI 3.0.x).
+- Never create web/mobile DTOs independently; import @formazieleni/api-client.
+- Every object endpoint must enforce object-level authorization (BOLA).
+- Every business mutation must support Idempotency-Key.
+- Every important state transition writes a domain event/outbox record.
+- Files are private; use upload/download intents, never public predictable URLs.
+- Do not build ETAP D business logic before Core Domain Gate C is green.

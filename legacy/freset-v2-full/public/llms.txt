@@ -1,0 +1,29 @@
+# Forma Zieleni
+
+> Pracownia architektury krajobrazu. Projektuje ogrody przydomowe (małe i duże), balkony, tarasy, rabaty kwietne, parki osiedlowe, roślinność przy ciągach pieszych i samochodowych, małą architekturę i wzory kostki brukowej. Obszar działania: Trójmiasto i województwo pomorskie. Główny projektant: inż. arch. kraj. Agnieszka Pupiało. Od prawie 10 lat projektuje zieleń.
+
+## Oferta
+
+- Projekty: od 2500 do 25 000 zł, największe do 50 000 zł
+- Konsultacja w ogrodzie: od {{CENA_1}} zł
+- Koncepcja z wizualizacjami: od {{CENA_2}} zł
+- Projekt kompleksowy: od {{CENA_3}} zł
+- Projekt balkonu lub tarasu: od {{CENA_4}} zł
+- Ceny ostateczne ustalane po rozmowie, przed rozpoczęciem pracy.
+
+## Kontakt
+
+- Telefon: +48 514 220 155
+- E-mail: agnieszka@formazieleni.pl
+- Godziny kontaktu: {{GODZINY_KONTAKTU}}
+- Facebook: https://www.facebook.com/FormaZieleni
+
+## Najważniejsze strony
+
+- [Realizacje](https://formazieleni.pl/realizacje/): projekty przed i po, z listami roślin
+- [Cennik](https://formazieleni.pl/cennik/): pakiety i orientacyjne koszty
+- [Jak pracujemy](https://formazieleni.pl/jak-pracujemy/): 5 kroków od rozmowy do ogrodu
+- [Projekt ogrodu](https://formazieleni.pl/uslugi/projekt-ogrodu/)
+- [Balkony i tarasy](https://formazieleni.pl/uslugi/balkony-i-tarasy/)
+- [Rabaty i przestrzeń miejska](https://formazieleni.pl/uslugi/rabaty-i-przestrzen-miejska/)
+- [Artykuły](https://formazieleni.pl/artykuly/): porady o projektowaniu i pielęgnacji ogrodów

@@ -1,0 +1,4 @@
+APK Forma Zieleni makieta 1:1 — v0.2.1
+https://expo.dev/artifacts/eas/RjZKZ2k4ymQpjpofF9N9eur0Q8Qv0_tAzeACEPQb670.apk
+
+Odinstaluj 0.2.0 przed instalacją 0.2.1.

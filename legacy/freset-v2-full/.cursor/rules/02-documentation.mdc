@@ -1,0 +1,5 @@
+---
+description: Documentation: every project-changing edit must update affected docs and docs/26-DECISION-REGISTER.md in the same change-set. No chat-only decisions.
+alwaysApply: true
+---
+Documentation: every project-changing edit must update affected docs and docs/26-DECISION-REGISTER.md in the same change-set. No chat-only decisions.

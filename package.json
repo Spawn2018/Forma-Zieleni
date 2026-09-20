@@ -2,7 +2,7 @@
   "name": "forma-zieleni",
   "version": "0.1.0",
   "private": true,
-  "description": "Forma Zieleni � WWW, CRM, portal klienta, aplikacje mobilne, Garden OS i automatyzacja.",
+  "description": "Forma Zieleni — WWW, CRM, portal klienta, aplikacje mobilne, Garden OS i automatyzacja.",
   "packageManager": "pnpm@10.33.2",
   "engines": {
     "node": ">=24.0.0",

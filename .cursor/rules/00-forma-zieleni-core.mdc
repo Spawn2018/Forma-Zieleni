@@ -1,0 +1,24 @@
+---
+description: Forma Zieleni canonical engineering rule
+alwaysApply: true
+---
+# Forma Zieleni Core Rule
+
+Read and obey, in order: `docs/constitution/PROJECT-CONSTITUTION.md`, current owner decisions (`docs/knowledge/POST-V2-DECISIONS.md` override ledger + `docs/architecture/DECISIONS.md` ADR history; latest explicit owner decision wins), `docs/vision/PRODUCT-CANON.md`, `docs/vision/MASTER-PLAN.md`, `docs/architecture/CURRENT-ARCHITECTURE.md` (sole binding architecture) / security / domain / contracts, current slice spec, then active rules/skills. Legacy/reference never overrides current Canon. `docs/architecture/ARCHITECTURE.md` is superseded redirect only.
+
+Use `docs/workflows/AUTONOMOUS-SLICES.md` and `docs/workflows/DECISION-GATES.md`. Execute AUTO/REVIEW autonomously. Stop at DECISION/DANGEROUS. Never expose/commit secrets, client data or unnecessary PII. Keep docs/provenance synchronized with system changes. Do not infer a framework, hosting, DB, ORM, storage or provider from legacy material.
+
+## Engineering quality
+For production code, apply `docs/engineering/ENGINEERING-STANDARD.md`. Performance-sensitive work follows `docs/engineering/PERFORMANCE-ENGINEERING.md`; data work follows `docs/engineering/DATABASE-ENGINEERING.md`; every push to main must satisfy `docs/engineering/PRE-PUSH-GATE.md`. Use project skills/subagents for focused review rather than expanding this core rule.
+
+## UI / UX / content binding rules
+For any customer-facing or operator-facing UI work, read and obey:
+- `docs/design/VISUAL-PRODUCT-CANON.md`
+- `docs/design/VISUAL-REFERENCE-MAP.md`
+- `docs/ux/UX-PRODUCT-CANON.md`
+- `docs/content/CONTENT-AND-VOICE-CANON.md`
+
+Do not invent a new visual identity, generic SaaS UI, generic AI marketing copy, fake facts, fake social proof or filler sections. Relevant supplied mockups are required reference evidence. Material visual/UX departure is a DECISION gate. UI completion requires independent visual/UX review when applicable.
+
+## Cursor OS 2026
+For multi-step engineering work also follow `docs/cursor-os/CURSOR-OS-2026.md`, `docs/cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md`, and `docs/cursor-os/PRE-PUSH-ORCHESTRATION.md`. Grok Bot, Projects, MCP, hooks and automations are supporting execution surfaces only; none overrides canonical project truth. Never invent generic UI/copy or business behavior. Use the Visual, UX and Content canons and supplied references.

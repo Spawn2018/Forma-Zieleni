@@ -1,0 +1,5 @@
+---
+description: Integrations: Google/Meta are adapters; OAuth; no hard-coded accounts. Sebastian Google is test-only, Agnieszka production account later. MCP READ separate from ACTIONS.
+alwaysApply: true
+---
+Integrations: Google/Meta are adapters; OAuth; no hard-coded accounts. Sebastian Google is test-only, Agnieszka production account later. MCP READ separate from ACTIONS.

@@ -1,0 +1,45 @@
+# Repository candidate catalog
+
+Status: REVIEW_REQUIRED. These are candidates/inspirations found in supplied project knowledge, not approved dependencies. Before adoption re-verify current maintenance, licence, security, compatibility, portability and business value. Legacy Cloudflare/Astro-specific rationale is not a current stack decision.
+
+- `CloudCannon/pagefind` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `GoogleChrome/lighthouse-ci` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `JustinBeckwith/linkinator` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `OWASP/CheatSheetSeries` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `Thinkmill/keystatic` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `better-auth/better-auth` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `binwiederhier/ntfy` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `calcom/cal.com` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `chatwoot/chatwoot` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `cloudflare/ai` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `cloudflare/mcp-server-cloudflare` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `cloudflare/templates` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `cloudflare/workers-sdk` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `colinhacks/zod` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `commenthol/date-holidays` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `decaporg/decap-cms` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `dequelabs/axe-core` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `drizzle-team/drizzle-orm` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `fakturownia/API` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `formbricks/formbricks` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `honojs/hono` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `knadh/listmonk` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `louislam/uptime-kuma` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `lovell/sharp` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `microsoft/playwright` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `modelcontextprotocol/servers` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `modelcontextprotocol/typescript-sdk` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `n8n-io/n8n` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `nip24pl/nip24-javascript-client` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `orestbida/cookieconsent` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `pa11y/pa11y-ci` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `pawel-id/bir1` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `plausible/analytics` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `resend/react-email` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `resend/resend-node` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `sanity-io/sanity` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `sneas/img-comparison-slider` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `stripe/stripe-node` — source: 13-KOSZTY-I-REPOZYTORIA.md; status: REVIEW_REQUIRED.
+- `umami-software/umami` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `withastro/astro` — source: 13-KOSZTY-I-REPOZYTORIA.md, 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
+- `wojtekmaj/is-valid-nip` — source: 14-REPOZYTORIA-PLUS.md; status: REVIEW_REQUIRED.
