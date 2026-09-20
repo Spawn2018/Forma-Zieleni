@@ -23,7 +23,46 @@ Parallelize research, independent review, test investigation and non-overlapping
 ## Human-quality code
 Code must be intentional, boring where possible, domain-named, locally understandable and proportionate to current requirements. Avoid AI-shaped abstraction inflation, generic helpers, speculative frameworks, duplicate wrappers, verbose comments that restate code, invented business rules and broad rewrites unrelated to the slice.
 
-## Required loop
-DISCOVER -> PLAN -> CONTRACT -> IMPLEMENT -> TEST -> REFACTOR -> SECURITY REVIEW -> PERFORMANCE/DATA REVIEW -> UX/A11Y REVIEW when applicable -> DOCUMENT -> FINAL DIFF -> PRE-PUSH GATE -> COMPLETE.
+## Binding autonomous execution loop
 
-A failed gate returns work to the owning implementation agent. Never weaken a gate to make it pass.
+**This section is the sole binding definition** of the autonomous slice execution loop for Forma Zieleni.
+
+```text
+DISCOVER
+→ PLAN
+→ CONTRACT
+→ IMPLEMENT
+→ TEST
+→ REFACTOR
+→ SECURITY REVIEW
+→ PERFORMANCE/DATA REVIEW when applicable
+→ UX/A11Y/VISUAL/CONTENT REVIEW when applicable
+→ DOCUMENT
+→ FINAL DIFF
+→ PRE-PUSH GATE
+→ COMPLETE
+```
+
+### Stage notes
+- **CONTRACT** is required before implementation wherever the slice affects API/domain contracts or introduces a new external surface.
+- **TEST**, **REFACTOR**, **SECURITY REVIEW**, **DOCUMENT**, **FINAL DIFF**, **PRE-PUSH GATE**, and **COMPLETE** are mandatory for implementation slices (proportionate evidence for docs-only / non-code slices).
+- **PERFORMANCE/DATA REVIEW** runs when the slice can affect hot paths, queries, migrations, caching, bundles, media, uploads or resource use.
+- **UX/A11Y/VISUAL/CONTENT REVIEW** runs when the slice affects customer-facing or operator-facing UI/copy; obey Visual, UX and Content Canons.
+- A failed gate returns work to the owning implementation agent. Never weaken a gate to make it pass.
+- Pre-push detail: `docs/cursor-os/PRE-PUSH-ORCHESTRATION.md` and `docs/engineering/PRE-PUSH-GATE.md`.
+
+### Decision Gate — interrupt / exit condition (every stage)
+
+**DECISION GATE is not a normal terminal step of the loop.**
+
+It is an **interrupt / exit condition that applies at every stage**:
+
+- If a **DECISION** or **DANGEROUS** action arises, the agent **stops** autonomous execution immediately and follows `docs/workflows/DECISION-GATES.md`.
+- **AUTO** / **REVIEW** work may proceed through the binding loop autonomously.
+- **DECISION** / **DANGEROUS** interrupts the loop and requires the appropriate owner consent before continuing.
+
+Do not reclassify a DECISION/DANGEROUS item as AUTO merely to keep the loop moving.
+
+### Related protocol documents
+- Slice recording / autonomy rules (short index): `docs/workflows/AUTONOMOUS-SLICES.md`
+- Action classes: `docs/workflows/DECISION-GATES.md`
