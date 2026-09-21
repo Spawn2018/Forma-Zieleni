@@ -190,7 +190,7 @@ export function audit(root, capability, state) {
     CONTRACT: () => { validateSlices(state.slices); return 'Plan schema, unique identifiers and earlier-only dependencies validated.'; },
     IMPLEMENT: () => null,
     TEST: () => {
-      const probes = [['git-push', 'DANGEROUS'], ['dns', 'DANGEROUS'], ['unknown', 'OWNER-ONLY']];
+      const probes = [['force-push', 'DANGEROUS'], ['dns', 'DANGEROUS'], ['unknown', 'OWNER-ONLY'], ['safe-checkpoint-push', 'AUTO']];
       for (const [action, expected] of probes) if (classify({ id: 'probe', capability: action, classification: 'AUTO', dependsOn: [] }) !== expected) throw new Error('ADVERSARIAL_GATE_FAILED');
       return 'Three deterministic hostile capability probes passed; this is not a product test suite.';
     },
