@@ -10,4 +10,4 @@ Warstwa reguł i modelu domenowego Forma Zieleni.
 
 ## Status
 
-Szkielet pakietu. Moduły domenowe nie są jeszcze zaimplementowane.
+Lead capture and qualification rules are implemented in `src/lead.ts`. Persistence, other CRM modules and UI remain open.

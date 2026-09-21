@@ -29,6 +29,7 @@ Thumbs.db
 *.backup.sql
 *.bak.sql
 backups/
+.autonomous-sessions/
 tmp/
 temp/
 private/

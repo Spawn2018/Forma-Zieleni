@@ -1,0 +1,32 @@
+{
+  "openapi": "3.0.4",
+  "versioning": "/v1",
+  "paths": [
+    "GET /health",
+    "POST /leads",
+    "GET /leads",
+    "GET /leads/{leadId}",
+    "POST /leads/{leadId}/qualify"
+  ],
+  "requiredHeaders": {
+    "POST /leads": ["Idempotency-Key"],
+    "POST /leads/{leadId}/qualify": ["Idempotency-Key"]
+  },
+  "requiredLeadFields": [
+    "id",
+    "source",
+    "status",
+    "contact",
+    "property",
+    "siteAnalysisRequested",
+    "qualification",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenLeadFields": [
+    "budget_min_pln",
+    "budget_max_pln",
+    "price",
+    "testimonial"
+  ]
+}

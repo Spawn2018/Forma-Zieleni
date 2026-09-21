@@ -139,6 +139,29 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 
 ---
 
+## ADR-011 — Local Autonomous Session Controller bootstrap
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-20 |
+| Status | Accepted (explicit Owner bootstrap authorization) |
+| Decyzja | Local Node 24 standard-library controller, repo-scoped atomic local JSON checkpoints, bounded capability allowlist and advisory OpenAI decision integration. No agent framework dependency. |
+| Kontekst | Owner requested auditable resumable sessions without manual task transfer; broad coding execution needs a separately verified sandbox boundary. |
+| Konsekwencje | Controller alone owns sessions; Cursor implements bounded slices. Existing binding loop is preserved. DECISION-GATES is the sole classifier. Grok is optional with local adversarial fallback. Initial capability is deterministic repo audit; autonomous coding adapters remain blocked. No bootstrap push or production actions. |
+| Supersedes | ADR-010 generic DECISION wording and any whole-session Cursor coordinator wording; manual Grok provenance and protected-action restrictions remain. |
+| Alternatives | Existing editor CLI execution was not adopted without verified sandbox/structured return; SDK/framework wrappers would add unjustified capability/dependency surface. |
+| Contract | `docs/cursor-os/AUTONOMOUS-SESSION-CONTROLLER.md` |
+
+## ADR-012 — Owner-in-loop controller and current lead contract
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-21 |
+| Status | Accepted |
+| Decyzja | Session-controller `choose-audit` is OWNER-DECISION resolved by `DECISION FZ-###: OPTION X`. OpenAI adapter stays unused. Current Core API source of truth for the first vertical is `contracts/openapi.json` (OpenAPI 3.0.4 lead qualification). |
+| Kontekst | ChatGPT is out of the runtime loop. Product construction continues with durable contracts while Gate A stack choices remain open. |
+| Konsekwencje | Missing Owner replies block only the dependent slice. HTTP/DB/UI runtimes wait for FZ-A1–A7. |
+
 ## Szablon kolejnego ADR
 
 ```markdown

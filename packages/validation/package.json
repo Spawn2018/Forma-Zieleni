@@ -1,0 +1,13 @@
+{
+  "name": "@forma-zieleni/validation",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/lead.ts"
+  },
+  "scripts": {
+    "test": "node --test lead.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts",
+    "lint": "node --check lead.test.mjs"
+  }
+}

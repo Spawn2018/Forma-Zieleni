@@ -1,0 +1,19 @@
+env:
+  contexts:
+    - name: forma-zieleni-lab
+      urls:
+        - http://127.0.0.1:3000
+      includePaths:
+        - http://127.0.0.1:3000/v1.*
+  parameters:
+    failOnError: true
+    progressToStdout: true
+jobs:
+  - type: openapi
+    parameters:
+      apiFile: contracts/openapi.json
+      targetUrl: http://127.0.0.1:3000
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
+# Active scan jobs are intentionally absent until a designated lab target exists.

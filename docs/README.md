@@ -37,6 +37,8 @@ Cursor agents start at repository root: [`../START-HERE-CURSOR.md`](../START-HER
 |----------|------|
 | [`architecture/CURRENT-ARCHITECTURE.md`](./architecture/CURRENT-ARCHITECTURE.md) | **Sole BINDING current architecture** |
 | [`architecture/SECURITY.md`](./architecture/SECURITY.md) | Security requirements and baselines |
+| [`architecture/OWNER-DECISION-PACKETS-GATE-A.md`](./architecture/OWNER-DECISION-PACKETS-GATE-A.md) | Open FZ-A1–A7 packets |
+| [`architecture/GATE-IMPLEMENTATION-CHECKPOINT.md`](./architecture/GATE-IMPLEMENTATION-CHECKPOINT.md) | Blocked implementation status |
 | [`architecture/DECISIONS.md`](./architecture/DECISIONS.md) | Formal ADR history |
 | [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) | Superseded redirect / provenance only |
 | [`architecture/README.md`](./architecture/README.md) | Architecture folder index |
@@ -74,7 +76,16 @@ Cursor agents start at repository root: [`../START-HERE-CURSOR.md`](../START-HER
 | [`api/API-FIRST.md`](./api/API-FIRST.md) | API-first rules; Gate B posture |
 | [`api/README.md`](./api/README.md) | API docs index + legacy OpenAPI warning |
 
-There is **no** approved current OpenAPI file in the active tree yet.
+Current OpenAPI 3.0.4: [`../contracts/openapi.json`](../contracts/openapi.json) (lead-qualification slice).
+
+## Security
+
+| Document | Role |
+|----------|------|
+| [`security/SECURITY-ASSURANCE.md`](./security/SECURITY-ASSURANCE.md) | Binding CodeRabbit + OWASP policy |
+| [`security/OWNER-SETUP-CODERABBIT-OWASP.md`](./security/OWNER-SETUP-CODERABBIT-OWASP.md) | Owner setup checkpoints |
+| [`security/ASVS-5.0.0-LEAD-SLICE.md`](./security/ASVS-5.0.0-LEAD-SLICE.md) | ASVS mapping for the lead slice |
+| [`security/S2.5-EVIDENCE-2026-09-21.md`](./security/S2.5-EVIDENCE-2026-09-21.md) | Live S2.5 evidence |
 
 ## Engineering
 
@@ -98,7 +109,7 @@ There is **no** approved current OpenAPI file in the active tree yet.
 
 | Document | Role |
 |----------|------|
-| [`workflows/DECISION-GATES.md`](./workflows/DECISION-GATES.md) | AUTO / REVIEW / DECISION / DANGEROUS |
+| [`workflows/DECISION-GATES.md`](./workflows/DECISION-GATES.md) | Sole action classification |
 | [`workflows/AUTONOMOUS-SLICES.md`](./workflows/AUTONOMOUS-SLICES.md) | Slice execution protocol |
 
 ## Knowledge / provenance
@@ -121,6 +132,7 @@ There is **no** approved current OpenAPI file in the active tree yet.
 |----------|------|
 | [`cursor-os/CURSOR-OS-2026.md`](./cursor-os/CURSOR-OS-2026.md) | Cursor operating model |
 | [`cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md`](./cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md) | Orchestration / model routing |
+| [`cursor-os/AUTONOMOUS-SESSION-CONTROLLER.md`](./cursor-os/AUTONOMOUS-SESSION-CONTROLLER.md) | Local controller contract, threat model and runbook |
 | [`cursor-os/PRE-PUSH-ORCHESTRATION.md`](./cursor-os/PRE-PUSH-ORCHESTRATION.md) | Pre-push orchestration |
 | [`cursor-os/HOOKS-MCP-AUTOMATIONS.md`](./cursor-os/HOOKS-MCP-AUTOMATIONS.md) | Hooks / MCP / automations policy |
 | [`cursor-os/GROK-BOT-OPERATING-MODEL.md`](./cursor-os/GROK-BOT-OPERATING-MODEL.md) | Binding Cursor ↔ Grok Bot collaboration model |

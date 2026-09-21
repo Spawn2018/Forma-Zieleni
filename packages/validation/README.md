@@ -10,4 +10,4 @@ Współdzielone schematy i walidacja wejścia/wyjścia.
 
 ## Status
 
-Szkielet pakietu. Biblioteka walidacji nie została jeszcze wybrana.
+Lead capture validation is implemented without a third-party schema library. A later library may replace this only after FZ-A2.

@@ -1,20 +1,38 @@
 # Autonomous Slice Protocol
 
-Status: protocol index / recording rules.
-**Binding execution loop:** [`../cursor-os/CURSOR-OS-2026.md`](../cursor-os/CURSOR-OS-2026.md) — section *Binding autonomous execution loop*.
+Status: CURRENT.
 
-Do not maintain a competing loop definition in this file.
+Binding loop is defined in `docs/cursor-os/CURSOR-OS-2026.md`. This file
+defines slice recording and interruption behavior only.
 
-## Short summary (non-binding)
+Each slice records objective, source requirements/decisions, acceptance
+criteria, affected contracts/domain, risk class, tests/gates, failure
+contract when applicable, blast radius, documentation changes, and
+completion evidence.
 
-Approved slices run the binding loop in `CURSOR-OS-2026.md`:
+At OWNER-DECISION/OWNER-ONLY: checkpoint the dependent slice, emit a
+Decision Packet, and continue independent AUTO/REVIEW work where safe.
+At DANGEROUS: do not perform the action without explicit Owner approval
+immediately before execution.
 
-DISCOVER → PLAN → CONTRACT → IMPLEMENT → TEST → REFACTOR → SECURITY REVIEW → PERFORMANCE/DATA REVIEW when applicable → UX/A11Y/VISUAL/CONTENT REVIEW when applicable → DOCUMENT → FINAL DIFF → PRE-PUSH GATE → COMPLETE.
+Agentic work follows progressive autonomy: READ -\> SUGGEST -\> DRAFT
+-\> ACT WITH APPROVAL -\> BOUNDED AUTO. Promotion requires evidence,
+evaluation, bounded blast radius, auditability, recovery/rollback, and
+Owner-approved policy.
 
-**Decision Gate** is not a normal end step. It is an interrupt/exit condition at **every** stage: DECISION or DANGEROUS stops autonomy per [`DECISION-GATES.md`](./DECISION-GATES.md). AUTO/REVIEW may proceed; DECISION/DANGEROUS requires owner consent.
+## Security-tool integration update --- 2026-09-21
 
-## Autonomy and recording
+Binding security-tool details live in
+`docs/security/SECURITY-ASSURANCE.md` and the Owner onboarding flow in
+`docs/security/OWNER-SETUP-CODERABBIT-OWASP.md`.
 
-Cursor may execute an approved slice without per-file approval. It must not convert an architectural/product/provider/legal choice into an implementation detail merely to avoid asking.
+CodeRabbit is an independent review layer, not Canon authority. Preserve
+`main-only`; use Cursor/IDE/CLI pre-push review rather than creating PRs
+solely for CodeRabbit. Respect the verified account rate limit; until
+verified, budget at most 3 free CLI reviews per developer per rolling
+hour. Usage-based billing is OWNER-DECISION.
 
-Each slice records objective, source requirements/decisions, acceptance criteria, affected contracts/domain, risk class, tests/gates, documentation changes and completion evidence.
+OWASP baseline: ASVS 5.0.0 requirements, ZAP DAST for runnable
+local/lab/staging targets, and Dependency-Check/SCA where technically
+suitable. Never active-scan legacy CT8 production or live customer
+environments without explicit Owner approval.

@@ -10,4 +10,4 @@ Współdzielone typy TypeScript wywodzące się z kontraktu API i modelu domenow
 
 ## Status
 
-Szkielet pakietu. Generacja typów nie jest jeszcze skonfigurowana.
+Lead record and error types match `contracts/openapi.json`. Runtime codegen waits for FZ-A2.

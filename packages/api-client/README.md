@@ -10,4 +10,4 @@ Typowany klient HTTP do Core API.
 
 ## Status
 
-Szkielet pakietu. Codegen i transport nie zostały jeszcze zaimplementowane.
+Typed `/v1` lead paths are implemented. HTTP transport and codegen wait for FZ-A2.

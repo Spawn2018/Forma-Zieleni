@@ -16,6 +16,8 @@ Wszystkie decyzje authz egzekwowane serwerowo.
 Leady, kontakty, firmy, interakcje, pipeline relacji przed i po sprzedaży.
 Wejście z `web` i kanałów marketingowych; obsługa w `admin`.
 
+Current durable start: `packages/domain` lead capture/qualification rules and `contracts/openapi.json`. Persistence and Admin UI wait on FZ-A3/FZ-A2.
+
 ### Sales
 
 Proces sprzedaży, etapy deal’a, handlowe przejścia statusów, powiązanie leada z ofertą i projektem.

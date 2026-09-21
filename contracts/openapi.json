@@ -1,0 +1,375 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Forma Zieleni Core API",
+    "version": "0.1.0",
+    "description": "Current-tree Core API contract. This document is the source of truth for the visitor lead-qualification slice. Legacy OpenAPI under legacy/ is reference only."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:{port}/v1",
+      "description": "Local or lab origin. Host, port and scheme are not a production hosting decision.",
+      "variables": {
+        "port": {
+          "default": "3000"
+        }
+      }
+    }
+  ],
+  "tags": [
+    { "name": "System" },
+    { "name": "Leads" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "operationId": "getHealth",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Process is accepting local health checks.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Health" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leads": {
+      "post": {
+        "tags": ["Leads"],
+        "operationId": "createLead",
+        "security": [],
+        "description": "Public visitor capture. Server-side validation and rate limits apply. Object authorization is enforced on later reads.",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LeadCapture" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lead recorded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Lead" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      },
+      "get": {
+        "tags": ["Leads"],
+        "operationId": "listLeads",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/Sort" },
+          { "$ref": "#/components/parameters/StatusFilter" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of leads visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LeadPage" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/leads/{leadId}": {
+      "get": {
+        "tags": ["Leads"],
+        "operationId": "getLead",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/LeadId" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lead visible to the authorized caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Lead" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/leads/{leadId}/qualify": {
+      "post": {
+        "tags": ["Leads"],
+        "operationId": "qualifyLead",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/LeadId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LeadQualify" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Qualification recorded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Lead" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque-session"
+      }
+    },
+    "parameters": {
+      "LeadId": {
+        "name": "leadId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "schema": { "type": "string", "minLength": 8, "maxLength": 256 }
+      },
+      "Sort": {
+        "name": "sort",
+        "in": "query",
+        "schema": { "type": "string", "enum": ["createdAt", "-createdAt", "updatedAt", "-updatedAt"], "default": "-createdAt" }
+      },
+      "StatusFilter": {
+        "name": "status",
+        "in": "query",
+        "schema": { "$ref": "#/components/schemas/LeadStatus" }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "minLength": 8, "maxLength": 128 }
+      },
+      "RequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": { "type": "string", "minLength": 8, "maxLength": 128 }
+      }
+    },
+    "schemas": {
+      "OpaqueId": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]{15,63}$",
+        "description": "Non-guessable identifier. Sequential integers are rejected."
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok"],
+        "properties": {
+          "ok": { "type": "boolean", "enum": [true] }
+        }
+      },
+      "LeadSource": {
+        "type": "string",
+        "enum": ["www", "portal", "admin", "other"]
+      },
+      "LeadStatus": {
+        "type": "string",
+        "enum": ["received", "site_analysis", "qualified", "consultation_ready", "unqualified"]
+      },
+      "QualificationResult": {
+        "type": "string",
+        "enum": ["pending", "qualified", "unqualified", "needs_review"]
+      },
+      "QualificationReason": {
+        "type": "string",
+        "enum": ["missing_contact", "missing_property_context", "capacity_hold", "ready_for_consultation"]
+      },
+      "LeadCapture": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "name", "phone", "siteAnalysisRequested"],
+        "properties": {
+          "source": { "$ref": "#/components/schemas/LeadSource" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "phone": { "type": "string", "minLength": 9, "maxLength": 32 },
+          "email": { "type": "string", "format": "email", "maxLength": 254 },
+          "locality": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "siteAnalysisRequested": { "type": "boolean" }
+        }
+      },
+      "LeadQualify": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capacityHold"],
+        "properties": {
+          "capacityHold": { "type": "boolean" }
+        }
+      },
+      "Lead": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "status", "contact", "property", "siteAnalysisRequested", "qualification", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "source": { "$ref": "#/components/schemas/LeadSource" },
+          "status": { "$ref": "#/components/schemas/LeadStatus" },
+          "contact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "phone"],
+            "properties": {
+              "name": { "type": "string" },
+              "phone": { "type": "string" },
+              "email": { "type": "string", "format": "email" }
+            }
+          },
+          "property": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "locality": { "type": "string" }
+            }
+          },
+          "siteAnalysisRequested": { "type": "boolean" },
+          "qualification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["result", "reasons"],
+            "properties": {
+              "result": { "$ref": "#/components/schemas/QualificationResult" },
+              "reasons": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/QualificationReason" }
+              }
+            }
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LeadPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items", "meta"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Lead" }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["limit", "nextCursor"],
+            "properties": {
+              "limit": { "type": "integer", "minimum": 1, "maximum": 100 },
+              "nextCursor": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "message", "requestId", "details"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "requestId": { "type": "string" },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["field", "reason"],
+                  "properties": {
+                    "field": { "type": "string" },
+                    "reason": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Validation failed.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Unauthorized": {
+        "description": "Authentication required.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Forbidden": {
+        "description": "Caller is authenticated but not authorized for this object.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "NotFound": {
+        "description": "Object does not exist or is not visible to the caller.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Conflict": {
+        "description": "Idempotency key reused with a different body.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "TooManyRequests": {
+        "description": "Rate or resource limit reached.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      }
+    }
+  }
+}

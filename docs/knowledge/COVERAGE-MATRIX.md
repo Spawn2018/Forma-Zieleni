@@ -45,7 +45,6 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 | External URLs/research evidence | URL-CATALOG + legacy research | INVENTORIED / REVERIFY BEFORE USE |
 
 ## Conflict resolutions that matter
-- Dual architecture entrypoints (`ARCHITECTURE.md` vs `CURRENT-ARCHITECTURE.md`): RESOLVED 2026-09-20 — `CURRENT-ARCHITECTURE.md` is sole binding; `ARCHITECTURE.md` is superseded redirect after merge (ADR-009).
 - Astro/Sanity/Workers/D1/R2/wrangler: SUPERSEDED AS STACK DECISION; retained as legacy candidates/evidence.
 - Old KANON-FREEZE prohibition on new endpoints/redesign and >3-files approval: SUPERSEDED by F-RESET + autonomous slices; UX/business intent remains reference.
 - Old PR/branch-centric workflow: SUPERSEDED by explicit direct-`main` owner decision. Quality gates/commit checkpoints remain applicable without requiring branches.

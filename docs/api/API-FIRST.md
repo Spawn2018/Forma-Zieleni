@@ -29,21 +29,20 @@ Wszystkie klienci korzystają z **tego samego Core API**:
 
 ## Granice etapu
 
-Na tym etapie:
+Current-tree contract:
 
-- **nie** instalujemy frameworków API (NestJS, Fastify, itd.),
-- **nie** wybieramy ORM,
-- **nie** publikujemy jeszcze pełnej specyfikacji OpenAPI — najpierw fundament i decyzje.
+- [`../../contracts/openapi.json`](../../contracts/openapi.json) is OpenAPI 3.0.4 and the source of truth for the visitor lead-qualification slice.
+- Shared errors, `/v1`, cursor pagination, filter, sort and idempotency are defined there.
+- Typed path contracts live in `packages/api-client`. No HTTP transport is generated until FZ-A2.
+- API framework, ORM and hosting remain UNDECIDED.
 
 ### Legacy OpenAPI — not current
 
 `legacy/freset-v2-full/contracts/openapi.yaml` (and provenance copies under `docs/knowledge/`) is **LEGACY / REFERENCE only**.
 
 - It is **not** the current OpenAPI contract.
-- It does **not** mean Master Plan Gate B is complete.
-- It must **not** be implemented as the live contract without a new approved **API Contract** slice.
-
-Kolejny krok kontraktowy (osobne zlecenie): szkielet OpenAPI i konwencje wersjonowania / błędów / auth.
+- It does **not** mean every Gate B runtime client is complete.
+- It must **not** be implemented as the live contract.
 
 ## Konwencje (kierunkowe, do utrwalenia w ADR)
 

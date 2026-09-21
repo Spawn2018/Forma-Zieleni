@@ -14,6 +14,7 @@ Core API Forma Zieleni — modular monolith, API-first.
 
 Szkielet katalogu. Framework HTTP, ORM i hosting nie zostały jeszcze wybrane.
 Klienci (`web`, `portal`, `admin`, później mobile i SketchUp) korzystają z tego samego API.
+Current contract: [`../../contracts/openapi.json`](../../contracts/openapi.json).
 
 Binding architecture: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/architecture/CURRENT-ARCHITECTURE.md).  
 Legacy OpenAPI under `legacy/` is reference only and does not complete Gate B.

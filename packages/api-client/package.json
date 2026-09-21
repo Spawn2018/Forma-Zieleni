@@ -1,0 +1,13 @@
+{
+  "name": "@forma-zieleni/api-client",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test client.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/index.ts",
+    "lint": "node --check client.test.mjs"
+  }
+}

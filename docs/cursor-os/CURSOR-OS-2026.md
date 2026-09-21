@@ -4,12 +4,12 @@
 Cursor is the engineering coordinator for Forma Zieleni. It must execute approved work autonomously while preserving the Project Constitution, Product/UX/Visual/Content Canons, domain contracts, security, performance and evidence requirements.
 
 ## Operating model
-1. Owner decides DECISION and DANGEROUS items.
+1. Owner is the decision authority for OWNER-DECISION, OWNER-ONLY and DANGEROUS items. OpenAI/ChatGPT is not required in the runtime decision loop.
 2. Cursor Project coordinator decomposes large bodies of work and delegates implementation/review work.
 3. Local Cursor Agent/CLI is the default interactive engineering surface.
 4. Project skills and rules are version-controlled and are the durable operating instructions.
 5. Independent reviewers do not silently rewrite requirements; they report blocking findings and evidence.
-6. Grok Bot is an additional independent research/review teammate under [`GROK-BOT-OPERATING-MODEL.md`](./GROK-BOT-OPERATING-MODEL.md) — not the source of truth and not an uncontrolled production operator. Manual owner handoff is the current Cursor→Grok path.
+6. Grok Bot is an additional independent research/review/operations teammate, not the source of truth and not an uncontrolled production operator.
 7. Deterministic tools (tests, linters, type checks, contract checks, benchmarks, migration checks) decide mechanical gates whenever possible; LLM judgment supplements them.
 
 ## Canon loading order
@@ -57,14 +57,38 @@ DISCOVER
 
 It is an **interrupt / exit condition that applies at every stage**:
 
-- If a **DECISION** or **DANGEROUS** action arises, the agent **stops** autonomous execution immediately and follows `docs/workflows/DECISION-GATES.md`.
+- If an **OWNER-DECISION**, **OWNER-ONLY** or **DANGEROUS** action arises, the agent **stops** the dependent slice immediately and follows `docs/workflows/DECISION-GATES.md`.
 - **AUTO** / **REVIEW** work may proceed through the binding loop autonomously.
-- **DECISION** / **DANGEROUS** interrupts the loop and requires the appropriate owner consent before continuing.
-
-Do not reclassify a DECISION/DANGEROUS item as AUTO merely to keep the loop moving.
+- Independent safe slices continue while the blocked slice waits.
+- Silence is never consent. Do not reclassify OWNER-DECISION, OWNER-ONLY or DANGEROUS as AUTO to keep the loop moving.
 
 ### Related protocol documents
 - Slice recording / autonomy rules (short index): `docs/workflows/AUTONOMOUS-SLICES.md`
 - Action classes: `docs/workflows/DECISION-GATES.md`
 - Grok Bot collaboration (binding): `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md`
 - Grok handoff skill: `.cursor/skills/grok-research-handoff/SKILL.md`
+- Security assurance: `docs/security/SECURITY-ASSURANCE.md`
+- Owner security-tool setup: `docs/security/OWNER-SETUP-CODERABBIT-OWASP.md`
+
+## Agentic execution policy
+Agentic automation is layered on top of clean data, explicit contracts and deterministic rules; it is never the source of truth. Prefer bounded tools, structured inputs/outputs and deterministic gates. Every consequential automation defines blast radius, failure/recovery behavior, audit evidence and resource budgets. Graceful degradation must keep critical product/business workflows usable when AI is unavailable.
+
+## Owner-in-loop controller
+The Autonomous Session Controller may orchestrate the binding loop, but it must not create a competing loop or weaken gates. OWNER-DECISION pauses only the dependent slice; safe independent work may continue. An Owner reply uses `DECISION FZ-###: OPTION X` plus optional constraints and is validated for id and ambiguity before the slice resumes. The OpenAI adapter remains in the tree, default-off, and unused by the session loop. Native unattended write execution remains disabled until filesystem/credential/path isolation is runtime-verified. The known Codex/Windows sandbox blocker must not be bypassed merely to gain autonomy.
+
+## Security-tool integration update --- 2026-09-21
+
+Binding security-tool details live in
+`docs/security/SECURITY-ASSURANCE.md` and the Owner onboarding flow in
+`docs/security/OWNER-SETUP-CODERABBIT-OWASP.md`.
+
+CodeRabbit is an independent review layer, not Canon authority. Preserve
+`main-only`; use Cursor/IDE/CLI pre-push review rather than creating PRs
+solely for CodeRabbit. Respect the verified account rate limit; until
+verified, budget at most 3 free CLI reviews per developer per rolling
+hour. Usage-based billing is OWNER-DECISION.
+
+OWASP baseline: ASVS 5.0.0 requirements, ZAP DAST for runnable
+local/lab/staging targets, and Dependency-Check/SCA where technically
+suitable. Never active-scan legacy CT8 production or live customer
+environments without explicit Owner approval.
