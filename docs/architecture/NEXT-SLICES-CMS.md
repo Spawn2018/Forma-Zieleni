@@ -63,12 +63,10 @@ Next: CMS-DATA.
 
 Dependencies: CMS-ARCH.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: CMS-ARCH recorded.
-Accept: content contract for Page, Article, Service, ProjectCaseStudy, MediaAsset, MediaCollection, SiteSettings, including the SEO object in FZ-SEARCH-1 section 5. This slice is also SEARCH-CONTENT-CONTRACT. Kysely or an Apostrophe adapter mapping; no Prisma. Apostrophe PostgreSQL is the target shape; a contract test does not require a production CMS process.
-Tests: schema/contract tests; `businessProjectRef` is opaque; SEO defaults do not require twenty editor fields.
-Docs: API-FIRST, DOMAIN-MAP.
-Next: CMS-AUTH and MEDIA-CORE may start after this.
+Status: COMPLETE for the projection contract. Apostrophe PostgreSQL tables are not created here.
+Accept: `contracts/content-contract.json` names Page, Article, Service, ProjectCaseStudy, MediaAsset, MediaCollection, and SiteSettings. `contracts/content-contract.mjs` is the adapter from editorial input to the SEO object in FZ-SEARCH-1 section 5. This is also SEARCH-CONTENT-CONTRACT. No Prisma. No second business API.
+Tests: `contracts/content-contract.test.mjs`.
+Next: CMS-AUTH and MEDIA-CORE may start after this. Neither is started in the contract commit.
 
 ### CMS-AUTH
 

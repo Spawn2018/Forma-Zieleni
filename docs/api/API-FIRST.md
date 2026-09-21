@@ -35,7 +35,7 @@ Current-tree contract:
 - Shared errors, `/v1`, cursor pagination, filter, sort and idempotency are defined there.
 - Typed path contracts live in `packages/api-client`. The lead HTTP runtime is `apps/api` (Hono). `GET /v1/health` is liveness. `GET /v1/ready` checks PostgreSQL. This package does not generate a transport client.
 - Core API framework is Hono. Data access is Kysely on PostgreSQL. Local development is native Windows; later Linux staging is Docker Compose. Production compute remains a later Owner decision. See [`../architecture/CURRENT-ARCHITECTURE.md`](../architecture/CURRENT-ARCHITECTURE.md).
-- Public content/media engine is DECIDED (ApostropheCMS on PostgreSQL, ADR-015) and is not CMS-ACCEPT. Published content is a projection consumed by WWW (and later mobile), not a second business database. SEO editorial fields are specified in [`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md). See [`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md).
+- Public content/media engine is DECIDED (ApostropheCMS on PostgreSQL, ADR-015) and is not CMS-ACCEPT. Published content is a projection consumed by WWW (and later mobile), not a second business database. The projection contract is [`../../contracts/content-contract.json`](../../contracts/content-contract.json). SEO rules are in [`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md). See [`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md).
 
 ### Legacy OpenAPI — not current
 

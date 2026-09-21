@@ -1,0 +1,36 @@
+{
+  "id": "FZ-CMS-CONTENT",
+  "engine": "apostrophe-postgresql",
+  "visual": "vendor-native",
+  "media": "fz-pipeline",
+  "notBusinessApi": true,
+  "types": [
+    "Page",
+    "Article",
+    "Service",
+    "ProjectCaseStudy",
+    "MediaAsset",
+    "MediaCollection",
+    "SiteSettings"
+  ],
+  "seoEditorFields": [
+    "title",
+    "description",
+    "canonical",
+    "robots",
+    "ogTitle",
+    "ogDescription",
+    "ogImage"
+  ],
+  "seoSystemFields": ["schemaType", "excludeFromSitemap", "socialImage"],
+  "omittedUntilEvidence": ["priority", "changeFrequency"],
+  "forbiddenPublicFields": [
+    "customerName",
+    "streetAddress",
+    "gps",
+    "price",
+    "rating",
+    "review"
+  ],
+  "businessProjectRef": "optional-opaque"
+}
