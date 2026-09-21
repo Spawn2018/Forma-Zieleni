@@ -20,7 +20,7 @@
     "No production deployment series, so DORA counts stay not measurable",
     "Live OAuth, spend, tracking and publication stay unauthorized"
   ],
-  "nextSafeAction": "MEDIA-COLLECTIONS remains the next ordinary READY slice in docs/architecture/NEXT-SLICES-CMS.md. Do not push.",
+  "nextSafeAction": "Add one traceability row for each open CMS and Search slice and for CMS acceptance items A-Q, at the depth the repository actually has. Do not mark them complete. Product execution then continues at MEDIA-COLLECTIONS. Do not push.",
   "evidencePaths": [
     "packages/domain/src/connected.ts",
     "packages/domain/src/growth.ts",
