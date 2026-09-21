@@ -50,7 +50,7 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 - Old PR/branch-centric workflow: SUPERSEDED by explicit direct-`main` owner decision. Quality gates/commit checkpoints remain applicable without requiring branches.
 - Old statement that Cloudflare Tunnel/private origin is implemented: false if present anywhere; current status is NOT IMPLEMENTED for the new system/legacy CT8.
 - DMARC: configured `p=none`, but PASS not verified. Any stronger statement is superseded.
-- Hosting/compute/DB/storage/ORM/payment provider/framework: UNDECIDED regardless of legacy implementation.
+- Gate A architecture (compute horizon, Hono, React Router Framework Mode, PostgreSQL + Kysely, Better Auth, local private files, OpenObserve/SOPS/restic/pgBackRest horizons, localhost then Cloudflare Tunnel): DECIDED in ADR-014. Payment provider, signing provider, production compute and production object storage remain UNDECIDED. Legacy implementation does not override that record.
 - Existing OpenAPI/DB/client/server artifacts: valuable reference/scaffold, not proof that current Gate B/C is implemented.
 - Historical prices/KPIs/budgets/company claims: do not publish or use as current facts without explicit re-verification.
 

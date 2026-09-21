@@ -1,8 +1,9 @@
 # FZ-SIGN-1 — Contract Lifecycle & Electronic Signature
 
 Status: CURRENT binding definition for contract lifecycle and electronic
-signature. Provider **UNDECIDED**. This is not a Gate A decision and does
-not close FZ-A1–A7.
+signature. Provider **UNDECIDED**. This is not a Gate A decision. Gate A
+architecture is recorded separately in ADR-014. This file does not
+select a signing provider.
 
 Canonical file: this document. Other Canon locations link here. They do
 not restate a second lifecycle.
@@ -173,7 +174,8 @@ may be specified. Do not add a provider SDK, database schema, API
 implementation, UI or infrastructure in order to “start signing”.
 
 Provider selection is OWNER-DECISION and happens before the first
-production contract-signing vertical, not before FZ-A1–A7.
+production contract-signing vertical. Gate A architecture is already
+recorded and does not select this provider.
 
 ## Gates
 

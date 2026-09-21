@@ -37,7 +37,7 @@ Cursor agents start at repository root: [`../START-HERE-CURSOR.md`](../START-HER
 |----------|------|
 | [`architecture/CURRENT-ARCHITECTURE.md`](./architecture/CURRENT-ARCHITECTURE.md) | **Sole BINDING current architecture** |
 | [`architecture/SECURITY.md`](./architecture/SECURITY.md) | Security requirements and baselines |
-| [`architecture/OWNER-DECISION-PACKETS-GATE-A.md`](./architecture/OWNER-DECISION-PACKETS-GATE-A.md) | Open FZ-A1–A7 packets |
+| [`architecture/OWNER-DECISION-PACKETS-GATE-A.md`](./architecture/OWNER-DECISION-PACKETS-GATE-A.md) | Recorded FZ-A1–A7 decisions |
 | [`architecture/GATE-IMPLEMENTATION-CHECKPOINT.md`](./architecture/GATE-IMPLEMENTATION-CHECKPOINT.md) | Blocked implementation status |
 | [`architecture/DECISIONS.md`](./architecture/DECISIONS.md) | Formal ADR history |
 | [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) | Superseded redirect / provenance only |
@@ -164,4 +164,4 @@ Do not treat ADR history and the post-V2 ledger as the same kind of document.
 
 ## Infra notes (not hosting decisions)
 
-See repository [`../infra/`](../infra/) — environment labels and Cloudflare **ingress** notes only. Hosting / compute / DB / storage remain UNDECIDED.
+See repository [`../infra/`](../infra/) — environment labels and Cloudflare **ingress** notes. Gate A architecture is recorded in [`architecture/CURRENT-ARCHITECTURE.md`](./architecture/CURRENT-ARCHITECTURE.md). Production compute, production object storage, Workers, D1, R2 and Pages are not selected. No Cloudflare or DNS change is made by those notes.

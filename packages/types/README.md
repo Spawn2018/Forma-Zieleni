@@ -10,4 +10,4 @@ Współdzielone typy TypeScript wywodzące się z kontraktu API i modelu domenow
 
 ## Status
 
-Lead record and error types match `contracts/openapi.json`. Runtime codegen waits for FZ-A2.
+Lead record and error types match `contracts/openapi.json`. Runtime codegen is later implementation work. The API framework is already Hono.

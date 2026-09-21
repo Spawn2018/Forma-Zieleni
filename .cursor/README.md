@@ -14,9 +14,9 @@ Binding architecture: [`../docs/architecture/CURRENT-ARCHITECTURE.md`](../docs/a
 
 That does **not** approve application hosting on Cloudflare compute/data products:
 
-- Workers = **UNDECIDED**
-- D1 = **UNDECIDED**
-- R2 = **UNDECIDED**
-- Pages = **UNDECIDED**
+- Workers = **not selected**
+- D1 = **not selected**
+- R2 = **not selected**
+- Pages = **not selected**
 
 Do not infer stack choices from plugin availability. See `docs/architecture/CURRENT-ARCHITECTURE.md` and `infra/cloudflare/README.md`.

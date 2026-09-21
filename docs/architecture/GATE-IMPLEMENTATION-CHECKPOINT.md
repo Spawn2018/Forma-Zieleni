@@ -1,36 +1,84 @@
 # Gate A–D implementation checkpoint — 2026-09-21
 
-Dependent implementation is paused where Owner decisions are missing. Independent contract and domain work continued. S2.5 CodeRabbit remediations for public lead capture, qualifyLead 409, validation types, quota-log path, native-test pwsh discovery and resumable Owner decisions are a local REVIEW slice. Eight native Windows process tests remain skipped until `pwsh.exe` is on PATH or `NATIVE_TEST_POWERSHELL` is set.
+Gate A **architecture selection** is DECIDED. Gate A **implementation and
+security acceptance** are not complete. FZ-SIGN-1 provider remains
+UNDECIDED.
 
-## Gate A implementation
+Eight native Windows process tests remain skipped until `pwsh.exe` is
+on PATH or `NATIVE_TEST_POWERSHELL` is set. That is skipped, not pass.
 
-OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md). Packets were refined 2026-09-21 into coherent API+WWW+Portal+Admin bundles; FZ-A5 was expanded then delta-amended (Casdoor added to A5-D; SuperTokens, Authelia and Kanidm excluded). The same day a landscape-delta expanded FZ-A1 (compute vs DEPLOY=systemd|compose|coolify|dokploy|caprover), FZ-A2 (TanStack Start RC + React Router Framework Mode bundles), FZ-A3 (first-class Kysely), FZ-A4 (MinIO CE withdrawn; Garage/RustFS/local/managed S3), FZ-A6 (obs/secrets/backup split), and FZ-A7 (Cloudflare-required; Pangolin/FRP excluded as sole public ingress). No option was selected or implemented. No hosting, database, ORM, storage, auth library, observability vendor or Cloudflare mutation was executed.
+## Gate A — architecture decided
 
-Local reproducible app config, CI deploy, API skeleton, migrations, object storage, auth runtime, restore test, monitoring, webhook tests, load baseline and private-origin validation remain unstarted.
+Owner decisions are recorded in
+[OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md)
+and ADR-014. Binding shape:
+[CURRENT-ARCHITECTURE.md](./CURRENT-ARCHITECTURE.md).
 
-FZ-SIGN-1 is recorded as a later contract-lifecycle boundary. It does not add an eighth Gate A decision. The signing provider remains UNDECIDED. No Documenso, DocuSeal, OpenSign or Autenti integration was implemented.
+- FZ-A1 OPTION A, `DEPLOY=compose`. Local Windows now. Docker Compose
+  is the later Linux staging model. No host was created. Production
+  compute is still later.
+- FZ-A2 OPTION F, `API=Hono`. WWW, Portal and Admin are separate React
+  Router Framework Mode applications. Not scaffolded in the recording
+  slice.
+- FZ-A3 OPTION E. PostgreSQL + Kysely. No ORM.
+- FZ-A4 OPTION A, `LATER=garage`. Local private files now. Garage is a
+  staging direction, not final production storage.
+- FZ-A5 OPTION E, `EMBED=B`. Better Auth now. No dedicated IdP. Domain
+  authorization stays in Core API.
+- FZ-A6 OPTION B. `OBS=openobserve`, `SECRETS=sops-age`,
+  `BACKUP=restic`, `PG=pgbackrest`. OpenObserve and pgBackRest are not
+  stood up on Windows for this decision. Session replay stays off.
+- FZ-A7 OPTION A, `OVERLAY=none`. Localhost now. Cloudflare Tunnel
+  later. No DNS or Cloudflare change was made.
+
+The option research in the packet stays as evidence. Rejected and
+unselected alternatives were not deleted.
+
+What is still not done: app config, CI deploy, Hono skeleton,
+migrations, object-storage adapter, auth runtime, restore test,
+monitoring process, webhook tests, load baseline, private-origin
+validation, ZAP, Dependency-Check.
+
+FZ-SIGN-1 remains a later contract-lifecycle boundary. It is not an
+eighth Gate A decision. No signing provider was selected or integrated.
 
 ## Gate B API contract
 
 REVIEW progress, not a complete runtime:
 
 - Current OpenAPI 3.0.4: `contracts/openapi.json`
-- Errors, `/v1`, cursor pagination, filter, sort, idempotency: present for the lead slice. `qualifyLead` declares 409 Conflict. Public `LeadCapture.source` is `PublicLeadSource` (`www`, `other`).
-- Typed client surfaces for web/portal/admin/mobile: `packages/api-client` paths only, no HTTP transport
+- Errors, `/v1`, cursor pagination, filter, sort, idempotency: present
+  for the lead slice. `qualifyLead` declares 409 Conflict. Public
+  `LeadCapture.source` is `PublicLeadSource` (`www`, `other`).
+- Typed client surfaces for web/portal/admin/mobile:
+  `packages/api-client` paths only, no HTTP transport yet
 - Contract and breaking-change tests: `contracts/openapi.test.mjs`
-- Generated runtime clients, CI publish and SketchUp Ruby client: blocked on FZ-A2 and later adapter work
+- Generated runtime clients, CI publish and SketchUp Ruby client remain
+  later adapter work. The framework choice no longer blocks them; the
+  implementation does.
 
 ## Gate C core domain
 
 REVIEW progress for lead rules only:
 
 - `packages/domain` create/qualify invariants
-- Persistence, outbox, CRM visibility in Admin, Identity/Auth runtime: blocked on FZ-A3 and FZ-A5
+- Persistence, outbox, Identity/Auth runtime and Admin CRM visibility
+  are the next implementation work, defined in
+  [NEXT-SLICE-LEAD-VERTICAL.md](./NEXT-SLICE-LEAD-VERTICAL.md). They are
+  not done.
 
 ## Gate D product surfaces
 
-OWNER-DECISION / blocked:
+Not started:
 
-- WWW, Portal, Admin/CRM UI and Mobile require FZ-A2 and FZ-A5
-- No generic UI was added
-- Visual/UX implementation waits for the application framework and supplied mockups
+- WWW, Portal and Admin stay unbuilt. Their framework is selected.
+- The lead vertical does not include those surfaces.
+- Mobile still waits on a later product slice.
+- No generic UI was added.
+
+## Next executable slice
+
+[NEXT-SLICE-LEAD-VERTICAL.md](./NEXT-SLICE-LEAD-VERTICAL.md): public
+lead capture, validation, PostgreSQL/Kysely persistence, authorized CRM
+list/get/qualify, audit/observability and tests. Not the whole CRM.
+Not started by this checkpoint.

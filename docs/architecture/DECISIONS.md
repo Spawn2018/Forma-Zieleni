@@ -96,10 +96,10 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Pole | Wartość |
 |------|---------|
 | Data | 2026-09-20 |
-| Status | Accepted |
+| Status | Superseded by ADR-014 |
 | Decyzja | Nie wybieramy jeszcze hostingu origin, providera bazy, storage ani konkretnej infrastruktury produkcyjnej. Nie instalujemy Dockera jako wymogu. Nie zakładamy Cloudflare Workers / D1 / R2. |
 | Kontekst | Najpierw architektura i kontrakt; unikamy lock-inu przed wymaganiami. |
-| Konsekwencje | `infra/` zawiera tylko opisy i placeholdery kierunkowe; implementacja app bez frameworków na tym etapie. |
+| Konsekwencje | Historical: `infra/` contained directional notes only, and apps had no framework yet. ADR-014 records the later Gate A choices. Workers, D1, R2 and Pages remain unselected. Production compute and production object storage remain later Owner decisions. |
 
 ---
 
@@ -159,8 +159,8 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Data | 2026-09-21 |
 | Status | Accepted |
 | Decyzja | Session-controller `choose-audit` is OWNER-DECISION resolved by `DECISION FZ-###: OPTION X`. OpenAI adapter stays unused. Current Core API source of truth for the first vertical is `contracts/openapi.json` (OpenAPI 3.0.4 lead qualification). |
-| Kontekst | ChatGPT is out of the runtime loop. Product construction continues with durable contracts while Gate A stack choices remain open. |
-| Konsekwencje | Missing Owner replies block only the dependent slice. HTTP/DB/UI runtimes wait for FZ-A1–A7. |
+| Kontekst | ChatGPT is out of the runtime loop. Product construction continued with durable contracts while Gate A stack choices were still open. Those choices are now ADR-014. |
+| Konsekwencje | Gate A architecture is recorded in ADR-014. Implementation of the lead vertical is defined in `NEXT-SLICE-LEAD-VERTICAL.md` and is not done by this ADR. |
 
 ## ADR-013 — Provider-neutral contract lifecycle (FZ-SIGN-1)
 
@@ -170,7 +170,18 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Status | Accepted (boundary only) |
 | Decyzja | Core API owns contract business state, authorization, lifecycle and archive metadata. Private object storage owns immutable artifacts. A signing engine is a replaceable adapter and is not the source of truth. Electronic signature is not treated as legally mandatory for every transaction. Provider remains UNDECIDED. |
 | Kontekst | Commercial flow needs Offer → Contract → signature when required → payment → project, without letting a SaaS become the ACL or the only archive. |
-| Konsekwencje | Canonical text: `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. Research: `OWNER-DECISION-PACKET-FZ-SIGN-1.md`. FZ-A1–A7 stay open. No SDK, schema or provider until a later Owner decision. |
+| Konsekwencje | Canonical text: `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. Research: `OWNER-DECISION-PACKET-FZ-SIGN-1.md`. Recording this boundary did not itself decide Gate A. Gate A was decided later in ADR-014. Signing provider, SDK and schema remain for a later Owner decision. |
+
+## ADR-014 — Gate A architecture selection
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-21 |
+| Status | Accepted |
+| Decyzja | Owner decided FZ-A1 OPTION A `DEPLOY=compose`; FZ-A2 OPTION F `API=Hono` (WWW, Portal and Admin are separate React Router Framework Mode apps); FZ-A3 OPTION E (PostgreSQL + Kysely); FZ-A4 OPTION A `LATER=garage`; FZ-A5 OPTION E `EMBED=B` (Better Auth now); FZ-A6 OPTION B `OBS=openobserve` `SECRETS=sops-age` `BACKUP=restic` `PG=pgbackrest`; FZ-A7 OPTION A `OVERLAY=none`. |
+| Kontekst | Gate A packets stayed open until an explicit Owner reply. Local Windows development stays native. Linux Docker Compose, Garage, OpenObserve, pgBackRest and Cloudflare Tunnel are later horizons. Production compute and production object storage are not selected. No recurring spend is authorized. |
+| Konsekwencje | Binding shape: `CURRENT-ARCHITECTURE.md`. Research remains in `OWNER-DECISION-PACKETS-GATE-A.md`. Next implementation definition: `NEXT-SLICE-LEAD-VERTICAL.md`. Architecture decided is not security acceptance. FZ-SIGN-1 provider stays UNDECIDED. Docker is not a Windows prerequisite. Cloudflare, DNS and production changes stay DANGEROUS. |
+| Supersedes | ADR-007 “do not choose yet” for the horizons named above. ADR-001 through ADR-006 and ADR-008 remain in force. |
 
 ## Szablon kolejnego ADR
 

@@ -5,9 +5,11 @@ definition. The canonical architecture is
 [`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
 The research record is
 [`../architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md).
+Gate A was decided afterward (ADR-014). This procedure does not keep
+Gate A open and it does not select a signing provider.
 
-Integrate that architecture into the existing Canon without changing any
-open FZ-A1–A7 decision or implementing a provider.
+That alignment recorded the lifecycle without implementing a provider.
+It did not itself decide FZ-A1–A7.
 
 Required documentation updates:
 1. Link FZ-SIGN-1 from the binding architecture/product roadmap locations that govern Offers → Contract → Payment → Project and Files.

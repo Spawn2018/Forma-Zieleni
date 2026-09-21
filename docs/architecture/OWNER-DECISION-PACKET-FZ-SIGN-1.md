@@ -1,7 +1,7 @@
 # FZ-SIGN-1 Owner research packet — signing engine
 
-Status: **OPEN / LATER**. Not a Gate A packet. FZ-A1–A7 stay OPEN.
-**No engine is selected.**
+Status: **OPEN / LATER**. Not a Gate A packet. Gate A architecture is
+DECIDED separately. **No engine is selected.**
 
 Canonical lifecycle: [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
 

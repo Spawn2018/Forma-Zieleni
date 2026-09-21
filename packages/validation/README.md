@@ -10,4 +10,4 @@ Współdzielone schematy i walidacja wejścia/wyjścia.
 
 ## Status
 
-Lead capture validation is implemented without a third-party schema library. A later library may replace this only after FZ-A2.
+Lead capture validation is implemented without a third-party schema library. Replacing it is an implementation choice inside a later slice, not an open Gate A decision.

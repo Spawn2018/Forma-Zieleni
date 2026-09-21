@@ -35,6 +35,7 @@ const linkScope = [
   'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md',
   'docs/architecture/OWNER-DECISION-PACKETS-GATE-A.md',
   'docs/architecture/GATE-IMPLEMENTATION-CHECKPOINT.md',
+  'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md',
   'docs/cursor-os/CURSOR-OS-2026.md',
   'docs/workflows/DECISION-GATES.md',
   'docs/domain/DOMAIN-MAP.md',
@@ -189,11 +190,28 @@ function checkCanon(errors) {
     'docs/cursor-os/CURSOR-OS-2026.md',
   ]);
   const packets = mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKETS-GATE-A.md', [
-    'Status: OPEN',
+    'Status: DECIDED',
+    'DECISION FZ-A1: OPTION A',
+    'DEPLOY=compose',
+    'DECISION FZ-A2: OPTION F',
+    'API=Hono',
+    'DECISION FZ-A3: OPTION E',
+    'DECISION FZ-A4: OPTION A',
+    'LATER=garage',
+    'DECISION FZ-A5: OPTION E',
+    'EMBED=B',
+    'DECISION FZ-A6: OPTION B',
+    'OBS=openobserve',
+    'SECRETS=sops-age',
+    'BACKUP=restic',
+    'PG=pgbackrest',
+    'DECISION FZ-A7: OPTION A',
+    'OVERLAY=none',
   ]);
-  if (/^DECISION FZ-A[1-7]: OPTION [A-Z](?:\s|$)/m.test(packets)) {
-    fail(errors, 'Gate A packet contains a filled FZ-A decision');
+  if (/^Status: OPEN\b/m.test(packets)) {
+    fail(errors, 'Gate A packet status is still OPEN');
   }
+  mustContain(errors, 'docs/architecture/DECISIONS.md', ['## ADR-014 — Gate A architecture selection']);
   mustContain(errors, 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', [
     'Provider **UNDECIDED**',
     '# FZ-SIGN-1 — Contract Lifecycle & Electronic Signature',
@@ -218,6 +236,14 @@ function checkCanon(errors) {
   mustContain(errors, 'docs/architecture/CURRENT-ARCHITECTURE.md', [
     'Legacy',
     'do not decide',
+    'apps/api` = Hono',
+    'React Router Framework Mode',
+    'Kysely',
+    'Better Auth',
+    'OpenObserve',
+    'Garage',
+    'Cloudflare Tunnel',
+    'Docker Compose',
   ]);
   const lifecycleHeaders = trackedFiles().filter((file) => {
     if (!file.endsWith('.md')) return false;

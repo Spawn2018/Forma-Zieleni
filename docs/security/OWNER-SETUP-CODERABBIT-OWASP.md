@@ -48,7 +48,7 @@ There is no OWASP account to create for the selected free baseline.
 ### Dependency/SCA
 
 1.  Cursor evaluates OWASP Dependency-Check against the chosen stack
-    after FZ-A2/FZ-A3.
+    after the lead implementation slice adds dependencies.
 2.  If it is technically appropriate, integrate it locally/CI.
 3.  Also use the repository's native GitHub dependency alerts/Dependabot
     where appropriate.

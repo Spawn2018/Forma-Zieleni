@@ -7,12 +7,19 @@ Kierunek: Cloudflare jako **docelowy jedyny publiczny ingress** produkcyjny.
 | Concern | Status |
 |---------|--------|
 | Cloudflare as public/security ingress | **Approved direction** |
-| Private origin behind Cloudflare | **Approved target** (not implemented for CT8 yet) |
-| Cloudflare Workers | **UNDECIDED** |
-| Cloudflare D1 | **UNDECIDED** |
-| Cloudflare R2 | **UNDECIDED** |
-| Cloudflare Pages | **UNDECIDED** |
-| Hosting / compute / DB / storage provider | **UNDECIDED** |
+| Private origin behind Cloudflare | **Approved target** (not implemented; localhost only now) |
+| Later staging public ingress | **Cloudflare Tunnel** (FZ-A7). Not created. DNS/Cloudflare changes remain DANGEROUS |
+| Operator overlay | **none** |
+| Cloudflare Workers | **Not selected** |
+| Cloudflare D1 | **Not selected** |
+| Cloudflare R2 | **Not selected** |
+| Cloudflare Pages | **Not selected** |
+| Compute now | **Local Windows.** Docker is not a development prerequisite |
+| Later Linux staging | **Docker Compose.** No host created |
+| Production compute | **Later Owner decision** |
+| Database | **PostgreSQL + Kysely** |
+| Files now | **Local private adapter** |
+| Later staging files | **Garage direction only.** Production store not permanently selected |
 
 ## Zakres tego katalogu
 
@@ -25,8 +32,12 @@ Editor Cloudflare plugins/tooling (if enabled) support ingress/security/document
 ## Docelowy model
 
 ```text
-Internet → Cloudflare (public ingress) → private origin (TBD)
+Internet → Cloudflare (public ingress) → private origin
 ```
+
+Now the origin is localhost only. The later staging path is Cloudflare
+Tunnel. Production origin host is not selected. Workers, D1, R2 and
+Pages are not the application stack.
 
 ## Stan obecny
 

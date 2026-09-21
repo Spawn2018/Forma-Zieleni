@@ -1,31 +1,117 @@
 # Current architecture and decision boundaries
 
-Status: CURRENT.
+Status: CURRENT. Gate A architecture selection is DECIDED (2026-09-21,
+ADR-014). Implementation and security acceptance are not complete.
 
-## Decided
+## Runtime
 
--   Public monorepo; direct `main` workflow by owner decision.
--   pnpm/Turborepo repository foundation; current local Node 24/pnpm 10
-    environment.
--   Product boundaries: web, portal, admin, api; mobile later.
--   API-first modular monolith; OpenAPI 3.0.x (current 3.0.4
-    target/reference); event-driven core + transactional outbox.
--   Core API/domain data is source of truth; providers are adapters.
-    Current lead-slice contract: `contracts/openapi.json`.
-    Contract lifecycle and electronic signature:
-    `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. The signing engine is an adapter,
-    not business truth. Provider UNDECIDED. FZ-SIGN-1 does not close
-    FZ-A1–A7.
--   Cloudflare is public/security ingress; target origin private.
--   dev/staging/production required.
+- Node 24
+- pnpm 10
+- Turborepo
 
-## Explicitly undecided
+## Applications
 
-Application frameworks; API framework/runtime; database provider/engine
-final choice; ORM; hosting/compute; storage; payment provider;
-observability backend; CMS; auth library; deployment provider;
-electronic-signature engine (FZ-SIGN-1, later). Legacy
-Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
+- `apps/api` = Hono on Node 24. Core API remains canonical.
+- `apps/web` = React Router Framework Mode
+- `apps/portal` = React Router Framework Mode
+- `apps/admin` = React Router Framework Mode
+- WWW, Portal and Admin stay separate applications and trust zones.
+- React Router loaders and actions may act as BFF adapters only. They
+  are not domain or business truth.
+- Android, iOS, SketchUp and future agents consume the Core API
+  contract, not frontend framework internals.
+- Mobile is later.
+
+## Data
+
+- PostgreSQL is the persistence truth.
+- Kysely is the typed SQL and data-access layer. It does not replace
+  SQL or database semantics.
+- Transactional outbox remains binding (ADR-004).
+- Prisma and other ORMs are not introduced.
+
+## Identity
+
+- Phased protocol-ready embedded auth.
+- NOW: Better Auth.
+- Preserve a stable `actorId`, issuer/`sub` mapping, separate conceptual
+  client identities for web, portal, admin, mobile, SketchUp and
+  machine-to-machine, and PKCE for public clients where applicable.
+- Domain BOLA, BFLA and BOPLA stay exclusively in Core API.
+- No dedicated identity provider is deployed now. A later issuer
+  migration must not move domain ACLs.
+
+## Files
+
+- NOW: local gitignored private file storage.
+- Files stay private, versioned and checksummed, and are authorized
+  through Core API.
+- A public bucket URL is not authorization.
+- LATER staging direction: Garage. That direction is not an irrevocable
+  production selection.
+- Production object storage remains a later Owner decision.
+
+## Observability
+
+- NOW: OpenTelemetry-compatible instrumentation and structured JSON.
+- LATER Linux staging: OpenObserve.
+- OpenObserve is not stood up on the Windows workstation merely to
+  satisfy this decision.
+- Session replay remains OFF unless separately approved after a privacy
+  review.
+
+## Secrets
+
+- Direction: SOPS+age when repository-adjacent encrypted secret material
+  is actually needed.
+- Local secrets are handled outside git.
+- No secrets in git, prompts, logs or fixtures.
+
+## Backup
+
+- A backup is not accepted until restore is tested.
+- restic for backup copies.
+- pgBackRest when PostgreSQL persistence reaches the relevant remote
+  staging or production stage.
+- pgBackRest is not stood up on the Windows workstation merely to
+  satisfy this decision.
+
+## Ingress
+
+- NOW: localhost only.
+- LATER staging public ingress: Cloudflare Tunnel.
+- Cloudflare remains the required public protection layer.
+- The origin must not become directly Internet-accessible around
+  Cloudflare.
+- No operator overlay now (`OVERLAY=none`).
+- Creating a tunnel, or changing DNS, firewall, Cloudflare or
+  production, is DANGEROUS and needs explicit Owner approval immediately
+  before execution.
+
+## Deployment
+
+- NOW: native local Windows development. Docker is not a Windows
+  development prerequisite.
+- LATER Linux staging: Docker Compose.
+- No remote host is purchased or created by the Gate A record.
+- Production compute remains a later Owner decision.
+
+## Already decided before Gate A
+
+- Public monorepo; direct `main` workflow by owner decision.
+- Product boundaries: web, portal, admin, api; mobile later.
+- API-first modular monolith; OpenAPI 3.0.4
+  (`contracts/openapi.json`); event-driven core + transactional outbox.
+- Contract lifecycle and electronic signature:
+  `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. The signing engine is an adapter,
+  not business truth. Provider UNDECIDED.
+- dev, staging and production remain required environments.
+- Local development cost target is approximately 0 PLN/month. Gate A
+  authorizes no paid subscription and no recurring spend.
+
+## Explicitly still undecided
+
+Payment provider; CMS; electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only). Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model
 
@@ -43,7 +129,7 @@ backup/restore.
 
 ## Agentic boundary
 
-Agentic features sit above DATA -\> RULES -\> DOMAIN and consume bounded
+Agentic features sit above DATA -> RULES -> DOMAIN and consume bounded
 tools/contracts. They are not canonical state. OpenAI/Grok/other
 providers remain replaceable adapters. Owner is the current runtime
 decision authority for escalated decisions. Native unattended

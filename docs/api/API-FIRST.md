@@ -33,8 +33,8 @@ Current-tree contract:
 
 - [`../../contracts/openapi.json`](../../contracts/openapi.json) is OpenAPI 3.0.4 and the source of truth for the visitor lead-qualification slice.
 - Shared errors, `/v1`, cursor pagination, filter, sort and idempotency are defined there.
-- Typed path contracts live in `packages/api-client`. No HTTP transport is generated until FZ-A2.
-- API framework, ORM and hosting remain UNDECIDED.
+- Typed path contracts live in `packages/api-client`. HTTP transport is the next lead slice, not an open framework choice.
+- Core API framework is Hono. Data access is Kysely on PostgreSQL. Local development is native Windows; later Linux staging is Docker Compose. Production compute remains a later Owner decision. See [`../architecture/CURRENT-ARCHITECTURE.md`](../architecture/CURRENT-ARCHITECTURE.md).
 
 ### Legacy OpenAPI — not current
 

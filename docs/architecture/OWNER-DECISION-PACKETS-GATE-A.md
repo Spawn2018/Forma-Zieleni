@@ -1,23 +1,85 @@
 # Gate A Owner Decision Packets
 
-Status: OPEN — refined 2026-09-21 for coherent stack bundles; FZ-A5
-expanded then delta-amended (Casdoor added); FZ-A1/A2/A3/A4/A6/A7
-landscape-delta the same day. These packets do not implement
-infrastructure and do not rank options. Reply with
-`DECISION FZ-A#: OPTION X` plus optional constraints. Silence is not
-consent. Prices not read as a number from an official current page are
-**UNKNOWN**.
+Status: DECIDED — Owner recorded FZ-A1–A7 on 2026-09-21. The research
+below is retained evidence. It is not a second menu and it does not
+rank options. Prices not read as a number from an official current page
+remain **UNKNOWN**. This packet does not implement infrastructure.
 
-Choosing a local/zero-cost path **now** is a development horizon, not
-the permanent production architecture. Staging and production remain
-later OWNER-DECISION / DANGEROUS steps.
+## Recorded Owner decisions
 
-FZ-SIGN-1 (contract lifecycle and electronic signature) is a **later**
-packet. It does not change any option below and does not add an eighth
-Gate A reply. Provider UNDECIDED. Definition:
+```text
+DECISION FZ-A1: OPTION A
+DEPLOY=compose
+DECISION FZ-A2: OPTION F
+API=Hono
+DECISION FZ-A3: OPTION E
+DECISION FZ-A4: OPTION A
+LATER=garage
+DECISION FZ-A5: OPTION E
+EMBED=B
+DECISION FZ-A6: OPTION B
+OBS=openobserve
+SECRETS=sops-age
+BACKUP=restic
+PG=pgbackrest
+DECISION FZ-A7: OPTION A
+OVERLAY=none
+```
+
+Binding interpretation:
+
+- **FZ-A1.** Development now is local Windows. Docker is not installed
+  for local development. Later Linux staging uses Docker Compose. No
+  remote host is created by this record. Production compute remains a
+  later Owner decision.
+- **FZ-A2.** Core API is Hono on Node 24. WWW, Portal and Admin are
+  separate React Router Framework Mode applications and trust zones.
+  Loaders and actions are BFF adapters only. Core API stays canonical.
+  Android, iOS, SketchUp and future agents consume the Core API
+  contract.
+- **FZ-A3.** PostgreSQL + Kysely. PostgreSQL is persistence truth.
+  Kysely is typed SQL, not a replacement for SQL semantics.
+  Transactional outbox stays binding. No Prisma or other ORM.
+- **FZ-A4.** Now: local gitignored private files, versioned,
+  checksummed, and authorized through Core API. A public bucket URL is
+  not authorization. Later staging direction is Garage. Garage is not
+  the irrevocable production store.
+- **FZ-A5.** Phased protocol-ready embedded auth. Now: Better Auth.
+  Preserve stable `actorId`, issuer/`sub` mapping, separate conceptual
+  clients for web, portal, admin, mobile, SketchUp and
+  machine-to-machine, and PKCE for public clients where applicable.
+  Domain BOLA/BFLA/BOPLA stay in Core API. No dedicated IdP now. A
+  later issuer migration must not move domain ACLs.
+- **FZ-A6.** OpenObserve, SOPS+age, restic and pgBackRest are the
+  selected direction. Now/local: OpenTelemetry-compatible
+  instrumentation and structured JSON; local secrets outside git;
+  SOPS+age only when repository-adjacent encrypted material is actually
+  needed; tested local backup/restore. Later Linux staging:
+  OpenObserve, restic and SOPS+age as appropriate. pgBackRest when
+  PostgreSQL reaches the relevant remote stage. Do not stand up
+  OpenObserve or pgBackRest on the Windows workstation merely to
+  satisfy this decision. Session replay stays OFF unless separately
+  approved after a privacy review.
+- **FZ-A7.** Now: localhost only. Later staging public ingress:
+  Cloudflare Tunnel. Cloudflare remains the required public layer. The
+  origin must not be directly Internet-accessible around Cloudflare.
+  No overlay now. Creating a tunnel or changing DNS, firewall,
+  Cloudflare or production is DANGEROUS and needs explicit Owner
+  approval immediately before execution.
+
+Local development target remains approximately 0 PLN/month. This record
+authorizes no paid subscription, cloud resource, server, domain change,
+paid auth feature, signing service or other recurring spend. Future
+recurring spend remains OWNER-ONLY.
+
+FZ-SIGN-1 stays provider UNDECIDED. These decisions do not select
+Documenso, DocuSeal, OpenSign, Autenti or another signing provider.
+Definition:
 [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
+Durable record: ADR-014 in [`DECISIONS.md`](./DECISIONS.md). Binding
+shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.md).
 
-## How to use this pack
+## How to use this pack (historical)
 
 1. Pick one **application bundle** in FZ-A2. That locks Core API runtime
    and the WWW / Portal / Admin framework so a later “UI library”
@@ -32,7 +94,10 @@ Gate A reply. Provider UNDECIDED. Definition:
    stay non-containerized even if staging later uses Docker/PaaS.
 4. Pick FZ-A4 / A6 / A7 as **now / staging / production** horizons.
    A6 is one reply but three concerns (telemetry, secrets, backup).
-5. Issue all seven replies. Do not implement until those replies exist.
+5. The seven replies were issued on 2026-09-21 and are recorded above.
+   Choosing the local path now is a development horizon, not the
+   permanent production architecture. This packet still does not
+   implement infrastructure.
 
 ## Decision dependencies
 
@@ -475,7 +540,9 @@ Off-site copy (second disk, Garage/R2/Hetzner OS, or Owner-held offline) is part
 
 ## Coherent architecture profiles (not a ranking, not a winner)
 
-These show how the expanded options *can* be combined. Owner may mix across profiles. None is selected.
+These show how the expanded options could be combined before the Owner
+reply. They are historical evidence, not a second decision. The binding
+mix is the recorded block at the top of this file.
 
 ### Profile 1 — Minimal / local-first
 
@@ -525,9 +592,10 @@ These show how the expanded options *can* be combined. Owner may mix across prof
 
 ---
 
-## Suggested reply block
+## Suggested reply block (historical blank form)
 
-Copy and fill. Constraints optional.
+The filled decisions are in **Recorded Owner decisions** above. This
+blank form is the template that was used.
 
 ```text
 DECISION FZ-A1: OPTION _

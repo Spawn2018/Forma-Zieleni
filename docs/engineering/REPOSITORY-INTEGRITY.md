@@ -24,10 +24,11 @@ Regenerate only with `node scripts/repo-integrity.mjs --write`, then
 verify with `pnpm repo:check`. Do not edit the manifest by hand.
 
 `pnpm repo:check` also checks tracked-file hygiene, a small secret-pattern
-scan of tracked text, the current workspace shape while FZ-A2 is open, required Canon entrypoints,
-FZ-A1–A7 still OPEN, FZ-SIGN-1 still UNDECIDED, and relative links in
-the current Canon set. It does not select a stack or a signing provider.
-OpenAPI behavior stays in `pnpm test` (`contracts/openapi.test.mjs`).
+scan of tracked text, workspace `package.json` files that already
+exist, required Canon entrypoints, the recorded FZ-A1–A7 decisions,
+FZ-SIGN-1 still UNDECIDED, and relative links in the current Canon set.
+It does not select a stack or a signing provider. OpenAPI behavior
+stays in `pnpm test` (`contracts/openapi.test.mjs`).
 
 ## Not current manifests
 
@@ -44,7 +45,9 @@ These files are frozen provenance. Do not regenerate them to match HEAD.
 `pnpm-workspace.yaml` globs `apps/*`, `packages/*` and `tooling/*`.
 Directories such as `apps/web`, `apps/portal`, `apps/admin`, `apps/api`,
 `packages/ui` and `packages/config` may exist without `package.json`
-while FZ-A2 is OPEN. That is not a failed integrity check.
+until an implementation slice adds them. Gate A being DECIDED does not
+make a missing manifest a failed integrity check. An implementation
+slice adds the real package when it creates the app.
 
 An empty local `services/` directory, if present, is not a workspace
 member (ADR-008 removed `services/*`). Do not add placeholder packages

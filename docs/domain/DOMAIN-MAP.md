@@ -16,7 +16,7 @@ Wszystkie decyzje authz egzekwowane serwerowo.
 Leady, kontakty, firmy, interakcje, pipeline relacji przed i po sprzedaży.
 Wejście z `web` i kanałów marketingowych; obsługa w `admin`.
 
-Current durable start: `packages/domain` lead capture/qualification rules and `contracts/openapi.json`. Persistence and Admin UI wait on FZ-A3/FZ-A2.
+Current durable start: `packages/domain` lead capture/qualification rules and `contracts/openapi.json`. Persistence is the next slice (`../architecture/NEXT-SLICE-LEAD-VERTICAL.md`). Admin UI is later.
 
 ### Sales
 
@@ -53,7 +53,7 @@ Wymaga idempotencji, audytu i bezpiecznych webhooków.
 ### Files
 
 Metadane plików projektowych, uprawnienia dostępu, wersjonowanie logiczne.
-Binaria w storage (provider TBD); autoryzacja odczytu po stronie API (BOLA).
+Binaria w storage: teraz lokalny prywatny adapter (gitignored); kierunek staging później Garage; produkcyjny magazyn obiektów nie jest trwale wybrany. Autoryzacja odczytu po stronie API (BOLA). Publiczny URL bucketu nie jest autoryzacją.
 
 ### Events
 
