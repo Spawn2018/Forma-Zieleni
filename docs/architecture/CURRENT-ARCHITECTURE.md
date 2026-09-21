@@ -51,7 +51,8 @@ ADR-014). Implementation and security acceptance are not complete.
   production selection.
 - Production object storage remains a later Owner decision.
 - Public content media is not a private business file. CMS / public
-  publishing remains UNDECIDED (FZ-CMS-1 OPEN).
+  publishing remains UNDECIDED (FZ-CMS-1 OPEN). A 2026-09-21 finalist
+  validation lab exists; it does not select an engine.
 
 ## Observability
 

@@ -1,8 +1,9 @@
 # FZ-CMS-1 — Content, media and visual publishing
 
-Status: OPEN — OWNER-DECISION. Research date **2026-09-21**. No option
-is selected. This packet does not implement a production CMS, mutate
-Cloudflare/DNS, authorize spend, or replace Gate A.
+Status: OPEN — OWNER-DECISION. Research date **2026-09-21**. Finalist
+validation lab also **2026-09-21**. No option is selected. This packet
+does not implement a production CMS, mutate Cloudflare/DNS, authorize
+spend, or replace Gate A.
 
 Silence is not a decision.
 
@@ -24,6 +25,11 @@ The Owner also needs a media pipeline that preserves originals, strips
 GPS, and delivers responsive derivatives. That pipeline is independent
 enough that a weak bundled carousel must not veto an otherwise strong
 engine.
+
+The first lab was research plus a Native + Puck-shaped PoC. This
+validation lab added executed media bytes, last-known-good, React
+gallery/before-after prototypes, and isolated vendor API attempts. It
+is still **not** a selection.
 
 ## Current architecture constraints
 
@@ -75,373 +81,468 @@ derivative regeneration rules.
 ## Finalists
 
 The prompt named Payload, Apostrophe, Squidex and native FZ + Puck.
-Evidence changed the executable set:
+Evidence did **not** silently replace the shortlist.
 
 | Option | Product | Why it is a finalist or not |
 |---|---|---|
 | A | Payload 3.90.1 (MIT) | Node, PostgreSQL, TypeScript, active 2026 releases. Official self-host is free. Visual editing, SSO and publishing workflows are Enterprise. Admin is Next.js-shaped. Figma acquired Payload; core is still claimed MIT/open source. |
-| B | ApostropheCMS 4.x (MIT) | In-context visual editing. Official: PostgreSQL is production-supported from **4.31.0**. Mongo remains the older default (SSPL database). Separate identity store. |
+| B | ApostropheCMS 4.32.2 (MIT) | In-context visual editing. Official: PostgreSQL is production-supported from **4.31.0**. Mongo remains supported and is excluded for FZ production. Official unattended starter is an Astro frontend + Apostrophe backend. |
 | C | Native FZ Content Core + Puck 0.23 (MIT) | Fits Hono, Kysely, Better Auth, React Router Admin. Lab executed. Engineering cost is real. |
-| D | Strapi Community 5.x (MIT) | Node + PostgreSQL, draft/publish, media, webhooks, import/export. Content history, review workflows, SSO and live preview beyond community are paid (`$45/mo` Growth starting point on the official 2026 pricing page; SSO add-on listed). |
+| D | Strapi Community 5.54.0 (MIT) | Node + PostgreSQL, draft/publish, media, webhooks, import/export. Content history, review workflows, live preview and SSO beyond Community are paid. Remains a finalist **and** a paid-feature benchmark. |
 | E | Defer CMS | Continue Lead/CRM. No production content store. |
-| — | Squidex (MIT) | Researched. .NET + official Docker install. SQL/Postgres is early (7.18, Q1 2025). **Documentation-only** here; no Docker was installed. Not an executable finalist. |
+| — | Squidex (MIT) | Researched. .NET + official Docker install. **Documentation-only**; no Docker was installed. Not an executable finalist. |
 | — | Directus 12 (MSCL, source-available) | **Not a finalist.** Official 2026-04-22: Innovation Grant under $5M revenue and 50 employees; registration keys; 4-year GPLv3 conversion. Not OSI-permissive. |
 | — | Keystone 6 (MIT) | PostgreSQL via **Prisma**. Conflicts with FZ-A3. |
 | — | Wagtail / Umbraco | Extra Python or .NET runtime. Not a Windows-native fit. |
 
 ## Versions and sources (2026-09-21)
 
-- Payload: official [get-started](https://payloadcms.com/get-started) (MIT, Node 20.9+, Mongo/Postgres/SQLite); [Figma announcement](https://www.figma.com/blog/payload-joins-figma/); GitHub `payloadcms/payload` v3.90.0/v3.90.1 on 2026-09-18 (3.90.0 notes critical security fixes). GHSA-mmxc-95ch-2j7c / CVE-2026-34748 stored XSS, fixed in 3.78.0.
-- Apostrophe: official [deployment](https://apostrophecms.com/guides/deployment-in-apostrophecms) (Postgres from 4.31.0); GHSA-5f64-7vfc-rcx6 (CVE-2026-45011) and GHSA-wf43-fpp3-cf65 (CVE-2026-53608) stored XSS in 2026.
-- Strapi: official [pricing](https://strapi.io/pricing-cms) and [self-host](https://strapi.io/hosting); GHSA-pcw7-5633-82vv / CVE-2026-22707 upload MIME bypass, fixed in 5.33.3.
-- Directus: official [v12 license](https://directus.com/resources/directus-v12-license-change) (2026-04-22).
-- Squidex: official [pricing](https://squidex.io/pricing) MIT self-host; [Q1 2025 SQL](https://www.squidex.io/post/squidex-update-2025-q1).
-- Puck: MIT, [0.23](https://puckeditor.com/blog/puck-023) 2026-08-07.
-- Lightbox candidate: `yet-another-react-lightbox` 3.32.2 MIT (2026-07-30).
+- Payload: official [what-is-payload](https://payloadcms.com/docs/getting-started/what-is-payload) now calls Payload “the Next.js fullstack framework”; [enterprise](https://payloadcms.com/enterprise) still markets Visual Editor, SSO and publishing workflows. GitHub `payloadcms/payload` v3.90.1. Blank lab template also pulled Next **16.3.3** and sharp **0.35.4**.
+- Apostrophe: official [deployment](https://apostrophecms.com/guides/deployment-in-apostrophecms) — MongoDB and PostgreSQL are both production-supported; PostgreSQL from **4.31.0**; SQLite is local-dev recommended. Installed starter resolved `apostrophe@4.32.2`.
+- Strapi: official [pricing](https://strapi.io/pricing-cms) re-scraped 2026-09-21. Community remains MIT/free with draft/publish, media, webhooks, import/export. Growth **$45/month** includes 3 seats then **$15/seat/month**, Live Preview, Releases, **Content History 14-day retention**. SSO add-on **$150/month + $50/seat**. Review Workflows + Audit Logs are Enterprise.
+- Puck: MIT, `@puckeditor/core` **0.23.0** (2026-08-07). Do not use stale `@measured/puck` 0.20.2 or unrelated npm `puck`.
+- Lightbox: `yet-another-react-lightbox` **3.32.2** MIT.
+- Before/after: `react-compare-slider` **4.0.0** MIT.
+- Image processor executed: `sharp` **0.34.5** (Apache-2.0, libvips). npm latest on the research day was 0.35.4.
+
+## What was actually executed vs documentation-only
+
+| Candidate | Executed in this validation lab | Documentation-only / not executed |
+|---|---|---|
+| A Payload 3.90.1 | Isolated blank template scaffolded on Windows without Docker. Shared collections added in the removable tree. `pnpm install` completed (Next 16.3.3 + Payload). Local API created Service/Page/Article/ProjectCaseStudy. Publish then later draft left the published title unchanged. First harness attempts failed on missing `PAYLOAD_SECRET` load order, then succeeded. | Admin UI, media upload UI, versions UI, export UI, Next `dev` server. Do not call the admin an executed editor PoC. |
+| B Apostrophe 4.32.2 | Official unattended `apostrophe-astro-demo` installed. SQLite adapter. Task API created Service, Article and ProjectCaseStudy. | Admin / in-context UI, media upload UI, Astro frontend, PostgreSQL adapter, draft isolation (see below). |
+| C Native + Puck | Store, draft/publish/rollback, 30-asset gallery, last-known-good projection, crop math, sharp WebP/AVIF, GPS strip, React gallery + before/after prototypes. | Puck visual chrome in Admin, scheduler process, browser-verified focus trap/swipe/pinch. |
+| D Strapi 5.54.0 | Isolated app scaffolded. First `pnpm install` crashed Windows **exit 3221226505** under parallel load; retry succeeded. `better-sqlite3` needed an explicit prebuild because pnpm 10 skipped install scripts. Document Service created Service/Page/Article/ProjectCaseStudy. Publish then later draft left the published title unchanged. | Admin UI, media upload UI, export UI, history UI (paid). |
+| Squidex | None | Docs only. No Docker / .NET host. |
+
+Exact vendor evidence files: `labs/fz-cms-1/evidence/*-exercise.json`.
+
+## Option A — Payload
+
+- **Editor experience:** Official admin is a Next.js app. Default Media
+  collection is `upload: true` with `read: () => true` in the blank
+  template (public-read unless FZ tightens access). Forms/collections
+  are the free path. Visual page building is Enterprise.
+- **Free vs paid:** Self-host MIT $0. Visual Editor, SSO, publishing
+  / approval workflows: Enterprise (no public SKU). Live Preview is
+  listed on the OSS getting-started page and Visual Editor is listed on
+  the Enterprise page; those are **not collapsed** into one cell.
+- **Architecture impact:** Extra Node/Next process beside Hono + three
+  React Router apps. Official Postgres adapter uses vendor-internal
+  Drizzle and does **not** replace FZ-A3 Kysely for Core API.
+- **Identity:** Own users. SSO paid. Better Auth can only front or map
+  `payloadUserId → actorId`. Separate editor identities unless a custom
+  bridge is built.
+- **Media / FZ pipeline:** Official uploads include resizing and
+  focal-point cropping. FZ still owns GPS strip, immutable masters,
+  Canon fit modes, and public vs business-file isolation.
+- **Visual editing:** PAID native visual editor, or CUSTOM FZ Puck in
+  front of headless collections.
+- **Gallery/lightbox:** Not a Payload built-in public WWW concern. FZ
+  React prototype path applies.
+- **Publishing/versioning:** Drafts/versions are OSS. Review workflow
+  is Enterprise. See matrix below.
+- **Automation:** Hooks exist. FZ still owns outbox /
+  `content.published` and must not auto-publish CRM completion.
+- **Outage:** Needs an FZ published projection. Live admin/DB read on
+  every WWW request is not last-known-good.
+- **Portability:** Export is CUSTOM FZ unless a later plugin is
+  verified. Collections are TypeScript, not opaque, but versions and
+  Lexical rich text are vendor-shaped.
+- **Security:** 2026 stored XSS history (fixed in 3.78.0+). Blank
+  Media `read: () => true` is a lab finding. Next attack surface is
+  new versus Gate A.
+- **Operational burden:** Payload + Next + SQLite-now/Postgres-later +
+  uploads + sharp. Two upgrade clocks (Payload and Next).
+- **Custom FZ required:** published projection, Better Auth map, GPS
+  pipeline, WWW, Canon blocks, export, outbox. Visual editor unless
+  Enterprise.
+- **Advantages:** Typed collections, OSS drafts/versions, PostgreSQL,
+  active releases, focal helpers.
+- **Disadvantages:** Next.js admin beside React Router; Figma
+  ownership; paid visual/SSO/workflows; first Local API boot is slow
+  and secret-sensitive. Admin UI was not started.
+- **Migration/reversibility:** Reversible if FZ owns projection +
+  masters. Irreversible if pages live only as Lexical/Next admin
+  state.
+
+## Option B — ApostropheCMS on PostgreSQL
+
+- **Editor experience:** Strongest MIT in-context visual editing.
+  Official starter also ships Astro, demo widgets including
+  `price-card-widget` (Canon-forbidden prices if used as-is), and a
+  default Express API key in the starter.
+- **Free vs paid:** Self-host MIT $0. Managed hosting unused.
+- **Architecture impact:** Apostrophe process + optional Astro
+  frontend. Production DB must be PostgreSQL (4.31.0+). Lab executed
+  SQLite, not Postgres. Mongo remains a temptation and is excluded.
+- **Identity:** `@apostrophecms/user` is separate. SSO not verified as
+  free. Better Auth mapping required. In-context sessions stay
+  Apostrophe.
+- **Media / FZ pipeline:** Official attachments have focal helpers in
+  the Astro bridge. FZ still owns GPS strip and Canon derivatives.
+- **Visual editing:** FREE OSS in-context.
+- **Gallery/lightbox:** WWW still FZ-owned. Starter image widgets are
+  not the public gallery contract.
+- **Publishing/versioning:** Draft/published locales exist. The lab
+  task used `apos.task.getReq()` and inserted `:en:published` ids, so
+  a later update changed the published title. That is a **harness
+  limitation**, not a verified product defect. Editor-UI draft
+  isolation remains NOT TESTED.
+- **Automation:** Piece events exist. FZ still owns outbox.
+- **Outage:** Needs FZ published projection. Astro SSR talking live to
+  Apostrophe is not last-known-good.
+- **Portability:** `@apostrophecms/import-export` is in the starter.
+  Vendor areas/widgets are opaque. FZ export still required for a
+  clean exit.
+- **Security:** 2026 stored XSS advisories on URL/SEO-like fields.
+  Starter ships a session secret and admin API key in module source
+  (lab-only tree; must not be copied to production).
+- **Operational burden:** Apostrophe + Vite/assets + (starter) Astro +
+  PostgreSQL + uploads. Two frontends if the Astro kit is kept.
+- **Custom FZ required:** Postgres wiring, identity map, projection,
+  GPS pipeline, Canon blocks replacing demo widgets, XSS hardening.
+- **Advantages:** Real visual editing without a paid SKU; PG now
+  officially supported; SEO/sitemap/import-export modules exist.
+- **Disadvantages:** Extra identity; extra Astro stack in the official
+  starter; Mongo gravity; draft isolation not proven in this lab; XSS
+  history.
+- **Migration/reversibility:** Reversible with FZ projection +
+  originals. Widget areas are the lock-in if WWW renders them
+  directly.
+
+## Option C — Native FZ + Puck
+
+- **Editor experience:** None until CMS-ADMIN. Lab is a store +
+  prototypes, not an Owner-usable admin.
+- **Free vs paid:** $0 license. Owner time is the cost.
+- **Architecture impact:** Same Hono + PostgreSQL + React Router
+  Admin. No extra CMS process.
+- **Identity:** Better Auth `actorId` directly. No second user table.
+- **Media / FZ pipeline:** Executed in-lab: WebP/AVIF bytes, GPS
+  strip, CONTAIN / SMART_FILL / ADAPTIVE_LAYOUT, responsive widths.
+- **Visual editing:** Puck 0.23 MIT, Canon blocks only.
+- **Gallery/lightbox:** Isolated React prototype +
+  `yet-another-react-lightbox` 3.32.2 resolved. Browser swipe/pinch
+  DEFERRED.
+- **Publishing/versioning:** Lab executed draft isolation, publish,
+  later draft, rollback, last-known-good snapshot. Scheduler
+  DEFERRED.
+- **Automation:** Lab emits `content.published`. Outbox worker remains
+  the Lead deferred shape.
+- **Outage:** Executed: `publishedProjection(store)` then
+  `servePublished(snapshot)` after an empty editorial store still
+  served the published Service, not the later draft.
+- **Portability:** Native JSON export omits bytes and GPS.
+- **Security:** Smallest new vendor surface. Upload/XSS/SVG still
+  FZ-owned. No vendor CMS advisories, but we own all bugs.
+- **Operational burden:** Lowest new process count; highest FZ code
+  ownership.
+- **Custom FZ required:** Essentially the entire CMS.
+- **Advantages:** Gate A fit; one identity; last-known-good designed
+  in; no paid visual-editor tax.
+- **Disadvantages:** Months of REVIEW slices; no usable editor today.
+- **Migration/reversibility:** Highest. The model is already FZ.
+
+## Option D — Strapi Community
+
+- **Editor experience:** Form-first admin. Community has media
+  library, draft/publish, RBAC. History, live preview, releases,
+  review, audit, SSO are paid.
+- **Free vs paid:** See official 2026-09-21 pricing scrape above.
+  Hard requirements that are paid: revision history / rollback,
+  review workflow, audit trail, live preview, SSO, Releases
+  (scheduled bundles). Those can be rebuilt as CUSTOM FZ, but then
+  Community is no longer cheaper than native for those cells.
+- **Architecture impact:** Extra Strapi Node process + PostgreSQL.
+  Admin is React 18 + Vite, not Next, and not React Router.
+- **Identity:** Strapi admin users ≠ users-permissions. SSO is paid.
+  Better Auth can only map.
+- **Media / FZ pipeline:** Community media library exists. Official
+  provider is local uploads. FZ still owns GPS/derivatives.
+- **Visual editing:** NOT AVAILABLE in Community. Puck would be
+  CUSTOM FZ.
+- **Gallery/lightbox:** FZ WWW path.
+- **Publishing/versioning:** Draft/publish FREE OSS. History 14 days
+  on Growth. Review/audit Enterprise.
+- **Automation:** Webhooks FREE OSS. FZ still owns outbox and must
+  not treat a webhook as authorization.
+- **Outage:** Needs FZ published projection.
+- **Portability:** Official Data Import/Export/Transfer is Community.
+  Vendor documentIds remain.
+- **Security:** GHSA-pcw7-5633-82vv / CVE-2026-22707 upload MIME
+  bypass, fixed in 5.33.3; lab target is 5.54.0. Users-permissions is
+  a second auth surface.
+- **Operational burden:** Strapi + admin build + SQLite-now/Postgres
+  + uploads. Isolated install is large (~1200 packages) and crashed
+  once on this Windows machine under parallel load.
+- **Custom FZ required:** projection, identity map, history/rollback
+  if we refuse Growth, Puck, GPS pipeline, WWW.
+- **Advantages:** Mature Community draft/publish/media/export;
+  PostgreSQL; no Next.js requirement.
+- **Disadvantages:** Paid cells for history/preview/SSO/review; form
+  first; install/boot weight.
+- **Migration/reversibility:** Official export helps. Still need FZ
+  projection for a clean exit.
+- **Benchmark note:** D stays a finalist. It is materially weaker on
+  **free** history/rollback/SSO/review/live preview. That is a
+  documented paid boundary, not a silent drop.
+
+## Option E — Defer
+
+Valid. Lead is not security-accepted. Deferring avoids a new control
+plane while CRM hardening continues. Cost: WWW still has no content
+store; hard-coded copy risk rises.
+
+## Editorial workflow (A–Q)
+
+Labels are only: WORKS IN FREE OSS UI | WORKS THROUGH API/CODE ONLY |
+REQUIRES CUSTOM FZ CODE | PAID ONLY | NOT AVAILABLE | NOT TESTED.
+
+No invented click counts.
+
+| Task | Native | Payload | Apostrophe | Strapi Community |
+|---|---|---|---|---|
+| A Create Service | API/CODE (lab store) | API/CODE | API/CODE (task insert) | API/CODE |
+| B Create Page | API/CODE | API/CODE | NOT TESTED (module present; no page insert) | API/CODE |
+| C Create Article | API/CODE | API/CODE | API/CODE | API/CODE |
+| D Create ProjectCaseStudy | API/CODE | API/CODE | API/CODE | API/CODE |
+| E Upload multiple media | API/CODE synthetic | NOT TESTED | NOT TESTED | NOT TESTED |
+| F Create/reorder gallery | API/CODE | NOT TESTED | NOT TESTED | NOT TESTED |
+| G Select hero | API/CODE | NOT TESTED | NOT TESTED | NOT TESTED |
+| H ALT/caption | API/CODE | NOT TESTED | NOT TESTED | NOT TESTED |
+| I Focal point | API/CODE math + sharp | NOT TESTED UI; OSS docs claim focal crop | NOT TESTED UI; starter has focal helpers | NOT TESTED |
+| J Preview | Markup/proto only | NOT TESTED (OSS vs Enterprise unclear) | NOT TESTED | PAID ONLY (Live Preview) |
+| K Publish | API/CODE | API/CODE | API/CODE (`:en:published` ids) | API/CODE |
+| L Edit draft without changing public | API/CODE + LKG test | API/CODE | NOT TESTED (task req wrote published) | API/CODE |
+| M Revision/history | API/CODE | NOT TESTED UI; OSS versions exist | NOT TESTED | PAID ONLY |
+| N Rollback | API/CODE | NOT TESTED UI; OSS versions exist | NOT TESTED | PAID ONLY |
+| O Schedule publication | NOT TESTED / DEFERRED | NOT TESTED | NOT TESTED | PAID ONLY (Releases) |
+| P SEO fields | API/CODE | NOT TESTED | NOT TESTED (seo module present) | NOT TESTED |
+| Q Export content | API/CODE JSON | NOT TESTED | NOT TESTED (import-export module present) | NOT TESTED (Community feature exists) |
+
+## Publishing matrix
+
+Cells use only FREE OSS / CUSTOM FZ / PAID / NOT AVAILABLE / NOT VERIFIED.
+Source: `labs/fz-cms-1/evidence/publishing-matrix.json`.
+
+| Capability | A Payload | B Apostrophe | C Native | D Strapi Community |
+|---|---|---|---|---|
+| draft | FREE OSS | FREE OSS | CUSTOM FZ | FREE OSS |
+| preview | NOT VERIFIED | FREE OSS | CUSTOM FZ | PAID |
+| publish | FREE OSS | FREE OSS | CUSTOM FZ | FREE OSS |
+| unpublish | FREE OSS | FREE OSS | CUSTOM FZ | FREE OSS |
+| scheduled publish | NOT VERIFIED | NOT VERIFIED | CUSTOM FZ | PAID |
+| revision history | FREE OSS | FREE OSS | CUSTOM FZ | PAID |
+| diff | NOT VERIFIED | NOT VERIFIED | CUSTOM FZ | PAID |
+| rollback | FREE OSS | NOT VERIFIED | CUSTOM FZ | PAID |
+| review workflow | PAID | NOT VERIFIED | CUSTOM FZ | PAID |
+| audit trail | NOT VERIFIED | NOT VERIFIED | CUSTOM FZ | PAID |
+| visual editing | PAID | FREE OSS | CUSTOM FZ | NOT AVAILABLE |
+
+## Auth / Better Auth
+
+Better Auth remains platform identity. Source:
+`labs/fz-cms-1/evidence/auth-matrix.json`.
+
+| | Local CMS users | OIDC/OAuth/SSO | Better Auth integration | Separate editor identities | actorId |
+|---|---|---|---|---|---|
+| A | FREE OSS | PAID | CUSTOM FZ front/map | yes | map `payloadUserId` |
+| B | FREE OSS | NOT VERIFIED | CUSTOM FZ map | yes | map Apostrophe user |
+| C | CUSTOM FZ | CUSTOM FZ | same Better Auth | no | session actor |
+| D | FREE OSS | PAID | CUSTOM FZ map | yes | map Strapi admin user |
+
+Coherent FZ Admin SSO on A or D requires a **paid** vendor feature or
+a custom bridge. Flag those options if the Owner wants one login
+without custom identity work.
+
+## Media pipeline — executed
+
+Processor: **sharp 0.34.5** (libvips). Verified by generating bytes,
+not by assuming the package name.
+
+Executed evidence (`labs/fz-cms-1/evidence/media-bytes.json`,
+`exif-gps.json`):
+
+- High-res synthetic master 3600×2400 JPEG, 68843 bytes.
+- Card CONTAIN 400×267: WebP 560 B, AVIF 465 B. Card is not the
+  original.
+- AVIF files contain the `avif` brand; `sharp.metadata()` reports
+  `heif`. Do not treat that metadata string as a wrong MIME on disk.
+- Regeneration of the same WebP checksum was deterministic in-lab.
+- Orientation defaulted to 1 on the synthetic master.
+- No perceptual-quality claim is made from byte size.
+
+Public derivatives **must not** leak GPS. Synthetic JPEG GPS
+`12.345678, 98.765432` was present on the master (EXIF + ASCII
+markers) and absent on WebP/AVIF/JPEG derivatives. Master bytes are
+preserved separately.
+
+Responsive widths remain 400 / 800 / 1200 / 1600 / 2400.
+
+Garage was **not** stood up. FZ-A4 still applies: local adapter now,
+S3/Garage later. CMS-native storage must not become the public ACL.
+
+## Smart composition — executed
+
+Geometry still forbids claiming that one source can fill every frame,
+show 100%, and add no empty area.
+
+- CONTAIN: landscape, panorama keep full source (`cropped: false`).
+- SMART_FILL: landscape 1600×900 → 1:1, focal left/center/right move
+  `x` left-to-right; portrait 900×1600 → 1:1 crops height; square
+  1200×1200 → 1:1 is not a crop.
+- Safe-region constraint shifts the window so the safe box stays
+  inside the crop when the crop is wide enough.
+- ADAPTIVE_LAYOUT: 2400×600 into a tall 0.6 target keeps the full
+  source and sets `layoutAdapts`.
+- Subject-aware/AI crop was researched and **not** added.
+
+## Bulk media
+
+Native store: 30 synthetic assets on one ProjectCaseStudy, reorder,
+hero, export. That is a store operation, not a vendor picker.
+
+Vendor/editor 30-file picker, progress, per-file failure: **NOT
+TESTED**. Reasoning for 100 images: without virtualized lists and
+async derivative jobs, an admin table of 100 originals will hitch;
+processing must stay off the public request path; FZ should ingest
+with per-file isolation and never send 6000 px to a card. Do not
+generate a wasteful 100-file fixture to prove that sentence.
+
+## Gallery / lightbox / before-after
+
+Isolated React proto: `labs/fz-cms-1/www-proto`.
+
+- Gallery: carousel region, lazy thumbs except first, derivative
+  `w400.webp`.
+- Lightbox contract: X, Escape, backdrop, image click does not close,
+  prev/next, count, `w1600.webp`, no `master`.
+- Library resolved: `yet-another-react-lightbox@3.32.2`. Zoom plugin
+  path recorded; pinch/pan **NOT TESTED** in a browser.
+- Vanilla `demo.html` implements dialog + focus restore + backdrop +
+  image-click isolation. Native `<dialog>` supplies Escape.
+- Before/after: labelled `input type="range"` plus
+  `react-compare-slider@4.0.0` (docs: keyboard + touch).
+- Automated DOM/component: executed. Browser swipe/touch/focus-trap
+  depth: **DEFERRED**.
+
+## CMS outage / last-known-good
+
+Executed in native lab: publish Service → snapshot
+`publishedProjection` → new empty editorial store cannot read the
+draft → `servePublished(snapshot)` still returns the published title.
+
+Smallest architecture-valid mechanism: write a published projection
+on `content.published`; WWW reads only that snapshot. No Redis/CDN
+platform was introduced.
+
+Packaged CMS options still need this FZ write. A live draft DB is not
+an outage design.
+
+## Cost of ownership (relative engineering surface)
+
+Zero license is not zero cost. No PLN rates invented.
+
+| Surface | A Payload | B Apostrophe | C Native | D Strapi |
+|---|---|---|---|---|
+| Runtime processes | Payload/Next + PG | Apostrophe (+ Astro if starter) + PG | Hono already planned | Strapi + PG |
+| Database | PG (vendor Drizzle internally) | PG 4.31+ (lab used SQLite) | Kysely/PG | PG |
+| Backup | PG + originals + Next/app | PG + originals + uploads | PG + originals | PG + originals + uploads |
+| Upgrade surface | Payload + Next | Apostrophe + Vite/Astro | FZ code only | Strapi major trains |
+| Security patches | Vendor + Next + XSS history | Vendor + XSS history | FZ-owned | Vendor + upload advisory history |
+| Extra stack | Next 16 admin | Official starter Astro | Puck | Strapi admin Vite |
+| Identity burden | map + paid SSO | map | none extra | map + paid SSO |
+| Media burden | FZ pipeline still | FZ pipeline still | FZ pipeline (already prototyped) | FZ pipeline still |
+| Visual editing burden | paid or Puck | included; harden | Puck + Admin | Puck |
+| Maintenance | High vendor+Next | High vendor+optional Astro | High FZ code | High vendor |
+
+## Portability / export
+
+Native export recovers content, slugs, SEO, relationships, media
+references, gallery order, revision ids. It omits original bytes
+(regenerate from stored masters) and GPS.
+
+Vendor exports were **not** executed (Payload timeout; Apostrophe
+module present unused; Strapi install incomplete). Expected vendor
+opaque state: Lexical JSON (Payload), widget areas (Apostrophe),
+Strapi `documentId` drafts. FZ projection + original files remain the
+exit hatch.
+
+## Security / SCA
+
+- Rechecked official pages and known 2026 advisories for the tested
+  version lines. A selected engine must start patched.
+- `pnpm audit` of the **repo** is part of the final gate. Isolated
+  vendor `node_modules` stay gitignored and were not committed.
+- ZAP: **DEFERRED** (Java not installed; no public expose). Do not
+  install heavyweight DAST solely for this lab.
+- Upload/rich-text/preview boundaries: Payload blank Media is
+  public-read; Apostrophe starter API key is admin; Strapi
+  users-permissions is a second door; preview tokens must never appear
+  in public HTML. None of those UIs were attack-tested.
+- No customer photographs. No public bind.
 
 ## Recurring cost / paid boundaries
 
-No purchase was made. Official pages:
+No purchase was made.
 
-- Payload self-host: $0 license. Visual editing, SSO, publishing
-  workflows: Enterprise / sales, not a public SKU. Self-host remains
-  functional without those.
-- Apostrophe self-host: $0 license. Managed hosting exists; unused.
-- Native: $0 license. Owner time and engineering.
-- Strapi Community: $0 license. Growth **$45/month** includes 3 seats
-  then **$15/seat/month**. History, review workflows, SSO and live
-  preview beyond Community are paid or must be rebuilt.
-- Directus: free only inside Innovation Grant / Core limits. Rejected.
-
-Vendor lock-in risk is highest where visual editing or history is
-paywalled (Payload Enterprise, Strapi Growth) or where Mongo remains
-the operational default (older Apostrophe). Native lock-in is our own
-code.
+- Payload self-host: $0. Visual/SSO/publishing workflows: Enterprise.
+- Apostrophe self-host: $0.
+- Native: $0 license.
+- Strapi Community: $0. Growth $45/mo + seats; Content History 14
+  days; SSO add-on $150/mo + $50/seat; Review/Audit Enterprise.
 
 ## Infrastructure / runtime
 
-NOW: localhost, existing PostgreSQL binaries if a selected engine needs
-them. No Docker installed for this lab. Later Compose staging can host
-a CMS process; the origin still sits behind Cloudflare.
-
-| Option | Extra runtime | Windows-local now | RAM/CPU (docs, not measured) |
-|---|---|---|---|
-| A Payload | Node process + PostgreSQL | Possible without Docker; Next-shaped admin | Typical Node CMS; image work extra |
-| B Apostrophe | Node process + PostgreSQL (or Mongo) | Possible; Mongo would add SSPL DB | Typical Node CMS |
-| C Native | Same Hono + PostgreSQL as Core API | Lab executed, no extra process | Lowest new process count |
-| D Strapi | Node process + PostgreSQL | Possible without Docker | Typical Node CMS |
-| E Defer | None | — | — |
-| Squidex | .NET + official Docker | Docs-only | Not measured |
-
-## Architecture fit
-
-Core API remains business truth. WWW loaders fetch **published
-projections** only. Admin may embed or deep-link an editor. Domain
-BOLA stays in Core API.
-
-Preferred isolation: editorial control-plane failure must not take
-down the last published WWW snapshot. That means a publication
-projection or last-known-good snapshot, not a live draft query on
-every public request.
-
-A packaged CMS that stores drafts and published rows in one database
-can still satisfy this if WWW reads only a published snapshot written
-by FZ on `content.published`.
-
-## PostgreSQL / data
-
-- Payload and Strapi: official PostgreSQL support.
-- Apostrophe: PostgreSQL production-supported from 4.31.0; do not
-  accept Mongo as the FZ production content store.
-- Native: Kysely tables beside, not inside, CRM schemas.
-- Keystone rejected for Prisma.
-- No CMS table may become the lead/customer/contract ACL.
-
-## Auth / authz
-
-Better Auth stays the platform identity. A CMS with its own users is
-acceptable only if editor identities map to a stable `actorId` and
-never become CRM ACL.
-
-Payload / Strapi / Apostrophe default to their own user tables. SSO is
-paid on Payload Enterprise and Strapi Growth/Enterprise. Native can
-reuse Better Auth and Core API grants (`content:edit`,
-`content:publish`, `content:review`).
-
-Roles to map later: editor, publisher, admin, optional reviewer.
-Client-supplied roles remain forbidden.
-
-A separate CMS admin is operationally acceptable if FZ Admin later
-presents a coherent entry point. It is not authorization for CRM.
-
-## Editorial UX
-
-Required Owner tasks (create Service, 30-image ProjectCaseStudy,
-reorder, hero/focal, preview, publish, edit without changing public,
-rollback, schedule, export):
-
-| Task | Native lab | Payload / Apostrophe / Strapi UIs |
-|---|---|---|
-| A Create service | Executed in store API | Not started (no vendor install) |
-| B 30-image case study | Executed | Not started |
-| C Reorder gallery | Executed | Not started |
-| D Hero + focal | Focal math executed | UI not started |
-| E Desktop/mobile preview | Markup only | Not started |
-| F Publish | Executed | Docs: all three have publish |
-| G Draft without public change | Executed | Docs: draft/publish exists |
-| H Rollback | Executed | Payload versions yes; Strapi history paid; Apostrophe history exists |
-| I Schedule | **DEFERRED** in lab | Vendor-dependent; not executed |
-| J Export | JSON without bytes | Strapi Community import/export; others need FZ export |
-
-Inference from official docs, not click counts:
-
-- Payload: strong typed collections; visual page building and
-  workflows are Enterprise.
-- Apostrophe: strongest in-context visual edit; 2026 XSS advisories
-  on URL/SEO-like fields.
-- Strapi: form-first; history/review paid.
-- Native + Puck: controlled blocks. Owner can operate it only after
-  FZ builds Admin chrome. Custom code is not “free”.
-
-## Visual editing
-
-Puck 0.23 (MIT, 2026-08-07) is the verified React visual-composition
-candidate. It can sit on native Admin or in front of a headless CMS.
-It must only expose Canon blocks. Arbitrary HTML is out.
-
-Payload visual editing is Enterprise. Apostrophe is in-context by
-default. Strapi is not a visual page builder in Community.
-
-## Structured content
-
-Do not flatten everything to posts. `ProjectCaseStudy` is first-class.
-Public locality only. No customer names, private addresses, invoices
-or source-project ACLs. `businessProjectRef` is opaque.
-
-Source-level sketches: `labs/fz-cms-1/schemas/`.
-
-## Publishing / versioning
-
-Required: current public revision stable; safe preview; history;
-rollback; actor/time audit; publication events; slug/redirects; no
-accidental draft publication.
-
-Lab: draft isolation, publish, later draft, rollback, `content.published`
-event. Scheduler process **DEFERRED**.
-
-Vendor: all finalists have draft/publish. History/review workflows are
-paid on Strapi. Payload publishing workflows are Enterprise. FZ still
-owns the published-projection write.
-
-## SEO / discovery
-
-WWW must emit title, description, canonical, robots, OG/Twitter,
-sitemap, redirects, JSON-LD without invented facts. Image width/height
-and ALT come from MediaAsset. CMS convenience must not disable React
-Router SSR.
-
-## Automation / AI-readiness
-
-Preferred flow: content transaction → outbox → revalidation / index /
-notify. Business `Project COMPLETED` may request a
-`ProjectCaseStudy` **DRAFT** after authorization. It must never
-auto-publish customer/private data.
-
-AI may later suggest title, summary, ALT, SEO, tags, gallery order,
-focal point. Output is SUGGESTION / DRAFT. Human approval stays the
-default. No paid AI API in this slice. MCP is not required to select
-a CMS.
-
-## Media pipeline
-
-Required for every option (FZ-owned even if a CMS has transforms):
-
-- Immutable master, checksum, MIME verification, pixel-bomb limit,
-  safe storage id, upload actor/time.
-- Public derivatives: AVIF/WebP/JPEG fallback, widths 400 / 800 /
-  1200 / 1600 / 2400 unless design evidence later changes them.
-- EXIF/GPS stripped on public derivatives. Originals not overwritten.
-- `picture` / `srcset` / `sizes` / width+height to limit CLS.
-- SVG denied until a sanitizer policy exists. HEIC/PDF/video later.
-
-Lab executed crop math and upload denial. AVIF/WebP **byte encoding
-DEFERRED**.
-
-## Smart crop / focal / safe region
-
-Geometry: one source cannot fill every frame, show 100% and add no
-empty area. Modes:
-
-- CONTAIN: show 100%, no crop.
-- SMART_FILL: fill frame from focal point, no distortion.
-- ADAPTIVE_LAYOUT: if crop would destroy the composition, layout
-  adapts.
-
-Lab: landscape → 1:1 SMART_FILL with focal x=0.2 clamps to the left
-edge; focal x=0.8 moves the window right. Equal 16:9 SMART_FILL is
-not recorded as a crop. Panorama →
-tall frame ADAPTIVE_LAYOUT keeps the full source. AI may suggest
-focal points later; it must not silently inpaint or extend.
-
-## Bulk upload / galleries
-
-Lab: 30 synthetic assets on one ProjectCaseStudy, reorder, hero,
-export. Vendor multi-select UIs were not started.
-
-MediaCollection reuses MediaAsset ids. Do not duplicate masters.
-Variants: carousel, grid, featured+thumbs, before/after, page-builder
-gallery block.
-
-## Carousel / lightbox / before-after
-
-Public React components are FZ-owned. A weak CMS carousel is not a
-veto. Lab markup: carousel region, dialog, X, prev/next, lazy thumbs,
-focus-trap/restore and derivative-not-master contract.
-
-Preferred later library: `yet-another-react-lightbox` 3.32.2 MIT,
-subject to a later a11y/bundle review. Before/after is a later REVIEW
-slice; no inaccessible pointer-only control.
-
-## Storage / Garage / portability
-
-FZ-A4 stays: local adapter now, S3-compatible / Garage later. CMS
-must not bind us to a proprietary media cloud.
-
-Separate buckets/prefixes:
-
-- BUSINESS FILES: contracts, invoices, private customer/project files.
-- CONTENT MEDIA: approved public photos, article images, public
-  downloads.
-
-If the CMS is removed in three years: recover structured JSON, slugs,
-SEO, relationships, originals, regeneration rules, gallery order,
-redirects. Lab export omits bytes and records `gpsStripped: true`.
-
-## Security / privacy
-
-Rich text, SVG, preview tokens and unpublished APIs are the main CMS
-risks. 2026 advisories exist for Payload, Apostrophe and Strapi. A
-selected engine must start on a patched version.
-
-Do not call a candidate “secure” because it is popular. ZAP of a CMS
-admin did not run. Lead-slice deferred controls remain deferred.
-
-Private GPS must not appear on public derivatives. Private project
-photos never auto-publish.
-
-## Performance / reliability / last-known-good
-
-Critical test: if the editorial CMS is down, WWW must still serve the
-last safely published snapshot. Strongly prefer a projection written
-on publish, not a live draft-store read.
-
-Image processing cost sits off the public request path. Derivative
-generation is a job, not an on-the-fly 6000px resize for a 400px card.
-
-Backup: PostgreSQL + original media. Derivatives are reproducible.
-restic / pgBackRest remain later horizons. Lab did not stand them up.
-
-## Native FZ + Puck baseline (not “free”)
-
-`labs/fz-cms-1/native` is the fair comparison, not an imaginary
-custom system. Dependency-free. No `sharp`. Not production.
-
-FZ would still have to build: revisions, draft/publish, scheduler,
-preview tokens, media library, transforms, focal/safe region,
-galleries, redirects, SEO, Admin UX, audit, permissions, search,
-export, outbox, last-known-good snapshot.
-
-Strength: one identity, one PostgreSQL, one authorization model, no
-paid visual-editor tax, no Next.js CMS admin beside React Router.
-Cost: months of REVIEW slices and ongoing maintenance. That cost is
-why OPTION C is not automatically cheaper than A/B/D.
-
-## PoCs actually executed vs documentation-only
-
-| Candidate | PoC kind |
-|---|---|
-| Native Content Core | Executed: store, 30 images, crop math, gallery contract, export |
-| Payload | Source-level collections only |
-| Apostrophe | Source-level modules only |
-| Strapi | Source-level content-types only |
-| Squidex | Docs/research only (no Docker / .NET host) |
-
-## Comparison (evidence, not a selection)
-
-| Criterion | A Payload | B Apostrophe | C Native+Puck | D Strapi Community |
-|---|---|---|---|---|
-| Architecture fit | Headless + extra admin | In-context CMS | Same process as Core API | Headless + extra admin |
-| Editor UX | Strong forms; visual paid | Strong visual | Must be built | Forms; history paid |
-| Structured types | Excellent | Good | Excellent if we build them | Good |
-| Media intelligence | Partial; FZ pipeline still required | Partial; FZ pipeline still required | Lab math only | Partial; FZ pipeline still required |
-| Versions | Yes | Yes | Lab yes | History paid |
-| Scheduling | Needs FZ or plugin | Needs verification | Must build | Plugin/paid |
-| Auth | Own users; SSO paid | Own users | Better Auth | Own users; SSO paid |
-| PostgreSQL | Yes | Yes from 4.31.0 | Kysely | Yes |
-| License | MIT | MIT | MIT | MIT Community |
-| Recurring $ | $0 self-host | $0 self-host | $0 license | $0 or $45+ |
-| Exit | JSON + files + FZ export | JSON + files + FZ export | Native export | Official export + FZ |
-| Last-known-good | Needs FZ projection | Needs FZ projection | Designed in | Needs FZ projection |
-| Maintenance | Vendor + Figma ownership | Vendor | FZ owns all | Vendor |
-
-## Advantages / disadvantages / risks
-
-**A Payload.** Advantage: TypeScript collections, PostgreSQL, active
-releases. Disadvantage: Next-shaped admin beside React Router;
-visual/SSO/workflows Enterprise; Figma ownership is a long-term
-governance question even while MIT is claimed. Risk: paid features
-creep; XSS history requires patched versions.
-
-**B Apostrophe.** Advantage: real in-context visual editing on MIT.
-Disadvantage: separate identity; Mongo temptation; 2026 stored XSS.
-Risk: editors publishing unsafe URL/SEO fields.
-
-**C Native.** Advantage: Gate A fit, Better Auth, one Admin later.
-Disadvantage: we build the CMS. Risk: underestimating editor UX and
-media work; delayed WWW.
-
-**D Strapi.** Advantage: mature Community draft/publish/media/webhooks.
-Disadvantage: history/review/SSO paid; form-first. Risk: Owner later
-needs paid Growth for ordinary editorial workflow.
-
-**E Defer.** Advantage: no new surface while Lead security is open.
-Disadvantage: WWW stays without a content store; hard-coded copy risk
-rises.
-
-## Reversibility / migration
-
-Reversible if FZ owns the published projection and original files.
-Irreversible if public pages are authored only inside a vendor format
-with no export. First implementation slice must write the shared
-model, not vendor-only documents.
-
-Migration path after a later change: export JSON + masters →
-regenerate derivatives → remap slugs/redirects → cut WWW to the new
-projection.
-
-## Blockers (do not treat as PASS)
-
-- Vendor admin UIs not executed.
-- AVIF/WebP encoding not executed.
-- HEIC, PDF preview, video not executed.
-- Scheduler process not executed.
-- ZAP / Dependency-Check of a CMS not executed.
-- No Docker, no Cloudflare, no real photos, no purchase.
-
-## Safe work that can continue without this decision
-
-Lead remaining security work. FZ-SIGN-1 stays undecided. No WWW
-marketing pages that invent facts. No CMS production install. No
-Cloudflare/DNS change. Isolated lab may stay or be deleted after the
-reply.
+NOW: localhost. Existing PostgreSQL binaries at
+`D:\OMNIROUTE\tools\pg16` were **not** used for vendor labs (SQLite
+only). No Docker installed for this lab. Payload's template
+`Dockerfile` / `docker-compose.yml` were not run.
+
+## Visual + media subdecisions
+
+The CMS engine, the visual editor, and the media pipeline are
+composable. Prefer not forcing one vendor to own every concern.
+
+If the Owner wants to bind constraints with the engine:
+
+```text
+DECISION FZ-CMS-1: OPTION X
+VISUAL=puck
+MEDIA=fz-pipeline
+```
+
+`VISUAL=` values that are valid without a new research round:
+`puck` | `vendor-native` | `later`.
+
+`MEDIA=` values: `fz-pipeline` | `vendor-native` | `hybrid`.
+
+Recommended default **if** an engine is chosen: `MEDIA=fz-pipeline`
+(GPS, masters, fit modes stay FZ-owned). Use `VISUAL=puck` when the
+engine has no Canon-safe free visual editor (A without Enterprise, C,
+D). `VISUAL=vendor-native` is only coherent for B, or for A if the
+Owner also accepts Enterprise visual editing. These are constraints,
+not a hidden winner. Do not invent extra questions.
 
 ## After a reply
 
-1. Record the decision in this file and ADR-015 (Proposed → Accepted).
-2. Update Canon/architecture maps. CMS stays distinct from CRM.
-3. Execute [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) in order.
-4. Stop only at a genuine OWNER-ONLY / DANGEROUS gate.
-5. After CMS-ACCEPT, return to the main product roadmap.
+Cursor must do this without a new ChatGPT prompt. Binding procedure:
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md).
+
+1. Validate `DECISION FZ-CMS-1: OPTION A|B|C|D|E` plus optional
+   `VISUAL=` / `MEDIA=`. Silence or two options is invalid.
+2. Record this packet Status: DECIDED and POST-V2 item 24.
+3. Accept/update ADR-015.
+4. Update CURRENT-ARCHITECTURE CMS line. Do not change Gate A,
+   FZ-SIGN-1, or Lead security-acceptance.
+5. Select first READY slice (`CMS-ARCH`).
+6. Execute AUTO/REVIEW slices in order.
+7. Stop only at genuine OWNER-DECISION / OWNER-ONLY / DANGEROUS.
+8. Continue otherwise through CMS-ACCEPT.
+9. `RETURN-ROADMAP` returns to the main execution roadmap.
+10. CMS completion does **not** erase deferred Lead security
+    obligations.
 
 ## Options requiring Owner reply
 
@@ -454,19 +555,31 @@ or `OPTION B`, `OPTION C`, `OPTION D`, or `OPTION E`.
 | Option | Meaning |
 |---|---|
 | A | Payload as the content engine. FZ owns published projections, media privacy pipeline, and WWW/Puck-or-Enterprise visual rules. |
-| B | ApostropheCMS as the content engine on PostgreSQL. Harden XSS fields. Map users to Better Auth later. |
+| B | ApostropheCMS as the content engine on PostgreSQL. Harden XSS fields. Map users to Better Auth later. Do not keep Mongo. |
 | C | Native Content Core in Core API + React Router Admin + Puck. No third-party CMS process. |
-| D | Strapi Community as the content engine. Accept that history/review/SSO are paid or must be rebuilt. |
+| D | Strapi Community as the content engine. Accept that history/review/SSO/live preview are paid or must be rebuilt. |
 | E | Defer the CMS. Continue Lead/CRM. WWW stays without a production content store. |
 
-Optional one-line constraint, if needed:
+Optional constraints:
 
 ```text
 VISUAL=puck
 MEDIA=fz-pipeline
 ```
 
-Recommended default if an option is chosen: `MEDIA=fz-pipeline` so
-GPS strip, masters and fit modes stay FZ-owned. `VISUAL=puck` if the
-selected engine does not already provide a Canon-safe visual editor.
-These are constraints, not a hidden winner.
+## Safe work that can continue without this decision
+
+Lead remaining security work. FZ-SIGN-1 stays undecided. No WWW
+marketing pages that invent facts. No CMS production install. No
+Cloudflare/DNS change. Isolated lab may stay or be deleted after the
+reply.
+
+## Blockers (do not treat as PASS)
+
+- Vendor **admin UIs** not executed (Payload/Strapi Local/Document
+  APIs only; Apostrophe task API only).
+- Scheduler process not executed.
+- Browser-level lightbox swipe/pinch/focus-trap depth DEFERRED.
+- ZAP / Dependency-Check of a running CMS admin DEFERRED.
+- HEIC, PDF preview, video not executed.
+- No Docker, no Cloudflare, no real photos, no purchase.

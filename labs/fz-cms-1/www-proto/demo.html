@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <title>FZ-CMS-1 gallery lab</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 1.5rem; }
+    .thumbs { display: flex; gap: 8px; }
+    button img { display: block; }
+    dialog[open] { border: 1px solid #333; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Galeria laboratoryjna</h1>
+  <section class="thumbs" role="region" aria-roledescription="carousel" aria-label="Galeria realizacji">
+    <button type="button" data-open="0" aria-label="Rabata">
+      <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="160" height="90" alt="Rabata" />
+    </button>
+    <button type="button" data-open="1" aria-label="Taras">
+      <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="160" height="90" alt="Taras" />
+    </button>
+  </section>
+  <dialog id="box" aria-modal="true" aria-label="Powiększenie zdjęcia">
+    <button type="button" id="close" aria-label="Zamknij">X</button>
+    <button type="button" id="prev" aria-label="Poprzednie">Poprzednie</button>
+    <figure>
+      <img id="large" alt="" width="320" height="180" />
+      <figcaption id="cap"></figcaption>
+    </figure>
+    <button type="button" id="next" aria-label="Następne">Następne</button>
+    <p id="count"></p>
+  </dialog>
+  <script>
+    const items = [
+      { alt: 'Rabata', caption: 'Rabata laboratoryjna' },
+      { alt: 'Taras', caption: 'Taras laboratoryjny' },
+    ];
+    const box = document.getElementById('box');
+    let index = 0;
+    let last = null;
+    function show(i) {
+      index = (i + items.length) % items.length;
+      document.getElementById('large').alt = items[index].alt;
+      document.getElementById('cap').textContent = items[index].caption;
+      document.getElementById('count').textContent = `${index + 1} / ${items.length}`;
+    }
+    document.querySelectorAll('[data-open]').forEach(button => {
+      button.addEventListener('click', () => {
+        last = button;
+        show(Number(button.dataset.open));
+        box.showModal();
+        document.getElementById('close').focus();
+      });
+    });
+    document.getElementById('close').addEventListener('click', () => box.close());
+    box.addEventListener('click', event => { if (event.target === box) box.close(); });
+    document.getElementById('large').addEventListener('click', event => event.stopPropagation());
+    document.getElementById('prev').addEventListener('click', () => show(index - 1));
+    document.getElementById('next').addEventListener('click', () => show(index + 1));
+    box.addEventListener('close', () => last?.focus());
+    window.addEventListener('keydown', event => {
+      if (!box.open) return;
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+  </script>
+</body>
+</html>

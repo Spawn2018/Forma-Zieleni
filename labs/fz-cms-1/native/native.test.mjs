@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { syntheticImage } from './src/png.mjs';
 import { cropWindow, planDerivatives, validateUpload } from './src/media.mjs';
-import { addAsset, addCollection, createDocument, createStore, exportBundle, publicView, publish, reorderCollection, rollback, updateDraft } from './src/content.mjs';
+import { addAsset, addCollection, createDocument, createStore, exportBundle, publicView, publish, publishedProjection, reorderCollection, rollback, servePublished, updateDraft } from './src/content.mjs';
 import { galleryMarkup, lightboxContract } from './src/gallery.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -99,6 +99,19 @@ test('gallery markup and lightbox contract stay keyboard-first', () => {
   assert.equal(lightboxContract().usesDerivativeNotMaster, true);
 });
 
+test('published projection survives an empty editorial store', () => {
+  const store = createStore();
+  const service = createDocument(store, 'Service', { title: 'Projekt ogrodu', slug: 'projekt-ogrodu', seo: { title: 'Projekt ogrodu' } });
+  publish(store, service.document.id, service.revision.id);
+  updateDraft(store, service.document.id, { title: 'Szkic', slug: 'projekt-ogrodu', seo: { title: 'Szkic' } });
+  const snapshot = publishedProjection(store);
+  const down = createStore();
+  assert.equal(publicView(down, service.document.id), null);
+  const served = servePublished(snapshot);
+  assert.equal(served.documents[0].fields.title, 'Projekt ogrodu');
+  assert.equal(served.documents.some(item => item.fields.title === 'Szkic'), false);
+});
+
 test('write lab evidence without customer pixels', () => {
   const image = syntheticImage('landscape');
   const plans = planDerivatives({ ...image, focal: { x: 0.4, y: 0.5 } }, [
@@ -111,7 +124,7 @@ test('write lab evidence without customer pixels', () => {
     researchDate: '2026-09-21',
     input: { kind: image.kind, width: image.width, height: image.height, bytes: image.bytes.length, checksum: image.checksum },
     plans,
-    note: 'AVIF/WebP bytes are planned, not encoded, until a lab encoder is added. Masters stay immutable.',
+    note: 'Store evidence only. AVIF/WebP bytes are executed in labs/fz-cms-1/media. Masters stay immutable.',
   }, null, 2));
   assert.equal(plans[0].masterPreserved, true);
 });

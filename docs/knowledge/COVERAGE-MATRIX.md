@@ -39,7 +39,7 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 | AI / MCP / source-of-truth rule | Constitution + legacy V2 reference | COVERED |
 | Cursor autonomy / decision gates | Workflows + Core Rule | COVERED |
 | Current public-main monorepo decisions | POST-V2 + Architecture | COVERED |
-| CMS / public content / media publishing | FZ-CMS-1 packet OPEN | RESEARCHED / OWNER-DECISION — not selected |
+| CMS / public content / media publishing | FZ-CMS-1 packet OPEN; finalist validation lab 2026-09-21 | RESEARCHED / OWNER-DECISION — not selected |
 | Legacy API/DB/migrations/OpenAPI/client/plugin/code | `legacy/` snapshots | PRESERVED / NOT CURRENT BY DEFAULT |
 | Marketing/copy/ads/research/visual/product details | `legacy/` snapshots + V2 reference | PRESERVED / ACTIVE INPUT WHEN SLICE REQUIRES |
 | GitHub repository/tool candidates | REPOSITORY-CATALOG | INVENTORIED / REVIEW REQUIRED |

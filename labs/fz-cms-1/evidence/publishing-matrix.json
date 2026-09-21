@@ -1,0 +1,63 @@
+{
+  "researchDate": "2026-09-21",
+  "cells": ["FREE OSS", "CUSTOM FZ", "PAID", "NOT AVAILABLE", "NOT VERIFIED"],
+  "note": "Each cell is a single capability. Do not collapse to 'workflow supported'.",
+  "matrix": {
+    "payload": {
+      "draft": "FREE OSS",
+      "preview": "NOT VERIFIED",
+      "publish": "FREE OSS",
+      "unpublish": "FREE OSS",
+      "scheduledPublish": "NOT VERIFIED",
+      "revisionHistory": "FREE OSS",
+      "diff": "NOT VERIFIED",
+      "rollback": "FREE OSS",
+      "reviewWorkflow": "PAID",
+      "auditTrail": "NOT VERIFIED",
+      "visualEditing": "PAID"
+    },
+    "apostrophe": {
+      "draft": "FREE OSS",
+      "preview": "FREE OSS",
+      "publish": "FREE OSS",
+      "unpublish": "FREE OSS",
+      "scheduledPublish": "NOT VERIFIED",
+      "revisionHistory": "FREE OSS",
+      "diff": "NOT VERIFIED",
+      "rollback": "NOT VERIFIED",
+      "reviewWorkflow": "NOT VERIFIED",
+      "auditTrail": "NOT VERIFIED",
+      "visualEditing": "FREE OSS"
+    },
+    "native": {
+      "draft": "CUSTOM FZ",
+      "preview": "CUSTOM FZ",
+      "publish": "CUSTOM FZ",
+      "unpublish": "CUSTOM FZ",
+      "scheduledPublish": "CUSTOM FZ",
+      "revisionHistory": "CUSTOM FZ",
+      "diff": "CUSTOM FZ",
+      "rollback": "CUSTOM FZ",
+      "reviewWorkflow": "CUSTOM FZ",
+      "auditTrail": "CUSTOM FZ",
+      "visualEditing": "CUSTOM FZ"
+    },
+    "strapiCommunity": {
+      "draft": "FREE OSS",
+      "preview": "PAID",
+      "publish": "FREE OSS",
+      "unpublish": "FREE OSS",
+      "scheduledPublish": "PAID",
+      "revisionHistory": "PAID",
+      "diff": "PAID",
+      "rollback": "PAID",
+      "reviewWorkflow": "PAID",
+      "auditTrail": "PAID",
+      "visualEditing": "NOT AVAILABLE"
+    }
+  },
+  "previewNotes": {
+    "payload": "OSS getting-started lists live preview; Enterprise markets Visual Editor. Kept NOT VERIFIED rather than guessed.",
+    "strapiCommunity": "Live Preview is on official Growth plan. Releases (scheduled bundles) are Growth."
+  }
+}

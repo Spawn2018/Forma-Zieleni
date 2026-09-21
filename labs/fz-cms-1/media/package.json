@@ -1,0 +1,15 @@
+{
+  "name": "@forma-zieleni/cms-lab-media",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test process.test.mjs",
+    "lint": "node --check process.test.mjs && node --check src/process.mjs && node --check src/jpeg-gps.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.34.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["sharp"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "researchDate": "2026-09-21",
+  "product": "apostrophe",
+  "version": "4.32.2",
+  "adapter": "sqlite",
+  "executed": true,
+  "kind": "WORKS THROUGH API/CODE ONLY",
+  "adminUi": "NOT TESTED",
+  "extraFrontend": "astro",
+  "results": {
+    "serviceId": "hmtyqxa1peu0ufov4dohfwlo:en:published",
+    "publishedTitle": "Projekt ogrodu — szkic",
+    "laterDraftTitle": "Projekt ogrodu — szkic",
+    "publicUnchanged": false,
+    "articleId": "d6m253njcw9tukupqj5djilf:en:published",
+    "studyId": "sqitl2z4cgbjxvy0kuvqzz5r:en:published",
+    "pageModulePresent": true
+  }
+}

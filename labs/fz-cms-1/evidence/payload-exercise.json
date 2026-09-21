@@ -1,0 +1,18 @@
+{
+  "researchDate": "2026-09-21",
+  "product": "payload",
+  "version": "3.90.1",
+  "executed": true,
+  "kind": "WORKS THROUGH API/CODE ONLY",
+  "adminUi": "NOT TESTED",
+  "adminShape": "next.js",
+  "results": {
+    "serviceId": 1,
+    "publishedTitle": "Projekt ogrodu",
+    "laterDraftTitle": "Projekt ogrodu — szkic",
+    "publicUnchanged": true,
+    "pageId": 1,
+    "articleId": 1,
+    "studyId": 1
+  }
+}

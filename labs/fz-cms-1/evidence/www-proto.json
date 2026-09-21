@@ -1,0 +1,22 @@
+{
+  "researchDate": "2026-09-21",
+  "automated": {
+    "galleryMarkup": "PASS",
+    "lightboxContract": "PASS",
+    "beforeAfterRange": "PASS",
+    "libraryResolve": {
+      "yet-another-react-lightbox": "3.32.2",
+      "react-compare-slider": "4.0.0"
+    }
+  },
+  "browser": {
+    "mouseClickOpen": "DEFERRED",
+    "swipeTouch": "DEFERRED",
+    "pinchZoom": "DEFERRED",
+    "keyboardArrows": "DEFERRED beyond demo.html script",
+    "escapeClose": "demo.html uses native dialog (Escape is a browser default)",
+    "focusTrapDepth": "DEFERRED",
+    "reducedMotion": "contract only"
+  },
+  "note": "Do not treat automated SSR markup as a full browser a11y pass."
+}

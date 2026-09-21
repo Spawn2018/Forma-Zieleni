@@ -38,6 +38,10 @@ exports/
 customer-data/
 client-data/
 .source-materials/
-labs/fz-cms-1/native/node_modules/
+labs/fz-cms-1/**/node_modules/
 labs/fz-cms-1/tmp/
 labs/fz-cms-1/evidence/generated/
+labs/fz-cms-1/**/.next/
+labs/fz-cms-1/**/.cache/
+labs/fz-cms-1/**/.strapi/
+labs/fz-cms-1/**/.tmp/

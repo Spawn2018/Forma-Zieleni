@@ -1,0 +1,15 @@
+{
+  "name": "@forma-zieleni/cms-lab-www-proto",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test proto.test.mjs",
+    "lint": "node --check proto.test.mjs && node --check src/gallery.mjs && node --check src/before-after.mjs && node --check src/libraries.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-compare-slider": "4.0.0",
+    "yet-another-react-lightbox": "3.32.2"
+  }
+}

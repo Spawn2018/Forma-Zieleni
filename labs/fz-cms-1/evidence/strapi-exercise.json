@@ -1,0 +1,17 @@
+{
+  "researchDate": "2026-09-21",
+  "product": "strapi",
+  "version": "5.54.0",
+  "executed": true,
+  "kind": "WORKS THROUGH API/CODE ONLY",
+  "adminUi": "NOT TESTED",
+  "results": {
+    "draftCreated": true,
+    "publishedTitle": "Projekt ogrodu",
+    "laterDraftTitle": "Projekt ogrodu — szkic",
+    "publicUnchanged": true,
+    "pageId": "g4p0y4g38e1om8gxf20m8jce",
+    "articleId": "hrh25avngnjogaovi91p5x24",
+    "studyId": "vgo0b1agllm25oglix5jbenx"
+  }
+}

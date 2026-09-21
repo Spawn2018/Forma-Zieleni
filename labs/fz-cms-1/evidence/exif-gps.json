@@ -1,0 +1,16 @@
+{
+  "researchDate": "2026-09-21",
+  "syntheticGps": {
+    "lat": 12.345678,
+    "lon": 98.765432
+  },
+  "masterHasGpsMarker": true,
+  "masterHasExif": true,
+  "derivativeHasGpsMarker": false,
+  "derivativeHasExif": false,
+  "masterBytes": 13749,
+  "webpBytes": 1102,
+  "avifBytes": 654,
+  "masterChecksum": "f16a7fb259698d180a13455ecef50d30478cf03dd9af7cc22aa3b686d7055a03",
+  "note": "Master is preserved separately. Public derivatives were encoded with sharp defaults that omit EXIF."
+}

@@ -100,3 +100,23 @@ export function exportBundle(store) {
     events: [...store.events],
   };
 }
+
+export function publishedProjection(store) {
+  return {
+    at: now(),
+    documents: [...store.documents.values()]
+      .map(document => publicView(store, document.id))
+      .filter(Boolean)
+      .map(revision => ({
+        id: revision.documentId,
+        type: revision.type,
+        revisionId: revision.id,
+        fields: { ...revision.fields },
+      })),
+  };
+}
+
+export function servePublished(projection) {
+  if (!projection?.documents) throw new Error('PROJECTION_MISSING');
+  return projection;
+}

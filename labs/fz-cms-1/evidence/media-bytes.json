@@ -1,0 +1,22 @@
+{
+  "researchDate": "2026-09-21",
+  "processor": "sharp@0.34.5",
+  "runtime": "node-24.15.0-windows",
+  "master": {
+    "kind": "synthetic-large-png-then-jpeg",
+    "width": 3600,
+    "height": 2400,
+    "bytes": 68843,
+    "hasExif": false
+  },
+  "card": {
+    "webp": { "bytes": 560, "width": 400, "height": 267, "format": "webp" },
+    "avif": { "bytes": 465, "width": 400, "height": 267, "format": "avif", "sharpMetadataFormat": "heif" }
+  },
+  "gps": {
+    "synthetic": { "lat": 12.345678, "lon": 98.765432 },
+    "masterHadExifAndGpsMarker": true,
+    "publicDerivativesHadExifOrGpsMarker": false
+  },
+  "note": "Card derivatives are smaller than the master and do not receive the original. AVIF brand is present in the file; sharp.metadata() reports heif."
+}

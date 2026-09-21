@@ -1,0 +1,39 @@
+{
+  "researchDate": "2026-09-21",
+  "note": "No production auth migration was implemented.",
+  "betterAuthRemains": "FZ-A5 EMBED=Better Auth. CMS users must map to stable actorId and never become CRM ACL.",
+  "candidates": {
+    "payload": {
+      "localUsers": "FREE OSS",
+      "oidcOauthSso": "PAID",
+      "betterAuthFront": "CUSTOM FZ — possible as a reverse-proxy/BFF in front of Payload admin, or a later mapping layer. Payload still owns its user table unless FZ replaces it.",
+      "separateEditorIdentities": true,
+      "actorIdConsequence": "Need a durable map payloadUserId → actorId. Dual login unless SSO spend or custom bridge.",
+      "paidFlagForCoherentAdminSso": true
+    },
+    "apostrophe": {
+      "localUsers": "FREE OSS",
+      "oidcOauthSso": "NOT VERIFIED",
+      "betterAuthFront": "CUSTOM FZ — Apostrophe @apostrophecms/user is a separate identity store. Mapping required.",
+      "separateEditorIdentities": true,
+      "actorIdConsequence": "Need apostrophe user id → actorId. In-context editing stays on Apostrophe sessions.",
+      "paidFlagForCoherentAdminSso": false
+    },
+    "native": {
+      "localUsers": "CUSTOM FZ",
+      "oidcOauthSso": "CUSTOM FZ",
+      "betterAuthFront": "Same Better Auth as Admin. No second user table required.",
+      "separateEditorIdentities": false,
+      "actorIdConsequence": "actorId is the session actor.",
+      "paidFlagForCoherentAdminSso": false
+    },
+    "strapiCommunity": {
+      "localUsers": "FREE OSS",
+      "oidcOauthSso": "PAID",
+      "betterAuthFront": "CUSTOM FZ — Strapi admin users are separate from users-permissions end-users. Better Auth can front FZ Admin only.",
+      "separateEditorIdentities": true,
+      "actorIdConsequence": "Need strapiAdminUserId → actorId. Community has no official SSO.",
+      "paidFlagForCoherentAdminSso": true
+    }
+  }
+}

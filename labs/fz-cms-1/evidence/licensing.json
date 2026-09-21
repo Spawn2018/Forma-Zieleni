@@ -1,0 +1,64 @@
+{
+  "researchDate": "2026-09-21",
+  "note": "Official pages revalidated during the finalist lab. No purchase was made.",
+  "payload": {
+    "versionTested": "3.90.1",
+    "license": "MIT",
+    "selfHostLicenseCost": 0,
+    "adminShape": "Next.js fullstack framework (official docs 2026-09-21)",
+    "officialSources": [
+      "https://payloadcms.com/docs/getting-started/what-is-payload",
+      "https://payloadcms.com/enterprise"
+    ],
+    "freeOssDocumented": ["self-host", "admin", "drafts/versions", "REST/GraphQL", "uploads", "focal-point cropping", "access control", "local users"],
+    "enterpriseDocumented": ["visual editor", "SSO/SAML/OAuth", "publishing/approval workflows"],
+    "livePreview": "Official OSS getting-started page lists live preview as a framework capability. Enterprise page still markets Visual Editor separately. NOT collapsed."
+  },
+  "apostrophe": {
+    "installedStarterVersion": "4.32.2",
+    "npmLatestOnResearch": "4.32.2",
+    "license": "MIT",
+    "selfHostLicenseCost": 0,
+    "officialSources": [
+      "https://apostrophecms.com/guides/deployment-in-apostrophecms"
+    ],
+    "postgres": "Officially production-supported from 4.31.0",
+    "sqlite": "Officially local-development recommended; production only if sure needs stay single-server",
+    "mongo": "Still production-supported; excluded for FZ production by FZ-A3",
+    "starterKit": "create-apostrophe unattended default = apostrophe-astro-demo (Astro frontend + Apostrophe backend)"
+  },
+  "strapi": {
+    "versionTested": "5.54.0",
+    "license": "MIT Community",
+    "officialSource": "https://strapi.io/pricing-cms",
+    "communityFree": ["RBAC", "draft & publish", "media library", "webhooks", "dynamic zones", "REST", "GraphQL", "API tokens", "data import/export/transfer", "custom fields", "unlimited entries"],
+    "growth": {
+      "price": "$45/month includes 3 seats, then $15/seat/month",
+      "includes": ["Live Preview", "Releases", "Content History 14-day retention", "Strapi AI credits"]
+    },
+    "ssoAddon": "$150/month + $50/seat/month on Growth; included on Enterprise",
+    "enterpriseOnly": ["Review Workflows", "Audit Logs"]
+  },
+  "puck": {
+    "package": "@puckeditor/core",
+    "version": "0.23.0",
+    "license": "MIT",
+    "staleNpmName": "@measured/puck 0.20.2"
+  },
+  "lightbox": {
+    "package": "yet-another-react-lightbox",
+    "version": "3.32.2",
+    "license": "MIT"
+  },
+  "beforeAfter": {
+    "package": "react-compare-slider",
+    "version": "4.0.0",
+    "license": "MIT"
+  },
+  "sharp": {
+    "executedVersion": "0.34.5",
+    "npmLatestOnResearch": "0.35.4",
+    "license": "Apache-2.0",
+    "note": "libvips-backed. Payload blank template pins sharp 0.35.4. Lab media suite used 0.34.5 because that is what installed in the isolated media package."
+  }
+}

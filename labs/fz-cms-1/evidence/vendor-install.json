@@ -1,0 +1,35 @@
+{
+  "researchDate": "2026-09-21",
+  "note": "Vendor trees stay in gitignored labs/fz-cms-1/tmp. This file is the committed evidence.",
+  "windows": "10.0.26100",
+  "node": "24.15.0",
+  "pnpm": "10.33.2",
+  "dockerInstalledForThisLab": false,
+  "postgresBinariesPresent": "D:\\OMNIROUTE\\tools\\pg16\\pgsql\\bin\\psql.exe 16.15 — not used; vendor labs used SQLite",
+  "payload": {
+    "version": "3.90.1",
+    "template": "create-payload-app blank --db sqlite --no-deps, then pnpm install --ignore-workspace",
+    "next": "16.3.3",
+    "sqliteAdapter": "@payloadcms/db-sqlite 3.90.1",
+    "sharpPinnedByTemplate": "0.35.4",
+    "localApi": "executed after dotenv-before-config fix",
+    "adminUi": "NOT TESTED"
+  },
+  "apostrophe": {
+    "starter": "create-apostrophe unattended default kit apostrophe-astro-demo",
+    "apostrophe": "4.32.2",
+    "adapter": "APOS_DEFAULT_DB_ADAPTER=sqlite",
+    "extraFrontend": "Astro",
+    "taskApi": "executed",
+    "adminUi": "NOT TESTED",
+    "draftIsolation": "NOT TESTED — task req inserted :en:published ids"
+  },
+  "strapi": {
+    "version": "5.54.0",
+    "firstInstall": "Windows exit 3221226505 under parallel Payload install",
+    "retryInstall": "pnpm install --ignore-workspace succeeded, 1210 packages",
+    "sqliteBinding": "pnpm skipped better-sqlite3 scripts; prebuild-install run explicitly",
+    "documentService": "executed; published title unchanged after later draft",
+    "adminUi": "NOT TESTED"
+  }
+}

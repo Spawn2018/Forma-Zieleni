@@ -1,6 +1,6 @@
 export const WIDTHS = [400, 800, 1200, 1600, 2400];
 
-export function cropWindow({ width, height, targetRatio, focal = { x: 0.5, y: 0.5 }, mode }) {
+export function cropWindow({ width, height, targetRatio, focal = { x: 0.5, y: 0.5 }, mode, safeRegion }) {
   const sourceRatio = width / height;
   if (mode === 'CONTAIN' || Math.abs(sourceRatio - targetRatio) < 0.01) {
     return { x: 0, y: 0, width, height, cropped: false, shown: 1 };
@@ -8,14 +8,25 @@ export function cropWindow({ width, height, targetRatio, focal = { x: 0.5, y: 0.
   if (mode === 'ADAPTIVE_LAYOUT' && Math.abs(sourceRatio - targetRatio) > 0.35) {
     return { x: 0, y: 0, width, height, cropped: false, shown: 1, layoutAdapts: true };
   }
+  let crop;
   if (sourceRatio > targetRatio) {
     const cropW = Math.round(height * targetRatio);
     const x = Math.max(0, Math.min(width - cropW, Math.round(focal.x * width - cropW / 2)));
-    return { x, y: 0, width: cropW, height, cropped: true, shown: cropW / width };
+    crop = { x, y: 0, width: cropW, height, cropped: true, shown: cropW / width };
+  } else {
+    const cropH = Math.round(width / targetRatio);
+    const y = Math.max(0, Math.min(height - cropH, Math.round(focal.y * height - cropH / 2)));
+    crop = { x: 0, y, width, height: cropH, cropped: true, shown: cropH / height };
   }
-  const cropH = Math.round(width / targetRatio);
-  const y = Math.max(0, Math.min(height - cropH, Math.round(focal.y * height - cropH / 2)));
-  return { x: 0, y, width, height: cropH, cropped: true, shown: cropH / height };
+  if (!safeRegion) return crop;
+  const safeX = Math.round(safeRegion.x * width);
+  const safeW = Math.round(safeRegion.w * width);
+  if (crop.width >= safeW) {
+    if (safeX < crop.x) crop.x = Math.max(0, safeX);
+    if (safeX + safeW > crop.x + crop.width) crop.x = Math.min(width - crop.width, safeX + safeW - crop.width);
+    crop.safeRegionHonored = true;
+  }
+  return crop;
 }
 
 export function planDerivatives(asset, placements) {
