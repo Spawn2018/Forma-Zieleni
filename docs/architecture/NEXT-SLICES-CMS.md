@@ -112,11 +112,10 @@ Next: MEDIA-LIBRARY.
 
 Dependencies: MEDIA-PROCESS.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: MEDIA-PROCESS recorded.
-Accept: bulk upload, progress, per-file failure, duplicate checksum, reference-safe delete.
-Tests: 30-file batch with one failure isolated; delete blocked when referenced.
-Next: MEDIA-COLLECTIONS.
+Status: COMPLETE for the local library.
+Accept: `ingestBatch` reports progress, keeps a successful file when another file is denied, reuses a matching checksum, and `deleteAsset` refuses an asset that a document still references.
+Tests: `packages/media/library.test.mjs` (30 stored, 1 denied).
+Next: MEDIA-COLLECTIONS. CMS-ADMIN may start because CMS-PUBLISH and MEDIA-LIBRARY are recorded. CMS-ADMIN must exercise the real Apostrophe editor, which this library does not replace.
 
 ### MEDIA-COLLECTIONS
 
