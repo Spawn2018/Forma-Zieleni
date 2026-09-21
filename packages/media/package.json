@@ -3,11 +3,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/master.mjs"
+    ".": "./src/master.mjs",
+    "./derivatives": "./src/derivatives.mjs"
   },
   "scripts": {
-    "test": "node --test master.test.mjs",
-    "lint": "node --check src/master.mjs && node --check master.test.mjs",
-    "typecheck": "node --check src/master.mjs"
+    "test": "node --test master.test.mjs derivatives.test.mjs",
+    "lint": "node --check src/master.mjs && node --check src/derivatives.mjs && node --check master.test.mjs && node --check derivatives.test.mjs",
+    "typecheck": "node --check src/master.mjs && node --check src/derivatives.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.35.4"
   }
 }

@@ -102,10 +102,10 @@ Next: MEDIA-PROCESS.
 
 Dependencies: MEDIA-CORE.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: MEDIA-CORE recorded.
-Accept: AVIF/WebP/JPEG derivatives, EXIF/GPS strip, CONTAIN/SMART_FILL/ADAPTIVE_LAYOUT, widths from evidence, no silent generative expand.
-Tests: GPS absent on public bytes; crop math; master unchanged.
+Status: COMPLETE.
+Accept: `packages/media/src/derivatives.mjs` writes WebP, AVIF, and JPEG from the master. CONTAIN and ADAPTIVE_LAYOUT keep the full frame. SMART_FILL crops. Sharp is pinned at 0.35.4 because 0.34.5, used by the lab, is below the patched range for current high libvips and libheif advisories. The lab evidence is unchanged. Public bytes omit the synthetic GPS marker. The master buffer is unchanged. No generative expand.
+Tests: `packages/media/derivatives.test.mjs`.
+Performance: derivative encoding is off the request that stores the master. This slice did not add a new latency budget beyond the existing lab byte evidence.
 Next: MEDIA-LIBRARY.
 
 ### MEDIA-LIBRARY
