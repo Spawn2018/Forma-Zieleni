@@ -1,7 +1,10 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "search-attribution-recorded",
+  "currentPhase": "post-push-verified",
+  "publishedHead": "f6478ebf9d85900fa0fd83ec88ee5f130f1fb6d4",
+  "postPushSafety": "PASS",
+  "codeRabbit": "No check run and no review comment on the published commit. Live quota was not re-read from an account.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -22,7 +25,7 @@
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "GALLERY-WWW is blocked until a React Router app exists. SEARCH-DATA-MODEL waits until a connector needs stored rows. Do not push.",
+  "nextSafeAction": "SEARCH-DATA-MODEL is the next READY slice. GALLERY-WWW stays blocked until a web app exists. Do not push this local test fix until the next approved checkpoint.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
     "docs/architecture/FZ-DOCUMENTATION-OS.md",

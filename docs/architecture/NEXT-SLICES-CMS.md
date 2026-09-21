@@ -128,7 +128,7 @@ Next: GALLERY-WWW. That slice needs a React Router app, which is not in the tree
 
 ### GALLERY-WWW
 
-Dependencies: MEDIA-COLLECTIONS.
+Dependencies: MEDIA-COLLECTIONS. Blocked until the www app slice exists.
 Gate: REVIEW + visual/UX.
 Autonomous: yes.
 Entry: MEDIA-COLLECTIONS recorded.
