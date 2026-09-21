@@ -1,0 +1,13 @@
+{
+  "name": "@forma-zieleni/media",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/master.mjs"
+  },
+  "scripts": {
+    "test": "node --test master.test.mjs",
+    "lint": "node --check src/master.mjs && node --check master.test.mjs",
+    "typecheck": "node --check src/master.mjs"
+  }
+}

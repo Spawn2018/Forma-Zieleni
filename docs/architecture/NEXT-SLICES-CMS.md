@@ -92,10 +92,10 @@ Next: CMS-SEO, CMS-EVENTS, CMS-ADMIN.
 
 Dependencies: CMS-DATA.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: CMS-DATA recorded.
-Accept: immutable master, checksum, MIME/pixel-bomb, local adapter now, S3/Garage-shaped interface later.
-Tests: checksum, denied MIME, storage path not public by default.
+Status: COMPLETE for the local private adapter.
+Accept: `packages/media` stores an immutable checksummed master. JPEG, PNG, and WebP are sniffed from bytes. SVG and a declared type that disagrees with the bytes are denied. Dimensions above 16,000 px or 40 million pixels are rejected before a bitmap decode. The stored key is under `masters/` and `publicUrl` is null.
+Tests: `packages/media/master.test.mjs`.
+Security: no public path, no client MIME trust, pixel-bomb cap.
 Next: MEDIA-PROCESS.
 
 ### MEDIA-PROCESS
