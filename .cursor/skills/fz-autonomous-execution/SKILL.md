@@ -34,7 +34,7 @@ Delegate, do not duplicate:
 - Grok, through `grok-research-handoff`, for fresh external research or a substantial adversarial challenge. Grok output is evidence. Never send secrets, credentials, or customer data. If Grok is unavailable, record `EXTERNAL ADVERSARIAL REVIEW: DEFERRED` and continue.
 - CodeRabbit only when review value is high. Use `scripts/security/coderabbit-quota.mjs`. At most 3 free CLI reviews per developer per rolling hour. Paid usage is OWNER-DECISION. Quota exhaustion records DEFERRED and does not stop other READY work.
 
-Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. `git push`, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval.
+Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. A safe fast-forward push to `origin` `main` is AUTO after the pre-push gate. Force-push, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval for those.
 
 `node scripts/fz-noc/cli.mjs beat` at the start and end of real work. On a repeated identical failure: `node scripts/fz-noc/cli.mjs attempt --slice <id> --commit <HEAD> --signature "<command>"`. Three identical attempts block that slice. Select again and work-steal.
 

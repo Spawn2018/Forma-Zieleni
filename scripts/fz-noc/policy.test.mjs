@@ -133,9 +133,11 @@ test('silent turns stall and then stop', () => {
 test('shell and MCP guards ask for dangerous operations and allow ordinary ones', () => {
   assert.equal(classifyShell('git status').permission, 'allow');
   assert.equal(classifyShell('git commit -m "chore: add autonomous Cursor orchestration"').permission, 'allow');
-  assert.equal(classifyShell('git push').permission, 'ask');
-  assert.equal(classifyShell('powershell -Command "git push"').permission, 'ask');
-  assert.equal(classifyShell('git -C D:\\repo push origin main').permission, 'ask');
+  assert.equal(classifyShell('git push').permission, 'allow');
+  assert.equal(classifyShell('powershell -Command "git push"').permission, 'allow');
+  assert.equal(classifyShell('git -C D:\\repo push origin main').permission, 'allow');
+  assert.equal(classifyShell('git push --force').permission, 'ask');
+  assert.equal(classifyShell('git push --force-with-lease').permission, 'ask');
   assert.equal(classifyShell('git reset --hard HEAD').permission, 'ask');
   assert.equal(classifyShell('git clean -fd').permission, 'ask');
   assert.equal(classifyShell('npx wrangler deploy').permission, 'ask');

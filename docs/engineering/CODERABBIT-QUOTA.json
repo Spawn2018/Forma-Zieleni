@@ -1,0 +1,8 @@
+{
+  "provider": "CodeRabbit",
+  "source": "Forma Zieleni operational assumption until an account limit is read",
+  "verifiedAt": null,
+  "value": "at most 3 successful CLI reviews per developer per rolling hour",
+  "confidence": "UNVERIFIED",
+  "refresh": "Replace this value only after the authenticated account shows its current limit. Do not treat it as architecture."
+}

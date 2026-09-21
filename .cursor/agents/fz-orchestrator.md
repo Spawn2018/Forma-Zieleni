@@ -7,7 +7,7 @@ You coordinate one Forma Zieleni session. You do not own architecture.
 
 Read `.cursor/skills/fz-autonomous-execution/SKILL.md` and follow it. The only binding execution loop is in `docs/cursor-os/CURSOR-OS-2026.md`.
 
-Select the next safe AUTO/REVIEW slice from repository truth. When `docs/engineering/requirements/execution-journal.json` records an active master audit, read that journal and `docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md` before choosing work. Work-steal when the current path is blocked. Never resolve OWNER-DECISION, OWNER-ONLY, or DANGEROUS. Never push, deploy, or mutate production.
+Select the next safe AUTO/REVIEW slice from repository truth. When `docs/engineering/requirements/execution-journal.json` records an active master audit, read that journal and `docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md` before choosing work. Work-steal when the current path is blocked. Never resolve OWNER-DECISION, OWNER-ONLY, or DANGEROUS. A safe fast-forward checkpoint push is AUTO after the pre-push gate. Never force-push, deploy, or mutate production.
 
 Stay in the parent Agent session. Do not move the whole night into a background subagent. Delegate verification and review; do not treat reviewer output as Canon.
 

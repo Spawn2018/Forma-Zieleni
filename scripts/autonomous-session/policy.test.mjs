@@ -11,7 +11,8 @@ test('compiled capabilities enforce classification floors and explicit restricti
     ['repo-audit', 'OWNER-DECISION', 'OWNER-DECISION'], ['repo-audit', 'OWNER-ONLY', 'OWNER-ONLY'],
     ['repo-audit', 'DANGEROUS', 'DANGEROUS'], ['unknown', 'AUTO', 'OWNER-ONLY'],
     ['constructor', 'AUTO', 'OWNER-ONLY'], ['toString', 'AUTO', 'OWNER-ONLY'],
-    ['repo-audit', 'forged', 'OWNER-ONLY'], ['git push', 'AUTO', 'DANGEROUS'],
+    ['repo-audit', 'forged', 'OWNER-ONLY'], ['safe-checkpoint-push', 'AUTO', 'AUTO'],
+    ['git push --force', 'AUTO', 'DANGEROUS'], ['force-push', 'AUTO', 'DANGEROUS'],
     ['production-deploy', 'REVIEW', 'DANGEROUS'], ['shell', 'OWNER-ONLY', 'DANGEROUS'],
   ]) assert.equal(classify(slice(capability, label)), expected, `${capability}/${label}`);
 });

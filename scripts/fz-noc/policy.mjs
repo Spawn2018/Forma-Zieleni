@@ -17,8 +17,9 @@ export const SHUTDOWN_MESSAGE =
   'The /noc deadline has passed. Do not start a new slice. Finish or checkpoint the current atomic work, do not mark incomplete work complete, validate what finished, commit locally only if that work is complete, report the result and the next READY state, then stop the session.';
 
 const GIT = '(?:^|[;&|]|\\n|\\s|["\'])git(?:\\.exe)?(?:\\s+-C\\s+\\S+|\\s+-[^\\s]+)*\\s+';
+const GIT_PUSH = new RegExp(`${GIT}push\\b`, 'i');
+const PUSH_NOT_AUTO = /--force(?:-with-lease)?|--mirror|--delete|\s\+\S/;
 const SHELL_ASK = [
-  { id: 'git-push', re: new RegExp(`${GIT}push\\b`, 'i') },
   { id: 'git-reset-hard', re: new RegExp(`${GIT}reset\\s+--hard\\b`, 'i') },
   { id: 'git-clean', re: new RegExp(`${GIT}clean\\b`, 'i') },
   { id: 'wrangler', re: /\bwrangler\b/i },
@@ -307,6 +308,13 @@ export function decideFollowup(session, input, now = new Date()) {
 
 export function classifyShell(command) {
   const text = String(command || '');
+  if (GIT_PUSH.test(text) && PUSH_NOT_AUTO.test(text)) {
+    return {
+      permission: 'ask',
+      user_message: 'This shell command matches a protected operation (git-push-force) and needs Owner approval.',
+      agent_message: 'A fast-forward checkpoint push is AUTO. Force, mirror, and delete pushes are not. A /noc window is not approval for history rewrite.',
+    };
+  }
   const hit = SHELL_ASK.find((rule) => rule.re.test(text));
   if (!hit) return { permission: 'allow' };
   return {

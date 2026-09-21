@@ -36,7 +36,9 @@ software-house review.
     [`../architecture/FZ-CONTINUOUS-IMPROVEMENT.md`](../architecture/FZ-CONTINUOUS-IMPROVEMENT.md)
     blocks the push. Other Learning Debt does not.
 
-Push is blocked on failures. Do not silence tests, loosen types, skip
+Push is blocked on failures. A passing gate authorizes a fast-forward
+push to the existing `origin` `main` without a separate Owner review.
+Do not silence tests, loosen types, skip
 security checks or raise performance budgets just to make the gate
 green.
 

@@ -11,4 +11,4 @@ For ordinary development, open the repository in Cursor and use Agent/Plan modes
 My Machines is not required to start building Forma Zieleni. Do not expose production secrets merely to make agent execution convenient.
 
 ## Git policy
-The owner chose direct work on `main`. Keep changes small and checkpointed. The absence of PRs increases the importance of the pre-push gate, independent review and clean commits. Never push automatically merely because implementation finished.
+The owner chose direct work on `main`. Keep changes small and checkpointed. The absence of PRs increases the importance of the pre-push gate, independent review and clean commits. Do not push merely because implementation finished. A fast-forward checkpoint push is AUTO only after that gate.

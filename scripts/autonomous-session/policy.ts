@@ -1,5 +1,5 @@
 export type Classification = 'AUTO' | 'REVIEW' | 'OWNER-DECISION' | 'OWNER-ONLY' | 'DANGEROUS';
-export type Capability = 'repo-audit' | 'canon-audit' | 'choose-audit';
+export type Capability = 'repo-audit' | 'canon-audit' | 'choose-audit' | 'safe-checkpoint-push';
 export type Slice = {
   id: string;
   capability: string;
@@ -12,8 +12,9 @@ const capabilities: Readonly<Record<string, Classification>> = Object.freeze({
   'repo-audit': 'AUTO',
   'canon-audit': 'REVIEW',
   'choose-audit': 'OWNER-DECISION',
+  'safe-checkpoint-push': 'AUTO',
 });
-const dangerous = /production|deploy|dns|cloudflare|secret|payment|cutover|delete|migration|destruct|git[ -](push|reset|clean|checkout|switch)|shell|command/i;
+const dangerous = /production|deploy|dns|cloudflare|secret|payment|cutover|delete|migration|destruct|git[ -](reset|clean|checkout|switch)|git[ -]push\S*\s+--force|force-with-lease|force-push|shell|command/i;
 
 export function classify(slice: Slice): Classification {
   if (slice.classification === 'DANGEROUS' || dangerous.test(slice.capability)) return 'DANGEROUS';

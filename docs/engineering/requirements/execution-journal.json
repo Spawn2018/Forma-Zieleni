@@ -1,7 +1,8 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "post-push-verified",
+  "currentPhase": "safe-checkpoint-push-auto",
+  "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate. Force-push, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "f6478ebf9d85900fa0fd83ec88ee5f130f1fb6d4",
   "postPushSafety": "PASS",
   "codeRabbit": "No check run and no review comment on the published commit. Live quota was not re-read from an account.",
@@ -25,7 +26,7 @@
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "SEARCH-DATA-MODEL is the next READY slice. GALLERY-WWW stays blocked until a web app exists. Do not push this local test fix until the next approved checkpoint.",
+  "nextSafeAction": "After this checkpoint is on origin/main, execute SEARCH-DATA-MODEL if the graph still selects it. Do not start GALLERY-WWW.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
     "docs/architecture/FZ-DOCUMENTATION-OS.md",
