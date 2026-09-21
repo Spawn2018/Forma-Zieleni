@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { ApiFailure } from './errors.ts';
 
 export const CLIENTS = ['web', 'portal', 'admin', 'mobile', 'sketchup', 'm2m'] as const;
 export type ClientId = (typeof CLIENTS)[number];
@@ -13,7 +14,7 @@ export type Actor = {
 };
 
 export interface SessionAuthenticator {
-  authenticate(authorization: string | undefined): Actor | null;
+  authenticate(request: Request): Promise<Actor | null>;
 }
 
 type TokenBody = {
@@ -41,7 +42,8 @@ export function mintTestSession(secret: string, actor: Actor): string {
 export function testAuthenticator(secret: string): SessionAuthenticator {
   if (secret.length < 16) throw new Error('TEST_AUTH_SECRET_TOO_SHORT');
   return {
-    authenticate(authorization) {
+    async authenticate(request) {
+      const authorization = request.headers.get('authorization') ?? undefined;
       if (!authorization?.startsWith('Bearer ')) return null;
       const token = authorization.slice('Bearer '.length);
       const split = token.split('.');
@@ -71,12 +73,33 @@ export function testAuthenticator(secret: string): SessionAuthenticator {
 }
 
 export function failClosedAuthenticator(): SessionAuthenticator {
-  return { authenticate: () => null };
+  return { async authenticate() { return null; } };
 }
 
-export function authenticatorFromEnv(env: { AUTH_MODE?: string; TEST_AUTH_SECRET?: string }): SessionAuthenticator {
-  if (env.AUTH_MODE === 'test') return testAuthenticator(env.TEST_AUTH_SECRET ?? '');
-  return failClosedAuthenticator();
+const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+export function betterAuthAuthenticator(options: {
+  lookup: (headers: Headers) => Promise<{ userId: string } | null>;
+  loadActor: (subject: string) => Promise<Actor | null>;
+  trustedOrigins: readonly string[];
+}): SessionAuthenticator {
+  return {
+    async authenticate(request) {
+      const authorization = request.headers.get('authorization') ?? '';
+      const bearer = authorization.toLowerCase().startsWith('bearer ');
+      const cookieSession = (request.headers.get('cookie') ?? '').includes('better-auth.session_token');
+      if (!bearer && cookieSession && UNSAFE.has(request.method.toUpperCase())) {
+        const origin = request.headers.get('origin');
+        if (!origin || !options.trustedOrigins.includes(origin)) {
+          throw new ApiFailure(403, 'CSRF_ORIGIN', 'The request origin is not allowed.');
+        }
+      }
+      if (!bearer && !cookieSession) return null;
+      const session = await options.lookup(request.headers);
+      if (!session) return null;
+      return options.loadActor(session.userId);
+    },
+  };
 }
 
 export function allows(actor: Actor, capability: Capability): boolean {

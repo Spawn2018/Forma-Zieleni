@@ -4,14 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "node src/server.ts",
-    "test": "node --test src/http.test.mjs src/postgres.integration.test.mjs",
-    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/app.ts src/server.ts src/db.ts src/postgres-store.ts",
-    "lint": "node --check src/http.test.mjs && node --check src/postgres.integration.test.mjs"
+    "test": "node --test src/http.test.mjs src/rate-limit.test.mjs src/config.test.mjs src/session.test.mjs src/postgres.integration.test.mjs",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target es2023 --module nodenext --allowImportingTsExtensions src/app.ts src/server.ts src/dispatch-once.ts src/db.ts src/postgres-store.ts",
+    "lint": "node --check src/http.test.mjs && node --check src/postgres.integration.test.mjs && node --check src/rate-limit.test.mjs && node --check src/config.test.mjs && node --check src/session.test.mjs"
   },
   "dependencies": {
     "@forma-zieleni/domain": "workspace:*",
     "@forma-zieleni/validation": "workspace:*",
     "@hono/node-server": "^2.1.1",
+    "better-auth": "^1.7.5",
     "hono": "^4.13.8",
     "kysely": "^0.29.6",
     "pg": "^8.23.0"

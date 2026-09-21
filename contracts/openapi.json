@@ -38,6 +38,25 @@
         }
       }
     },
+    "/ready": {
+      "get": {
+        "tags": ["System"],
+        "operationId": "getReady",
+        "security": [],
+        "description": "Readiness for the current API dependencies. This is not liveness.",
+        "responses": {
+          "200": {
+            "description": "Required dependencies accept a trivial check.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Health" }
+              }
+            }
+          },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
     "/leads": {
       "post": {
         "tags": ["Leads"],
@@ -374,6 +393,10 @@
       },
       "TooManyRequests": {
         "description": "Rate or resource limit reached.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
+      },
+      "Unavailable": {
+        "description": "A required dependency is not ready. The body does not include connection or query details.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } }
       }
     }

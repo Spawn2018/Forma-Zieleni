@@ -3,6 +3,7 @@
   "versioning": "/v1",
   "paths": [
     "GET /health",
+    "GET /ready",
     "POST /leads",
     "GET /leads",
     "GET /leads/{leadId}",

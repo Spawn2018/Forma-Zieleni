@@ -123,6 +123,12 @@ class PostgresTx implements LeadTx {
       payload: jsonb(message.payload),
       created_at: new Date(message.at),
       published_at: null,
+      attempts: 0,
+      next_attempt_at: null,
+      claimed_at: null,
+      claim_token: null,
+      last_error: null,
+      delivery_status: 'pending',
     }).execute();
   }
 

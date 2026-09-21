@@ -33,10 +33,7 @@ and ADR-014. Binding shape:
 The option research in the packet stays as evidence. Rejected and
 unselected alternatives were not deleted.
 
-What is still not done: CI deploy, object-storage adapter, production
-Better Auth, restore test, OpenObserve, webhook tests, load baseline,
-private-origin validation, ZAP, Dependency-Check. The lead schema and
-Hono routes exist. They are not security acceptance.
+What is still not done: CI deploy, object-storage adapter, OpenObserve, webhook tests, load baseline, private-origin validation, ZAP, Dependency-Check, a supervised outbox worker, and off-site backup. The lead API now has Better Auth sessions, Core API grants, `GET /v1/ready`, a one-shot outbox dispatcher, and a local PostgreSQL dump/restore test. That is not security acceptance.
 
 FZ-SIGN-1 remains a later contract-lifecycle boundary. It is not an
 eighth Gate A decision. No signing provider was selected or integrated.
@@ -62,7 +59,7 @@ REVIEW progress, not a complete runtime:
 REVIEW progress for lead rules only:
 
 - `packages/domain` create/qualify invariants
-- Persistence, outbox, and the lead qualify/list/get runtime are in `apps/api`. Production Identity/Auth and Admin CRM visibility are not done.
+- Persistence, outbox dispatch, and the lead qualify/list/get runtime are in `apps/api`. Better Auth identifies the session. Capability grants stay in Core API tables. Admin CRM UI is not done.
 
 ## Gate D product surfaces
 
@@ -77,7 +74,8 @@ Not started:
 
 [NEXT-SLICE-LEAD-VERTICAL.md](./NEXT-SLICE-LEAD-VERTICAL.md) is
 implemented in `apps/api`: public capture, validation, PostgreSQL/Kysely
-persistence, staff list/get/qualify, outbox, audit, and tests. Not the
-whole CRM. Production Better Auth, ZAP, Dependency-Check, and a tested
-backup restore are not done. Architecture selection is still not
+persistence, staff list/get/qualify, Better Auth sessions with Core API
+grants, outbox dispatch, audit, readiness, and tests. Not the
+whole CRM. ZAP, Dependency-Check, a supervised worker, and off-site
+backup are not done. Architecture selection is still not
 security acceptance.

@@ -7,34 +7,45 @@ Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/ar
 
 ## Implemented
 
-- `GET /v1/health` — process liveness only. It does not check the database.
-- `POST /v1/leads` — public capture, strict JSON validation, idempotency, 8 KiB body cap, per-process rate limit.
-- `GET /v1/leads` and `GET /v1/leads/{leadId}` — staff read. Anonymous callers receive 401. Authenticated callers without `leads:read` receive 403.
-- `POST /v1/leads/{leadId}/qualify` — uses `packages/domain`. Same idempotency conflict (409) as the contract.
-- Lead row, idempotency record, transactional `domain_outbox`, and `audit_event` in one database transaction.
-- Structured JSON request logs and a small span boundary. No contact fields, tokens, or raw bodies.
+- `GET /v1/health` — process liveness. It does not check the database.
+- `GET /v1/ready` — readiness. The server runs `select 1`. Failure is `503` with code `NOT_READY` and no SQL or connection text.
+- `POST /v1/leads` — public capture, strict JSON validation, idempotency, 8 KiB streamed body cap.
+- `GET /v1/leads` and `GET /v1/leads/{leadId}` — require a server-derived actor with `leads:read`.
+- `POST /v1/leads/{leadId}/qualify` — domain rules, `leads:qualify`, idempotency `409`.
+- Better Auth email/password sessions in schema `auth`. The mounted handler has sign-up disabled. Bearer tokens are signed session tokens. Cookie mutations require a trusted `Origin`.
+- Capabilities live in `actor_capability`. The stable `actor_id` is an opaque Core API id mapped from issuer + Better Auth user id, not from email.
+- `AUTH_MODE=test` is a separate HMAC signer. It starts only when `ALLOW_TEST_AUTH=1` and `NODE_ENV` is not `production`.
+- Lead, idempotency, outbox, and audit rows share one transaction.
+- `node src/dispatch-once.ts` claims pending outbox rows with `FOR UPDATE SKIP LOCKED`, delivers them to a local stdout sink, and records retry or poison. There is no broker and no long-running worker.
+- Structured JSON request logs. No contact fields, cookies, tokens, or raw bodies.
+- Public capture rate limit keys the direct TCP peer. `X-Forwarded-For` is used only when `TRUST_PROXY=1` and the peer is listed in `TRUSTED_PROXIES`, and then only the last hop. The limiter is in-process, bounded, and replaceable.
 
 ## Not implemented
 
-- WWW, Portal, Admin, mobile, SketchUp.
-- The rest of CRM.
-- Production Better Auth. `AUTH_MODE` other than `test` fails closed: every CRM call is 401. That is not production authentication acceptance.
-- OpenObserve, session replay, Cloudflare, Garage, signing, payments.
-- A delivery worker for the outbox. Rows are written unpublished.
-- Database readiness on `/v1/health`.
-- Socket-address rate limiting. The process default buckets every caller as `local` (30 captures per minute). Tests inject the key. Do not treat this as an edge limiter.
+- WWW, Portal, Admin, mobile, SketchUp, and the rest of CRM.
+- Social login, MFA, password recovery, organizations, and SSO.
+- A supervised outbox worker. Run `dispatch-once` when a local delivery pass is needed.
+- OpenObserve, session replay, Cloudflare, Garage, signing, and payments.
+- Distributed rate limiting. Do not treat the process limiter as an edge control.
+- ZAP and OWASP Dependency-Check on this machine.
 
 ## Local run
 
-PostgreSQL must already be running. This package does not install Docker or start a server for you.
+PostgreSQL must already be running. This package does not install Docker.
 
 ```text
 $env:LEAD_DATABASE_URL = 'postgres://USER@127.0.0.1:5432/forma_zieleni_dev'
+$env:BETTER_AUTH_SECRET = '<32+ random characters>'
+$env:BETTER_AUTH_URL = 'http://127.0.0.1:3000'
+$env:TRUSTED_ORIGINS = 'http://127.0.0.1:3000'
 node src/server.ts
 ```
 
-The process listens on `127.0.0.1` and port `3000` unless `PORT` is set.
-`AUTH_MODE=test` with `TEST_AUTH_SECRET` (at least 16 characters) enables the test session signer only. Do not use that mode as production auth.
+The process listens on `127.0.0.1` and port `3000` unless `PORT` is set. Startup logs the port and auth mode. It does not print `LEAD_DATABASE_URL`.
+
+Staff grants are rows in `identity_principal` and `actor_capability`. A valid session without a grant receives `403`.
+
+`pnpm --filter @forma-zieleni/api typecheck` uses `--skipLibCheck` because the published Better Auth types reference `bun:sqlite`.
 
 ## Tests
 
@@ -43,7 +54,10 @@ The process listens on `127.0.0.1` and port `3000` unless `PORT` is set.
 HTTP tests use an in-memory store. They are not persistence acceptance.
 `src/postgres.integration.test.mjs` uses `LEAD_DATABASE_URL` when set. Otherwise it starts a temporary PostgreSQL cluster with `initdb`/`pg_ctl` from `psql` on `PATH`, or `FORMA_PG_BIN`, bound to `127.0.0.1` with trust auth, then stops it. If neither is available the test is skipped and persistence acceptance is not claimed.
 
+When the test owns that cluster, it also runs `pg_dump` / `pg_restore` into a disposable `forma_restore` database and drops it. That is local evidence only. restic and pgBackRest remain later.
+
 ## Security status
 
-Lead behavior is covered by the API tests, including authorization, source spoofing, idempotency, injection-as-data, and log redaction.
-`pnpm audit` on 2026-09-21 reported no known vulnerabilities. OWASP Dependency-Check is not installed and was not run.
+Not security-accepted. Authentication, authorization, validation, idempotency, and the local restore check have tests. ZAP and Dependency-Check were not run. `pnpm audit --audit-level=moderate` on 2026-09-21 reported no known vulnerabilities.
+
+Direct dependency added for identity: `better-auth` 1.7.5, MIT. It is the selected embedded session library. Domain grants are not stored as Better Auth roles.

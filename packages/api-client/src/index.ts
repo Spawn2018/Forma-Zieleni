@@ -4,6 +4,7 @@ export const API_PREFIX = '/v1';
 
 export const leadPaths = Object.freeze({
   health: `${API_PREFIX}/health`,
+  ready: `${API_PREFIX}/ready`,
   leads: `${API_PREFIX}/leads`,
   lead: (leadId: string) => `${API_PREFIX}/leads/${leadId}`,
   qualify: (leadId: string) => `${API_PREFIX}/leads/${leadId}/qualify`,

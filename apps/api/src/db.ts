@@ -1,4 +1,4 @@
-import { Kysely, PostgresDialect, sql } from 'kysely';
+import { Kysely, PostgresDialect, sql, type Generated } from 'kysely';
 import { Migrator, type Migration, type MigrationProvider } from 'kysely/migration';
 import pg from 'pg';
 
@@ -32,6 +32,23 @@ export interface Database {
     payload: unknown;
     created_at: Date;
     published_at: Date | null;
+    attempts: Generated<number>;
+    next_attempt_at: Date | null;
+    claimed_at: Date | null;
+    claim_token: string | null;
+    last_error: string | null;
+    delivery_status: string;
+  };
+  identity_principal: {
+    actor_id: string;
+    issuer: string;
+    subject: string;
+    client_id: string;
+    created_at: Date;
+  };
+  actor_capability: {
+    actor_id: string;
+    capability: string;
   };
   audit_event: {
     id: string;
@@ -102,6 +119,106 @@ DROP TABLE IF EXISTS idempotency_record;
 DROP TABLE IF EXISTS lead;
 `;
 
+const UP_SECURITY = `
+ALTER TABLE domain_outbox
+  ADD COLUMN attempts integer NOT NULL DEFAULT 0,
+  ADD COLUMN next_attempt_at timestamptz,
+  ADD COLUMN claimed_at timestamptz,
+  ADD COLUMN claim_token text,
+  ADD COLUMN last_error text,
+  ADD COLUMN delivery_status text NOT NULL DEFAULT 'pending';
+ALTER TABLE domain_outbox
+  ADD CONSTRAINT domain_outbox_attempts_bound CHECK (attempts >= 0 AND attempts <= 20),
+  ADD CONSTRAINT domain_outbox_status_known CHECK (delivery_status IN ('pending', 'published', 'poison')),
+  ADD CONSTRAINT domain_outbox_error_code CHECK (last_error IS NULL OR last_error = 'DELIVERY_FAILED');
+UPDATE domain_outbox SET delivery_status = 'published' WHERE published_at IS NOT NULL;
+CREATE TABLE identity_principal (
+  actor_id text PRIMARY KEY,
+  issuer text NOT NULL,
+  subject text NOT NULL,
+  client_id text NOT NULL,
+  created_at timestamptz NOT NULL,
+  CONSTRAINT identity_actor_opaque CHECK (actor_id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT identity_client_known CHECK (client_id IN ('web', 'portal', 'admin', 'mobile', 'sketchup', 'm2m')),
+  CONSTRAINT identity_issuer_len CHECK (char_length(issuer) BETWEEN 1 AND 200),
+  CONSTRAINT identity_subject_len CHECK (char_length(subject) BETWEEN 1 AND 200),
+  UNIQUE (issuer, subject)
+);
+CREATE TABLE actor_capability (
+  actor_id text NOT NULL REFERENCES identity_principal (actor_id),
+  capability text NOT NULL,
+  PRIMARY KEY (actor_id, capability),
+  CONSTRAINT actor_capability_known CHECK (capability IN ('leads:read', 'leads:qualify'))
+);
+CREATE SCHEMA IF NOT EXISTS auth;
+CREATE TABLE auth."user" (
+  id text PRIMARY KEY,
+  name text NOT NULL,
+  email text NOT NULL UNIQUE,
+  "emailVerified" boolean NOT NULL DEFAULT false,
+  image text,
+  "createdAt" timestamptz NOT NULL,
+  "updatedAt" timestamptz NOT NULL
+);
+CREATE TABLE auth.session (
+  id text PRIMARY KEY,
+  "expiresAt" timestamptz NOT NULL,
+  token text NOT NULL UNIQUE,
+  "createdAt" timestamptz NOT NULL,
+  "updatedAt" timestamptz NOT NULL,
+  "ipAddress" text,
+  "userAgent" text,
+  "userId" text NOT NULL REFERENCES auth."user" (id) ON DELETE CASCADE
+);
+CREATE INDEX auth_session_user ON auth.session ("userId");
+CREATE TABLE auth.account (
+  id text PRIMARY KEY,
+  "accountId" text NOT NULL,
+  "providerId" text NOT NULL,
+  "userId" text NOT NULL REFERENCES auth."user" (id) ON DELETE CASCADE,
+  "accessToken" text,
+  "refreshToken" text,
+  "idToken" text,
+  "accessTokenExpiresAt" timestamptz,
+  "refreshTokenExpiresAt" timestamptz,
+  scope text,
+  password text,
+  "createdAt" timestamptz NOT NULL,
+  "updatedAt" timestamptz NOT NULL,
+  UNIQUE ("providerId", "accountId")
+);
+CREATE INDEX auth_account_user ON auth.account ("userId");
+CREATE TABLE auth.verification (
+  id text PRIMARY KEY,
+  identifier text NOT NULL,
+  value text NOT NULL,
+  "expiresAt" timestamptz NOT NULL,
+  "createdAt" timestamptz NOT NULL,
+  "updatedAt" timestamptz NOT NULL
+);
+CREATE INDEX auth_verification_identifier ON auth.verification (identifier);
+`;
+
+const DOWN_SECURITY = `
+DROP TABLE IF EXISTS auth.verification;
+DROP TABLE IF EXISTS auth.account;
+DROP TABLE IF EXISTS auth.session;
+DROP TABLE IF EXISTS auth."user";
+DROP SCHEMA IF EXISTS auth;
+DROP TABLE IF EXISTS actor_capability;
+DROP TABLE IF EXISTS identity_principal;
+ALTER TABLE domain_outbox DROP CONSTRAINT IF EXISTS domain_outbox_error_code;
+ALTER TABLE domain_outbox DROP CONSTRAINT IF EXISTS domain_outbox_status_known;
+ALTER TABLE domain_outbox DROP CONSTRAINT IF EXISTS domain_outbox_attempts_bound;
+ALTER TABLE domain_outbox
+  DROP COLUMN IF EXISTS delivery_status,
+  DROP COLUMN IF EXISTS last_error,
+  DROP COLUMN IF EXISTS claim_token,
+  DROP COLUMN IF EXISTS claimed_at,
+  DROP COLUMN IF EXISTS next_attempt_at,
+  DROP COLUMN IF EXISTS attempts;
+`;
+
 const migration: Migration = {
   async up(db) {
     await sql.raw(UP).execute(db);
@@ -111,9 +228,18 @@ const migration: Migration = {
   },
 };
 
+const securityMigration: Migration = {
+  async up(db) {
+    await sql.raw(UP_SECURITY).execute(db);
+  },
+  async down(db) {
+    await sql.raw(DOWN_SECURITY).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
-    return { '001_lead_vertical': migration };
+    return { '001_lead_vertical': migration, '002_security_runtime': securityMigration };
   },
 };
 

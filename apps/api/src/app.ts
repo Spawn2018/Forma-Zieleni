@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertOpaqueLeadId } from '@forma-zieleni/domain';
 import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest } from '@forma-zieleni/validation';
@@ -6,7 +7,7 @@ import { allows, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
-import { WindowLimiter } from './rate-limit.ts';
+import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
 
 type Vars = { requestId: string; actorId?: string; started: number };
@@ -18,7 +19,12 @@ export type AppOptions = {
   logs?: LogRecord[];
   tracer?: Tracer;
   limiter?: WindowLimiter;
-  addressOf?: (request: Request) => string;
+  addressOf?: (request: Request) => string | null;
+  trustProxy?: boolean;
+  trustedPeers?: readonly string[];
+  trustedOrigins?: readonly string[];
+  ready?: () => Promise<boolean>;
+  authHandler?: (request: Request) => Promise<Response>;
 };
 
 function mintRequestId(): string {
@@ -96,7 +102,10 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   const logs = options.logs ?? [];
   const tracer = options.tracer ?? noopTracer;
   const limiter = options.limiter ?? new WindowLimiter(30, 60_000);
-  const addressOf = options.addressOf ?? (() => 'local');
+  const trustProxy = options.trustProxy ?? false;
+  const trustedPeers = options.trustedPeers ?? [];
+  const trustedOrigins = options.trustedOrigins ?? [];
+  const ready = options.ready ?? (async () => true);
   const app = new Hono<{ Variables: Vars }>();
 
   app.onError((error, c) => {
@@ -134,6 +143,14 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', '');
     c.set('started', started);
     c.header('X-Request-Id', id);
+    const origin = c.req.header('origin');
+    if (origin && trustedOrigins.includes(origin)) {
+      c.header('Access-Control-Allow-Origin', origin);
+      c.header('Vary', 'Origin');
+      c.header('Access-Control-Allow-Credentials', 'true');
+      c.header('Access-Control-Allow-Headers', 'authorization, content-type, idempotency-key, x-request-id');
+      c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    }
     const span = tracer.startSpan('http.request');
     span.setAttribute('http.request.method', c.req.method);
     span.setAttribute('url.path', pathnameOf(c.req.url));
@@ -156,8 +173,25 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
 
   app.get('/v1/health', c => c.json({ ok: true }));
 
+  app.get('/v1/ready', async c => {
+    if (!(await ready())) throw new ApiFailure(503, 'NOT_READY', 'The API is not ready.');
+    return c.json({ ok: true });
+  });
+
+  app.options('*', c => c.body(null, trustedOrigins.includes(c.req.header('origin') ?? '') ? 204 : 403));
+
+  if (options.authHandler) {
+    app.on(['GET', 'POST'], '/api/auth/*', c => options.authHandler!(c.req.raw));
+  }
+
   app.post('/v1/leads', async c => {
-    if (!limiter.allow(addressOf(c.req.raw), Date.now())) throw new ApiFailure(429, 'RATE_LIMITED', 'Too many lead captures.');
+    const keyName = captureKey({
+      peer: peerAddress(c),
+      forwardedFor: c.req.header('x-forwarded-for') ?? null,
+      trustProxy,
+      trustedPeers,
+    });
+    if (!keyName || !limiter.allow(keyName, Date.now())) throw new ApiFailure(429, 'RATE_LIMITED', 'Too many lead captures.');
     const key = idempotencyKey(c.req.header('idempotency-key'));
     const parsed = validateLeadCaptureRequest(await readJson(c.req.raw));
     if (!parsed.ok) throw new ApiFailure(400, 'LEAD_INVALID', 'Lead could not be accepted.', parsed.errors);
@@ -166,7 +200,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   });
 
   app.get('/v1/leads', async c => {
-    const actor = requireActor(c, options.authenticator, 'leads:read');
+    const actor = await requireActor(c, options.authenticator, 'leads:read');
     c.set('actorId', actor.actorId);
     const query = parseListQuery({
       limit: c.req.query('limit'),
@@ -179,7 +213,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   });
 
   app.get('/v1/leads/:leadId', async c => {
-    const actor = requireActor(c, options.authenticator, 'leads:read');
+    const actor = await requireActor(c, options.authenticator, 'leads:read');
     c.set('actorId', actor.actorId);
     const lead = await readLead(options.store, pathLeadId(c.req.param('leadId')));
     if (!lead) throw new ApiFailure(404, 'LEAD_NOT_FOUND', 'Lead was not found.');
@@ -187,7 +221,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   });
 
   app.post('/v1/leads/:leadId/qualify', async c => {
-    const actor = requireActor(c, options.authenticator, 'leads:qualify');
+    const actor = await requireActor(c, options.authenticator, 'leads:qualify');
     c.set('actorId', actor.actorId);
     const key = idempotencyKey(c.req.header('idempotency-key'));
     const parsed = validateLeadQualifyRequest(await readJson(c.req.raw));
@@ -197,10 +231,19 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   });
 
   return app;
+
+  function peerAddress(c: { req: { raw: Request } }): string | null {
+    if (options.addressOf) return options.addressOf(c.req.raw);
+    try {
+      return getConnInfo(c as never).remote.address ?? null;
+    } catch {
+      return null;
+    }
+  }
 }
 
-function requireActor(c: { req: { header(name: string): string | undefined } }, authenticator: SessionAuthenticator, capability: 'leads:read' | 'leads:qualify') {
-  const actor = authenticator.authenticate(c.req.header('authorization'));
+async function requireActor(c: { req: { raw: Request } }, authenticator: SessionAuthenticator, capability: 'leads:read' | 'leads:qualify') {
+  const actor = await authenticator.authenticate(c.req.raw);
   if (!actor) throw new ApiFailure(401, 'UNAUTHENTICATED', 'Authentication is required.');
   if (!allows(actor, capability)) throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
   return actor;

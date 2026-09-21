@@ -36,6 +36,7 @@ function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
       authenticator: testAuthenticator(SECRET),
       logs,
       limiter: new WindowLimiter(limit, 60_000),
+      addressOf: () => '198.51.100.10',
       now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
     }),
   };
@@ -176,7 +177,11 @@ test('logs carry the request id and omit contact fields, tokens and payloads', a
   const logs = [];
   const { app } = appFor(new MemoryLeadStore(), logs);
   const token = mintTestSession(SECRET, staff);
-  const response = await app.request('/v1/leads', json(capture, { 'x-request-id': 'req-fixed-01', authorization: `Bearer ${token}` }));
+  const response = await app.request('/v1/leads', json(capture, {
+    'x-request-id': 'req-fixed-01',
+    authorization: `Bearer ${token}`,
+    cookie: 'better-auth.session_token=sekret-cookie-value',
+  }));
   assert.equal(response.headers.get('x-request-id'), 'req-fixed-01');
   assert.equal(response.status, 201);
   const line = JSON.stringify(logs);
@@ -186,6 +191,8 @@ test('logs carry the request id and omit contact fields, tokens and payloads', a
   assert.equal(line.includes('anna@example.invalid'), false);
   assert.equal(line.includes(token), false);
   assert.equal(line.includes('Bearer'), false);
+  assert.equal(line.includes('session_token'), false);
+  assert.equal(line.includes('sekret-cookie-value'), false);
   assert.equal(logs[0].path, '/v1/leads');
 });
 
@@ -203,7 +210,7 @@ test('database failure stays a safe 503', async () => {
       throw new PersistenceFailure();
     },
   };
-  const app = createApp({ store: broken, authenticator: testAuthenticator(SECRET) });
+  const app = createApp({ store: broken, authenticator: testAuthenticator(SECRET), addressOf: () => '198.51.100.20' });
   const response = await app.request('/v1/leads', json(capture));
   assert.equal(response.status, 503);
   const body = await response.json();
@@ -232,4 +239,73 @@ test('staff list paginates with the contract cursor', async () => {
   const rest = await second.json();
   assert.equal(rest.items[0].contact.name, NAME);
   assert.equal(rest.meta.nextCursor, null);
+});
+
+test('authorization does not reveal leads before the capability check', async () => {
+  const { app } = appFor();
+  const created = await app.request('/v1/leads', json(capture, { 'idempotency-key': 'enum-key-0001' }));
+  const lead = await created.json();
+  const reader = { ...staff, capabilities: ['leads:read'] };
+  assert.equal((await app.request(`/v1/leads/${lead.id}`)).status, 401);
+  assert.equal((await app.request(`/v1/leads/${lead.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/leads/missinglead0000000', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request(`/v1/leads/${lead.id}`, { headers: bearer(reader) })).status, 200);
+  assert.equal((await app.request('/v1/leads/missinglead0000000', { headers: bearer(reader) })).status, 404);
+  const qualify = await app.request(`/v1/leads/${lead.id}/qualify`, json({ capacityHold: false }, { ...bearer(reader), 'idempotency-key': 'enum-qual-0001' }));
+  assert.equal(qualify.status, 403);
+});
+
+test('spoofed forwarding does not open a new capture bucket', async () => {
+  const app = createApp({
+    store: new MemoryLeadStore(),
+    authenticator: testAuthenticator(SECRET),
+    limiter: new WindowLimiter(1, 60_000),
+    addressOf: () => '127.0.0.1',
+  });
+  const first = await app.request('/v1/leads', json(capture, { 'idempotency-key': 'spoof-key-001', 'x-forwarded-for': '203.0.113.8' }));
+  const second = await app.request('/v1/leads', json(capture, { 'idempotency-key': 'spoof-key-002', 'x-forwarded-for': '203.0.113.9' }));
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 429);
+});
+
+test('a trusted proxy uses the appended client address', async () => {
+  const app = createApp({
+    store: new MemoryLeadStore(),
+    authenticator: testAuthenticator(SECRET),
+    limiter: new WindowLimiter(1, 60_000),
+    addressOf: () => '127.0.0.1',
+    trustProxy: true,
+    trustedPeers: ['127.0.0.1'],
+  });
+  const left = await app.request('/v1/leads', json(capture, { 'idempotency-key': 'proxy-key-001', 'x-forwarded-for': '198.51.100.8, 203.0.113.4' }));
+  const right = await app.request('/v1/leads', json({ ...capture, name: 'Beata Testowa' }, { 'idempotency-key': 'proxy-key-002', 'x-forwarded-for': '198.51.100.8, 203.0.113.5' }));
+  assert.equal(left.status, 201);
+  assert.equal(right.status, 201);
+});
+
+test('readiness is separate from liveness', async () => {
+  const app = createApp({
+    store: new MemoryLeadStore(),
+    authenticator: testAuthenticator(SECRET),
+    ready: async () => false,
+  });
+  assert.deepEqual(await (await app.request('/v1/health')).json(), { ok: true });
+  const ready = await app.request('/v1/ready');
+  assert.equal(ready.status, 503);
+  assert.equal((await ready.json()).error.code, 'NOT_READY');
+});
+
+test('cors allows only configured origins', async () => {
+  const app = createApp({
+    store: new MemoryLeadStore(),
+    authenticator: testAuthenticator(SECRET),
+    trustedOrigins: ['http://127.0.0.1:3000'],
+    addressOf: () => '198.51.100.40',
+  });
+  const allowed = await app.request('/v1/health', { headers: { origin: 'http://127.0.0.1:3000' } });
+  assert.equal(allowed.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3000');
+  const denied = await app.request('/v1/health', { headers: { origin: 'https://evil.example' } });
+  assert.equal(denied.headers.get('access-control-allow-origin'), null);
+  const preflight = await app.request('/v1/leads', { method: 'OPTIONS', headers: { origin: 'https://evil.example' } });
+  assert.equal(preflight.status, 403);
 });

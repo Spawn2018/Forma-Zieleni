@@ -1,7 +1,7 @@
 # Next slice — lead vertical
 
-Status: IMPLEMENTED for the Core API lead vertical in `apps/api`.
-Not security-accepted. Production Better Auth is not wired.
+Status: IMPLEMENTED for the Core API lead vertical in `apps/api`, with a hardening pass for Better Auth sessions, peer rate limits, readiness, and outbox dispatch.
+Not security-accepted. Off-site backup, ZAP, and Dependency-Check remain deferred.
 
 Gate A architecture is DECIDED (ADR-014,
 [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.md)). That selection
