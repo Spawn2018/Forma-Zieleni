@@ -347,3 +347,28 @@ test('cors allows only configured origins', async () => {
   const preflight = await app.request('/v1/leads', { method: 'OPTIONS', headers: { origin: 'https://evil.example' } });
   assert.equal(preflight.status, 403);
 });
+
+test('a marketing plan route compiles a synthetic plan and cannot authorize spend', async () => {
+  const { app } = appFor();
+  const planner = {
+    actorId: 'actor_growth_plan',
+    issuer: 'test-issuer',
+    sub: 'growth-plan',
+    clientId: 'admin',
+    capabilities: ['growth:plan'],
+  };
+  const anonymous = await app.request('/v1/growth/plans', json({ goal: 'Wiecej kwalifikowanych rozmow', budgetPln: 8000, horizonDays: 90 }));
+  assert.equal(anonymous.status, 401);
+  const crm = await app.request('/v1/growth/plans', json({ goal: 'Wiecej kwalifikowanych rozmow', budgetPln: 8000, horizonDays: 90 }, bearer(staff)));
+  assert.equal(crm.status, 403);
+  const denied = await app.request('/v1/growth/plans', json({ goal: 'Wiecej kwalifikowanych rozmow', budgetPln: 8000, horizonDays: 90, spend: true }, bearer(planner)));
+  assert.equal(denied.status, 400);
+  const created = await app.request('/v1/growth/plans', json({ goal: 'Wiecej kwalifikowanych rozmow', budgetPln: 8000, horizonDays: 90 }, bearer(planner)));
+  assert.equal(created.status, 201);
+  const plan = await created.json();
+  assert.equal(plan.synthetic, true);
+  assert.equal(plan.authorizesSpend, false);
+  assert.equal(plan.authorizesPublication, false);
+  assert.equal(plan.simulator.status, 'NOT_ENOUGH_DATA');
+  assert.ok(plan.articleCount >= 1);
+});

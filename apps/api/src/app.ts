@@ -1,9 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, decideDraftRead } from '@forma-zieleni/domain';
+import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
 import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest } from '@forma-zieleni/validation';
-import { allows, type SessionAuthenticator } from './auth.ts';
+import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
@@ -231,6 +231,40 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json(lead);
   });
 
+  app.post('/v1/growth/plans', async c => {
+    const actor = await requireActor(c, options.authenticator, 'growth:plan');
+    c.set('actorId', actor.actorId);
+    const body = await readJson(c.req.raw);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) throw badRequest('PLAN_INVALID', 'Plan input is not valid.');
+    const record = body as Record<string, unknown>;
+    try {
+      assertNoClientSuppliedAuthority(record);
+    } catch {
+      throw badRequest('CLIENT_AUTHORITY_REJECTED', 'Plan authority is granted on the server.');
+    }
+    if ('spend' in record || 'publish' in record || record.authorizesSpend === true) {
+      throw badRequest('PLAN_AUTHORITY', 'A plan cannot authorize spend or publication.');
+    }
+    if (typeof record.goal !== 'string' || typeof record.budgetPln !== 'number' || typeof record.horizonDays !== 'number') {
+      throw badRequest('PLAN_INVALID', 'Plan input is not valid.');
+    }
+    try {
+      const plan = compileMarketingPlan({
+        goal: record.goal,
+        budgetPln: record.budgetPln,
+        horizonDays: record.horizonDays,
+        now: now(),
+        excludedChannels: Array.isArray(record.excludedChannels) ? record.excludedChannels.filter(item => typeof item === 'string') : [],
+      });
+      return c.json(plan, 201);
+    } catch (error) {
+      if (error instanceof Error && /GOAL_TOO_THIN|BUDGET_INVALID|HORIZON_INVALID|DATE_INVALID/.test(error.message)) {
+        throw badRequest('PLAN_INVALID', 'Plan input is not valid.');
+      }
+      throw error;
+    }
+  });
+
   app.get('/v1/content/:contentId', async c => {
     const supplied: Record<string, unknown> = {};
     for (const key of ['role', 'capabilities', 'actorId']) {
@@ -269,7 +303,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
   }
 }
 
-async function requireActor(c: { req: { raw: Request } }, authenticator: SessionAuthenticator, capability: 'leads:read' | 'leads:qualify') {
+async function requireActor(c: { req: { raw: Request }; set: (key: 'actorId', value: string) => void }, authenticator: SessionAuthenticator, capability: Capability) {
   const actor = await authenticator.authenticate(c.req.raw);
   if (!actor) throw new ApiFailure(401, 'UNAUTHENTICATED', 'Authentication is required.');
   if (!allows(actor, capability)) throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');

@@ -158,6 +158,10 @@ runtime-verified.
 FZ-CIS is cross-cutting. It does not change the product architecture
 above. Binding rules:
 [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md).
+Connected facts:
+[`FZ-CONNECTED-ECOSYSTEM.md`](./FZ-CONNECTED-ECOSYSTEM.md).
+Growth plans:
+[`FZ-GROWTH-OS.md`](./FZ-GROWTH-OS.md).
 The execution loop stays in Cursor OS. The execution graph stays in
 [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md).
 

@@ -438,8 +438,9 @@ Recovery: DB restore, media restore, export, last-known-good published content.
 Not a second roadmap and not a READY list. Binding rules:
 [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md).
 Material Learning Debt is derived from the learning store. It does not
-add a slice id. Deferred until a product surface exists: deployment
-telemetry, field performance, and search or UX outcome learning.
-Production-only later: live SLOs, error-budget enforcement, and
-customer conversion learning. Next product work remains the READY
-slices above.
+add a slice id. The connected-ecosystem and growth-plan contracts are
+recorded in
+[`FZ-CONNECTED-ECOSYSTEM.md`](./FZ-CONNECTED-ECOSYSTEM.md) and
+[`FZ-GROWTH-OS.md`](./FZ-GROWTH-OS.md). They do not replace this graph.
+Next ordinary READY work remains MEDIA-COLLECTIONS. Approval UI waits
+until `apps/admin` is a real application. Do not mark CMS-ACCEPT.

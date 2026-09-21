@@ -1,0 +1,39 @@
+{
+  "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
+  "addendum": "CLOSED-LOOP-MARKETING-EXECUTION",
+  "currentPhase": "foundation-recorded",
+  "startingHead": "977c453794b27f6d30c65bec28785b90da6b64f9",
+  "branch": "main",
+  "push": false,
+  "ownerGates": [
+    "FZ-SIGN-1 UNDECIDED",
+    "FZ-SEARCH-CRAWL-1 OPEN",
+    "CMS-ACCEPT OPEN",
+    "payment provider UNDECIDED",
+    "production hosting UNDECIDED"
+  ],
+  "blockers": [
+    "apps/admin and apps/portal are README boundaries, so approval UI is not built",
+    "Apostrophe Admin UI and PostgreSQL lab are not executed",
+    "Lead vertical is not security-accepted",
+    "No production deployment series, so DORA counts stay not measurable",
+    "Live OAuth, spend, tracking and publication stay unauthorized"
+  ],
+  "nextSafeAction": "MEDIA-COLLECTIONS remains the next ordinary READY slice in docs/architecture/NEXT-SLICES-CMS.md. Do not push.",
+  "evidencePaths": [
+    "packages/domain/src/connected.ts",
+    "packages/domain/src/growth.ts",
+    "packages/domain/ecosystem.test.mjs",
+    "apps/api/src/app.ts",
+    "apps/api/src/http.test.mjs",
+    "docs/architecture/FZ-CONNECTED-ECOSYSTEM.md",
+    "docs/architecture/FZ-GROWTH-OS.md",
+    "docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md",
+    "scripts/requirements/registry.mjs"
+  ],
+  "contextRecoveryHints": [
+    "Read START-HERE-CURSOR.md, then CURRENT-ARCHITECTURE.md, FZ-CONTINUOUS-IMPROVEMENT.md, FZ-CONNECTED-ECOSYSTEM.md, FZ-GROWTH-OS.md, this journal, and FZ-MASTER-TRACEABILITY.md.",
+    "Do not stage .cursor/settings.json.",
+    "Synthetic plans are not business results."
+  ]
+}

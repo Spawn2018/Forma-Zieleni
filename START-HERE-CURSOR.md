@@ -47,6 +47,10 @@ authorities. Before every push use
 
 Learning is not a second execution loop. Binding rules:
 `docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md`.
+Connected facts: `docs/architecture/FZ-CONNECTED-ECOSYSTEM.md`.
+Growth plans: `docs/architecture/FZ-GROWTH-OS.md`.
+Requirement registry: `docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md`.
+Recovery state: `docs/engineering/requirements/execution-journal.json`.
 Raw observations are not Canon. Owner gates cannot be learned away.
 
 ## Security-tool integration update --- 2026-09-21

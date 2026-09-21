@@ -1,11 +1,12 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { isContentCapability, type ContentCapability } from '@forma-zieleni/domain';
+import { isContentCapability, isGrowthCapability, type ContentCapability } from '@forma-zieleni/domain';
 import { ApiFailure } from './errors.ts';
 
 export const CLIENTS = ['web', 'portal', 'admin', 'mobile', 'sketchup', 'm2m'] as const;
 export type ClientId = (typeof CLIENTS)[number];
 export type LeadCapability = 'leads:read' | 'leads:qualify';
-export type Capability = LeadCapability | ContentCapability;
+export type GrowthCapability = 'growth:plan' | 'semantic:review';
+export type Capability = LeadCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -32,7 +33,7 @@ function isClient(value: unknown): value is ClientId {
 }
 
 function isCapability(value: unknown): value is Capability {
-  return value === 'leads:read' || value === 'leads:qualify' || (typeof value === 'string' && isContentCapability(value));
+  return value === 'leads:read' || value === 'leads:qualify' || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 
 export function mintTestSession(secret: string, actor: Actor): string {

@@ -265,12 +265,43 @@ const contentCapabilityMigration: Migration = {
   },
 };
 
+const GROWTH_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const growthCapabilityMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+      ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+      ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+        CHECK (capability IN (${GROWTH_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+      DELETE FROM actor_capability WHERE capability IN ('growth:plan', 'semantic:review');
+      ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+      ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+        CHECK (capability IN (${CONTENT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
       '001_lead_vertical': migration,
       '002_security_runtime': securityMigration,
       '003_content_capabilities': contentCapabilityMigration,
+      '004_growth_capabilities': growthCapabilityMigration,
     };
   },
 };
