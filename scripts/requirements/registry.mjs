@@ -112,6 +112,55 @@ row('FZ-REQ-CONTEXT-001', 'Recovery reads the journal, traceability and Canon wi
 row('FZ-REQ-EVIDENCE-001', 'Research limits are dated. Unfetched platform specs stay unverified.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', '', 'NONE', '');
 row('FZ-REQ-COMPLETION-001', 'The registry rejects a duplicate id, a missing prefix, or an actual depth below the recorded maximum.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md', 'scripts/requirements/registry.mjs', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 
+const DOCS = 'docs/architecture/FZ-DOCUMENTATION-OS.md';
+const DOCS_CHECK = 'scripts/docs/check.test.mjs';
+row('FZ-REQ-DOC-001', 'Documentation OS is subordinate Canon. Current architecture stays the entrypoint.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', DOCS, DOCS, DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DOC-002', 'Documents link to machine truth instead of copying OpenAPI, events, and requirements.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/API.md', 'docs/engineering/EVENTS.md', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DOC-003', 'Role guides match the current product. Missing Admin and CMS screens are stated.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/DOCUMENTATION-MAP.md', 'docs/guides/agnieszka.md', DOCS_CHECK, 'apps/admin is README only', 'NONE', 'No click-path guide for a UI that does not exist.');
+row('FZ-REQ-DOC-004', 'Storybook, Backstage, and a documentation site generator are not installed.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md', 'package.json', DOCS_CHECK, 'No shared UI package', 'NONE', 'Reconsider Storybook when a shared component is used by a real screen.');
+row('FZ-REQ-DOCOPS-001', 'DocumentationOps is separate from the five DORA delivery metrics and has no page-count target.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', DOCS, 'docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DOCOPS-002', 'Documentation debt stays on the existing execution graph. A signal cannot promote itself to Canon.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', DOCS, 'scripts/docs/learning.mjs', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DOCCTX-001', 'The context map stores pointers. Recovery starts at START-HERE, not a full-tree dump.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', DOCS, 'docs/engineering/FZ-CONTEXT-MAP.json', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DOCQA-001', 'pnpm docs:check fails on broken pointers, drifted events, placeholders, and a numeric DORA score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', DOCS, 'scripts/docs/check.mjs', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-PLATFORM-001', 'Golden paths reuse Cursor OS. One writer. No internal developer portal app.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/GOLDEN-PATHS.md', 'docs/cursor-os/CURSOR-OS-2026.md', DOCS_CHECK, '', 'NONE', '');
+row('FZ-REQ-DORA-003', 'DORA capability coverage is evidenced per capability. There is no combined score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', DOCS_CHECK, 'No production deployment series', 'NONE', 'Several capabilities stay DESIGNED or NOT MEASURABLE.');
+row('FZ-REQ-DORA-004', 'AI use is classified. Customer data and secrets are prohibited in external tools. Token count is not productivity.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FZ-AI-USAGE-POLICY.md', 'docs/engineering/FZ-AI-USAGE-POLICY.md', DOCS_CHECK, '', 'NONE', 'Vendor privacy promises were not re-verified.');
+row('FZ-REQ-DORA-005', 'Release readiness is local and reproducible. Deploy, hosting, and alert thresholds stay gated or unmeasured.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/RELEASE-READINESS.md', 'docs/engineering/RELEASE-READINESS.md', DOCS_CHECK, 'production hosting UNDECIDED', 'OWNER-DECISION', '');
+
+const OPEN_SLICES = [
+  'MEDIA-COLLECTIONS', 'GALLERY-WWW', 'BEFORE-AFTER', 'CMS-SEO', 'CMS-ADMIN', 'CMS-WWW', 'CMS-HARDEN',
+  'CMS-PERF', 'CMS-RESTORE', 'CMS-EXPORT', 'CMS-ACCEPT', 'SEARCH-WWW-TECHNICAL', 'SEARCH-STRUCTURED-DATA',
+  'SEARCH-SITEMAP-ROBOTS', 'SEARCH-ATTRIBUTION', 'SEARCH-DATA-MODEL', 'SEARCH-CONNECTORS', 'SEARCH-SYNC',
+  'SEARCH-HISTORY', 'SEARCH-TECH-AUDIT', 'SEARCH-AI-VISIBILITY', 'SEARCH-CRAWLER-INTELLIGENCE',
+  'SEARCH-CONTENT-INTELLIGENCE', 'SEARCH-ADMIN', 'SEARCH-ALERTS', 'SEARCH-SECURITY', 'SEARCH-PERFORMANCE',
+  'SEARCH-RECOVERY', 'SEARCH-ACCEPT', 'RETURN-ROADMAP',
+];
+for (const slice of OPEN_SLICES) {
+  row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
+}
+const ACCEPTANCE = [
+  ['A', 'Apostrophe plus PostgreSQL in the intended architecture'],
+  ['B', 'Real Apostrophe Admin and editor UI'],
+  ['C', 'Real page, project, article, and service editing'],
+  ['D', 'Native visual editing quality'],
+  ['E', 'FZ media pipeline integration in the vendor editor'],
+  ['F', 'Draft and publish in the vendor product'],
+  ['G', 'Preview'],
+  ['H', 'Revision, history, and rollback in the vendor product'],
+  ['I', 'Scheduler strategy'],
+  ['J', 'Permissions and auth integration with the vendor'],
+  ['K', 'Last-known-good publication in the running CMS'],
+  ['L', 'CMS backup and restore'],
+  ['M', 'CMS export and exit'],
+  ['N', 'CMS security lab'],
+  ['O', 'CMS performance evidence'],
+  ['P', 'CMS accessibility evidence'],
+  ['Q', 'React Router WWW integration'],
+];
+for (const [letter, text] of ACCEPTANCE) {
+  row(`FZ-REQ-CMS-ACCEPT-${letter}`, text, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'CMS-ACCEPT is open', 'REVIEW', 'Domain contracts do not close vendor acceptance.');
+}
+
 const PREFIXES = [
   'FZ-REQ-GOV', 'FZ-REQ-AUTO', 'FZ-REQ-DORA', 'FZ-REQ-CIS', 'FZ-REQ-ARCH', 'FZ-REQ-SEC', 'FZ-REQ-PRIV',
   'FZ-REQ-WWW', 'FZ-REQ-PORTAL', 'FZ-REQ-ADMIN', 'FZ-REQ-MOBILE', 'FZ-REQ-API', 'FZ-REQ-DATA', 'FZ-REQ-CMS',
@@ -120,6 +169,7 @@ const PREFIXES = [
   'FZ-REQ-EXPERIENCE', 'FZ-REQ-CRM', 'FZ-REQ-SITEINTEL', 'FZ-REQ-GARDENOS', 'FZ-REQ-SKETCHUP',
   'FZ-REQ-INTEGRATION', 'FZ-REQ-OPS', 'FZ-REQ-MKTEXEC', 'FZ-REQ-OFFERINTEL', 'FZ-REQ-OFFERLEARN',
   'FZ-REQ-PROJECTGROWTH', 'FZ-REQ-EXECINTEGRITY', 'FZ-REQ-CONTEXT', 'FZ-REQ-EVIDENCE', 'FZ-REQ-COMPLETION',
+  'FZ-REQ-DOC', 'FZ-REQ-DOCOPS', 'FZ-REQ-DOCCTX', 'FZ-REQ-DOCQA', 'FZ-REQ-PLATFORM',
 ];
 
 function rank(depth) {

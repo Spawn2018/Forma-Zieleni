@@ -8,7 +8,8 @@
     "GET /leads",
     "GET /leads/{leadId}",
     "POST /leads/{leadId}/qualify",
-    "GET /content/{contentId}"
+    "GET /content/{contentId}",
+    "POST /growth/plans"
   ],
   "requiredHeaders": {
     "POST /leads": ["Idempotency-Key"],

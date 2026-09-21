@@ -46,6 +46,7 @@ DISCOVER
 ### Stage notes
 - **CONTRACT** is required before implementation wherever the slice affects API/domain contracts or introduces a new external surface.
 - **TEST**, **REFACTOR**, **SECURITY REVIEW**, **DOCUMENT**, **FINAL DIFF**, **PRE-PUSH GATE**, and **COMPLETE** are mandatory for implementation slices (proportionate evidence for docs-only / non-code slices).
+- **DOCUMENT** includes a documentation impact check. If behavior, a contract, security, privacy, operations, or an operator workflow changed, update the canonical document in the same slice. No material documentation impact is a valid result. Rules: `docs/architecture/FZ-DOCUMENTATION-OS.md`.
 - **PERFORMANCE/DATA REVIEW** runs when the slice can affect hot paths, queries, migrations, caching, bundles, media, uploads or resource use.
 - **UX/A11Y/VISUAL/CONTENT REVIEW** runs when the slice affects customer-facing or operator-facing UI/copy; obey Visual, UX and Content Canons.
 - A failed gate returns work to the owning implementation agent. Never weaken a gate to make it pass.

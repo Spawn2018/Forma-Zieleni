@@ -51,6 +51,8 @@ Connected facts: `docs/architecture/FZ-CONNECTED-ECOSYSTEM.md`.
 Growth plans: `docs/architecture/FZ-GROWTH-OS.md`.
 Requirement registry: `docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md`.
 Recovery state: `docs/engineering/requirements/execution-journal.json`.
+Document finding aid: `docs/DOCUMENTATION-MAP.md`.
+Read the context map for the task. Do not load the whole tree.
 Raw observations are not Canon. Owner gates cannot be learned away.
 
 ## Security-tool integration update --- 2026-09-21

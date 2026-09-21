@@ -25,6 +25,7 @@ All active documents and agents must link here for “current architecture”.
 | [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md) | Binding continuous-improvement rules. Not an execution loop. |
 | [`FZ-CONNECTED-ECOSYSTEM.md`](./FZ-CONNECTED-ECOSYSTEM.md) | Connected facts, relations, review and visibility. Subordinate to current architecture. |
 | [`FZ-GROWTH-OS.md`](./FZ-GROWTH-OS.md) | Marketing plan, execution graph, offer learning and project flywheel. Not a second roadmap. |
+| [`FZ-DOCUMENTATION-OS.md`](./FZ-DOCUMENTATION-OS.md) | Documentation rules. Subordinate to current architecture. Not a documentation site. |
 | [`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md) | Production training-crawler policy. OPEN. |
 | [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md) | Binding contract lifecycle and e-signature boundary. Provider undecided. |
 | [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md) | Later research packet. No engine selected. |

@@ -164,6 +164,9 @@ Growth plans:
 [`FZ-GROWTH-OS.md`](./FZ-GROWTH-OS.md).
 The execution loop stays in Cursor OS. The execution graph stays in
 [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md).
+Documentation rules:
+[`FZ-DOCUMENTATION-OS.md`](./FZ-DOCUMENTATION-OS.md).
+The finding aid is [`../DOCUMENTATION-MAP.md`](../DOCUMENTATION-MAP.md).
 
 ## Security-tool integration update --- 2026-09-21
 

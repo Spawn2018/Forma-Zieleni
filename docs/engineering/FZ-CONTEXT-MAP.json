@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "note": "Pointers only. Do not copy Canon into this file.",
+  "recovery": [
+    "START-HERE-CURSOR.md",
+    "docs/cursor-os/CURSOR-OS-2026.md",
+    "docs/architecture/CURRENT-ARCHITECTURE.md",
+    "docs/DOCUMENTATION-MAP.md",
+    "docs/engineering/requirements/execution-journal.json",
+    "docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md",
+    "docs/engineering/FZ-CONTEXT-MAP.json"
+  ],
+  "domains": [
+    {
+      "id": "architecture",
+      "canon": "docs/architecture/CURRENT-ARCHITECTURE.md",
+      "code": ["apps/api/src/app.ts"],
+      "tests": ["apps/api/src/http.test.mjs"],
+      "decisions": ["docs/architecture/DECISIONS.md"]
+    },
+    {
+      "id": "documentation",
+      "canon": "docs/architecture/FZ-DOCUMENTATION-OS.md",
+      "code": ["scripts/docs/check.mjs"],
+      "tests": ["scripts/docs/check.test.mjs"],
+      "decisions": ["docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md"]
+    },
+    {
+      "id": "connected",
+      "canon": "docs/architecture/FZ-CONNECTED-ECOSYSTEM.md",
+      "code": ["packages/domain/src/connected.ts"],
+      "tests": ["packages/domain/ecosystem.test.mjs"],
+      "decisions": ["docs/domain/GLOSSARY.md"]
+    },
+    {
+      "id": "growth",
+      "canon": "docs/architecture/FZ-GROWTH-OS.md",
+      "code": ["packages/domain/src/growth.ts"],
+      "tests": ["packages/domain/ecosystem.test.mjs"],
+      "decisions": ["docs/engineering/FZ-AI-USAGE-POLICY.md"]
+    },
+    {
+      "id": "search",
+      "canon": "docs/architecture/FZ-SEARCH-1.md",
+      "code": ["contracts/content-contract.mjs"],
+      "tests": ["contracts/content-contract.test.mjs"],
+      "decisions": ["docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md"]
+    },
+    {
+      "id": "security",
+      "canon": "docs/architecture/SECURITY.md",
+      "code": ["apps/api/src/auth.ts"],
+      "tests": ["apps/api/src/http.test.mjs"],
+      "decisions": ["docs/workflows/DECISION-GATES.md"]
+    }
+  ]
+}

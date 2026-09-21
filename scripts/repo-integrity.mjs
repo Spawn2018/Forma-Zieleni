@@ -49,6 +49,8 @@ const linkScope = [
   'docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md',
   'docs/architecture/FZ-CONNECTED-ECOSYSTEM.md',
   'docs/architecture/FZ-GROWTH-OS.md',
+  'docs/architecture/FZ-DOCUMENTATION-OS.md',
+  'docs/DOCUMENTATION-MAP.md',
   'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md',
   'docs/cursor-os/CURSOR-OS-2026.md',
   'docs/workflows/DECISION-GATES.md',

@@ -1,9 +1,9 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
-  "addendum": "CLOSED-LOOP-MARKETING-EXECUTION",
-  "currentPhase": "foundation-recorded",
-  "startingHead": "977c453794b27f6d30c65bec28785b90da6b64f9",
-  "lastVerifiedCommit": "92696187996d8d09ff5188b0fac0eae41b0e00cd",
+  "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
+  "currentPhase": "documentation-os-recorded",
+  "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
+  "lastVerifiedCommit": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "branch": "main",
   "push": false,
   "ownerGates": [
@@ -18,22 +18,21 @@
     "Apostrophe Admin UI and PostgreSQL lab are not executed",
     "Lead vertical is not security-accepted",
     "No production deployment series, so DORA counts stay not measurable",
-    "Live OAuth, spend, tracking and publication stay unauthorized"
+    "Live OAuth, spend, tracking and publication stay unauthorized",
+    "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "Add one traceability row for each open CMS and Search slice and for CMS acceptance items A-Q, at the depth the repository actually has. Do not mark them complete. Product execution then continues at MEDIA-COLLECTIONS. Do not push.",
+  "nextSafeAction": "The next ordinary product slice is MEDIA-COLLECTIONS in docs/architecture/NEXT-SLICES-CMS.md. Do not push.",
   "evidencePaths": [
-    "packages/domain/src/connected.ts",
-    "packages/domain/src/growth.ts",
     "packages/domain/ecosystem.test.mjs",
-    "apps/api/src/app.ts",
-    "apps/api/src/http.test.mjs",
-    "docs/architecture/FZ-CONNECTED-ECOSYSTEM.md",
-    "docs/architecture/FZ-GROWTH-OS.md",
-    "docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md",
-    "scripts/requirements/registry.mjs"
+    "docs/architecture/FZ-DOCUMENTATION-OS.md",
+    "docs/DOCUMENTATION-MAP.md",
+    "docs/engineering/FZ-CONTEXT-MAP.json",
+    "docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md",
+    "scripts/docs/check.mjs",
+    "docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md"
   ],
   "contextRecoveryHints": [
-    "Read START-HERE-CURSOR.md, then CURRENT-ARCHITECTURE.md, FZ-CONTINUOUS-IMPROVEMENT.md, FZ-CONNECTED-ECOSYSTEM.md, FZ-GROWTH-OS.md, this journal, and FZ-MASTER-TRACEABILITY.md.",
+    "Read START-HERE-CURSOR.md, then the recovery list in docs/engineering/FZ-CONTEXT-MAP.json. Do not load the whole tree.",
     "Do not stage .cursor/settings.json.",
     "Synthetic plans are not business results."
   ]

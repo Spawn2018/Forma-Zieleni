@@ -19,7 +19,8 @@
   "tags": [
     { "name": "System" },
     { "name": "Leads" },
-    { "name": "Content" }
+    { "name": "Content" },
+    { "name": "Growth" }
   ],
   "paths": {
     "/health": {
@@ -204,6 +205,38 @@
           "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
+    },
+    "/growth/plans": {
+      "post": {
+        "tags": ["Growth"],
+        "operationId": "compileMarketingPlan",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Compiles a synthetic marketing plan from a goal, a budget ceiling and a horizon. The plan does not authorize spend or publication. Requires the server-granted growth:plan capability.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MarketingPlanInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Synthetic plan. Not a business result and not permission to spend.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MarketingPlanContract" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
     }
   },
   "components": {
@@ -259,6 +292,31 @@
         "type": "string",
         "pattern": "^[a-z][a-z0-9]{15,63}$",
         "description": "Non-guessable identifier. Sequential integers are rejected."
+      },
+      "MarketingPlanInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["goal", "budgetPln", "horizonDays"],
+        "properties": {
+          "goal": { "type": "string", "minLength": 8 },
+          "budgetPln": { "type": "integer", "minimum": 1 },
+          "horizonDays": { "type": "integer", "minimum": 14, "maximum": 366 },
+          "excludedChannels": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "MarketingPlanContract": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["synthetic", "label", "authorizesSpend", "authorizesPublication"],
+        "properties": {
+          "synthetic": { "type": "boolean", "enum": [true] },
+          "label": { "type": "string", "enum": ["SYNTHETIC / TEST ONLY"] },
+          "authorizesSpend": { "type": "boolean", "enum": [false] },
+          "authorizesPublication": { "type": "boolean", "enum": [false] }
+        }
       },
       "Health": {
         "type": "object",

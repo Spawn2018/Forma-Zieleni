@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "docId": "DOC-ARCH",
+      "title": "Current architecture",
+      "type": "CANON",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "CANON",
+      "status": "CURRENT",
+      "freshnessClass": "STABLE",
+      "path": "docs/architecture/CURRENT-ARCHITECTURE.md"
+    },
+    {
+      "docId": "DOC-DOCS",
+      "title": "Documentation OS",
+      "type": "CANON",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "SUBORDINATE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/architecture/FZ-DOCUMENTATION-OS.md"
+    },
+    {
+      "docId": "DOC-MAP",
+      "title": "Documentation map",
+      "type": "REFERENCE",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "SUBORDINATE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/DOCUMENTATION-MAP.md"
+    },
+    {
+      "docId": "DOC-BASELINE",
+      "title": "Documentation quality baseline",
+      "type": "EVIDENCE",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "EVIDENCE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md"
+    },
+    {
+      "docId": "DOC-OWNER",
+      "title": "Owner guide",
+      "type": "GUIDE",
+      "audience": "owner",
+      "owner": "OWNER",
+      "authority": "GUIDE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/guides/wlasciciel.md"
+    },
+    {
+      "docId": "DOC-AGNIESZKA",
+      "title": "Agnieszka guide",
+      "type": "GUIDE",
+      "audience": "agnieszka",
+      "owner": "AGNIESZKA",
+      "authority": "GUIDE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/guides/agnieszka.md"
+    },
+    {
+      "docId": "DOC-DEV",
+      "title": "Developer guide",
+      "type": "GUIDE",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "GUIDE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/guides/developer.md"
+    },
+    {
+      "docId": "DOC-API",
+      "title": "API pointer",
+      "type": "REFERENCE",
+      "audience": "developer",
+      "owner": "CORE-API",
+      "authority": "REFERENCE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/engineering/API.md"
+    },
+    {
+      "docId": "DOC-EVENTS",
+      "title": "Domain events",
+      "type": "REFERENCE",
+      "audience": "developer",
+      "owner": "CORE-API",
+      "authority": "REFERENCE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/engineering/EVENTS.md"
+    },
+    {
+      "docId": "DOC-AI",
+      "title": "AI usage policy",
+      "type": "CANON",
+      "audience": "developer",
+      "owner": "SECURITY",
+      "authority": "SUBORDINATE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/engineering/FZ-AI-USAGE-POLICY.md"
+    },
+    {
+      "docId": "DOC-DORA",
+      "title": "DORA capability coverage",
+      "type": "EVIDENCE",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "authority": "EVIDENCE",
+      "status": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "path": "docs/engineering/DORA-CAPABILITY-COVERAGE.md"
+    },
+    {
+      "docId": "DOC-PATHS",
+      "title": "Golden paths",
+      "type": "EXPLANATION",
+      "audience": "developer",
+      "owner": "FZ-ORCHESTRATOR",
+      "authority": "SUBORDINATE",
+      "status": "CURRENT",
+      "freshnessClass": "STABLE",
+      "path": "docs/engineering/GOLDEN-PATHS.md"
+    }
+  ]
+}
