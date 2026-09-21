@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "foundation-closure-recorded",
+  "currentPhase": "media-collections-recorded",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -22,7 +22,7 @@
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "The next ordinary product slice is MEDIA-COLLECTIONS in docs/architecture/NEXT-SLICES-CMS.md. Do not push.",
+  "nextSafeAction": "GALLERY-WWW needs a React Router app that is not in the tree. Work-steal to SEARCH-ATTRIBUTION. Do not push.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
     "docs/architecture/FZ-DOCUMENTATION-OS.md",

@@ -144,6 +144,10 @@ const OPEN_SLICES = [
   'SEARCH-RECOVERY', 'SEARCH-ACCEPT', 'RETURN-ROADMAP',
 ];
 for (const slice of OPEN_SLICES) {
+  if (slice === 'MEDIA-COLLECTIONS') {
+    row('FZ-REQ-CMS-SLICE-MEDIA-COLLECTIONS', 'Collections reorder, set a hero, store ALT and focal data, and reuse one master.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/collections.mjs', 'packages/media/collections.test.mjs', '', 'NONE', 'Gallery UI is the next slice and needs a web app.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

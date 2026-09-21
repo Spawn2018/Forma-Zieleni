@@ -121,11 +121,10 @@ Next: MEDIA-COLLECTIONS. CMS-ADMIN may start because CMS-PUBLISH and MEDIA-LIBRA
 
 Dependencies: MEDIA-LIBRARY.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: MEDIA-LIBRARY recorded.
+Status: COMPLETE for the local collection contract. No gallery UI.
 Accept: reorder, hero, captions, ALT, focal/safe region, before/after pair, reuse without copying masters.
-Tests: reorder persistence; same asset in two collections; one master.
-Next: GALLERY-WWW.
+Tests: `packages/media/collections.test.mjs`.
+Next: GALLERY-WWW. That slice needs a React Router app, which is not in the tree.
 
 ### GALLERY-WWW
 
