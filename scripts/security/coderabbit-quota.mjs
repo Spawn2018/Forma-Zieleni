@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const HOUR = 60 * 60 * 1000;
 const BUDGET = 3;
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const file = path.join(root, 'tmp', 'coderabbit-reviews.json');
+const file = process.env.CODERABBIT_QUOTA_LOG || path.join(root, 'tmp', 'coderabbit-reviews.json');
 
 function load() {
   if (!existsSync(file)) return [];
@@ -14,18 +14,42 @@ function load() {
   return value.filter(entry => typeof entry.startedAt === 'string' && Number.isFinite(Date.parse(entry.startedAt)));
 }
 
+function usedOf(entries) {
+  return entries.filter(entry => entry.outcome === 'success').length;
+}
+
+function report(used, extra = {}) {
+  const remaining = Math.max(0, BUDGET - used);
+  return {
+    status: remaining ? 'AVAILABLE' : 'DEFERRED',
+    used,
+    remaining,
+    budget: BUDGET,
+    usedOfBudget: `${used}/${BUDGET}`,
+    availableOfBudget: `${remaining}/${BUDGET}`,
+    source: 'conservative-3-per-rolling-hour',
+    ...extra,
+  };
+}
+
 const now = Date.now();
 const recent = load().filter(entry => now - Date.parse(entry.startedAt) < HOUR);
-const remaining = Math.max(0, BUDGET - recent.length);
-if (process.argv[2] === 'record') {
-  if (remaining < 1) {
-    console.log(JSON.stringify({ status: 'DEFERRED', reason: 'CODERABBIT_RATE_LIMIT', remaining: 0, budget: BUDGET }));
+const used = usedOf(recent);
+const command = process.argv[2];
+const outcome = command === 'record' ? process.argv[3] : command;
+
+if (!command) {
+  console.log(JSON.stringify(report(used)));
+} else if (outcome === 'success' || outcome === 'fail') {
+  if (outcome === 'success' && used >= BUDGET) {
+    console.log(JSON.stringify({ ...report(used), reason: 'CODERABBIT_RATE_LIMIT' }));
     process.exitCode = 2;
   } else {
     mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, JSON.stringify([...recent, { startedAt: new Date(now).toISOString() }], null, 2));
-    console.log(JSON.stringify({ status: 'RESERVED', remaining: remaining - 1, budget: BUDGET }));
+    writeFileSync(file, JSON.stringify([...recent, { startedAt: new Date(now).toISOString(), outcome }], null, 2));
+    console.log(JSON.stringify({ ...report(used + (outcome === 'success' ? 1 : 0)), recorded: outcome }));
   }
 } else {
-  console.log(JSON.stringify({ status: remaining ? 'AVAILABLE' : 'DEFERRED', remaining, budget: BUDGET, source: 'conservative-until-account-verified' }));
+  console.log(JSON.stringify({ ...report(used), reason: 'INVALID_QUOTA_COMMAND' }));
+  process.exitCode = 2;
 }
