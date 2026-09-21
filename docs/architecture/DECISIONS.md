@@ -162,6 +162,16 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Kontekst | ChatGPT is out of the runtime loop. Product construction continues with durable contracts while Gate A stack choices remain open. |
 | Konsekwencje | Missing Owner replies block only the dependent slice. HTTP/DB/UI runtimes wait for FZ-A1–A7. |
 
+## ADR-013 — Provider-neutral contract lifecycle (FZ-SIGN-1)
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-21 |
+| Status | Accepted (boundary only) |
+| Decyzja | Core API owns contract business state, authorization, lifecycle and archive metadata. Private object storage owns immutable artifacts. A signing engine is a replaceable adapter and is not the source of truth. Electronic signature is not treated as legally mandatory for every transaction. Provider remains UNDECIDED. |
+| Kontekst | Commercial flow needs Offer → Contract → signature when required → payment → project, without letting a SaaS become the ACL or the only archive. |
+| Konsekwencje | Canonical text: `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. Research: `OWNER-DECISION-PACKET-FZ-SIGN-1.md`. FZ-A1–A7 stay open. No SDK, schema or provider until a later Owner decision. |
+
 ## Szablon kolejnego ADR
 
 ```markdown

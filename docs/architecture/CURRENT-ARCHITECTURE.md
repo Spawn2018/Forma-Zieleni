@@ -12,6 +12,10 @@ Status: CURRENT.
     target/reference); event-driven core + transactional outbox.
 -   Core API/domain data is source of truth; providers are adapters.
     Current lead-slice contract: `contracts/openapi.json`.
+    Contract lifecycle and electronic signature:
+    `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. The signing engine is an adapter,
+    not business truth. Provider UNDECIDED. FZ-SIGN-1 does not close
+    FZ-A1–A7.
 -   Cloudflare is public/security ingress; target origin private.
 -   dev/staging/production required.
 
@@ -19,7 +23,8 @@ Status: CURRENT.
 
 Application frameworks; API framework/runtime; database provider/engine
 final choice; ORM; hosting/compute; storage; payment provider;
-observability backend; CMS; auth library; deployment provider. Legacy
+observability backend; CMS; auth library; deployment provider;
+electronic-signature engine (FZ-SIGN-1, later). Legacy
 Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model

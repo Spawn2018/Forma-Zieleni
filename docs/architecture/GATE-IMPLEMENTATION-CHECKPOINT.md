@@ -8,6 +8,8 @@ OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNE
 
 Local reproducible app config, CI deploy, API skeleton, migrations, object storage, auth runtime, restore test, monitoring, webhook tests, load baseline and private-origin validation remain unstarted.
 
+FZ-SIGN-1 is recorded as a later contract-lifecycle boundary. It does not add an eighth Gate A decision. The signing provider remains UNDECIDED. No Documenso, DocuSeal, OpenSign or Autenti integration was implemented.
+
 ## Gate B API contract
 
 REVIEW progress, not a complete runtime:

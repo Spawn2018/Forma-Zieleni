@@ -20,7 +20,7 @@ Wymagania bezpieczeństwa dla platformy. Obowiązują niezależnie od ostateczne
 
 ### BOLA (Broken Object Level Authorization)
 
-- każdy dostęp do obiektu (`projectId`, `offerId`, `fileId`, …) sprawdzany względem tożsamości i relacji własności/uprawnień,
+- każdy dostęp do obiektu (`projectId`, `offerId`, `contractId`, `fileId`, …) sprawdzany względem tożsamości i relacji własności/uprawnień,
 - zakaz opierania bezpieczeństwa na „ukrytych” ID,
 - testy negatywne: użytkownik A nie odczytuje/nie mutuje zasobów użytkownika B.
 
@@ -60,12 +60,13 @@ Wymagania bezpieczeństwa dla platformy. Obowiązują niezależnie od ostateczne
 - walidacja typu, rozmiaru i zawartości po stronie serwera,
 - przechowywanie poza publicznym rootem aplikacji,
 - skanowanie / ograniczenia wykonania (brak serwowania uploadów jako aktywnego kodu),
-- osobne uprawnienia do odczytu plików (BOLA na `fileId`),
-- preferowane podpisane, czasowo ograniczone URL-e dostępu.
+- osobne uprawnienia do odczytu plików (BOLA na `fileId` i na `contractId`),
+- preferowane podpisane, czasowo ograniczone URL-e dostępu (to jest kontrola dostępu do bajtów, nie podpis elektroniczny umowy),
+- artefakty umów: [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md). Publiczny URL nie jest autoryzacją. Silnik podpisu nie jest jedynym archiwum.
 
 ## Webhooki: podpisy, idempotency, replay safety
 
-Wejścia webhook (płatności, faktury, messaging, itd.):
+Wejścia webhook (płatności, faktury, messaging, przyszły silnik podpisu, itd.):
 
 - weryfikacja **podpisu** (HMAC / signature header providera),
 - **idempotency keys** — ponowione dostarczenie nie tworzy podwójnego skutku biznesowego,
@@ -96,7 +97,8 @@ Wejścia webhook (płatności, faktury, messaging, itd.):
 
 ## Backup i restore testing
 
-- regularne backupy danych kanonicznych,
+- regularne backupy danych kanonicznych, w tym metadanych umowy w Core API i artefaktów w prywatnym storage,
+- podpis u dostawcy nie zastępuje kopii off-site ani testu restore ([`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md)),
 - okresowe **testy przywracania** (nie tylko „backup istnieje”),
 - procedury restore w runbookach — bez sekretów w repo.
 

@@ -25,10 +25,14 @@ and unique; no programmatic spam.
 
 Offer is a first-class object with scope, exclusions, price, validity,
 timeline, milestones, correction rounds, payment schedule, files,
-version/acceptance and contract linkage. Canonical activation: Offer -\>
-Accept -\> Contract -\> Deposit/Payment -\> Project. Capacity informs
-promised dates. Scope creep is made visible through decisions/change
-orders rather than hidden labour.
+version/acceptance and contract linkage. Canonical activation remains
+Offer → Accept → Contract → Deposit/Payment → Project. Signature, when
+the contract requires it, sits between Contract and Deposit/Payment and
+is specified only in
+[`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
+That document does not make electronic signature legally mandatory for
+every transaction. Capacity informs promised dates. Scope creep is made
+visible through decisions/change orders rather than hidden labour.
 
 ## 2. Project OS
 
@@ -61,8 +65,12 @@ relationship after project delivery.
 ## Product surfaces
 
 -   `apps/web`: public sales application.
--   `apps/portal`: separate client portal.
--   `apps/admin`: internal CRM/operations/control surface.
+-   `apps/portal`: separate client portal. A future signing ceremony, if
+    any, is a view over Core API state, not a second contract record.
+-   `apps/admin`: internal CRM/operations/control surface. Contract
+    approval and lifecycle operations for staff live here later; they
+    call Core API. Definition:
+    [`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
 -   `apps/api`: Core API boundary/runtime, implementation stack
     undecided.
 -   Mobile later: task/photo/push/relationship-first, not a portal

@@ -12,6 +12,11 @@ Choosing a local/zero-cost path **now** is a development horizon, not
 the permanent production architecture. Staging and production remain
 later OWNER-DECISION / DANGEROUS steps.
 
+FZ-SIGN-1 (contract lifecycle and electronic signature) is a **later**
+packet. It does not change any option below and does not add an eighth
+Gate A reply. Provider UNDECIDED. Definition:
+[`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
+
 ## How to use this pack
 
 1. Pick one **application bundle** in FZ-A2. That locks Core API runtime

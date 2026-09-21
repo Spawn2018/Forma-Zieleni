@@ -34,7 +34,9 @@ Plant Knowledge -\> Garden OS foundations.
 
 Architecture: API-first modular monolith, event-driven core,
 transactional outbox, server-side authz, private files,
-signed/idempotent/replay-safe webhooks.
+signed/idempotent/replay-safe webhooks. Contract lifecycle and
+e-signature boundary (provider undecided, not a Gate A blocker):
+`docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`.
 
 ## D --- Products
 

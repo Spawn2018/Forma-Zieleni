@@ -35,8 +35,15 @@ Widoczne odpowiednio w `admin` i `portal`.
 
 ### Offers
 
-Oferty i umowy: wersje, akceptacje, warunki, ślad decyzji klienta.
+Oferty: zakres, wyłączenia, cena, ważność, akceptacja, powiązanie z umową.
 Powiązane ze Sales, Projects i Payments.
+Szczegół cyklu umowy i podpisu: [`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
+Podpis elektroniczny nie jest tu uznany za prawnie obowiązkowy dla każdej transakcji.
+
+### Contracts
+
+Umowy, wersje, aneksy i change orders. Stan biznesowy, autoryzacja i metadane archiwum należą do Core API.
+Silnik podpisu jest adapterem i pozostaje UNDECIDED (FZ-SIGN-1). Nie jest ACL projektu ani jedynym archiwum.
 
 ### Payments
 
@@ -79,7 +86,8 @@ Klienci UI / mobile / SketchUp korzystają przez to samo API.
 Identity/Auth
     └── autoryzuje wszystkie moduły
 
-CRM ──► Sales ──► Offers ──► Payments
+CRM ──► Sales ──► Offers ──► Contracts ──► Payments
+              │         (podpis gdy wymagany — FZ-SIGN-1)
               └──► Projects ──► Files
                      │
                      ├── Site Intelligence

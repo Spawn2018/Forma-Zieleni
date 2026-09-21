@@ -20,7 +20,7 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 | Business constraint / owner-hour economics | PRODUCT-CANON | COVERED |
 | Full customer lifecycle | PRODUCT-CANON | COVERED |
 | Revenue OS / CRM / Capacity | PRODUCT-CANON | COVERED |
-| Offer / contract / payment activation | PRODUCT-CANON + Constitution | COVERED |
+| Offer / contract / payment activation | PRODUCT-CANON + FZ-SIGN-1 | COVERED — signature when required; provider UNDECIDED |
 | Scope protection / change orders / decision log | PRODUCT-CANON | COVERED |
 | Project OS / revisions / files | PRODUCT-CANON | COVERED |
 | Site Intelligence / Data Layer | PRODUCT-CANON | COVERED |

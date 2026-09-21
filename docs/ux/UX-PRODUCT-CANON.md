@@ -8,6 +8,12 @@ UX follows the real Forma Zieleni lifecycle and domain. Cursor must not invent g
 ## Canonical lifecycle
 Anonymous Visitor → Site Analysis → Qualified Lead → Consultation → Opportunity → Offer → Contract → Payment → Project → Garden → Garden OS → Referral / Maintenance / Next Project.
 
+Contract states, signature-when-required, and the rule that a signing
+engine is not the business record are defined only in
+[`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
+This UX lifecycle does not require an electronic signature on every
+payment.
+
 ## UX rules
 - Every screen has a clear user, job-to-be-done, state and next action.
 - Public WWW is a Sales Application: educate, build evidence, qualify and move the right visitor to the right next step.
@@ -15,8 +21,8 @@ Anonymous Visitor → Site Analysis → Qualified Lead → Consultation → Oppo
 - Capacity influences promises, availability and marketing pressure.
 - Offer is first-class: scope, exclusions, price, timeline, milestones, correction rounds where applicable, payment schedule, validity, files, acceptance and contract relation.
 - Scope changes must be visible; change orders/decision history must not become invisible work.
-- Portal exposes project truth: status, next action, decisions, files/revisions, approvals, payments and communication relevant to the client.
-- Admin/CRM exposes next action, value, source, qualification, property/site context, capacity and history.
+- Portal exposes project truth: status, next action, decisions, files/revisions, approvals, payments and communication relevant to the client. A signing view, if later added, shows Core API contract state.
+- Admin/CRM exposes next action, value, source, qualification, property/site context, capacity and history. Staff contract approval stays an Admin operation on Core API.
 - Garden OS continues the relationship after project delivery; it is not merely a maintenance checklist.
 - Mobile is task/photo/push-first, not a full portal clone.
 - Site Intelligence should progressively collect/use property context without making the visitor fight a technical GIS interface.

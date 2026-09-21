@@ -15,6 +15,8 @@ Read in order: 1. `docs/constitution/PROJECT-CONSTITUTION.md` 2.
 12. `docs/content/CONTENT-AND-VOICE-CANON.md` 13.
 `docs/design/VISUAL-REFERENCE-MAP.md` 14. relevant
 domain/contracts/knowledge/legacy references for the slice.
+Contract lifecycle (provider undecided, not a Gate A blocker):
+`docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`.
 
 Rules: - Current canon outranks legacy implementation. - Legacy material
 is preserved for provenance and detailed domain/UX knowledge. - Supplied

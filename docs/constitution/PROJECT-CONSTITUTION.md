@@ -14,7 +14,7 @@ Build Forma Zieleni as one coherent business/product/engineering platform, not a
 - Event-driven core uses a transactional outbox for reliable domain-event publication; consumers are idempotent where required.
 - AI architecture is DATA -> RULES -> DOMAIN -> AI. AI may interpret/propose/automate but cannot become botanical, financial, authorization or domain truth.
 - External data is normalized/cached behind adapters when runtime dependency would reduce reliability or portability.
-- Files are private by default, authorized, versioned/integrity checked, and never exposed through guessable public URLs.
+- Files are private by default, authorized, versioned/integrity checked, and never exposed through guessable public URLs. Contract artifacts follow the same rule; the binding lifecycle is `docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`.
 - Observability and auditability are designed in: logs, metrics, traces/errors, audit events and business events, without unnecessary PII.
 - Backups are not considered complete until restore is tested.
 - Dependencies are minimized and selected on value, maintenance, licence, security, portability and removability.

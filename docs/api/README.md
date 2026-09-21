@@ -19,3 +19,5 @@ Current OpenAPI 3.0.4: [`../../contracts/openapi.json`](../../contracts/openapi.
 - Must not be implemented as the live contract.
 
 Binding architecture context: [`../architecture/CURRENT-ARCHITECTURE.md`](../architecture/CURRENT-ARCHITECTURE.md).
+
+Contract lifecycle (not yet an OpenAPI surface; provider undecided): [`../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](../architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
