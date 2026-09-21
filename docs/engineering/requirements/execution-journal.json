@@ -31,7 +31,7 @@
     "docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md",
     "scripts/docs/check.mjs",
     "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json",
-    "docs/engineering/requirements/FZ-DOC-INVENTORY.json",
+    "docs/engineering/requirements/FZ-DOC-INVENTORY.json"
   ],
   "contextRecoveryHints": [
     "Read START-HERE-CURSOR.md, then the recovery list in docs/engineering/FZ-CONTEXT-MAP.json. Do not load the whole tree.",
