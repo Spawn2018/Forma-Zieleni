@@ -4,7 +4,7 @@ Dependent implementation is paused where Owner decisions are missing. Independen
 
 ## Gate A implementation
 
-OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md). Packets were refined 2026-09-21 into coherent API+WWW+Portal+Admin bundles; no option was selected or implemented. No hosting, database, ORM, storage, auth library, observability vendor or Cloudflare mutation was executed.
+OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md). Packets were refined 2026-09-21 into coherent API+WWW+Portal+Admin bundles; FZ-A5 was expanded then delta-amended (Casdoor added to A5-D; SuperTokens, Authelia and Kanidm excluded). The same day a landscape-delta expanded FZ-A1 (compute vs DEPLOY=systemd|compose|coolify|dokploy|caprover), FZ-A2 (TanStack Start RC + React Router Framework Mode bundles), FZ-A3 (first-class Kysely), FZ-A4 (MinIO CE withdrawn; Garage/RustFS/local/managed S3), FZ-A6 (obs/secrets/backup split), and FZ-A7 (Cloudflare-required; Pangolin/FRP excluded as sole public ingress). No option was selected or implemented. No hosting, database, ORM, storage, auth library, observability vendor or Cloudflare mutation was executed.
 
 Local reproducible app config, CI deploy, API skeleton, migrations, object storage, auth runtime, restore test, monitoring, webhook tests, load baseline and private-origin validation remain unstarted.
 
