@@ -1,3 +1,5 @@
+<img src="docs/brand/logo.png" alt="Forma Zieleni. Architektura krajobrazu." width="180">
+
 # Forma Zieleni
 
 System pracowni architektury krajobrazu: od wejścia na stronę, przez ofertę i projekt, do ogrodu, który zostaje po realizacji.
