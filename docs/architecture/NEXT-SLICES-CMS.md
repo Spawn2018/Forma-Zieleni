@@ -162,11 +162,10 @@ Next: CMS-WWW.
 
 Dependencies: CMS-PUBLISH.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: CMS-PUBLISH recorded.
-Accept: transactional outbox; webhook signing later; no auto-publish from business Project COMPLETED.
-Tests: outbox row with the content write; COMPLETED does not publish.
-Next: CMS-WWW.
+Status: COMPLETE.
+Accept: `applyBusinessProjectCompleted` does not publish a case study and does not append an outbox row. Webhook signing stays later.
+Tests: `packages/domain/content-events.test.mjs`. The publish path already writes `content.published` in the same operation as the public pointer.
+Next: CMS-WWW still waits on gallery and SEO slices. MEDIA-PROCESS is READY.
 
 ### CMS-ADMIN
 

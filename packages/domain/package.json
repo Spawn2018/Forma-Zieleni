@@ -6,8 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "node --test lead.test.mjs content-auth.test.mjs content-publish.test.mjs",
-    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/content-auth.ts src/content-publish.ts src/index.ts",
-    "lint": "node --check lead.test.mjs && node --check content-auth.test.mjs && node --check content-publish.test.mjs"
+    "test": "node --test lead.test.mjs content-auth.test.mjs content-publish.test.mjs content-events.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/content-auth.ts src/content-publish.ts src/content-events.ts src/index.ts",
+    "lint": "node --check lead.test.mjs && node --check content-auth.test.mjs && node --check content-publish.test.mjs && node --check content-events.test.mjs"
   }
 }

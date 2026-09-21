@@ -19,6 +19,7 @@ export {
   rollbackRevision,
 } from './content-publish.ts';
 export type { ContentAudit, ContentFields, ContentOutbox, ContentStore, ContentType } from './content-publish.ts';
+export { applyBusinessProjectCompleted } from './content-events.ts';
 export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
