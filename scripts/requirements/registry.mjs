@@ -126,6 +126,14 @@ row('FZ-REQ-PLATFORM-001', 'Golden paths reuse Cursor OS. One writer. No interna
 row('FZ-REQ-DORA-003', 'DORA capability coverage is evidenced per capability. There is no combined score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', DOCS_CHECK, 'No production deployment series', 'NONE', 'Several capabilities stay DESIGNED or NOT MEASURABLE.');
 row('FZ-REQ-DORA-004', 'AI use is classified. Customer data and secrets are prohibited in external tools. Token count is not productivity.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FZ-AI-USAGE-POLICY.md', 'docs/engineering/FZ-AI-USAGE-POLICY.md', DOCS_CHECK, '', 'NONE', 'Vendor privacy promises were not re-verified.');
 row('FZ-REQ-DORA-005', 'Release readiness is local and reproducible. Deploy, hosting, and alert thresholds stay gated or unmeasured.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/RELEASE-READINESS.md', 'docs/engineering/RELEASE-READINESS.md', DOCS_CHECK, 'production hosting UNDECIDED', 'OWNER-DECISION', '');
+row('FZ-REQ-DORA-006', 'Value stream stages are named. Durations stay not measurable until a release clock exists.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/VALUE-STREAM.md', 'docs/engineering/VALUE-STREAM.md', 'scripts/requirements/closure.test.mjs', 'no production release clock', 'NONE', 'NOT MEASURABLE');
+row('FZ-REQ-DORA-007', 'Data domains name an owner, a contract, and visibility. There is no data-quality score.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/HEALTHY-DATA.md', 'docs/engineering/HEALTHY-DATA.md', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
+row('FZ-REQ-DORA-008', 'A future alert needs a decision and a baseline. No numeric threshold is invented.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FAILURE-ALERTS.md', 'docs/engineering/FAILURE-ALERTS.md', 'scripts/requirements/closure.test.mjs', 'no production baseline', 'NONE', '');
+row('FZ-REQ-DORA-009', 'Test data rejects a customer-database copy and an unlabeled marketing plan.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/TEST-DATA-POLICY.md', 'scripts/docs/test-data.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
+row('FZ-REQ-DORA-010', 'Maintainability, supply chain, and AI cost rules reject vanity scores and extra supply-chain products.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/DORA-LAST-MILE.md', 'docs/engineering/DORA-LAST-MILE.md', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
+row('FZ-REQ-COVERAGE-001', 'Every numbered directive section is classified and every normative section maps to a real requirement id.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json', 'scripts/requirements/closure.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
+row('FZ-REQ-DOCINV-001', 'Every Markdown file under docs/ is classified. Unexplained orphans are zero.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/FZ-DOC-INVENTORY.json', 'scripts/requirements/closure.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
+row('FZ-REQ-RECOVERY-001', 'Mutation does not start when the recovery marker and HEAD disagree. The hook reminds; it cannot stop a writer who ignores it.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/execution-journal.json', 'scripts/requirements/closure.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', 'Cursor cannot refuse an edit solely from this marker.');
 
 const OPEN_SLICES = [
   'MEDIA-COLLECTIONS', 'GALLERY-WWW', 'BEFORE-AFTER', 'CMS-SEO', 'CMS-ADMIN', 'CMS-WWW', 'CMS-HARDEN',
@@ -170,6 +178,7 @@ const PREFIXES = [
   'FZ-REQ-INTEGRATION', 'FZ-REQ-OPS', 'FZ-REQ-MKTEXEC', 'FZ-REQ-OFFERINTEL', 'FZ-REQ-OFFERLEARN',
   'FZ-REQ-PROJECTGROWTH', 'FZ-REQ-EXECINTEGRITY', 'FZ-REQ-CONTEXT', 'FZ-REQ-EVIDENCE', 'FZ-REQ-COMPLETION',
   'FZ-REQ-DOC', 'FZ-REQ-DOCOPS', 'FZ-REQ-DOCCTX', 'FZ-REQ-DOCQA', 'FZ-REQ-PLATFORM',
+  'FZ-REQ-COVERAGE', 'FZ-REQ-DOCINV', 'FZ-REQ-RECOVERY',
 ];
 
 function rank(depth) {

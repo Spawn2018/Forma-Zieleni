@@ -14,6 +14,8 @@ const CAPABILITIES = [
   'Reliability engineering', 'Pervasive security', 'Flexible infrastructure', 'Loosely coupled architecture',
   'Streamlined change approval', 'Customer feedback', 'User-centric focus', 'Team experimentation',
   'Value stream visibility', 'WIP limits', 'Learning culture', 'Quality internal platform',
+  'Platform engineering', 'Empowering teams to choose tools', 'Trunk-based development',
+  'Monitoring systems to inform business decisions',
   'AI-accessible internal data', 'Healthy data ecosystem', 'Clear and communicated AI stance',
 ];
 

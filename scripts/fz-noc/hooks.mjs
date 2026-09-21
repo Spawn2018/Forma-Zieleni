@@ -55,12 +55,12 @@ export function runDangerousMcp() {
 
 export function runSessionStart() {
   emit({
-    additional_context: 'Forma Zieleni workspace. Read START-HERE-CURSOR.md. Canon is authority. The FZ orchestrator selects READY work. Owner gates cannot be bypassed. An active /noc window, if any, is .fz-noc/live.json.',
+    additional_context: 'Forma Zieleni workspace. Read START-HERE-CURSOR.md. Canon is authority. The FZ orchestrator selects READY work. Owner gates cannot be bypassed. An active /noc window, if any, is .fz-noc/live.json. Before editing, reconstruct HEAD and docs/engineering/requirements/execution-journal.json.',
   });
 }
 
 export function runPreCompact() {
   emit({
-    user_message: 'Forma Zieleni state lives in the repository. After compaction, re-read START-HERE-CURSOR.md and .fz-noc/live.json when a /noc window is active.',
+    user_message: 'Forma Zieleni state lives in the repository. After compaction, re-read START-HERE-CURSOR.md, docs/engineering/FZ-CONTEXT-MAP.json, and docs/engineering/requirements/execution-journal.json. Do not edit until HEAD is reconstructed.',
   });
 }

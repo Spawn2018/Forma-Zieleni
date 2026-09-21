@@ -1,9 +1,10 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "documentation-os-recorded",
+  "currentPhase": "foundation-closure-recorded",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
-  "lastVerifiedCommit": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
+  "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
+  "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "branch": "main",
   "push": false,
   "ownerGates": [
@@ -29,7 +30,8 @@
     "docs/engineering/FZ-CONTEXT-MAP.json",
     "docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md",
     "scripts/docs/check.mjs",
-    "docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md"
+    "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json",
+    "docs/engineering/requirements/FZ-DOC-INVENTORY.json",
   ],
   "contextRecoveryHints": [
     "Read START-HERE-CURSOR.md, then the recovery list in docs/engineering/FZ-CONTEXT-MAP.json. Do not load the whole tree.",

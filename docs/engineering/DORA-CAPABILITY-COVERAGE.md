@@ -30,12 +30,16 @@ this repository, not a survey band.
 | Customer feedback | NOT_MEASURABLE | No live customer channel is connected. |
 | User-centric focus | FOUNDATION | UX Canon exists. Portal and WWW apps do not. |
 | Team experimentation | FOUNDATION | Experiment records exist in FZ-CIS. No live experiment. |
-| Value stream visibility | DESIGNED | Lineage is written. Times are not measured. |
+| Value stream visibility | DESIGNED | `docs/engineering/VALUE-STREAM.md`. Times are not measured. |
 | WIP limits | OPERATIONAL | One writer. Read-only work may sit beside it. |
 | Learning culture | FOUNDATION | FZ-CIS. Production learning is not measurable yet. |
 | Quality internal platform | FOUNDATION | `docs/engineering/GOLDEN-PATHS.md` |
+| Platform engineering | FOUNDATION | The same golden paths. No Backstage portal. |
+| Empowering teams to choose tools | FOUNDATION | Gate A and Owner gates choose tools. Agents do not add a framework ad hoc. |
+| Trunk-based development | OPERATIONAL | Direct `main`. One writer. |
+| Monitoring systems to inform business decisions | DESIGNED | `docs/engineering/FAILURE-ALERTS.md`. No metric without a decision. |
 | AI-accessible internal data | FOUNDATION | Context map of pointers. Not a dump of the tree. |
-| Healthy data ecosystem | FOUNDATION | Connected fabric owners, visibility, and provenance. No data-quality score. |
+| Healthy data ecosystem | FOUNDATION | `docs/engineering/HEALTHY-DATA.md` and the connected fabric. No data-quality score. |
 | Clear and communicated AI stance | FOUNDATION | `docs/engineering/FZ-AI-USAGE-POLICY.md` |
 
 Data domains that exist have an owner in code: leads in the Core API,
