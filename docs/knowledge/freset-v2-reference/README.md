@@ -2,7 +2,7 @@
 
 Status: **REFERENCE / PROVENANCE ONLY** — not live Forma Zieleni Canon.
 
-These files preserve the F-RESET v2 audit/decision corpus for traceability. Banners inside individual files that say “CANONICAL/CURRENT” describe their role **inside that historical F-RESET v2 pack**, not the active repository Canon after post-V2 overrides.
+These files preserve the F-RESET v2 audit/decision corpus for traceability. Banners inside individual files that say “CANONICAL/CURRENT” describe their role **inside that historical F-RESET v2 pack**, not the active repository Canon after post-V2 overrides. `FILE-MANIFEST-SHA256.txt` in this folder is that historical snapshot, not the current repository manifest (`SHA256SUMS.txt`).
 
 ## What wins today
 

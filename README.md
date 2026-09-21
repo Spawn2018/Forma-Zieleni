@@ -8,3 +8,11 @@ Do not commit secrets/private keys/client data. The package intentionally does n
 
 ## Engineering quality extension
 This canon includes stack-neutral engineering standards plus Cursor skills/subagents for professional code quality, safe refactoring, performance, database design, caching, testing, dependency review and a mandatory pre-push gate. These are evidence-driven and do not select an application framework, database engine, hosting provider or cache product.
+
+## Repository integrity
+
+`pnpm repo:check` verifies the current tracked-file manifest
+`SHA256SUMS.txt`. `FILE-MANIFEST-SHA256.txt` and the copies under
+`docs/knowledge/freset-v2-reference/` and `legacy/` are frozen
+provenance, not the current tree. See
+`docs/engineering/REPOSITORY-INTEGRITY.md`.

@@ -23,7 +23,9 @@ software-house review.
 9.  Accessibility review for user-facing UI.
 10. Build/package verification.
 11. Documentation/ADR/OpenAPI synchronization where applicable.
-12. Final `git diff` review and `git diff --check`.
+12. Final `git diff` review, `git diff --check`, and `pnpm repo:check`
+    (current tracked-file manifest plus repository hygiene). Semantics:
+    `docs/engineering/REPOSITORY-INTEGRITY.md`.
 13. Security-tool evidence when applicable: deterministic tests, then
     SCA once the stack exists, then one CodeRabbit review per coherent
     green slice when quota is available, then ZAP when a runnable
