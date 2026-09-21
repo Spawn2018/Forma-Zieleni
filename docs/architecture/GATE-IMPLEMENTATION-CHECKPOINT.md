@@ -4,7 +4,7 @@ Dependent implementation is paused where Owner decisions are missing. Independen
 
 ## Gate A implementation
 
-OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md). No hosting, database, ORM, storage, auth library, observability vendor or Cloudflare mutation was selected or executed.
+OWNER-DECISION. FZ-A1–A7 are open in [OWNER-DECISION-PACKETS-GATE-A.md](./OWNER-DECISION-PACKETS-GATE-A.md). Packets were refined 2026-09-21 into coherent API+WWW+Portal+Admin bundles; no option was selected or implemented. No hosting, database, ORM, storage, auth library, observability vendor or Cloudflare mutation was executed.
 
 Local reproducible app config, CI deploy, API skeleton, migrations, object storage, auth runtime, restore test, monitoring, webhook tests, load baseline and private-origin validation remain unstarted.
 
