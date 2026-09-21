@@ -63,6 +63,44 @@ function bearer(actor) {
   return { authorization: `Bearer ${mintTestSession(SECRET, actor)}` };
 }
 
+const draftId = 'ct8k2n4p6q8r0s2t';
+const publicId = 'pu8k2n4p6q8r0s2t';
+
+test('unpublished content stays private and a content role does not grant CRM access', async () => {
+  const documents = {
+    [draftId]: { title: 'Szkic usługi', status: 'draft' },
+    [publicId]: { title: 'Usługa opublikowana', status: 'published' },
+  };
+  const app = createApp({
+    store: new MemoryLeadStore(),
+    authenticator: testAuthenticator(SECRET),
+    logs: [],
+    limiter: new WindowLimiter(100, 60_000),
+    addressOf: () => '198.51.100.10',
+    contentDocuments: documents,
+  });
+  const anonymous = await app.request(`/v1/content/${draftId}`);
+  assert.equal(anonymous.status, 401);
+  const staffDenied = await app.request(`/v1/content/${draftId}`, { headers: bearer(staff) });
+  assert.equal(staffDenied.status, 403);
+  const editor = {
+    actorId: 'actoreditor000001',
+    issuer: 'test-issuer',
+    sub: 'editor-1',
+    clientId: 'admin',
+    capabilities: ['content:read-draft'],
+  };
+  const allowed = await app.request(`/v1/content/${draftId}`, { headers: bearer(editor) });
+  assert.equal(allowed.status, 200);
+  assert.equal((await allowed.json()).status, 'draft');
+  const published = await app.request(`/v1/content/${publicId}`);
+  assert.equal(published.status, 200);
+  const supplied = await app.request(`/v1/content/${draftId}?role=admin`);
+  assert.equal(supplied.status, 400);
+  const leads = await app.request('/v1/leads', { headers: bearer(editor) });
+  assert.equal(leads.status, 403);
+});
+
 test('public capture persists a lead and rejects bad bodies, types, sources and size', async () => {
   const { app, store } = appFor();
   const created = await app.request('/v1/leads', json(capture));

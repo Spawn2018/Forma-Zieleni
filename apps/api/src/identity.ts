@@ -3,6 +3,7 @@ import { bearer } from 'better-auth/plugins';
 import { PostgresDialect, type Kysely } from 'kysely';
 import type pg from 'pg';
 import { newOpaqueId } from './ids.ts';
+import { isContentCapability } from '@forma-zieleni/domain';
 import type { Actor, Capability, ClientId } from './auth.ts';
 import { PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
@@ -12,7 +13,7 @@ function isUnique(error: unknown): boolean {
 }
 
 function isCapability(value: string): value is Capability {
-  return value === 'leads:read' || value === 'leads:qualify';
+  return value === 'leads:read' || value === 'leads:qualify' || isContentCapability(value);
 }
 
 export async function ensureActor(db: Kysely<Database>, issuer: string, subject: string): Promise<Actor> {

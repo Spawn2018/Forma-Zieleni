@@ -72,11 +72,11 @@ Next: CMS-AUTH and MEDIA-CORE may start after this. Neither is started in the co
 
 Dependencies: CMS-DATA.
 Gate: REVIEW.
-Autonomous: yes, unless SSO spend appears (OWNER-ONLY).
-Entry: CMS-DATA recorded.
-Accept: editor/publisher/admin/reviewer mapped to `actorId`; unpublished content 401/403; no client-supplied roles.
-Tests: anonymous unpublished 401; ungranted 403; no CRM grant implied by a content role.
-Next: CMS-PUBLISH. Stop if the recorded option requires paid SSO (OWNER-ONLY).
+Status: COMPLETE. No paid SSO.
+Accept: `packages/domain/src/content-auth.ts` maps editor, reviewer, publisher, and admin onto `actorId` capabilities. Draft reads are 401 without a session and 403 without `content:read-draft`. A client-supplied role, capability list, or actorId is rejected. A content grant does not include `leads:read` or `leads:qualify`.
+Tests: `packages/domain/content-auth.test.mjs` and the unpublished-content case in `apps/api/src/http.test.mjs`. Migration `003_content_capabilities` widens the capability check.
+Security: authority is server-granted; lead capabilities stay a separate allowlist; draft bodies are not returned to anonymous callers.
+Next: CMS-PUBLISH.
 
 ### CMS-PUBLISH
 

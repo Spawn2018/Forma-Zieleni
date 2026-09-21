@@ -18,7 +18,8 @@
   ],
   "tags": [
     { "name": "System" },
-    { "name": "Leads" }
+    { "name": "Leads" },
+    { "name": "Content" }
   ],
   "paths": {
     "/health": {
@@ -172,6 +173,37 @@
           "409": { "$ref": "#/components/responses/Conflict" }
         }
       }
+    },
+    "/content/{contentId}": {
+      "get": {
+        "tags": ["Content"],
+        "operationId": "getContentProjection",
+        "security": [],
+        "description": "Published projection is public. A draft requires a server-granted content:read-draft capability. Client-supplied role, capabilities, or actorId are rejected. This is not a CRM object.",
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visible content projection.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ContentProjection" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
     }
   },
   "components": {
@@ -234,6 +266,16 @@
         "required": ["ok"],
         "properties": {
           "ok": { "type": "boolean", "enum": [true] }
+        }
+      },
+      "ContentProjection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "status"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["draft", "published"] }
         }
       },
       "LeadSource": {

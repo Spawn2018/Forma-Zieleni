@@ -237,9 +237,41 @@ const securityMigration: Migration = {
   },
 };
 
+const CONTENT_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+].map(capability => `'${capability}'`).join(', ');
+
+const contentCapabilityMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+      ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+      ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+        CHECK (capability IN (${CONTENT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+      DELETE FROM actor_capability WHERE capability LIKE 'content:%';
+      ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+      ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+        CHECK (capability IN ('leads:read', 'leads:qualify'));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
-    return { '001_lead_vertical': migration, '002_security_runtime': securityMigration };
+    return {
+      '001_lead_vertical': migration,
+      '002_security_runtime': securityMigration,
+      '003_content_capabilities': contentCapabilityMigration,
+    };
   },
 };
 

@@ -1,4 +1,15 @@
 export {
+  CONTENT_CAPABILITIES,
+  CONTENT_ROLES,
+  assertNoClientSuppliedAuthority,
+  bindContentRole,
+  capabilitiesForContentRole,
+  decideDraftRead,
+  isContentCapability,
+  isContentRole,
+} from './content-auth.ts';
+export type { ContentCapability, ContentRole, ContentVisibility } from './content-auth.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,

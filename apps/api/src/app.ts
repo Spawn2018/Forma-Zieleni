@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertOpaqueLeadId } from '@forma-zieleni/domain';
+import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, decideDraftRead } from '@forma-zieleni/domain';
 import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest } from '@forma-zieleni/validation';
 import { allows, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
@@ -25,6 +25,7 @@ export type AppOptions = {
   trustedOrigins?: readonly string[];
   ready?: () => Promise<boolean>;
   authHandler?: (request: Request) => Promise<Response>;
+  contentDocuments?: Readonly<Record<string, { title: string; status: 'draft' | 'published' }>>;
 };
 
 function mintRequestId(): string {
@@ -228,6 +229,32 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     if (!parsed.ok) throw new ApiFailure(400, 'LEAD_INVALID', 'Qualification could not be accepted.', parsed.errors);
     const lead = await qualifyExistingLead(options.store, pathLeadId(c.req.param('leadId')), parsed.value.capacityHold, actor, key, now());
     return c.json(lead);
+  });
+
+  app.get('/v1/content/:contentId', async c => {
+    const supplied: Record<string, unknown> = {};
+    for (const key of ['role', 'capabilities', 'actorId']) {
+      if (c.req.query(key) != null) supplied[key] = c.req.query(key);
+    }
+    try {
+      assertNoClientSuppliedAuthority(supplied);
+    } catch {
+      throw new ApiFailure(400, 'CLIENT_AUTHORITY_REJECTED', 'Content authority is granted on the server.');
+    }
+    let contentId: string;
+    try {
+      contentId = assertOpaqueLeadId(decodeURIComponent(c.req.param('contentId')));
+    } catch {
+      throw badRequest('CONTENT_ID_INVALID', 'Content id is not valid.');
+    }
+    const document = options.contentDocuments?.[contentId];
+    if (!document) throw new ApiFailure(404, 'CONTENT_NOT_FOUND', 'Content was not found.');
+    const actor = await options.authenticator.authenticate(c.req.raw);
+    const decision = decideDraftRead(actor, document.status);
+    if (decision === 'unauthenticated') throw new ApiFailure(401, 'UNAUTHENTICATED', 'Authentication is required.');
+    if (decision === 'forbidden') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    if (actor) c.set('actorId', actor.actorId);
+    return c.json({ id: contentId, title: document.title, status: document.status });
   });
 
   return app;
