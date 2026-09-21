@@ -25,6 +25,16 @@ Do not generate unsupported phrases such as:
 
 No exclamation-mark-heavy sales voice. No vague CTA such as “Dowiedz się więcej” when a concrete action can be named.
 
+## Public content store
+
+WWW public copy, service pages, articles, project case studies and
+public media wait on FZ-CMS-1
+([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
+Do not hard-code unverified marketing facts into React Router. After
+the Owner reply, published content is a projection, not source-file
+copy. This Canon still forbids invented facts, fake social proof and
+unverified prices.
+
 ## Facts and placeholders
 Legacy copy decks are a **content source/reference**, not automatic factual truth. Values such as prices, ratings, review counts, turnaround times, number of projects, awards, geographic coverage and credentials must be verified against current business data before publication.
 

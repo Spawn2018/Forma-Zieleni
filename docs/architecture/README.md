@@ -18,7 +18,9 @@ All active documents and agents must link here for “current architecture”.
 | [`DECISIONS.md`](./DECISIONS.md) | Formal ADR **history** (not the sole current decision ledger) |
 | [`OWNER-DECISION-PACKETS-GATE-A.md`](./OWNER-DECISION-PACKETS-GATE-A.md) | Recorded FZ-A1–A7 decisions. Research retained. |
 | [`GATE-IMPLEMENTATION-CHECKPOINT.md`](./GATE-IMPLEMENTATION-CHECKPOINT.md) | Architecture decided versus implementation not done. |
-| [`NEXT-SLICE-LEAD-VERTICAL.md`](./NEXT-SLICE-LEAD-VERTICAL.md) | Next implementation slice. Defined, not started. |
+| [`NEXT-SLICE-LEAD-VERTICAL.md`](./NEXT-SLICE-LEAD-VERTICAL.md) | Lead Core API vertical. Implemented, not security-accepted. |
+| [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. OPEN. |
+| [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | After-decision CMS backlog. Not authorized until FZ-CMS-1. |
 | [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md) | Binding contract lifecycle and e-signature boundary. Provider undecided. |
 | [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md) | Later research packet. No engine selected. |
 

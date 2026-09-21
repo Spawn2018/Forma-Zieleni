@@ -38,6 +38,7 @@ Cursor agents start at repository root: [`../START-HERE-CURSOR.md`](../START-HER
 | [`architecture/CURRENT-ARCHITECTURE.md`](./architecture/CURRENT-ARCHITECTURE.md) | **Sole BINDING current architecture** |
 | [`architecture/SECURITY.md`](./architecture/SECURITY.md) | Security requirements and baselines |
 | [`architecture/OWNER-DECISION-PACKETS-GATE-A.md`](./architecture/OWNER-DECISION-PACKETS-GATE-A.md) | Recorded FZ-A1–A7 decisions |
+| [`architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](./architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. OPEN |
 | [`architecture/GATE-IMPLEMENTATION-CHECKPOINT.md`](./architecture/GATE-IMPLEMENTATION-CHECKPOINT.md) | Blocked implementation status |
 | [`architecture/DECISIONS.md`](./architecture/DECISIONS.md) | Formal ADR history |
 | [`architecture/ARCHITECTURE.md`](./architecture/ARCHITECTURE.md) | Superseded redirect / provenance only |

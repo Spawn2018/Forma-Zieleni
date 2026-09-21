@@ -1,0 +1,14 @@
+{
+  "api::page.page": { "draftAndPublish": true },
+  "api::article.article": { "draftAndPublish": true },
+  "api::service.service": { "draftAndPublish": true },
+  "api::project-case-study.project-case-study": {
+    "draftAndPublish": true,
+    "attributes": {
+      "title": { "type": "string" },
+      "publicLocality": { "type": "string" },
+      "gallery": { "type": "relation", "relation": "oneToOne", "target": "api::media-collection.media-collection" },
+      "businessProjectRef": { "type": "string" }
+    }
+  }
+}

@@ -53,6 +53,14 @@ WWW -\> Portal -\> Admin/CRM UI -\> Mobile -\> SketchUp -\> Garden OS
 extensions -\> AI -\> XR, subject to product validation and gates. Do
 not build all surfaces in parallel.
 
+WWW public copy, service pages, articles, project case studies and
+public media wait on FZ-CMS-1
+([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
+Do not hard-code unverified marketing facts into React Router. After
+the Owner reply, execute
+[`../architecture/NEXT-SLICES-CMS.md`](../architecture/NEXT-SLICES-CMS.md)
+then return to this product sequence. Content is not CRM.
+
 ## Cross-cutting operational readiness
 
 Across A--D, add failure engineering, data/AI classification, capability

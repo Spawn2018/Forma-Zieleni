@@ -18,4 +18,4 @@ Baseline: OWASP Application Security Verification Standard 5.0.0. Chapter index 
 | V15.2 Security Architecture and Dependencies | Direct dependencies reviewed. `pnpm audit --audit-level=moderate` reported no known vulnerabilities on 2026-09-21 | `apps/api/package.json` and the audit command | OWASP Dependency-Check is not installed |
 | V16.5 Error Handling | Stable error codes; no provider dumps | HTTP 400/401/403/404/409/429/503 bodies | — |
 
-ZAP did not run: Java and the ZAP installer are not on this machine. Future local procedure: [ZAP-LEAD-LOCAL.md](./ZAP-LEAD-LOCAL.md). Dependency-Check did not run. Those states are DEFERRED, never PASS. The rows above are not Gate A security acceptance.
+ZAP did not run: Java and the ZAP installer are not on this machine. Future local procedure: [ZAP-LEAD-LOCAL.md](./ZAP-LEAD-LOCAL.md). Dependency-Check did not run. Those states are DEFERRED, never PASS. The rows above are not Gate A security acceptance. FZ-CMS-1 is a separate OPEN Owner decision and is not covered by this lead mapping.

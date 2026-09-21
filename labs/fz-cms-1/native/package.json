@@ -1,0 +1,9 @@
+{
+  "name": "@forma-zieleni/cms-lab-native",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test native.test.mjs",
+    "lint": "node --check native.test.mjs && node --check src/png.mjs && node --check src/media.mjs && node --check src/content.mjs && node --check src/gallery.mjs"
+  }
+}

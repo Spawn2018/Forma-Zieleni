@@ -79,3 +79,8 @@ grants, outbox dispatch, audit, readiness, and tests. Not the
 whole CRM. ZAP, Dependency-Check, a supervised worker, and off-site
 backup are not done. Architecture selection is still not
 security acceptance.
+
+CMS / public content is a separate OPEN Owner decision (FZ-CMS-1).
+Do not implement a production CMS until
+[`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md)
+is answered. The isolated lab in `labs/fz-cms-1` is not a selection.

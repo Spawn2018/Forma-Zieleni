@@ -17,6 +17,8 @@ Read in order: 1. `docs/constitution/PROJECT-CONSTITUTION.md` 2.
 domain/contracts/knowledge/legacy references for the slice.
 Contract lifecycle (provider undecided, not a Gate A blocker):
 `docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`.
+CMS / public content (OPEN, not selected):
+`docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`.
 
 Rules: - Current canon outranks legacy implementation. - Legacy material
 is preserved for provenance and detailed domain/UX knowledge. - Supplied

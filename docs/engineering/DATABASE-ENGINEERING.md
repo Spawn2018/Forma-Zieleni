@@ -8,6 +8,9 @@ PostgreSQL is the selected persistence engine (ADR-014). Kysely is the typed SQL
 - Use stable identifiers and explicit foreign-key relationships where the selected database supports them.
 - Encode uniqueness, required relationships and safe value constraints at the strongest appropriate layer; critical invariants should not depend solely on UI validation.
 - Separate operational source-of-truth data from derived analytics/search/cache projections.
+- Public content/media tables, if added after FZ-CMS-1, are not CRM.
+  A published projection is derived from an editorial revision. Do not
+  store private customer/project files in the public content schema.
 
 ## Access
 - All queries have ownership and a reason to exist.

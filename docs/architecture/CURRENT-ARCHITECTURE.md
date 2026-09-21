@@ -50,6 +50,8 @@ ADR-014). Implementation and security acceptance are not complete.
 - LATER staging direction: Garage. That direction is not an irrevocable
   production selection.
 - Production object storage remains a later Owner decision.
+- Public content media is not a private business file. CMS / public
+  publishing remains UNDECIDED (FZ-CMS-1 OPEN).
 
 ## Observability
 
@@ -111,7 +113,7 @@ ADR-014). Implementation and security acceptance are not complete.
 
 ## Explicitly still undecided
 
-Payment provider; CMS; electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only). Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
+Payment provider; CMS (FZ-CMS-1 OPEN — [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md)); electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only). Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model
 

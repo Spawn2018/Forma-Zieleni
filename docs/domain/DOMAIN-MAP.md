@@ -80,6 +80,16 @@ Wykorzystywana przez projektowanie i Garden OS; nie zastępuje danych projektowy
 Warstwa operacyjno-projektowa ogrodu: modele, decyzje projektowe, powiązania z projektami i wiedzą roślinną.
 Klienci UI / mobile / SketchUp korzystają przez to samo API.
 
+### Content / public media
+
+Public pages, services, articles, `ProjectCaseStudy`, media library and
+editorial workflow. This is not CRM and not a private business Project.
+Architecture is UNDECIDED (FZ-CMS-1 OPEN):
+[`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md).
+A future public case study may store an opaque business-project
+reference. Private customer/project files must not become public media
+without an explicit, authorized, auditable step.
+
 ## Relacje (wysoki poziom)
 
 ```text
@@ -93,6 +103,8 @@ CRM ──► Sales ──► Offers ──► Contracts ──► Payments
                      ├── Site Intelligence
                      ├── Plant Knowledge
                      └── Garden OS
+
+Content / public media  (FZ-CMS-1 OPEN; not CRM)
 
 Events ◄── (mutacje domenowe)
     └──► Automation

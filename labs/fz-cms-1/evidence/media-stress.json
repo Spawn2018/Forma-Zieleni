@@ -1,0 +1,61 @@
+{
+  "researchDate": "2026-09-21",
+  "input": {
+    "kind": "landscape",
+    "width": 1600,
+    "height": 900,
+    "bytes": 36519,
+    "checksum": "678ca6c9afcc0434a6c189c0905637e9f1bb9d25f90eebd7dd6f6191f34303c7"
+  },
+  "plans": [
+    {
+      "placement": "desktop-hero",
+      "format": "image/webp",
+      "fallback": "image/jpeg",
+      "width": 1600,
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 900,
+        "cropped": false,
+        "shown": 1
+      },
+      "masterPreserved": true,
+      "gpsStripped": true
+    },
+    {
+      "placement": "project-card",
+      "format": "image/webp",
+      "fallback": "image/jpeg",
+      "width": 400,
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 900,
+        "cropped": false,
+        "shown": 1
+      },
+      "masterPreserved": true,
+      "gpsStripped": true
+    },
+    {
+      "placement": "lightbox",
+      "format": "image/webp",
+      "fallback": "image/jpeg",
+      "width": 1600,
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 900,
+        "cropped": false,
+        "shown": 1
+      },
+      "masterPreserved": true,
+      "gpsStripped": true
+    }
+  ],
+  "note": "AVIF/WebP bytes are planned, not encoded, until a lab encoder is added. Masters stay immutable."
+}

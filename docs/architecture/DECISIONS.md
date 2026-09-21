@@ -183,6 +183,16 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Konsekwencje | Binding shape: `CURRENT-ARCHITECTURE.md`. Research remains in `OWNER-DECISION-PACKETS-GATE-A.md`. Next implementation definition: `NEXT-SLICE-LEAD-VERTICAL.md`. Architecture decided is not security acceptance. FZ-SIGN-1 provider stays UNDECIDED. Docker is not a Windows prerequisite. Cloudflare, DNS and production changes stay DANGEROUS. |
 | Supersedes | ADR-007 “do not choose yet” for the horizons named above. ADR-001 through ADR-006 and ADR-008 remain in force. |
 
+## ADR-015 — Content / media / visual publishing (FZ-CMS-1)
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-09-21 |
+| Status | Proposed |
+| Decyzja | Not recorded. Owner must reply `DECISION FZ-CMS-1: OPTION A\|B\|C\|D\|E`. |
+| Kontekst | WWW needs an editor-operated content and media system that is not CRM. Gate A stack stays binding. Research and an isolated lab are in `OWNER-DECISION-PACKET-FZ-CMS-1.md` and `labs/fz-cms-1`. |
+| Konsekwencje | No CMS is selected by this ADR. After an Owner reply, update this status to Accepted and execute `NEXT-SLICES-CMS.md`. |
+
 ## Szablon kolejnego ADR
 
 ```markdown

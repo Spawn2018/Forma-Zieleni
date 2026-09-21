@@ -1,0 +1,21 @@
+{
+  "researchDate": "2026-09-21",
+  "status": "LAB / NOT PRODUCTION",
+  "boundary": {
+    "contentOwns": ["Page", "Article", "Service", "ProjectCaseStudy", "MediaAsset", "MediaCollection", "SiteSettings"],
+    "businessOwns": ["Lead", "Opportunity", "Customer", "Contract", "Payment", "BusinessProject", "private files"],
+    "referenceRule": "A ProjectCaseStudy may store an optional opaque businessProjectRef. That reference is not authorization and does not publish private project media."
+  },
+  "lifecycle": ["draft", "ready", "scheduled", "published", "archived"],
+  "types": {
+    "Page": ["id", "title", "slug", "seo", "blocks", "status", "publishedRevisionId"],
+    "Article": ["id", "title", "slug", "summary", "blocks", "tags", "seo", "status", "publishedAt"],
+    "Service": ["id", "title", "slug", "summary", "blocks", "seo", "status"],
+    "ProjectCaseStudy": ["id", "title", "slug", "summary", "services", "publicLocality", "completedOn", "heroAssetId", "galleryId", "beforeAfter", "seo", "status", "businessProjectRef"],
+    "MediaAsset": ["id", "checksum", "mime", "width", "height", "bytes", "focal", "safeRegion", "alt", "caption", "masterPath", "gpsStripped"],
+    "MediaCollection": ["id", "title", "itemIds", "heroAssetId", "variant"],
+    "SiteSettings": ["nav", "footer", "contact", "faq", "cta", "seoDefaults"]
+  },
+  "blocks": ["Hero", "Text", "TextImage", "ServicesGrid", "ProjectGrid", "ProjectGallery", "BeforeAfter", "ArticleGrid", "FAQ", "CTA", "Contact", "MediaGallery"],
+  "fitModes": ["CONTAIN", "SMART_FILL", "ADAPTIVE_LAYOUT"]
+}

@@ -17,6 +17,11 @@ payment.
 ## UX rules
 - Every screen has a clear user, job-to-be-done, state and next action.
 - Public WWW is a Sales Application: educate, build evidence, qualify and move the right visitor to the right next step.
+- Public copy, case studies and galleries wait on FZ-CMS-1
+  ([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
+  Do not invent testimonials or hard-code unverified marketing pages.
+  Carousel, lightbox and before/after remain keyboard- and
+  screen-reader-first when those surfaces are built.
 - Optimize qualified visitor value and owner capacity, not raw lead count.
 - Capacity influences promises, availability and marketing pressure.
 - Offer is first-class: scope, exclusions, price, timeline, milestones, correction rounds where applicable, payment schedule, validity, files, acceptance and contract relation.
