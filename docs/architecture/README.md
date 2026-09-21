@@ -19,8 +19,10 @@ All active documents and agents must link here for “current architecture”.
 | [`OWNER-DECISION-PACKETS-GATE-A.md`](./OWNER-DECISION-PACKETS-GATE-A.md) | Recorded FZ-A1–A7 decisions. Research retained. |
 | [`GATE-IMPLEMENTATION-CHECKPOINT.md`](./GATE-IMPLEMENTATION-CHECKPOINT.md) | Architecture decided versus implementation not done. |
 | [`NEXT-SLICE-LEAD-VERTICAL.md`](./NEXT-SLICE-LEAD-VERTICAL.md) | Lead Core API vertical. Implemented, not security-accepted. |
-| [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. OPEN. Finalist validation lab 2026-09-21. |
-| [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | After-decision CMS backlog. Not authorized until FZ-CMS-1. |
+| [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. DECIDED: option B, vendor-native visual editing, FZ media pipeline. Not CMS-ACCEPT. |
+| [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | CMS and Search Intelligence execution graph. |
+| [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md) | Binding Search Intelligence architecture: SEO contract, crawlers, attribution, data model, Admin IA. |
+| [`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md) | Production training-crawler policy. OPEN. |
 | [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md) | Binding contract lifecycle and e-signature boundary. Provider undecided. |
 | [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md) | Later research packet. No engine selected. |
 

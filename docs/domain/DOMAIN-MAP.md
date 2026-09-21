@@ -84,8 +84,10 @@ Klienci UI / mobile / SketchUp korzystają przez to samo API.
 
 Public pages, services, articles, `ProjectCaseStudy`, media library and
 editorial workflow. This is not CRM and not a private business Project.
-Architecture is UNDECIDED (FZ-CMS-1 OPEN):
+Architecture is DECIDED (ADR-015, option B) and not yet accepted:
 [`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md).
+Search observations are a separate capability, not CMS rows:
+[`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md).
 A future public case study may store an opaque business-project
 reference. Private customer/project files must not become public media
 without an explicit, authorized, auditable step.
@@ -104,7 +106,8 @@ CRM ──► Sales ──► Offers ──► Contracts ──► Payments
                      ├── Plant Knowledge
                      └── Garden OS
 
-Content / public media  (FZ-CMS-1 OPEN; not CRM)
+Content / public media  (FZ-CMS-1 DECIDED; not CRM; not CMS-ACCEPT)
+Search Intelligence     (FZ-SEARCH-1; reads business IDs; does not write CRM)
 
 Events ◄── (mutacje domenowe)
     └──► Automation

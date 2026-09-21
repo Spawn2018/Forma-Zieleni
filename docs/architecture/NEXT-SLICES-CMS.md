@@ -1,11 +1,15 @@
-# After FZ-CMS-1 — CMS implementation backlog
+# CMS and Search Intelligence execution graph
 
-Status: READY only after `DECISION FZ-CMS-1: OPTION X` is recorded.
-Until then this file is a plan, not authorization.
+Status: AUTHORIZED. The file was READY only after
+`DECISION FZ-CMS-1: OPTION X`. That reply is recorded:
+`OPTION B`, `VISUAL=vendor-native`, `MEDIA=fz-pipeline` (ADR-015).
 
-Do not start these slices before the Owner reply. Do not create an
-endless agent loop. One bounded slice at a time. Stop at OWNER-ONLY
-or DANGEROUS.
+Search slices below are part of this graph, not a second roadmap.
+Binding search architecture: [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md).
+
+Do not create an endless agent loop. One bounded slice at a time.
+Stop at OWNER-ONLY or DANGEROUS. FZ-SEARCH-CRAWL-1 is OPEN and does
+not block CMS-DATA.
 
 ## After the Owner reply
 
@@ -50,11 +54,9 @@ Every slice below also carries, unless a row says otherwise:
 
 Dependencies: FZ-CMS-1 recorded.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: packet Status is DECIDED; ADR-015 still Proposed until this slice records it.
-Accept: selected engine isolated from Core API; published-projection rule written; last-known-good WWW strategy written.
-Tests: architecture/contract notes; no runtime CMS install unless the option requires a local engine already allowed by FZ-A1.
-Docs: CURRENT-ARCHITECTURE, ADR-015 Accepted, this backlog status.
+Status: COMPLETE in the ADR-015 record. No runtime CMS install.
+Accept: Apostrophe is isolated from Core API business truth; WWW reads a published projection; last published snapshot survives an editorial outage. Written in CURRENT-ARCHITECTURE and ADR-015.
+Tests: architecture notes only. Vendor Admin UI and PostgreSQL remain NOT TESTED.
 Next: CMS-DATA.
 
 ### CMS-DATA
@@ -63,9 +65,9 @@ Dependencies: CMS-ARCH.
 Gate: REVIEW.
 Autonomous: yes.
 Entry: CMS-ARCH recorded.
-Accept: OpenAPI or content-contract for Page, Article, Service, ProjectCaseStudy, MediaAsset, MediaCollection, SiteSettings; Kysely or adapter mapping; no Prisma unless Owner also changed FZ-A3.
-Tests: schema/contract tests for the shared types; `businessProjectRef` is opaque.
-Docs: API-FIRST, DOMAIN-MAP, inventory.
+Accept: content contract for Page, Article, Service, ProjectCaseStudy, MediaAsset, MediaCollection, SiteSettings, including the SEO object in FZ-SEARCH-1 section 5. This slice is also SEARCH-CONTENT-CONTRACT. Kysely or an Apostrophe adapter mapping; no Prisma. Apostrophe PostgreSQL is the target shape; a contract test does not require a production CMS process.
+Tests: schema/contract tests; `businessProjectRef` is opaque; SEO defaults do not require twenty editor fields.
+Docs: API-FIRST, DOMAIN-MAP.
 Next: CMS-AUTH and MEDIA-CORE may start after this.
 
 ### CMS-AUTH
@@ -150,12 +152,12 @@ Next: CMS-WWW (with CMS-PUBLISH + CMS-SEO).
 
 ### CMS-SEO
 
-Dependencies: CMS-PUBLISH.
+Dependencies: CMS-PUBLISH, SEARCH-WWW-TECHNICAL, SEARCH-STRUCTURED-DATA, SEARCH-SITEMAP-ROBOTS.
 Gate: REVIEW.
 Autonomous: yes.
-Entry: CMS-PUBLISH recorded.
-Accept: title, description, canonical, robots, OG, sitemap, redirects, JSON-LD without invented facts.
-Tests: slug change writes redirect; JSON-LD has no placeholder prices.
+Entry: those four are recorded. This id is the integration checkpoint, not a second SEO implementation.
+Accept: WWW output matches FZ-SEARCH-1 sections 6–7 and 9. Training-crawler groups stay absent while FZ-SEARCH-CRAWL-1 is OPEN.
+Tests: slug change writes redirect; JSON-LD has no placeholder prices; production robots fixture is not `Disallow: /`.
 Next: CMS-WWW.
 
 ### CMS-EVENTS
@@ -237,14 +239,194 @@ Entry: previous CMS/media slices recorded.
 Accept: checklist below. Do not mark security-accepted if ZAP/SCA/ingress remain deferred.
 Next: RETURN-ROADMAP.
 
+### SEARCH-ARCH
+
+Dependencies: none beyond this graph.
+Gate: REVIEW.
+Status: COMPLETE. Canonical text is `FZ-SEARCH-1.md` (research 2026-09-21).
+Accept: measurable vs unmeasurable claims recorded; no paid vendor; training-crawler choice left OPEN.
+Next: SEARCH-CONTENT-CONTRACT inside CMS-DATA.
+
+### SEARCH-WWW-TECHNICAL
+
+Dependencies: CMS-DATA, and the WWW app slice that first renders published content.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: SSR HTML, title, description, canonical, robots meta, status codes, 404, redirects, trailing-slash and query policies, no staging index leak.
+Tests: rendered head and a non-production disallow fixture.
+Next: SEARCH-STRUCTURED-DATA.
+
+### SEARCH-STRUCTURED-DATA
+
+Dependencies: SEARCH-WWW-TECHNICAL.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: JSON-LD only for visible verified facts. No ratings, prices, awards, or addresses unless verified.
+Tests: syntax and required mapping; omitted unverified fields.
+Next: SEARCH-SITEMAP-ROBOTS.
+
+### SEARCH-SITEMAP-ROBOTS
+
+Dependencies: SEARCH-STRUCTURED-DATA. Re-read crawler docs in the same slice.
+Gate: REVIEW.
+Autonomous: yes. Applying the file on Cloudflare is DANGEROUS and is not this slice.
+Accept: generated robots and sitemap from policy. Non-production is non-indexable. Production fixture has no blanket disallow. No training-token group until FZ-SEARCH-CRAWL-1 is DECIDED.
+Tests: the two environment fixtures.
+Next: CMS-SEO.
+
+### SEARCH-ATTRIBUTION
+
+Dependencies: existing Lead capture contract. Does not wait on Apostrophe.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: sanitized first/last touch fields; unknown stays unknown; form body is not logged with the referrer.
+Tests: hostile referrer and UTM stripped; allowlisted AI host only.
+Next: SEARCH-DATA-MODEL when external observations start. May run after CMS-DATA without blocking media slices.
+
+### SEARCH-DATA-MODEL
+
+Dependencies: SEARCH-ARCH. Persistence waits until a connector or attribution slice needs rows.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: PostgreSQL/Kysely entities from FZ-SEARCH-1 section 12, provenance, idempotency, retention note. No second database.
+Next: SEARCH-CONNECTORS.
+
+### SEARCH-CONNECTORS
+
+Dependencies: SEARCH-DATA-MODEL. Live OAuth to a business property is DANGEROUS.
+Gate: REVIEW for interfaces and fixtures. DANGEROUS for real credentials.
+Autonomous: fixtures only.
+Accept: adapter boundaries, no token logs, recorded quotas re-read that day.
+Next: SEARCH-SYNC.
+
+### SEARCH-SYNC
+
+Dependencies: SEARCH-CONNECTORS.
+Gate: REVIEW.
+Autonomous: yes on synthetic fixtures.
+Accept: job path, checkpoint, backoff, one provider outage does not blank the other.
+Next: SEARCH-HISTORY.
+
+### SEARCH-HISTORY
+
+Dependencies: SEARCH-SYNC.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: 7/28/90/180/365-day views from stored snapshots; year-over-year only when both sides exist.
+Next: SEARCH-TECH-AUDIT.
+
+### SEARCH-TECH-AUDIT
+
+Dependencies: SEARCH-SITEMAP-ROBOTS, CMS-WWW.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: issues for noindex, broken canonical, missing ALT, sitemap/robots health. Recommendations do not publish.
+Next: SEARCH-AI-VISIBILITY.
+
+### SEARCH-AI-VISIBILITY
+
+Dependencies: SEARCH-DATA-MODEL.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: Bing citations stay empty unless a real export/API was re-verified. No composite AI score.
+Next: SEARCH-CRAWLER-INTELLIGENCE.
+
+### SEARCH-CRAWLER-INTELLIGENCE
+
+Dependencies: SEARCH-AI-VISIBILITY. Cloudflare mutation is DANGEROUS and out of slice.
+Gate: REVIEW.
+Autonomous: yes for the model and a synthetic Cloudflare fixture.
+Accept: taxonomy A–E; referrals absent rather than zero on a free-plan fixture.
+Next: SEARCH-CONTENT-INTELLIGENCE.
+
+### SEARCH-CONTENT-INTELLIGENCE
+
+Dependencies: SEARCH-TECH-AUDIT, internal link graph from published content.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: evidence-backed recommendations; AI output marked AI-SUGGESTED; no auto-publish.
+Next: SEARCH-ADMIN.
+
+### SEARCH-ADMIN
+
+Dependencies: SEARCH-HISTORY or synthetic fixtures, plus SEARCH-CONTENT-INTELLIGENCE for that panel.
+Gate: REVIEW + UX.
+Autonomous: yes with synthetic data.
+Accept: every metric shows definition, source, window, freshness, evidence class.
+Next: SEARCH-ALERTS.
+
+### SEARCH-ALERTS
+
+Dependencies: SEARCH-ADMIN.
+Gate: REVIEW.
+Autonomous: yes. No production notification channel.
+Accept: thresholds exist; the suite does not page on a single-row blip.
+Next: SEARCH-SECURITY.
+
+### SEARCH-SECURITY
+
+Dependencies: SEARCH-CONNECTORS, SEARCH-ATTRIBUTION.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: redaction, XSS in imported labels, URL sanitize, preview leak test.
+Next: SEARCH-PERFORMANCE.
+
+### SEARCH-PERFORMANCE
+
+Dependencies: MEDIA-PROCESS, SEARCH-WWW-TECHNICAL.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: field CWV and lab data are different fields. LCP/CLS notes use the media pipeline.
+Next: SEARCH-RECOVERY.
+
+### SEARCH-RECOVERY
+
+Dependencies: SEARCH-DATA-MODEL, CMS-RESTORE.
+Gate: REVIEW.
+Autonomous: yes on local PostgreSQL.
+Accept: restore of synthetic observations; a written list of rows that cannot be re-synced after upstream retention.
+Next: SEARCH-ACCEPT.
+
+### SEARCH-ACCEPT
+
+Dependencies: SEARCH-SECURITY, SEARCH-PERFORMANCE, SEARCH-RECOVERY, and the WWW SEO slices.
+Gate: REVIEW.
+Autonomous: report only.
+Accept: do not mark accepted where ZAP, SCA, live credentials, or Cloudflare policy remain deferred.
+Next: RETURN-ROADMAP. CMS-ACCEPT and SEARCH-ACCEPT are separate checklists.
+
 ### RETURN-ROADMAP
 
-Dependencies: CMS-ACCEPT.
+Dependencies: CMS-ACCEPT. SEARCH-ACCEPT is a separate checklist and does not block the return. Open FZ-SEARCH-CRAWL-1 does not block it either.
 Gate: AUTO.
 Autonomous: yes.
 Entry: CMS-ACCEPT recorded.
 Accept: resume Lead remaining security work and the next product vertical. WWW/Admin content rules stay binding.
 Next: main Forma Zieleni execution roadmap. Lead deferred security stays visible. Do not treat CMS completion as Lead security-acceptance.
+
+## CMS acceptance still required (not PASS)
+
+A. Apostrophe + PostgreSQL in the intended architecture.
+B. Real Apostrophe Admin/editor UI.
+C. Real page, project, article, and service editing.
+D. Native visual editing quality.
+E. FZ Media Pipeline integration.
+F. Draft/publish.
+G. Preview.
+H. Revision/history/rollback, or an FZ compensation.
+I. Scheduler strategy.
+J. Permissions/auth integration.
+K. Last-known-good publication boundary.
+L. Backup/restore.
+M. Export/exit.
+N. Security.
+O. Performance.
+P. Accessibility.
+Q. React Router WWW integration.
+
+Lab leftovers that stay DEFERRED until re-tested: vendor Admin UI,
+PostgreSQL adapter, browser swipe/pinch/deep focus, ZAP,
+Dependency-Check of a running CMS, HEIC, PDF preview, video.
 
 ## Acceptance checklist (later production)
 

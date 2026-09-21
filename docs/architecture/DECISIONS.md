@@ -188,10 +188,10 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Pole | Wartość |
 |------|---------|
 | Data | 2026-09-21 |
-| Status | Proposed |
-| Decyzja | Not recorded. Owner must reply `DECISION FZ-CMS-1: OPTION A\|B\|C\|D\|E`. |
-| Kontekst | WWW needs an editor-operated content and media system that is not CRM. Gate A stack stays binding. Research, an isolated native lab, and a 2026-09-21 finalist validation lab are in `OWNER-DECISION-PACKET-FZ-CMS-1.md` and `labs/fz-cms-1`. No engine is selected. |
-| Konsekwencje | No CMS is selected by this ADR. After an Owner reply, update this status to Accepted and execute `NEXT-SLICES-CMS.md`. |
+| Status | Accepted |
+| Decyzja | `DECISION FZ-CMS-1: OPTION B` `VISUAL=vendor-native` `MEDIA=fz-pipeline`. Content engine: ApostropheCMS on PostgreSQL. Visual editing: Apostrophe native/in-context editing; do not add Puck by default. Media: Forma Zieleni owns the intelligent media pipeline. CMS is the content domain only. |
+| Kontekst | WWW needs an editor-operated content and media system that is not CRM. Gate A stack stays binding. Research, an isolated native lab, and a 2026-09-21 finalist validation lab are in `OWNER-DECISION-PACKET-FZ-CMS-1.md` and `labs/fz-cms-1`. The Owner reply selected option B with those constraints. The lab did not execute the vendor Admin UI or the PostgreSQL adapter. |
+| Konsekwencje | Execute `NEXT-SLICES-CMS.md`. This ADR is not CMS-ACCEPT. Acceptance items A–Q stay open. Apostrophe must not become CRM, Lead, Contract, Payment, business Project truth, Core API authorization, or private business file authority. Puck is not installed unless a later Owner decision records an evidence-based fallback. Search Intelligence is a separate bounded capability in `FZ-SEARCH-1.md`, not an Apostrophe table. FZ-SIGN-1 stays UNDECIDED. Lead security acceptance is unchanged. |
 
 ## Szablon kolejnego ADR
 

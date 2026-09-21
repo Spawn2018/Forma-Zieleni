@@ -1,9 +1,45 @@
 # FZ-CMS-1 — Content, media and visual publishing
 
-Status: OPEN — OWNER-DECISION. Research date **2026-09-21**. Finalist
-validation lab also **2026-09-21**. No option is selected. This packet
-does not implement a production CMS, mutate Cloudflare/DNS, authorize
-spend, or replace Gate A.
+Status: DECIDED — 2026-09-21. Research and the finalist validation lab
+are the same date. This record does not implement a production CMS,
+mutate Cloudflare/DNS, authorize spend, or replace Gate A.
+
+```text
+DECISION FZ-CMS-1: OPTION B
+VISUAL=vendor-native
+MEDIA=fz-pipeline
+```
+
+Recorded meaning:
+
+- Content engine: ApostropheCMS on PostgreSQL. MongoDB stays excluded.
+  SQLite is not the production-shaped path.
+- Visual editing: Apostrophe native/in-context editing is the initial
+  direction. Do not add Puck by default. Puck is only a later
+  fallback or augmentation if implementation evidence shows native
+  editing cannot meet Forma Zieleni requirements, and only through a
+  new Owner decision. Do not switch CMS silently.
+- Media: Forma Zieleni owns the canonical intelligent media pipeline.
+  Apostrophe media is not the architectural source of truth for
+  transformation rules.
+- CMS is the content domain. Core API remains the business domain.
+  Apostrophe must not become CRM, Lead, Contract, Payment, or business
+  Project truth, must not authorize Core API business objects, and
+  must not become the private business file authority.
+
+This decision is not CMS-ACCEPT. Items A–Q in
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) stay open until proved.
+Finalist evidence stays as executed: Apostrophe 4.32.2 through the
+task/API harness; vendor Admin UI NOT executed; PostgreSQL path NOT
+executed (starter used SQLite); native visual editing remains an
+acceptance requirement; Sharp WebP/AVIF, real EXIF/GPS stripping,
+CONTAIN / SMART_FILL / ADAPTIVE_LAYOUT, and last-known-good were
+demonstrated; gallery browser swipe/pinch/deep focus stays DEFERRED.
+Do not rewrite DEFERRED or NOT TESTED rows as PASS.
+
+Sentences below that say no option is selected describe the
+pre-decision research. They are historical evidence. The decision
+block above is the current record.
 
 Silence is not a decision.
 

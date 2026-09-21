@@ -80,7 +80,9 @@ whole CRM. ZAP, Dependency-Check, a supervised worker, and off-site
 backup are not done. Architecture selection is still not
 security acceptance.
 
-CMS / public content is a separate OPEN Owner decision (FZ-CMS-1).
-Do not implement a production CMS until
-[`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md)
-is answered. The isolated lab in `labs/fz-cms-1` is not a selection.
+CMS / public content is DECIDED (FZ-CMS-1 option B) and not
+CMS-ACCEPT. Execute
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md). The isolated lab in
+`labs/fz-cms-1` remains evidence, not acceptance. Search Intelligence
+architecture is [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler
+production policy stays OPEN.

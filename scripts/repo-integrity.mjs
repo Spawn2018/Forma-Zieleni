@@ -38,6 +38,8 @@ const linkScope = [
   'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md',
   'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md',
   'docs/architecture/NEXT-SLICES-CMS.md',
+  'docs/architecture/FZ-SEARCH-1.md',
+  'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md',
   'docs/cursor-os/CURSOR-OS-2026.md',
   'docs/workflows/DECISION-GATES.md',
   'docs/domain/DOMAIN-MAP.md',
@@ -216,12 +218,27 @@ function checkCanon(errors) {
   mustContain(errors, 'docs/architecture/DECISIONS.md', [
     '## ADR-014 — Gate A architecture selection',
     '## ADR-015 — Content / media / visual publishing (FZ-CMS-1)',
+    'DECISION FZ-CMS-1: OPTION B',
   ]);
   mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', [
-    'Status: OPEN',
-    'DECISION FZ-CMS-1: OPTION',
+    'Status: DECIDED',
+    'DECISION FZ-CMS-1: OPTION B',
+    'VISUAL=vendor-native',
+    'MEDIA=fz-pipeline',
+  ]);
+  mustContain(errors, 'docs/architecture/DECISIONS.md', [
+    '| Status | Accepted |',
   ]);
   mustContain(errors, 'docs/architecture/NEXT-SLICES-CMS.md', ['READY only after']);
+  mustContain(errors, 'docs/architecture/FZ-SEARCH-1.md', [
+    '# FZ-SEARCH-1',
+    'MEASURED',
+    'NO RELIABLE MEASUREMENT',
+  ]);
+  mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', [
+    'Status: OPEN',
+    'DECISION FZ-SEARCH-CRAWL-1: OPTION',
+  ]);
   mustContain(errors, 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', [
     'Provider **UNDECIDED**',
     '# FZ-SIGN-1 — Contract Lifecycle & Electronic Signature',

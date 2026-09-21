@@ -55,7 +55,7 @@ contracts, payments or files.
 - OpenObserve, pgBackRest, a Linux host, Docker Compose staging.
 - Cloudflare Tunnel, DNS, firewall or production changes.
 - FZ-SIGN-1 provider, payments, Fakturownia.
-- Production CMS / public content store (FZ-CMS-1 OPEN).
+- Production CMS / public content store. FZ-CMS-1 is DECIDED and is a separate backlog. This lead slice does not build it. Lead remains not security-accepted.
 - Session replay.
 - Real customer data, real credentials, paid services.
 

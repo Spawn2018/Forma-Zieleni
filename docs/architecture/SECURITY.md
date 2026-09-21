@@ -63,8 +63,12 @@ Wymagania bezpieczeństwa dla platformy. Obowiązują niezależnie od ostateczne
 - osobne uprawnienia do odczytu plików (BOLA na `fileId` i na `contractId`),
 - preferowane podpisane, czasowo ograniczone URL-e dostępu (to jest kontrola dostępu do bajtów, nie podpis elektroniczny umowy),
 - artefakty umów: [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md). Publiczny URL nie jest autoryzacją. Silnik podpisu nie jest jedynym archiwum.
-- public CMS media is not a private business file. FZ-CMS-1 is OPEN
+- public CMS media is not a private business file. FZ-CMS-1 is
+  DECIDED and not CMS-ACCEPT
   ([`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md)).
+  Search connector tokens, imported query strings, and referrers are
+  untrusted
+  ([`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md)).
   Unpublished content must not leak. A CMS is not CRM authorization.
   Public derivatives must not carry GPS. Private project photos never
   become public without an explicit, authorized, auditable step.

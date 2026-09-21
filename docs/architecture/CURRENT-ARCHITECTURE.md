@@ -50,9 +50,23 @@ ADR-014). Implementation and security acceptance are not complete.
 - LATER staging direction: Garage. That direction is not an irrevocable
   production selection.
 - Production object storage remains a later Owner decision.
-- Public content media is not a private business file. CMS / public
-  publishing remains UNDECIDED (FZ-CMS-1 OPEN). A 2026-09-21 finalist
-  validation lab exists; it does not select an engine.
+- Public content media is not a private business file. FZ-CMS-1 is
+  DECIDED (ADR-015): ApostropheCMS on PostgreSQL is the content
+  engine; Apostrophe native visual editing is the initial direction;
+  Forma Zieleni owns the media pipeline
+  (`VISUAL=vendor-native`, `MEDIA=fz-pipeline`). Apostrophe is not
+  CRM, Lead, Contract, Payment, business Project, Core API
+  authorization, or private file authority. Puck is not a default.
+  The 2026-09-21 lab did not execute the vendor Admin UI or
+  PostgreSQL. CMS-ACCEPT is not granted.
+- Published WWW content is a projection. The last published snapshot
+  remains servable if the editorial process is down. Drafts stay
+  private.
+- Search Intelligence is a bounded FZ capability
+  ([`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md)). It does not live in
+  Apostrophe tables and does not write CRM state. Training-crawler
+  production policy is OPEN
+  ([`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md)).
 
 ## Observability
 
@@ -114,7 +128,7 @@ ADR-014). Implementation and security acceptance are not complete.
 
 ## Explicitly still undecided
 
-Payment provider; CMS (FZ-CMS-1 OPEN — [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md)); electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only). Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
+Payment provider; electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only); production training-crawler policy (FZ-SEARCH-CRAWL-1 OPEN). CMS engine selection is DECIDED in ADR-015 and is not CMS-ACCEPT. Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model
 

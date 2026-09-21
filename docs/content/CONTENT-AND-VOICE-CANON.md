@@ -28,11 +28,13 @@ No exclamation-mark-heavy sales voice. No vague CTA such as “Dowiedz się wię
 ## Public content store
 
 WWW public copy, service pages, articles, project case studies and
-public media wait on FZ-CMS-1
+public media follow decided FZ-CMS-1
 ([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
-Do not hard-code unverified marketing facts into React Router. After
-the Owner reply, published content is a projection, not source-file
-copy. This Canon still forbids invented facts, fake social proof and
+Do not hard-code unverified marketing facts into React Router.
+Published content is a projection, not source-file copy. Search and
+AI-discovery writing rules are in
+[`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md).
+This Canon still forbids invented facts, fake social proof and
 unverified prices.
 
 ## Facts and placeholders

@@ -54,12 +54,14 @@ extensions -\> AI -\> XR, subject to product validation and gates. Do
 not build all surfaces in parallel.
 
 WWW public copy, service pages, articles, project case studies and
-public media wait on FZ-CMS-1
+public media follow the decided FZ-CMS-1 architecture
 ([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
-Do not hard-code unverified marketing facts into React Router. After
-the Owner reply, execute
-[`../architecture/NEXT-SLICES-CMS.md`](../architecture/NEXT-SLICES-CMS.md)
-then return to this product sequence. Content is not CRM.
+Do not hard-code unverified marketing facts into React Router. Execute
+[`../architecture/NEXT-SLICES-CMS.md`](../architecture/NEXT-SLICES-CMS.md),
+including Search Intelligence from
+[`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md),
+then return to this product sequence. Content is not CRM. The CMS
+decision is not CMS-ACCEPT.
 
 ## Cross-cutting operational readiness
 
