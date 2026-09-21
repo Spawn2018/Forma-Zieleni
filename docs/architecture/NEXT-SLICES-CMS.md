@@ -282,9 +282,10 @@ Next: SEARCH-DATA-MODEL when a connector needs rows. May run after CMS-DATA with
 
 Dependencies: SEARCH-ARCH. Persistence waits until a connector or attribution slice needs rows.
 Gate: REVIEW.
-Autonomous: yes.
-Accept: PostgreSQL/Kysely entities from FZ-SEARCH-1 section 12, provenance, idempotency, retention note. No second database.
-Next: SEARCH-CONNECTORS.
+Status: COMPLETE for the domain contract. PostgreSQL rows are not created until a connector writes them.
+Accept: entity names from FZ-SEARCH-1 section 12, provenance, idempotency, retention UNKNOWN. No second database.
+Tests: `packages/domain/search-data.test.mjs`.
+Next: SEARCH-CONNECTORS. Live OAuth stays DANGEROUS.
 
 ### SEARCH-CONNECTORS
 

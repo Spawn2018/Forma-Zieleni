@@ -6,8 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "node --test lead.test.mjs content-auth.test.mjs content-publish.test.mjs content-events.test.mjs ecosystem.test.mjs attribution.test.mjs",
-    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/content-auth.ts src/content-publish.ts src/content-events.ts src/connected.ts src/growth.ts src/attribution.ts src/index.ts",
-    "lint": "node --check lead.test.mjs && node --check content-auth.test.mjs && node --check content-publish.test.mjs && node --check content-events.test.mjs && node --check ecosystem.test.mjs && node --check attribution.test.mjs"
+    "test": "node --test lead.test.mjs content-auth.test.mjs content-publish.test.mjs content-events.test.mjs ecosystem.test.mjs attribution.test.mjs search-data.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/content-auth.ts src/content-publish.ts src/content-events.ts src/connected.ts src/growth.ts src/attribution.ts src/search-data.ts src/index.ts",
+    "lint": "node --check lead.test.mjs && node --check content-auth.test.mjs && node --check content-publish.test.mjs && node --check content-events.test.mjs && node --check ecosystem.test.mjs && node --check attribution.test.mjs && node --check search-data.test.mjs"
   }
 }

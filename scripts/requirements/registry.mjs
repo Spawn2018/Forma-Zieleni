@@ -152,6 +152,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-ATTRIBUTION', 'Referral sanitize keeps an unknown referrer unknown and labels only an allowlisted AI host.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/attribution.ts', 'packages/domain/attribution.test.mjs', '', 'NONE', 'Not yet a column on the lead row.');
     continue;
   }
+  if (slice === 'SEARCH-DATA-MODEL') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-DATA-MODEL', 'Search observations keep provenance and an idempotency key, and reject a form body.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-data.ts', 'packages/domain/search-data.test.mjs', 'connector before PostgreSQL rows', 'NONE', 'No search tables until a connector writes them.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

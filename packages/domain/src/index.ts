@@ -85,6 +85,8 @@ export {
 export type { MarketingPlan, Offer, WorkItem } from './growth.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
+export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';
+export type { SearchEntityName, SearchObservation } from './search-data.ts';
 export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
