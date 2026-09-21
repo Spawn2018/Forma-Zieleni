@@ -43,6 +43,12 @@ workflows. External AI/Bots are independent helpers, not canonical
 authorities. Before every push use
 `docs/cursor-os/PRE-PUSH-ORCHESTRATION.md`.
 
+## Continuous improvement
+
+Learning is not a second execution loop. Binding rules:
+`docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md`.
+Raw observations are not Canon. Owner gates cannot be learned away.
+
 ## Security-tool integration update --- 2026-09-21
 
 Binding security-tool details live in

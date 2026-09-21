@@ -31,6 +31,10 @@ software-house review.
     green slice when quota is available, then ZAP when a runnable
     target exists. Record DEFERRED/BLOCKED when the external tool is
     unavailable. Never mark that state PASS.
+14. Critical unresolved learning: an open critical security or incident
+    record from
+    [`../architecture/FZ-CONTINUOUS-IMPROVEMENT.md`](../architecture/FZ-CONTINUOUS-IMPROVEMENT.md)
+    blocks the push. Other Learning Debt does not.
 
 Push is blocked on failures. Do not silence tests, loosen types, skip
 security checks or raise performance budgets just to make the gate

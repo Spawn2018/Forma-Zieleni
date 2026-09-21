@@ -1,0 +1,69 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { pushBlockers, validateRecord } from './policy.mjs';
+
+export const FITNESS = [
+  {
+    id: 'single-cis-canon',
+    property: 'FZ-CIS has one binding architecture document',
+    reason: 'Learning rules must not fork into competing Canon',
+    mechanism: 'Exactly one Markdown file starts with the FZ-CIS title',
+    failure: 'Agents can follow two improvement policies',
+    owner: 'repository integrity',
+  },
+  {
+    id: 'learning-store-safe',
+    property: 'Tracked learning records validate and do not erode Owner gates',
+    reason: 'Evidence must stay data, without secrets or authority changes',
+    mechanism: 'records.json parses, each record validates, critical security blockers stay visible',
+    failure: 'A poisoned or secret-bearing record is treated as repository evidence',
+    owner: 'FZ orchestrator',
+  },
+  {
+    id: 'execution-loop-unchanged',
+    property: 'CURSOR-OS remains the only binding execution loop',
+    reason: 'FZ-CIS learns around execution and must not replace it',
+    mechanism: 'CURSOR-OS still names itself the sole binding definition',
+    failure: 'A second loop can select or skip work',
+    owner: 'FZ orchestrator',
+  },
+];
+
+function titleCount(files, root) {
+  const header = '# FZ Continuous Improvement System\n';
+  return files.filter((file) => {
+    if (!file.endsWith('.md')) return false;
+    const text = readFileSync(path.join(root, file), 'utf8');
+    return text.startsWith(header) || text.startsWith(header.replace('\n', '\r\n'));
+  });
+}
+
+export function checkFitness(root, files) {
+  const errors = [];
+  const titles = titleCount(files, root);
+  if (titles.length !== 1 || titles[0] !== 'docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md') {
+    errors.push(`single-cis-canon failed: ${titles.join(', ') || 'none'}`);
+  }
+  const loop = readFileSync(path.join(root, 'docs/cursor-os/CURSOR-OS-2026.md'), 'utf8');
+  if (!loop.includes('sole binding definition')) errors.push('execution-loop-unchanged failed');
+  const storePath = path.join(root, 'docs/engineering/learning/records.json');
+  let store;
+  try {
+    store = JSON.parse(readFileSync(storePath, 'utf8'));
+  } catch {
+    errors.push('learning-store-safe failed: records.json is not JSON');
+    return errors;
+  }
+  if (!store || store.version !== 1 || !Array.isArray(store.records)) {
+    errors.push('learning-store-safe failed: invalid store');
+    return errors;
+  }
+  for (const record of store.records) {
+    const checked = validateRecord(record, 'stored');
+    if (!checked.ok) errors.push(`learning-store-safe failed: ${record.id || 'record'} ${checked.errors.join(',')}`);
+  }
+  for (const blocker of pushBlockers(store.records)) {
+    if (!blocker.id) errors.push('learning-store-safe failed: critical blocker without id');
+  }
+  return errors;
+}

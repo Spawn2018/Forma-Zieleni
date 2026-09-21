@@ -432,3 +432,14 @@ Gallery: desktop/mobile, touch/mouse/keyboard, lightbox X/backdrop/Escape, focus
 Security: authz, unpublished, upload, XSS, SVG, SSRF, webhook auth, CSRF/CORS, SCA, secrets, logs.
 Performance: responsive images, no original overdelivery, lazy, LCP, CLS, cache.
 Recovery: DB restore, media restore, export, last-known-good published content.
+
+## Continuous improvement
+
+Not a second roadmap and not a READY list. Binding rules:
+[`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md).
+Material Learning Debt is derived from the learning store. It does not
+add a slice id. Deferred until a product surface exists: deployment
+telemetry, field performance, and search or UX outcome learning.
+Production-only later: live SLOs, error-budget enforcement, and
+customer conversion learning. Next product work remains the READY
+slices above.

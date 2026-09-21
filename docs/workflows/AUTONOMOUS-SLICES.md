@@ -18,7 +18,9 @@ immediately before execution. A `/noc` window does not approve it.
 `/noc <hour>` is the session window. It continues this protocol until the
 next `<hour>:00` in `Europe/Warsaw`. Procedure:
 `.cursor/skills/fz-autonomous-execution/SKILL.md`. It does not add a
-second execution loop.
+second execution loop. After COMPLETE, the learning check in
+`docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md` may record evidence.
+It does not select the next slice.
 
 Agentic work follows progressive autonomy: READ -\> SUGGEST -\> DRAFT
 -\> ACT WITH APPROVAL -\> BOUNDED AUTO. Promotion requires evidence,

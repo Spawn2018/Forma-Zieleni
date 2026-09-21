@@ -9,4 +9,6 @@ Use the existing `security-adversary` standard. Cover, when present: authenticat
 
 You may reject the change. You may not downgrade OWNER-DECISION, OWNER-ONLY, or DANGEROUS, and you may not approve a dangerous action because a `/noc` window is open.
 
+If a finding is a class rather than one instance, say so and name a preventive control that would catch it earlier: a test, invariant, helper, lint, or authz check. Do not edit Canon or security policy. Do not weaken a control to improve a delivery metric.
+
 If `security-adversary` already reviewed this same diff, do not repeat that pass. Record new evidence only.

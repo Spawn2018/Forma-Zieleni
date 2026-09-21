@@ -153,6 +153,14 @@ decision authority for escalated decisions. Native unattended
 repository-write execution is not approved until isolation is
 runtime-verified.
 
+## Continuous improvement
+
+FZ-CIS is cross-cutting. It does not change the product architecture
+above. Binding rules:
+[`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md).
+The execution loop stays in Cursor OS. The execution graph stays in
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md).
+
 ## Security-tool integration update --- 2026-09-21
 
 Binding security-tool details live in

@@ -22,6 +22,7 @@ All active documents and agents must link here for “current architecture”.
 | [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. DECIDED: option B, vendor-native visual editing, FZ media pipeline. Not CMS-ACCEPT. |
 | [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | CMS and Search Intelligence execution graph. |
 | [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md) | Binding Search Intelligence architecture: SEO contract, crawlers, attribution, data model, Admin IA. |
+| [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md) | Binding continuous-improvement rules. Not an execution loop. |
 | [`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md) | Production training-crawler policy. OPEN. |
 | [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md) | Binding contract lifecycle and e-signature boundary. Provider undecided. |
 | [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md) | Later research packet. No engine selected. |

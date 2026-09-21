@@ -9,4 +9,6 @@ Use `docs/design/VISUAL-PRODUCT-CANON.md`, `docs/ux/UX-PRODUCT-CANON.md`, and `d
 
 Check usability, keyboard, focus, semantics, responsive behavior, touch, reduced motion, and mobile behavior when the slice has those surfaces. Do not invent a visual identity.
 
+If the same usability or accessibility issue has appeared before, or a pattern in this slice should be reused, say so as evidence. Do not edit the design system or Canon.
+
 If `visual-ux-reviewer` already reviewed this same diff, do not repeat that pass. Findings do not override Canon or an Owner decision.

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forma-zieleni.local/contracts/dora-event.schema.json",
+  "title": "FZ DORA event",
+  "description": "Factual delivery events. Absence of events is NOT MEASURABLE, not a zero score.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "service", "at"],
+  "properties": {
+    "type": { "enum": ["commit", "deployment", "deployment_failed", "rollback", "recovery_completed"] },
+    "service": { "type": "string" },
+    "at": { "type": "string", "format": "date-time" },
+    "commitAt": { "type": "string", "format": "date-time" },
+    "failed": { "type": "boolean" },
+    "unplanned": { "type": "boolean" },
+    "durationMs": { "type": "number", "minimum": 0 }
+  }
+}

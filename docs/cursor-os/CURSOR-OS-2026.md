@@ -84,6 +84,10 @@ The interactive Agent stays on the binding loop above. When an ordinary turn com
 
 Local commit, push, and deploy stay distinct. The window does not approve OWNER-DECISION, OWNER-ONLY, or DANGEROUS actions. Grok and CodeRabbit remain evidence sources; their absence does not stop other READY work. Product execution stays on the local Agent. A Cloud or Background Agent is not the autonomy path unless the Owner decides otherwise.
 
+## Learning flywheel
+
+After COMPLETE, the autonomous skill runs a proportional learning check. That check is not a stage of the loop above and is not a second execution loop. Binding rules: [`../architecture/FZ-CONTINUOUS-IMPROVEMENT.md`](../architecture/FZ-CONTINUOUS-IMPROVEMENT.md).
+
 ## Security-tool integration update --- 2026-09-21
 
 Binding security-tool details live in

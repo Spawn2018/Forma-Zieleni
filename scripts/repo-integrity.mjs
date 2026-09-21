@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkFitness } from './fz-cis/fitness.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SUMS = 'SHA256SUMS.txt';
@@ -26,6 +27,12 @@ const linkScope = [
   'README.md',
   'docs/engineering/REPOSITORY-INTEGRITY.md',
   'docs/engineering/PRE-PUSH-GATE.md',
+  'docs/engineering/DORA-MEASUREMENT.md',
+  'docs/engineering/ENGINEERING-METRICS.md',
+  'docs/engineering/RELIABILITY.md',
+  'docs/engineering/FITNESS-FUNCTIONS.md',
+  'docs/engineering/FZ-CIS-BASELINE.md',
+  'docs/engineering/learning/README.md',
   'docs/constitution/PROJECT-CONSTITUTION.md',
   'docs/architecture/CURRENT-ARCHITECTURE.md',
   'docs/architecture/README.md',
@@ -39,6 +46,7 @@ const linkScope = [
   'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md',
   'docs/architecture/NEXT-SLICES-CMS.md',
   'docs/architecture/FZ-SEARCH-1.md',
+  'docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md',
   'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md',
   'docs/cursor-os/CURSOR-OS-2026.md',
   'docs/workflows/DECISION-GATES.md',
@@ -271,6 +279,10 @@ function checkCanon(errors) {
     'Garage',
     'Cloudflare Tunnel',
     'Docker Compose',
+    'FZ-CONTINUOUS-IMPROVEMENT.md',
+  ]);
+  mustContain(errors, 'START-HERE-CURSOR.md', [
+    'FZ-CONTINUOUS-IMPROVEMENT.md',
   ]);
   const lifecycleHeaders = trackedFiles().filter((file) => {
     if (!file.endsWith('.md')) return false;
@@ -306,6 +318,7 @@ function check(files) {
   checkWorkspace(errors);
   checkCanon(errors);
   checkLinks(errors);
+  for (const failure of checkFitness(root, files)) fail(errors, failure);
   checkSums(files, errors);
   return errors;
 }

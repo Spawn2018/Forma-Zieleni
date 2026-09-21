@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forma-zieleni.local/contracts/engineering-event.schema.json",
+  "title": "FZ engineering event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "at"],
+  "properties": {
+    "type": {
+      "enum": [
+        "slice_started", "slice_completed", "slice_blocked", "test_failed", "test_flaky",
+        "review_finding", "security_finding", "ux_finding", "grok_finding", "coderabbit_finding",
+        "owner_intervention", "gate_reached", "assumption_invalidated", "incident", "near_miss",
+        "experiment_started", "experiment_completed", "learning_promoted", "learning_rejected",
+        "learning_demoted", "toil_detected", "automation_added", "deployment", "deployment_failed",
+        "rollback", "recovery_completed"
+      ]
+    },
+    "at": { "type": "string", "format": "date-time" },
+    "service": { "type": "string" },
+    "slice": { "type": "string" },
+    "ref": { "type": "string" },
+    "ownerInterventionClass": { "enum": ["LEGITIMATE", "AVOIDABLE"] }
+  }
+}

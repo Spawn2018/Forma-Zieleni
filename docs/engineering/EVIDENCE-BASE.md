@@ -6,7 +6,7 @@ This document records external evidence used to shape Forma Zieleni engineering 
 - Google Research, *What Improves Developer Productivity at Google? Code Quality*: code quality and technical debt materially affect developer productivity.
 - Google Research, *Modern Code Review: A Case Study at Google*: lightweight tool-supported review is a mature quality practice at very large scale.
 - Google Research, *Productive Coverage*: raw coverage percentage is not enough; testing should focus on actionable/risky uncovered behavior.
-- DORA, trunk-based development and delivery metrics: small batches, continuously healthy trunk and measuring throughput/stability support high software-delivery performance.
+- DORA, trunk-based development and delivery metrics: small batches, continuously healthy trunk and measuring throughput/stability support high software-delivery performance. The five-metric reading checked on 2026-09-21 is in [`DORA-MEASUREMENT.md`](./DORA-MEASUREMENT.md).
 - Amazon Builders' Library, *Caching challenges and strategies*: caching can reduce latency/cost but creates failure modes; measure hit/miss, design for cold/unavailable cache, prevent thundering herd, treat TTL/invalidation/security deliberately.
 - Google Cloud Well-Architected performance/reliability/security guidance: performance is continuous; define requirements, monitor, test capacity, design graceful degradation and security by design.
 - Stripe Engineering, idempotency: network failures make safe retries/idempotency keys important for side-effecting APIs.

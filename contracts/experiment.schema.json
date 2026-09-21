@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forma-zieleni.local/contracts/experiment.schema.json",
+  "title": "FZ experiment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "question", "hypothesis", "baseline", "change", "expectedEffect", "metrics", "guardrails", "stopCondition"],
+  "properties": {
+    "id": { "type": "string" },
+    "status": { "enum": ["DRAFT", "RUNNING", "COMPLETED"] },
+    "question": { "type": "string" },
+    "hypothesis": { "type": "string" },
+    "baseline": { "type": "string" },
+    "change": { "type": "string" },
+    "expectedEffect": { "type": "string" },
+    "metrics": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "guardrails": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "stopCondition": { "type": "string" },
+    "result": { "type": "string" },
+    "decision": { "enum": ["ADOPT", "REVISE", "REJECT", "NEEDS_MORE_DATA"] },
+    "customerFacing": { "type": "boolean" },
+    "ownerApproved": { "type": "boolean" }
+  }
+}

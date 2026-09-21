@@ -8,3 +8,5 @@
 - Create and qualify require `Idempotency-Key`.
 - Legacy `legacy/freset-v2-full/contracts/openapi.yaml` remains reference only.
 - The lead HTTP runtime is `apps/api`. This file remains the contract. Generated clients in `packages/api-client` are still typed paths, not an HTTP client.
+
+Engineering learning contracts, which are not the Core API, live beside this file: `learning-record.schema.json`, `experiment.schema.json`, `engineering-event.schema.json`, and `dora-event.schema.json`. The runtime check is `scripts/fz-cis/policy.mjs`.

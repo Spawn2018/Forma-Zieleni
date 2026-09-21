@@ -4,7 +4,7 @@
 Grok Bot is an optional independent teammate available through the Cursor ecosystem when the owner's plan/account provides it. It is useful for external research, browser-based verification, long-running investigation, second-opinion review and repeatable routines.
 
 ## Not a source of truth
-Grok output is evidence/input only. It cannot override the Constitution, current decisions, contracts, tests, measured performance or owner decisions.
+Grok output is evidence/input only. It cannot override the Constitution, current decisions, contracts, tests, measured performance or owner decisions. A finding may become a learning signal under `docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md` only after local verification. It is not Canon, and it cannot edit agents, Skills, hooks, or security rules by itself.
 
 ## Recommended bots
 - Researcher: current technical/product research with links and dates.
