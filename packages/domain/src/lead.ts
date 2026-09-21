@@ -1,4 +1,5 @@
 export const LEAD_SOURCES = ['www', 'portal', 'admin', 'other'] as const;
+export const PUBLIC_LEAD_SOURCES = ['www', 'other'] as const;
 export const LEAD_STATUSES = ['received', 'site_analysis', 'qualified', 'consultation_ready', 'unqualified'] as const;
 export const QUALIFICATION_RESULTS = ['pending', 'qualified', 'unqualified', 'needs_review'] as const;
 export const QUALIFICATION_REASONS = [
@@ -9,6 +10,7 @@ export const QUALIFICATION_REASONS = [
 ] as const;
 
 export type LeadSource = (typeof LEAD_SOURCES)[number];
+export type PublicLeadSource = (typeof PUBLIC_LEAD_SOURCES)[number];
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
 export type QualificationResult = (typeof QUALIFICATION_RESULTS)[number];
 export type QualificationReason = (typeof QUALIFICATION_REASONS)[number];

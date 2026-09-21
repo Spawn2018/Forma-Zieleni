@@ -41,6 +41,13 @@ test('mutations require idempotency and public capture has no bearer requirement
   assert.equal(spec.components.parameters.IdempotencyKey.required, true);
 });
 
+test('public capture cannot assert internal sources and qualify declares idempotency conflict', () => {
+  assert.deepEqual(spec.components.schemas.PublicLeadSource.enum, ['www', 'other']);
+  assert.equal(spec.components.schemas.LeadCapture.properties.source.$ref, '#/components/schemas/PublicLeadSource');
+  assert.deepEqual(spec.components.schemas.LeadSource.enum, ['www', 'portal', 'admin', 'other']);
+  assert.equal(spec.paths['/leads/{leadId}/qualify'].post.responses['409'].$ref, '#/components/responses/Conflict');
+});
+
 test('errors share one schema and object reads are authorized', () => {
   for (const name of ['BadRequest', 'Unauthorized', 'Forbidden', 'NotFound', 'Conflict', 'TooManyRequests']) {
     assert.equal(spec.components.responses[name].content['application/json'].schema.$ref, '#/components/schemas/ApiError');

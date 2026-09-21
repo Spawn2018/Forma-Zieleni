@@ -4,7 +4,7 @@ Baseline: OWASP Application Security Verification Standard 5.0.0. Chapter index 
 
 | ASVS 5.0.x section | Slice acceptance | Evidence now | Evidence later |
 |---|---|---|---|
-| V2.2 Input Validation | Capture body allowlists fields; extras rejected | `packages/validation` tests | HTTP 400 contract tests |
+| V2.2 Input Validation | Capture body allowlists fields; extras rejected; public `source` cannot be `portal` or `admin`; non-string fields are rejected | `packages/validation` tests + `PublicLeadSource` | HTTP 400 contract tests |
 | V2.3 Business Logic Security | Qualification uses domain rules, not client status | `packages/domain` tests | API qualify tests |
 | V2.4 Anti-automation | Public POST is rate-limited | Documented on `POST /leads` | Runtime 429 test after FZ-A2 |
 | V4.1 Generic Web Service Security | Shared `ApiError`; `/v1`; no stack traces in contract | `contracts/openapi.test.mjs` | ZAP API scan when runnable |

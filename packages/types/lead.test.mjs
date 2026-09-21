@@ -16,4 +16,6 @@ test('shared LeadRecord fields stay aligned with the OpenAPI Lead schema', () =>
     'received', 'site_analysis', 'qualified', 'consultation_ready', 'unqualified',
   ]);
   assert.equal(Object.hasOwn(lead.properties, 'budget_min_pln'), false);
+  assert.equal(spec.components.schemas.LeadCapture.properties.source.$ref, '#/components/schemas/PublicLeadSource');
+  assert.deepEqual(spec.components.schemas.PublicLeadSource.enum, ['www', 'other']);
 });

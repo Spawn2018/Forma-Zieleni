@@ -1,6 +1,6 @@
 # Gate A–D implementation checkpoint — 2026-09-21
 
-Dependent implementation is paused where Owner decisions are missing. Independent contract and domain work continued.
+Dependent implementation is paused where Owner decisions are missing. Independent contract and domain work continued. S2.5 CodeRabbit remediations for public lead capture, qualifyLead 409, validation types, quota-log path, native-test pwsh discovery and resumable Owner decisions are a local REVIEW slice. Eight native Windows process tests remain skipped until `pwsh.exe` is on PATH or `NATIVE_TEST_POWERSHELL` is set.
 
 ## Gate A implementation
 
@@ -13,7 +13,7 @@ Local reproducible app config, CI deploy, API skeleton, migrations, object stora
 REVIEW progress, not a complete runtime:
 
 - Current OpenAPI 3.0.4: `contracts/openapi.json`
-- Errors, `/v1`, cursor pagination, filter, sort, idempotency: present for the lead slice
+- Errors, `/v1`, cursor pagination, filter, sort, idempotency: present for the lead slice. `qualifyLead` declares 409 Conflict. Public `LeadCapture.source` is `PublicLeadSource` (`www`, `other`).
 - Typed client surfaces for web/portal/admin/mobile: `packages/api-client` paths only, no HTTP transport
 - Contract and breaking-change tests: `contracts/openapi.test.mjs`
 - Generated runtime clients, CI publish and SketchUp Ruby client: blocked on FZ-A2 and later adapter work

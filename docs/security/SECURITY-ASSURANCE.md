@@ -25,12 +25,18 @@ Default integration order:
 3.  GitHub App PR review only when the project later adopts a PR
     workflow for a specific reason.
 
-Rate-limit policy: use the live CodeRabbit account/dashboard as the
-source of truth. Until verified otherwise, budget no more than 3 free
-CLI reviews per developer per rolling hour. Do not enable usage-based
-billing without Owner approval. When the review budget is exhausted,
-continue local deterministic AUTO/REVIEW work, queue the external
-review, and do not falsely mark CodeRabbit PASS.
+Rate-limit policy: use the live CodeRabbit account as the source of
+truth. Verified 2026-09-21 for account `Spawn2018`: plan Advanced
+(trial), seat assigned, usage-based billing inactive. Official published
+Advanced trial CLI allowance is 10 reviews per developer per rolling
+hour. `coderabbit usage` counts successful reviews in the billing period
+(one completed review incremented Your reviews from 0 to 1; a failed
+WebSocket review did not). The live hourly cap was not exhausted to
+measure it. Until that hourly cap is measured, keep the conservative
+project budget of 3 CLI reviews per developer per rolling hour. Do not
+enable usage-based billing without Owner approval. When the review
+budget is exhausted, continue local deterministic AUTO/REVIEW work,
+queue the external review, and do not falsely mark CodeRabbit PASS.
 
 Review batching: one CodeRabbit review should cover one coherent green
 slice/checkpoint, not every tiny commit. Cursor may commit coherent

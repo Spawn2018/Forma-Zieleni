@@ -149,7 +149,8 @@
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
         }
       }
     }
@@ -220,6 +221,11 @@
         "type": "string",
         "enum": ["www", "portal", "admin", "other"]
       },
+      "PublicLeadSource": {
+        "type": "string",
+        "enum": ["www", "other"],
+        "description": "Caller-asserted source on the unauthenticated capture route. Internal channels are assigned by the server, not by public input."
+      },
       "LeadStatus": {
         "type": "string",
         "enum": ["received", "site_analysis", "qualified", "consultation_ready", "unqualified"]
@@ -237,7 +243,7 @@
         "additionalProperties": false,
         "required": ["source", "name", "phone", "siteAnalysisRequested"],
         "properties": {
-          "source": { "$ref": "#/components/schemas/LeadSource" },
+          "source": { "$ref": "#/components/schemas/PublicLeadSource" },
           "name": { "type": "string", "minLength": 1, "maxLength": 120 },
           "phone": { "type": "string", "minLength": 9, "maxLength": 32 },
           "email": { "type": "string", "format": "email", "maxLength": 254 },

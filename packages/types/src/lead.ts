@@ -27,8 +27,10 @@ export type LeadRecord = {
   updatedAt: string;
 };
 
+export type PublicLeadSource = 'www' | 'other';
+
 export type LeadCaptureBody = {
-  source: LeadRecord['source'];
+  source: PublicLeadSource;
   name: string;
   phone: string;
   email?: string;

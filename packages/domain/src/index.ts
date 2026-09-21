@@ -1,5 +1,6 @@
 export {
   LEAD_SOURCES,
+  PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
   QUALIFICATION_RESULTS,
   QUALIFICATION_REASONS,
@@ -15,6 +16,7 @@ export type {
   LeadCapture,
   LeadQualification,
   LeadSource,
+  PublicLeadSource,
   LeadStatus,
   QualificationReason,
   QualificationResult,

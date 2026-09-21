@@ -122,6 +122,26 @@ test('resumed decision must not route to a forged capability', async () => {
   assert.equal(state.status, 'BLOCKED');
 });
 
+test('unavailable Owner decision stays pending and a later reply unblocks it', async () => {
+  const state = session([slice('choose', 'choose-audit'), slice('independent')]);
+  const first = harness({ decide: async () => null });
+  await runSession(state, first.ports);
+  assert.equal(state.status, 'BLOCKED');
+  assert.deepEqual(first.calls, ['repo-audit']);
+  assert.deepEqual(state.pendingWork, ['choose']);
+  assert.deepEqual(state.completedWork, ['independent']);
+  assert.ok(state.blockers.some(item => item.slice === 'choose' && item.reason === 'DECISION_UNAVAILABLE_OR_REJECTED'));
+
+  const resumed = structuredClone(state);
+  const reply = { choice: 'canon-audit', rationale: 'Owner selected OPTION B.', review: 'approved' };
+  const second = harness({ decide: async () => reply });
+  await runSession(resumed, second.ports);
+  assert.equal(resumed.status, 'COMPLETE');
+  assert.deepEqual(second.calls, ['canon-audit']);
+  assert.equal(resumed.blockers.some(item => item.slice === 'choose' && item.reason === 'DECISION_UNAVAILABLE_OR_REJECTED'), false);
+  assert.deepEqual(resumed.completedWork, ['independent', 'choose']);
+});
+
 test('valid persisted decision is reused on resume without another provider call', async () => {
   const state = session([slice('choose', 'choose-audit')], {
     decisions: [{ slice: 'choose', record: { choice: 'canon-audit', rationale: 'reviewed', review: 'approved' } }],

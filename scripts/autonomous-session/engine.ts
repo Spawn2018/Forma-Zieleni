@@ -27,9 +27,19 @@ export async function runSession(state: Session, ports: Ports): Promise<Session>
   limits(state.maxIterations, state.retryBudget, state.deadline);
   validateSlices(state.slices);
   const save = () => { state.updatedAt = new Date(ports.now()).toISOString(); ports.checkpoint(state); };
+  const waitingThisRun = new Set<string>();
   const block = (slice: Slice, reason: string) => {
     state.blockers.push({ slice: slice.id, reason });
     state.pendingWork = state.pendingWork.filter(id => id !== slice.id);
+  };
+  const waitForDecision = (slice: Slice) => {
+    if (!state.blockers.some(item => item.slice === slice.id && item.reason === 'DECISION_UNAVAILABLE_OR_REJECTED')) {
+      state.blockers.push({ slice: slice.id, reason: 'DECISION_UNAVAILABLE_OR_REJECTED' });
+    }
+    waitingThisRun.add(slice.id);
+  };
+  const clearWaitingDecision = (sliceId: string) => {
+    state.blockers = state.blockers.filter(item => !(item.slice === sliceId && item.reason === 'DECISION_UNAVAILABLE_OR_REJECTED'));
   };
   try {
     ports.guard(state);
@@ -40,17 +50,11 @@ export async function runSession(state: Session, ports: Ports): Promise<Session>
       if (state.deadline && ports.now() >= Date.parse(state.deadline)) { state.status = 'DEADLINE'; break; }
       if (state.iterationCount >= state.maxIterations) { state.status = 'MAX_ITERATIONS'; break; }
       ports.guard(state);
-      const slice = state.slices.find(s => state.pendingWork.includes(s.id) && s.dependsOn.every(id => state.completedWork.includes(id)));
+      const slice = state.slices.find(s => state.pendingWork.includes(s.id) && s.dependsOn.every(id => state.completedWork.includes(id)) && !waitingThisRun.has(s.id));
       if (!slice) { state.status = 'BLOCKED'; break; }
       state.currentSlice = slice.id;
       const risk = classify(slice);
       if (risk === 'OWNER-ONLY' || risk === 'DANGEROUS') { block(slice, risk); save(); continue; }
-      // Persist the attempt before any work: a crash consumes its retry/iteration budget.
-      const attempts = Object.hasOwn(state.attempts, slice.id) ? state.attempts[slice.id] : 0;
-      if (attempts > state.retryBudget) { block(slice, 'RETRY_BUDGET'); save(); continue; }
-      state.iterationCount++;
-      state.attempts[slice.id] = attempts + 1;
-      save();
       let capability = slice.capability;
       if (risk === 'OWNER-DECISION') {
         let decision = state.decisions.find(d => d.slice === slice.id)?.record;
@@ -58,14 +62,21 @@ export async function runSession(state: Session, ports: Ports): Promise<Session>
           decision = (await ports.decide(slice, state)) ?? undefined;
           if (ports.stopped()) { state.status = 'STOPPED'; break; }
           if (state.deadline && ports.now() >= Date.parse(state.deadline)) { state.status = 'DEADLINE'; break; }
-          if (!decision) { block(slice, 'DECISION_UNAVAILABLE_OR_REJECTED'); save(); continue; }
+          if (!decision) { waitForDecision(slice); save(); continue; }
           if (!['repo-audit', 'canon-audit'].includes(decision.choice)) { block(slice, 'INVALID_DECISION'); save(); continue; }
           state.decisions.push({ slice: slice.id, record: decision });
           save(); // ADR is durable before the chosen capability is used.
         }
         if (!['repo-audit', 'canon-audit'].includes(decision.choice)) { block(slice, 'INVALID_DECISION'); save(); continue; }
+        clearWaitingDecision(slice.id);
         capability = decision.choice;
       }
+      // Persist the attempt before any work: a crash consumes its retry/iteration budget.
+      const attempts = Object.hasOwn(state.attempts, slice.id) ? state.attempts[slice.id] : 0;
+      if (attempts > state.retryBudget) { block(slice, 'RETRY_BUDGET'); save(); continue; }
+      state.iterationCount++;
+      state.attempts[slice.id] = attempts + 1;
+      save();
       if (ports.stopped()) { state.status = 'STOPPED'; break; }
       if (state.deadline && ports.now() >= Date.parse(state.deadline)) { state.status = 'DEADLINE'; break; }
       ports.guard(state);

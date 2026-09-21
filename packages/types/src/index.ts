@@ -4,4 +4,5 @@ export type {
   LeadCaptureBody,
   LeadQualifyBody,
   LeadRecord,
+  PublicLeadSource,
 } from './lead.ts';

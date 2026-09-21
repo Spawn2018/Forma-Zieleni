@@ -1,9 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const HOUR = 60 * 60 * 1000;
 const BUDGET = 3;
-const file = path.join('tmp', 'coderabbit-reviews.json');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const file = path.join(root, 'tmp', 'coderabbit-reviews.json');
 
 function load() {
   if (!existsSync(file)) return [];
