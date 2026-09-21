@@ -1,6 +1,6 @@
 # Database Engineering Standard
 
-Provider/engine is not selected. These rules are engine-neutral unless an ADR later narrows them.
+PostgreSQL is the selected persistence engine (ADR-014). Kysely is the typed SQL layer. These rules still apply: persistence follows the domain, and Kysely does not replace database constraints.
 
 ## Modeling
 - Model business invariants first; persistence follows the domain rather than dictating it.

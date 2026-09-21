@@ -4,18 +4,18 @@ Baseline: OWASP Application Security Verification Standard 5.0.0. Chapter index 
 
 | ASVS 5.0.x section | Slice acceptance | Evidence now | Evidence later |
 |---|---|---|---|
-| V2.2 Input Validation | Capture body allowlists fields; extras rejected; public `source` cannot be `portal` or `admin`; non-string fields are rejected | `packages/validation` tests + `PublicLeadSource` | HTTP 400 contract tests |
-| V2.3 Business Logic Security | Qualification uses domain rules, not client status | `packages/domain` tests | API qualify tests |
-| V2.4 Anti-automation | Public POST is rate-limited | Documented on `POST /leads` | Runtime 429 test in the lead API slice |
-| V4.1 Generic Web Service Security | Shared `ApiError`; `/v1`; no stack traces in contract | `contracts/openapi.test.mjs` | ZAP API scan when runnable |
-| V4.2 HTTP Message Structure Validation | JSON schemas, required headers | OpenAPI 3.0.4 | Runtime parser tests |
-| V6 Authentication | Staff list/get/qualify require bearer | OpenAPI security arrays | Session tests in the lead API slice (Better Auth) |
-| V7 Session Management | Opaque session bearer, not a guessable lead id | `OpaqueId` pattern | Logout/timeout tests in the lead API slice |
-| V8.2 General Authorization Design | Object GET is authorized; hidden IDs are not a control | Contract + `assertOpaqueLeadId` | BOLA tests after auth runtime |
-| V8.3 Operation Level Authorization | Qualify is staff-only | OpenAPI `bearerAuth` on qualify | BFLA tests in the lead API slice |
-| V13.3 Secret Management | No secrets in contract or fixtures | Review of this slice | SOPS+age only when encrypted material is needed |
-| V14.2 General Data Protection | PII only in contact fields; no PII in ids or query examples | Domain + OpenAPI | Log redaction in the lead API slice |
-| V15.2 Security Architecture and Dependencies | Stack selected in ADR-014; SCA not run | Not applicable yet | Dependency-Check when the lead slice adds dependencies |
-| V16.5 Error Handling | Stable error codes; no provider dumps | `problem()` helper | Runtime error tests |
+| V2.2 Input Validation | Capture body allowlists fields; extras rejected; public `source` cannot be `portal` or `admin`; non-string fields are rejected | `packages/validation` tests and `apps/api` HTTP tests | — |
+| V2.3 Business Logic Security | Qualification uses domain rules, not client status | `packages/domain` tests and qualify HTTP test | — |
+| V2.4 Anti-automation | Public POST is rate-limited | `apps/api` returns 429 after the configured window | Not an edge or distributed limiter |
+| V4.1 Generic Web Service Security | Shared `ApiError`; `/v1`; no stack traces in contract | `contracts/openapi.test.mjs` and HTTP error bodies | ZAP API scan when runnable |
+| V4.2 HTTP Message Structure Validation | JSON schemas, required headers | OpenAPI 3.0.4 and HTTP malformed-JSON test | — |
+| V6 Authentication | Staff list/get/qualify require bearer | HTTP tests against the test signer. Production mode is 401 for every CRM call | Better Auth production integration |
+| V7 Session Management | Opaque session bearer, not a guessable lead id | Test HMAC session. Not a Better Auth session | Production session lifetime and logout |
+| V8.2 General Authorization Design | Object GET is authorized; hidden IDs are not a control | Staff 200/404 and portal 403 HTTP tests | Production actor source |
+| V8.3 Operation Level Authorization | Qualify is staff-only | Portal and anonymous qualify tests | Production actor source |
+| V13.3 Secret Management | No secrets in contract or fixtures | HTTP log test rejects tokens | SOPS+age when encrypted material is needed |
+| V14.2 General Data Protection | PII only in contact fields; no PII in ids or query examples | Domain, OpenAPI, and HTTP log redaction test | — |
+| V15.2 Security Architecture and Dependencies | Direct dependencies reviewed in this slice | pnpm audit result recorded with the slice | OWASP Dependency-Check not run |
+| V16.5 Error Handling | Stable error codes; no provider dumps | HTTP 400/401/403/404/409/429/503 bodies | — |
 
-ZAP, Dependency-Check and live auth tests are not applicable until their preconditions exist. That state is NA or DEFERRED, never PASS.
+ZAP and OWASP Dependency-Check are not run. Production Better Auth is not wired. Those states are NA or DEFERRED, never PASS. The rows above are not Gate A security acceptance.

@@ -1,6 +1,7 @@
 # Next slice — lead vertical
 
-Status: DEFINED. Not started. This file is the slice definition only.
+Status: IMPLEMENTED for the Core API lead vertical in `apps/api`.
+Not security-accepted. Production Better Auth is not wired.
 
 Gate A architecture is DECIDED (ADR-014,
 [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.md)). That selection

@@ -10,4 +10,4 @@ Typowany klient HTTP do Core API.
 
 ## Status
 
-Typed `/v1` lead paths are implemented. HTTP transport is the next lead slice ([`NEXT-SLICE-LEAD-VERTICAL.md`](../../docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md)). Hono is selected; this package does not implement it yet.
+Typed `/v1` lead paths are implemented. The Hono runtime is `apps/api`. This package still does not perform HTTP.

@@ -16,7 +16,7 @@ Wszystkie decyzje authz egzekwowane serwerowo.
 Leady, kontakty, firmy, interakcje, pipeline relacji przed i po sprzedaży.
 Wejście z `web` i kanałów marketingowych; obsługa w `admin`.
 
-Current durable start: `packages/domain` lead capture/qualification rules and `contracts/openapi.json`. Persistence is the next slice (`../architecture/NEXT-SLICE-LEAD-VERTICAL.md`). Admin UI is later.
+Current durable start: `packages/domain` lead rules, `contracts/openapi.json`, and the Hono lead vertical in `apps/api`. Admin UI is later. Production authentication is not complete.
 
 ### Sales
 

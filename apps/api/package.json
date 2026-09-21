@@ -1,0 +1,22 @@
+{
+  "name": "@forma-zieleni/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.ts",
+    "test": "node --test src/http.test.mjs src/postgres.integration.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/app.ts src/server.ts src/db.ts src/postgres-store.ts",
+    "lint": "node --check src/http.test.mjs && node --check src/postgres.integration.test.mjs"
+  },
+  "dependencies": {
+    "@forma-zieleni/domain": "workspace:*",
+    "@forma-zieleni/validation": "workspace:*",
+    "@hono/node-server": "^2.1.1",
+    "hono": "^4.13.8",
+    "kysely": "^0.29.6",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

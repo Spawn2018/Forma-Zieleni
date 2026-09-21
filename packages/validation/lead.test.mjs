@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { problem, validateLeadCaptureRequest } from './src/lead.ts';
+import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest } from './src/lead.ts';
 
 test('lead capture validation accepts a complete public request and rejects extras', () => {
   const ok = validateLeadCaptureRequest({
@@ -48,4 +48,11 @@ test('problem documents stay free of secrets and include request correlation', (
   const body = problem('LEAD_INVALID', 'Lead could not be accepted.', 'req_test_001', [{ field: 'phone', reason: 'LEAD_PHONE_INVALID' }]);
   assert.equal(body.error.requestId, 'req_test_001');
   assert.equal(JSON.stringify(body).includes('password'), false);
+});
+
+test('qualify body accepts only a boolean capacity hold', () => {
+  assert.equal(validateLeadQualifyRequest({ capacityHold: false }).ok, true);
+  assert.equal(validateLeadQualifyRequest({ capacityHold: 'true' }).ok, false);
+  assert.equal(validateLeadQualifyRequest(['capacityHold']).ok, false);
+  assert.equal(validateLeadCaptureRequest(['www']).ok, false);
 });

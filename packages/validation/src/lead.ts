@@ -14,7 +14,7 @@ function stringField(value: unknown, field: string, optional = false): { ok: tru
 }
 
 export function validateLeadCaptureRequest(value: unknown): { ok: true; value: LeadCaptureRequest } | { ok: false; errors: FieldError[] } {
-  if (!value || typeof value !== 'object') return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
   const body = value as Record<string, unknown>;
   const extra = Object.keys(body).filter(key => !['name', 'phone', 'email', 'locality', 'siteAnalysisRequested', 'source'].includes(key));
   if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
@@ -49,6 +49,15 @@ export function validateLeadCaptureRequest(value: unknown): { ok: true; value: L
   } catch (error) {
     return { ok: false, errors: [{ field: 'contact', reason: error instanceof Error ? error.message : 'LEAD_INVALID' }] };
   }
+}
+
+export function validateLeadQualifyRequest(value: unknown): { ok: true; value: { capacityHold: boolean } } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  const body = value as Record<string, unknown>;
+  const extra = Object.keys(body).filter(key => key !== 'capacityHold');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.capacityHold !== 'boolean') return { ok: false, errors: [{ field: 'capacityHold', reason: 'BOOLEAN_REQUIRED' }] };
+  return { ok: true, value: { capacityHold: body.capacityHold } };
 }
 
 export function problem(code: string, message: string, requestId: string, details: FieldError[] = []) {
