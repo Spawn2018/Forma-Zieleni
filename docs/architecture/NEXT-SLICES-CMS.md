@@ -82,11 +82,11 @@ Next: CMS-PUBLISH.
 
 Dependencies: CMS-AUTH.
 Gate: REVIEW.
-Autonomous: yes.
-Entry: CMS-AUTH recorded.
-Accept: draft isolated; publish deterministic; schedule if selected; revision/rollback; audit; outbox `content.published`.
-Tests: draft leak, public stability during edit, rollback, schedule if implemented.
-Next: CMS-SEO, CMS-EVENTS, CMS-ADMIN.
+Status: COMPLETE for the in-memory publication contract. PostgreSQL persistence of these rows is not this slice.
+Accept: `packages/domain/src/content-publish.ts` keeps a draft off the public projection, leaves the last published fields stable while a newer draft is edited, emits `content.published` with ids only, audits the actor, rolls back to an older revision, and holds a scheduled revision until its time.
+Tests: `packages/domain/content-publish.test.mjs`.
+Security: the outbox payload has no draft text. A missing public revision reads as absent, not as the latest draft.
+Next: CMS-SEO, CMS-EVENTS, CMS-ADMIN. SEO still waits on the WWW slices. CMS-EVENTS is the next READY slice on this branch.
 
 ### MEDIA-CORE
 

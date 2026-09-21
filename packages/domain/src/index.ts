@@ -10,6 +10,16 @@ export {
 } from './content-auth.ts';
 export type { ContentCapability, ContentRole, ContentVisibility } from './content-auth.ts';
 export {
+  createContentStore,
+  createDraft,
+  editDraft,
+  publicProjection,
+  publishRevision,
+  releaseDue,
+  rollbackRevision,
+} from './content-publish.ts';
+export type { ContentAudit, ContentFields, ContentOutbox, ContentStore, ContentType } from './content-publish.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
