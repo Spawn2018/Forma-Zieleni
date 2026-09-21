@@ -1,0 +1,49 @@
+---
+name: fz-autonomous-execution
+description: Run a Forma Zieleni autonomous session inside an active /noc window. Reconstruct READY work, execute the binding loop, and continue until the Warsaw deadline or a real blocking gate.
+---
+
+# FZ autonomous execution
+
+Session window only. The binding execution loop remains `docs/cursor-os/CURSOR-OS-2026.md`. Action classes remain `docs/workflows/DECISION-GATES.md`. This skill does not choose product, vendor, or architecture.
+
+## Start
+
+`/noc 9` means work until the next 09:00 `Europe/Warsaw`. `/noc` without an hour prints usage and does not start. `/noc stop` ends the window after the current atomic step.
+
+1. Stay in Agent mode. Do not switch to Plan. Do not run the whole night as a background Task.
+2. `node scripts/fz-noc/cli.mjs start <hour>`
+3. Arm one `/loop` watchdog named `loop-noc` every 15 minutes in this same session. Prompt: read `.fz-noc/live.json`. If `status` is `stop` or `untilUtc` has passed, stop the loop. If `status` is `busy` and `lastBeat` is newer than 25 minutes, do nothing. If `lastBeat` is older than 25 minutes and the deadline is still ahead, run one recovery cycle through this skill. Do not start a second writer.
+4. Run the first cycle immediately.
+
+## Each cycle
+
+Re-read `START-HERE-CURSOR.md`, `docs/cursor-os/CURSOR-OS-2026.md`, `docs/architecture/CURRENT-ARCHITECTURE.md`, and `docs/architecture/NEXT-SLICES-CMS.md`. Inspect git HEAD and status. Ignore chat history as project state.
+
+`node scripts/fz-noc/cli.mjs select --commit <HEAD>`
+
+The CLI applies the deterministic READY rule: completed dependencies, AUTO/REVIEW only, critical path, then work that unblocks the most remaining slices. It records the reason. Do not ask the Owner to pick between equivalent AUTO/REVIEW slices.
+
+Then run the binding loop for that slice: discover, plan, contract, implement, test, refactor, security review when the boundary changes, performance or data review when applicable, UX/a11y/visual/content review when a real UI exists, document, final diff, pre-push gate, complete.
+
+Delegate, do not duplicate:
+
+- `fz-verifier` when evidence could be fake or incomplete
+- `fz-security-reviewer` when security or privacy changes; the existing `security-adversary` standard applies
+- `fz-ux-a11y-reviewer` only for user-facing UI; the existing `visual-ux-reviewer` standard applies
+- Grok, through `grok-research-handoff`, for fresh external research or a substantial adversarial challenge. Grok output is evidence. Never send secrets, credentials, or customer data. If Grok is unavailable, record `EXTERNAL ADVERSARIAL REVIEW: DEFERRED` and continue.
+- CodeRabbit only when review value is high. Use `scripts/security/coderabbit-quota.mjs`. At most 3 free CLI reviews per developer per rolling hour. Paid usage is OWNER-DECISION. Quota exhaustion records DEFERRED and does not stop other READY work.
+
+Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. `git push`, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval.
+
+`node scripts/fz-noc/cli.mjs beat` at the start and end of real work. On a repeated identical failure: `node scripts/fz-noc/cli.mjs attempt --slice <id> --commit <HEAD> --signature "<command>"`. Three identical attempts block that slice. Select again and work-steal.
+
+## Continuation and stop
+
+Do not end a cycle by asking the Owner to type continue, resume, or next. The `stop` hook submits the next cycle while `.fz-noc/live.json` is active. That hook is the turn boundary. The 15-minute loop is only the dead-session watchdog.
+
+Stop the Owner only when no safe READY work remains and the blocker is a real OWNER-DECISION, OWNER-ONLY action, DANGEROUS action, technical blocker, or a roadmap acceptance checkpoint that needs the Owner. Silence is not approval. Do not downgrade a gate.
+
+At the deadline, do not start a new slice. Checkpoint, validate completed work, commit locally if it is complete, report, then `node scripts/fz-noc/cli.mjs stop` and stop the `loop-noc` watchdog.
+
+After context compaction or a new chat, reconstruct from the repository and `.fz-noc/live.json`. Do not treat the conversation as the execution graph.

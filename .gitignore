@@ -30,6 +30,7 @@ Thumbs.db
 *.bak.sql
 backups/
 .autonomous-sessions/
+.fz-noc/live.json
 tmp/
 temp/
 private/

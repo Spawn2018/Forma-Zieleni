@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "command": "node .cursor/hooks/fz-session-start.mjs" }
+    ],
+    "preCompact": [
+      { "command": "node .cursor/hooks/fz-precompact.mjs" }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/fz-noc-stop.mjs",
+        "loop_limit": null,
+        "timeout": 30
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/fz-dangerous-shell.mjs",
+        "failClosed": true,
+        "timeout": 15
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "node .cursor/hooks/fz-dangerous-mcp.mjs",
+        "failClosed": true,
+        "timeout": 15
+      }
+    ]
+  }
+}

@@ -13,7 +13,12 @@ completion evidence.
 At OWNER-DECISION/OWNER-ONLY: checkpoint the dependent slice, emit a
 Decision Packet, and continue independent AUTO/REVIEW work where safe.
 At DANGEROUS: do not perform the action without explicit Owner approval
-immediately before execution.
+immediately before execution. A `/noc` window does not approve it.
+
+`/noc <hour>` is the session window. It continues this protocol until the
+next `<hour>:00` in `Europe/Warsaw`. Procedure:
+`.cursor/skills/fz-autonomous-execution/SKILL.md`. It does not add a
+second execution loop.
 
 Agentic work follows progressive autonomy: READ -\> SUGGEST -\> DRAFT
 -\> ACT WITH APPROVAL -\> BOUNDED AUTO. Promotion requires evidence,

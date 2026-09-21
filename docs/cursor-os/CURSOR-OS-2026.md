@@ -74,7 +74,15 @@ It is an **interrupt / exit condition that applies at every stage**:
 Agentic automation is layered on top of clean data, explicit contracts and deterministic rules; it is never the source of truth. Prefer bounded tools, structured inputs/outputs and deterministic gates. Every consequential automation defines blast radius, failure/recovery behavior, audit evidence and resource budgets. Graceful degradation must keep critical product/business workflows usable when AI is unavailable.
 
 ## Owner-in-loop controller
-The Autonomous Session Controller may orchestrate the binding loop, but it must not create a competing loop or weaken gates. OWNER-DECISION pauses only the dependent slice; safe independent work may continue. An Owner reply uses `DECISION FZ-###: OPTION X` plus optional constraints and is validated for id and ambiguity before the slice resumes. The OpenAI adapter remains in the tree, default-off, and unused by the session loop. Native unattended write execution remains disabled until filesystem/credential/path isolation is runtime-verified. The known Codex/Windows sandbox blocker must not be bypassed merely to gain autonomy.
+The Autonomous Session Controller may orchestrate the binding loop, but it must not create a competing loop or weaken gates. OWNER-DECISION pauses only the dependent slice; safe independent work may continue. An Owner reply uses `DECISION FZ-###: OPTION X` plus optional constraints and is validated for id and ambiguity before the slice resumes. The OpenAI adapter remains in the tree, default-off, and unused by the session loop. Native unattended write execution remains disabled until filesystem/credential/path isolation is runtime-verified. The known Codex/Windows sandbox blocker must not be bypassed merely to gain autonomy. That limitation belongs to the audit controller. It does not disable the interactive Cursor Agent.
+
+## Session window (`/noc`)
+
+`/noc <hour>` is the Owner's session window, not a second execution loop and not a second roadmap. `/noc 9` means the next 09:00 in `Europe/Warsaw`, including daylight saving. The command is `.cursor/commands/noc.md`. The procedure is [the autonomous execution skill](../../.cursor/skills/fz-autonomous-execution/SKILL.md).
+
+The interactive Agent stays on the binding loop above. When an ordinary turn completes inside an active window, the project `stop` hook submits the next cycle. A 15-minute `loop-noc` watchdog recovers a dead session; it does not choose work. Runtime coordination lives in gitignored `.fz-noc/live.json` (shape: [`.fz-noc/live.example.json`](../../.fz-noc/live.example.json)). The execution graph remains `docs/architecture/NEXT-SLICES-CMS.md`.
+
+Local commit, push, and deploy stay distinct. The window does not approve OWNER-DECISION, OWNER-ONLY, or DANGEROUS actions. Grok and CodeRabbit remain evidence sources; their absence does not stop other READY work. Product execution stays on the local Agent. A Cloud or Background Agent is not the autonomy path unless the Owner decides otherwise.
 
 ## Security-tool integration update --- 2026-09-21
 
