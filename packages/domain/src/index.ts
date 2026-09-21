@@ -83,6 +83,8 @@ export {
   GROWTH_CAPABILITIES,
 } from './growth.ts';
 export type { MarketingPlan, Offer, WorkItem } from './growth.ts';
+export { sanitizeAttribution } from './attribution.ts';
+export type { AttributionTouch } from './attribution.ts';
 export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,

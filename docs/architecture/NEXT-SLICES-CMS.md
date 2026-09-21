@@ -273,10 +273,10 @@ Next: CMS-SEO.
 
 Dependencies: existing Lead capture contract. Does not wait on Apostrophe.
 Gate: REVIEW.
-Autonomous: yes.
-Accept: sanitized first/last touch fields; unknown stays unknown; form body is not logged with the referrer.
-Tests: hostile referrer and UTM stripped; allowlisted AI host only.
-Next: SEARCH-DATA-MODEL when external observations start. May run after CMS-DATA without blocking media slices.
+Status: COMPLETE for server-side sanitize. Not stored on the lead row yet.
+Accept: sanitized first/last touch fields; unknown stays unknown; form body is not an input.
+Tests: `packages/domain/attribution.test.mjs`.
+Next: SEARCH-DATA-MODEL when a connector needs rows. May run after CMS-DATA without blocking media slices.
 
 ### SEARCH-DATA-MODEL
 
