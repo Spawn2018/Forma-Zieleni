@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { publicHead, renderHead, resolvePublicRequest, robotsTxt, seoEnv } from './technical-seo.ts';
+import { publicHead, renderHead, resolvePublicRequest, robotsTxt, seoEnv, sitemapXml } from './technical-seo.ts';
 
 test('the rendered head has title, description, canonical and robots', () => {
   const html = renderHead(publicHead({
@@ -38,6 +38,16 @@ test('a non-production host cannot be indexed and production is not Disallow all
   assert.match(production, /Allow: \//);
   assert.equal(blocked.includes('GPTBot'), false);
   assert.equal(production.includes('GPTBot'), false);
+  assert.equal(blocked.includes('Sitemap:'), false);
+  assert.equal(blocked.includes('ClaudeBot'), false);
+  const named = robotsTxt('production', 'https://example.test');
+  assert.match(named, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
+  assert.equal(/^Disallow: \/$/m.test(named), false);
+  const hidden = sitemapXml('non-production', 'https://staging.example.test', ['/galeria']);
+  assert.equal(hidden.includes('<loc>'), false);
+  const listed = sitemapXml('production', 'https://example.test', ['/galeria', 'https://evil.example/x']);
+  assert.match(listed, /<loc>https:\/\/example\.test\/galeria<\/loc>/);
+  assert.equal(listed.includes('evil.example'), false);
 });
 
 test('trailing slashes and tracking queries redirect, and an old slug is preserved', () => {

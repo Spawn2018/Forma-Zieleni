@@ -1,7 +1,8 @@
 import { jsonLdScript, webPageJsonLd } from './structured-data.ts';
 
 const TRACKING = /^(?:utm_|fbclid$|gclid$|gbraid$|wbraid$)/;
-const KNOWN_PATHS = new Set(['/', '/galeria', '/porownanie', '/robots.txt']);
+const KNOWN_PATHS = new Set(['/', '/galeria', '/porownanie', '/robots.txt', '/sitemap.xml']);
+const PUBLIC_PAGES = new Set(['/', '/galeria', '/porownanie']);
 
 export type SeoEnv = 'production' | 'non-production';
 
@@ -53,9 +54,30 @@ export function resolvePublicRequest(url: URL, legacy: Readonly<Record<string, s
   return { status: 200, path };
 }
 
-export function robotsTxt(env: SeoEnv): string {
-  if (env === 'production') return 'User-agent: *\nAllow: /\n';
-  return 'User-agent: *\nDisallow: /\n';
+export function robotsTxt(env: SeoEnv, origin?: string): string {
+  if (env !== 'production') return 'User-agent: *\nDisallow: /\n';
+  const lines = ['User-agent: *', 'Allow: /'];
+  const sitemap = canonicalHref(origin, '/sitemap.xml');
+  if (sitemap) lines.push(`Sitemap: ${sitemap}`);
+  return `${lines.join('\n')}\n`;
+}
+
+export function sitemapXml(env: SeoEnv, origin: string | undefined, paths: readonly string[]): string {
+  const locs = env === 'production' ? paths.flatMap((path) => publicLoc(origin, path)) : [];
+  const entries = locs.map((loc) => `  <url><loc>${escapeText(loc)}</loc></url>`).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}${entries ? '\n' : ''}</urlset>\n`;
+}
+
+function publicLoc(origin: string | undefined, path: string): string[] {
+  let clean: string;
+  try {
+    clean = canonicalPath(path);
+  } catch {
+    return [];
+  }
+  if (!PUBLIC_PAGES.has(clean)) return [];
+  const href = canonicalHref(origin, clean);
+  return href ? [href] : [];
 }
 
 export function publicHead(input: {

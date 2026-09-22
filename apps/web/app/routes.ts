@@ -5,4 +5,5 @@ export default [
   route('galeria', 'routes/gallery.tsx'),
   route('porownanie', 'routes/compare.tsx'),
   route('robots.txt', 'routes/robots.ts'),
+  route('sitemap.xml', 'routes/sitemap.ts'),
 ] satisfies RouteConfig;

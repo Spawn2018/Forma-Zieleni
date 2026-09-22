@@ -286,9 +286,11 @@ Next: SEARCH-SITEMAP-ROBOTS.
 
 Dependencies: SEARCH-STRUCTURED-DATA. Re-read crawler docs in the same slice.
 Gate: REVIEW.
+Status: COMPLETE for generated fixtures. FZ-SEARCH-1 section 8 and FZ-SEARCH-CRAWL-1 were re-read on 2026-09-22. The crawl packet remains OPEN, so no training-token group is emitted. Cloudflare was not changed.
 Autonomous: yes. Applying the file on Cloudflare is DANGEROUS and is not this slice.
 Accept: generated robots and sitemap from policy. Non-production is non-indexable. Production fixture has no blanket disallow. No training-token group until FZ-SEARCH-CRAWL-1 is DECIDED.
-Tests: the two environment fixtures.
+Tests: `apps/web/app/technical-seo.test.mjs`. Non-production is `Disallow: /` with an empty sitemap. Production names the sitemap and is not `Disallow: /`.
+Security: sitemap locations stay on the configured origin. External paths are dropped.
 Next: CMS-SEO.
 
 ### SEARCH-ATTRIBUTION

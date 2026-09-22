@@ -169,6 +169,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-STRUCTURED-DATA', 'JSON-LD is a WebPage built from the visible title and description. Ratings, prices, awards, and addresses are omitted.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/structured-data.ts', 'apps/web/app/structured-data.test.mjs', '', 'NONE', 'No LocalBusiness until a verified address exists.');
     continue;
   }
+  if (slice === 'SEARCH-SITEMAP-ROBOTS') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-SITEMAP-ROBOTS', 'Robots and sitemap are generated from policy. Non-production disallows indexing. Production is not a blanket disallow. Training groups stay absent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Cloudflare apply stays DANGEROUS', 'NONE', 'FZ-SEARCH-CRAWL-1 remains OPEN.');
+    continue;
+  }
   if (slice === 'SEARCH-ATTRIBUTION') {
     row('FZ-REQ-CMS-SLICE-SEARCH-ATTRIBUTION', 'Referral sanitize keeps an unknown referrer unknown and labels only an allowlisted AI host.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/attribution.ts', 'packages/domain/attribution.test.mjs', '', 'NONE', 'Not yet a column on the lead row.');
     continue;
