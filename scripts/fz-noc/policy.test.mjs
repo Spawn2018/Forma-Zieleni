@@ -309,6 +309,14 @@ test('shell and MCP guards deny dangerous operations and allow ordinary ones', (
     classifyShell(`node -e "console.log('git push --force')"`).permission,
     'allow',
   );
+  assert.equal(
+    classifyShell(`node -e "require('child_process').execSync('git push origin main')"`).permission,
+    'deny',
+  );
+  assert.equal(
+    classifyShell(`node -e "require('child_process').spawnSync('git',['push','--no-verify'])"`).permission,
+    'deny',
+  );
   assert.equal(classifyShell('powershell -Command "git push --force"').permission, 'deny');
   assert.equal(classifyMcp({ tool_name: 'search_cloudflare_documentation', mcp_server_name: 'plugin-cloudflare-cloudflare-docs' }).permission, 'allow');
   assert.equal(classifyMcp({ tool_name: 'd1_database_delete', mcp_server_name: 'plugin-cloudflare-cloudflare-bindings' }).permission, 'deny');

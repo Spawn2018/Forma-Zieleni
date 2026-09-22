@@ -209,11 +209,17 @@ test('direct Cursor git push variants are denied and redirected to pnpm push:mai
     'git status && git push origin main',
     'git push --no-verify',
     'git push origin main --no-verify',
+    "node -e \"require('child_process').execSync('git push origin main')\"",
+    "node -e \"require('child_process').spawnSync('git',['push','--force'])\"",
   ]) {
     const decision = classifyShell(command);
     assert.equal(decision.permission, 'deny', command);
     assert.match(decision.agent_message, /pnpm push:main|DANGEROUS|no-verify|Force/i, command);
   }
+  assert.equal(
+    classifyShell(`node -e "console.log('git push origin main')"`).permission,
+    'allow',
+  );
   assert.equal(classifyShell('pnpm push:main').permission, 'allow');
   assert.equal(classifyShell('node scripts/ci/push-main.mjs').permission, 'allow');
   assert.equal(classifyObservedPrompt('git push origin main'), 'DANGEROUS');

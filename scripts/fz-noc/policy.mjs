@@ -27,6 +27,8 @@ export const SHUTDOWN_MESSAGE =
 
 const GIT = '(?:^|[;&|]|\\n|\\s|["\'])git(?:\\.exe)?(?:\\s+-C\\s+\\S+|\\s+-[^\\s]+)*\\s+';
 const GIT_PUSH = new RegExp(`${GIT}push\\b`, 'i');
+/** node -e spawnSync('git', ['push', ...]) / execFile argv form */
+const GIT_PUSH_ARGV = /['"]git(?:\.exe)?['"]\s*,\s*\[(?:[^\]]*)['"]push['"]/i;
 const PUSH_DANGEROUS = /--force(?:-with-lease)?|--mirror|--delete|\s\+\S/;
 const PUSH_NO_VERIFY = /--no-verify\b/;
 const SHELL_ASK = [
@@ -471,6 +473,10 @@ export function decideFollowup(session, input, now = new Date()) {
  * does not false-positive on embedded example strings. PowerShell/cmd
  * wrappers keep their quoted payloads so `powershell -Command "git push
  * --force"` remains denied.
+ *
+ * Exception: if the eval payload also invokes a process spawner
+ * (child_process / spawn / exec*), keep the raw command for push
+ * detection so agents cannot hide `git push` inside quoted node -e.
  */
 export function shellCommandForPolicy(command) {
   const text = String(command || '');
@@ -481,22 +487,39 @@ export function shellCommandForPolicy(command) {
     .replace(/`(?:\\.|[^`\\])*`/g, '``');
 }
 
+const NODE_EVAL_SPAWNER = /\b(child_process|spawnSync|execSync|execFileSync|spawn\s*\(|exec\s*\(|execFile\s*\()/i;
+
+/**
+ * Probe text for git-push rules. Prefer stripped node -e fixtures, but keep
+ * the raw command when the eval clearly spawns a subprocess.
+ */
+export function pushPolicyProbe(command) {
+  const raw = String(command || '');
+  if (/\bnode(?:\.exe)?\s+(-e|--eval|--input-type=module\s+-e)\b/i.test(raw)
+    && NODE_EVAL_SPAWNER.test(raw)) {
+    return raw;
+  }
+  return shellCommandForPolicy(raw);
+}
+
 export function classifyShell(command) {
-  const text = shellCommandForPolicy(command);
+  const raw = String(command || '');
+  const text = shellCommandForPolicy(raw);
+  const pushText = pushPolicyProbe(raw);
   const trimmed = text.trim();
   // A lone git checkpoint/read command must not deny merely because the
   // commit message or args mention the words "git push".
   const loneGitCheckpoint = /^git(?:\.exe)?\s+(commit|add|status|diff|show|log|rev-parse|branch|fetch|merge-base|ls-files|grep|symbolic-ref|cat-file|describe|name-rev|shortlog|check-ignore|config)\b/i.test(trimmed)
     && !/(?:&&|\|\||;|\n)/.test(trimmed);
-  if (!loneGitCheckpoint && GIT_PUSH.test(text)) {
-    if (PUSH_DANGEROUS.test(text)) {
+  if (!loneGitCheckpoint && (GIT_PUSH.test(pushText) || GIT_PUSH_ARGV.test(pushText))) {
+    if (PUSH_DANGEROUS.test(pushText)) {
       return {
         permission: 'deny',
         user_message: 'This shell command matches a protected operation (git-push-force) and is blocked.',
         agent_message: 'Force, mirror, and delete pushes are DANGEROUS and stay denied. A /noc window is not approval for history rewrite. Owner may run the command manually outside the agent if intentionally required.',
       };
     }
-    if (PUSH_NO_VERIFY.test(text)) {
+    if (PUSH_NO_VERIFY.test(pushText)) {
       return {
         permission: 'deny',
         user_message: 'This shell command matches a protected operation (git-push-no-verify) and is blocked.',
