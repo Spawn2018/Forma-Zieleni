@@ -167,7 +167,7 @@ row('FZ-REQ-SITEINTEL-001', 'Site Intelligence stays DATA, then RULES, then DOMA
   executableSlice: 'SITEINTEL-DATA-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-ATLAS-002', 'Plant Atlas taxonomy and provenance stay source-of-truth boundaries before any runtime atlas UI.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', GROWTH, PLAN, TEST, 'No atlas runtime product', 'NONE', 'FZ-REQ-ATLAS-001 foundation stays; runtime needs an executable path.', {
+row('FZ-REQ-ATLAS-002', 'Plant Atlas taxonomy and provenance stay source-of-truth boundaries before any runtime atlas UI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md', 'packages/domain/atlas-boundary.test.mjs', '', 'NONE', 'FZ-REQ-ATLAS-001 foundation stays; runtime atlas UI stays later.', {
   productCapability: 'ATLAS',
   executableSlice: 'ATLAS-PROVENANCE-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],

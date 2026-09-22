@@ -301,13 +301,17 @@ Next: none until a later Site Intelligence runtime slice.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Plant Atlas taxonomy/provenance source-of-truth
+boundary: `docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md` plus domain
+`atlasProvenanceBoundary()` / tests. Botanical sources stay taxonomic
+authorities, not horticultural proof. No atlas runtime UI.
 Autonomous: yes.
 Accept: document Plant Atlas taxonomy/provenance source-of-truth
 boundary for FZ-REQ-ATLAS-002. Botanical sources stay taxonomic
 authorities, not horticultural proof. No atlas runtime UI in this
 slice.
-Tests: documentation/registry check.
+Tests: `packages/domain/atlas-boundary.test.mjs`,
+`docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md`.
 Security: no invented plant advice as product truth.
 Next: none until a later Atlas product slice.
 

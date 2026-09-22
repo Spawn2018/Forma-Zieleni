@@ -98,6 +98,11 @@ export {
 } from './growth.ts';
 export type { MarketingPlan, Offer as MarketingOffer, WorkItem } from './growth.ts';
 export {
+  atlasProvenanceBoundary,
+  assertAtlasDoesNotAuthorizeAdvice,
+} from './atlas-boundary.ts';
+export type { AtlasProvenanceBoundary } from './atlas-boundary.ts';
+export {
   OFFER_STATUSES,
   assertOpaqueOfferId,
   createOffer,
