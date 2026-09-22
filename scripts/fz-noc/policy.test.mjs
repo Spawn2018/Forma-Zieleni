@@ -15,6 +15,8 @@ import {
   parseExecutionGraph,
   selectReady,
   grokDisposition,
+  coderabbitDisposition,
+  coderabbitPrivacyBlocked,
   STALL_MESSAGE,
 } from './policy.mjs';
 
@@ -150,6 +152,16 @@ test('routine work does not request Grok and an unavailable challenge stays defe
   assert.equal(grokDisposition({ adversarial: true, succeeded: true, adopted: true }), 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION');
   assert.equal(grokDisposition({ adversarial: true, succeeded: true, rejected: true }), 'GROK_FINDING_REJECTED');
   assert.equal(grokDisposition({ adversarial: true, succeeded: true }), 'GROK_SUCCEEDED');
+});
+
+test('CodeRabbit checkpoint states stay advisory and privacy-gated', () => {
+  assert.equal(coderabbitDisposition({ trivial: true }), 'CODERABBIT_NOT_NEEDED');
+  assert.equal(coderabbitDisposition({ checkpoint: true }), 'CODERABBIT_REQUESTED');
+  assert.equal(coderabbitDisposition({ passed: true }), 'CODERABBIT_PASS');
+  assert.equal(coderabbitDisposition({ findings: true }), 'CODERABBIT_FINDINGS');
+  assert.equal(coderabbitDisposition({ rateLimited: true }), 'CODERABBIT_DEFERRED_RATE_LIMIT');
+  assert.equal(coderabbitDisposition({ privacyBlocked: true }), 'CODERABBIT_DEFERRED_UNAVAILABLE');
+  assert.deepEqual(coderabbitPrivacyBlocked(['apps/web/x.tsx', '.env']), ['.env']);
 });
 
 test('repeated identical attempts block a slice', () => {

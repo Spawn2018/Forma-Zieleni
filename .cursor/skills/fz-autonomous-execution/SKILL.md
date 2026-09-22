@@ -31,8 +31,9 @@ Delegate, do not duplicate:
 - `fz-verifier` when evidence could be fake or incomplete
 - `fz-security-reviewer` when security or privacy changes; the existing `security-adversary` standard applies
 - `fz-ux-a11y-reviewer` only for user-facing UI; the existing `visual-ux-reviewer` standard applies
-- Grok, through `grok-research-handoff`, for fresh external research or a substantial adversarial challenge. Grok output is evidence. Never send secrets, credentials, or customer data. If Grok is unavailable, record `EXTERNAL ADVERSARIAL REVIEW: DEFERRED` and continue.
+- Grok, through `grok-research-handoff` and `node scripts/security/grok-callable.mjs`, for fresh external research or a substantial adversarial challenge. Grok output is evidence. Never send secrets, credentials, or customer data. Prefer the installed `grok` CLI headless path (`-p`) once authenticated. If Grok is unavailable, record `EXTERNAL ADVERSARIAL REVIEW: DEFERRED` / `GROK_DEFERRED` and continue. Grok must not mutate the repository.
 - CodeRabbit only when review value is high. Use `scripts/security/coderabbit-quota.mjs`. At most 3 free CLI reviews per developer per rolling hour. Paid usage is OWNER-DECISION. Quota exhaustion records DEFERRED and does not stop other READY work.
+- For a coherent checkpoint (not every micro-edit): after deterministic local verification and privacy/secret scope checks, run `node scripts/security/coderabbit-checkpoint.mjs run` when the planner says `action: review`. Record the returned `CODERABBIT_*` state in the execution journal / FZ-CIS. Findings are advisory; verify locally before adoption. Never send secrets, credentials, or customer data.
 
 Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. A safe fast-forward push to `origin` `main` is AUTO after the pre-push gate. Force-push, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval for those.
 

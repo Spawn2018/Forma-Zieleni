@@ -248,6 +248,56 @@ export function grokDisposition(input = {}) {
   return 'GROK_REQUESTED';
 }
 
+/**
+ * CodeRabbit is advisory checkpoint evidence, not Canon authority.
+ * Use on coherent checkpoint diffs only — never every micro-edit.
+ */
+export const CODERABBIT_STATES = Object.freeze([
+  'CODERABBIT_NOT_NEEDED',
+  'CODERABBIT_REQUESTED',
+  'CODERABBIT_PASS',
+  'CODERABBIT_FINDINGS',
+  'CODERABBIT_FINDINGS_FIXED',
+  'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+  'CODERABBIT_DEFERRED_RATE_LIMIT',
+  'CODERABBIT_DEFERRED_UNAVAILABLE',
+  'CODERABBIT_FAILED',
+]);
+
+const EXTERNAL_REVIEW_DENY = [
+  /(^|\/)\.env(\.|$)/i,
+  /(^|\/)(secrets?|credentials?)(\/|$)/i,
+  /\.(pem|p12|pfx|jks|keystore)$/i,
+  /(^|\/)id_(rsa|ed25519|ecdsa)(\.pub)?$/i,
+  /(^|\/)(customer-data|client-data|private)\//i,
+  /\b(payment|iban|pesel|passport)\b/i,
+];
+
+/** Paths that must not leave the machine for external AI review. */
+export function coderabbitPrivacyBlocked(paths = []) {
+  const blocked = [];
+  for (const raw of paths) {
+    const file = String(raw || '').replace(/\\/g, '/');
+    if (!file) continue;
+    if (EXTERNAL_REVIEW_DENY.some((re) => re.test(file))) blocked.push(file);
+  }
+  return [...new Set(blocked)];
+}
+
+export function coderabbitDisposition(input = {}) {
+  if (input.trivial === true || input.needed === false) return 'CODERABBIT_NOT_NEEDED';
+  if (input.privacyBlocked === true) return 'CODERABBIT_DEFERRED_UNAVAILABLE';
+  if (input.rateLimited === true) return 'CODERABBIT_DEFERRED_RATE_LIMIT';
+  if (input.unavailable === true) return 'CODERABBIT_DEFERRED_UNAVAILABLE';
+  if (input.failed === true) return 'CODERABBIT_FAILED';
+  if (input.findingsFixed === true) return 'CODERABBIT_FINDINGS_FIXED';
+  if (input.findingsRejected === true) return 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON';
+  if (input.findings === true) return 'CODERABBIT_FINDINGS';
+  if (input.passed === true) return 'CODERABBIT_PASS';
+  if (input.requested === true || input.checkpoint === true) return 'CODERABBIT_REQUESTED';
+  return 'CODERABBIT_NOT_NEEDED';
+}
+
 export function emptySession(deadline, now = new Date()) {
   return {
     until: deadline.until,

@@ -1,11 +1,11 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "search-alerts",
+  "currentPhase": "tooling-activation",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
-  "codeRabbit": "No check run and no review comment on the published commit. Live quota was not re-read from an account.",
+  "codeRabbit": "CLI authenticated (Spawn2018). Per-checkpoint via scripts/security/coderabbit-checkpoint.mjs. Default review access Spawn2018/Spawn2018 — Forma-Zieleni not visible in CR GitHub default. Period reviews observed=11; hourly cap UNKNOWN (project budget 3/hour). Usage billing inactive.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -19,14 +19,13 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "RETURN-ROADMAP is the next READY slice",
-    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only and are not accepted",
-    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
-    "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
+    "RETURN-ROADMAP is the next READY product slice",
+    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until ZAP/Dependency-Check/live credentials/Cloudflare policy exist",
+    "CodeRabbit GitHub App repo visibility for Forma-Zieleni needs Owner dashboard selection",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "RETURN-ROADMAP is READY. CMS-ACCEPT and SEARCH-ACCEPT stay open reports. Do not mark them accepted while ZAP, Dependency-Check, live credentials, or Cloudflare policy remain deferred.",
-  "grok": "GROK_NOT_NEEDED for the completed CMS and Search slices. The installed grok CLI is not signed in, so the synthetic probe is GROK_DEFERRED. The orchestrator does not invoke Grok and Grok is not a writer.",
+  "nextSafeAction": "After this activation checkpoint push, next product READY is RETURN-ROADMAP. Do not treat CMS-ACCEPT/SEARCH-ACCEPT as accepted. FZ-REQ-MOBILE-001 remains BLOCKED_BY_DEPENDENCY.",
+  "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",
     "packages/domain/search-alerts.test.mjs",
@@ -95,7 +94,10 @@
     "docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md",
     "scripts/docs/check.mjs",
     "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json",
-    "docs/engineering/requirements/FZ-DOC-INVENTORY.json"
+    "docs/engineering/requirements/FZ-DOC-INVENTORY.json",
+    "docs/engineering/ACTIVATION-AUDIT-2026-09-22.json",
+    "scripts/security/coderabbit-checkpoint.mjs",
+    "scripts/security/grok-callable.mjs"
   ],
   "contextRecoveryHints": [
     "Read START-HERE-CURSOR.md, then the recovery list in docs/engineering/FZ-CONTEXT-MAP.json. Do not load the whole tree.",

@@ -1,94 +1,30 @@
 ---
 name: grok-research-handoff
-description: Prepare a bounded research or independent-review handoff for Grok Bot (manual owner transfer). Does not invoke Grok programmatically and does not authorize implementation.
+description: Prepare a bounded research or independent-review handoff for Grok without giving it authority over canonical decisions.
 ---
 
 # Grok research / review handoff
 
-Use this skill when Forma Zieleni needs **external research** or **independent adversarial review** via Grok Bot.
+Use when Forma Zieleni needs **external research** or **independent adversarial review**.
 
-## Authority boundaries
+## Authority
 
-- Binding Grok collaboration model: `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md`
-- Binding slice loop: `docs/cursor-os/CURSOR-OS-2026.md`
-- Decision classes: `docs/workflows/DECISION-GATES.md`
-- Grok findings are **inputs only** — never override Canon, contracts, tests or owner decisions
-- This handoff is **research/review**, **not** implementation authorization
-- Codex local Agent **cannot** programmatically invoke a named Grok Bot and receive a return today — produce the brief for **manual owner transfer**
-- Never include secrets, tokens, credentials, private keys or customer/PII data
-- Do not propose custom bridges, Electron automation as binding path, Supermemory init, Continual Learning edits, Orchestrate fan-out or Thermos runs unless the owner already opened a DECISION for that
+- Binding model: `docs/cursor-os/GROK-BOT-OPERATING-MODEL.md`
+- Local callable channel: `node scripts/security/grok-callable.mjs` (Windows `grok` CLI)
+- Findings are **inputs only** — never override Canon, contracts, tests, or Owner decisions
+- Never include secrets, tokens, credentials, or customer/PII data
+- Grok must not mutate the repository; Cursor remains the writer
 
-## Produce exactly this structured handoff
+## Before claiming CALLABLE
 
-```markdown
-# Grok handoff — Forma Zieleni
+1. `node scripts/security/grok-callable.mjs status`
+2. If `authenticated` is false: stop only auth — Owner runs `grok login` or `grok login --device-auth`
+3. Optional machine probe: `node scripts/security/grok-callable.mjs probe`
 
-## TASK
-<one paragraph: what to research or review; named Bot(s): Researcher and/or Adversarial Reviewer>
+## Produce a structured brief
 
-## CONTEXT
-- Repository: Forma Zieleni (local main-only workflow)
-- Slice / objective:
-- Relevant local paths (read-only for Grok unless owner grants computer use):
-- What Codex local already concluded (to challenge or extend):
-
-## CANON REFERENCES
-- docs/constitution/PROJECT-CONSTITUTION.md
-- docs/architecture/CURRENT-ARCHITECTURE.md
-- docs/knowledge/POST-V2-DECISIONS.md
-- <add Visual/UX/Content/Product/Security paths as applicable>
-- Note: legacy/ is reference only; do not treat as current stack decisions
-
-## RESEARCH QUESTIONS
-1.
-2.
-3.
-
-## REQUIRED EVIDENCE
-- Current primary sources with URLs and retrieval dates where possible
-- Explicit separation of fact vs inference
-- What would falsify the Codex local conclusion
-
-## REVIEW REQUEST
-- Target Bot: Forma Zieleni — Researcher | Forma Zieleni — Adversarial Reviewer | both (Researcher first, then handoff)
-- Severity taxonomy for Adversarial Reviewer: BLOCKER | MAJOR | MINOR | NO ISSUE
-- Scope limits:
-
-## ALLOWED ACTIONS
-- Read Canon / supplied paths
-- External research with provenance
-- Independent challenge of conclusions
-- Optional Codex CloudAgent **only if** owner/Grok explicitly enables it for this task and Forma Zieleni gates are respected (no silent branch/PR override of main-only)
-- Local computer use **only** under per-command approval ("Ask every time")
-
-## PROHIBITED ACTIONS
-- Treat Grok/plugin/chat/Supermemory memory as source of truth
-- Modify Forma Zieleni Canon or repository without going back through Codex local + gates
-- Choose framework / hosting / DB / ORM / storage / payment provider
-- Push, production, DNS, secrets, destructive data ops
-- Build custom Codex→Grok bridges or control-ui automation as the delivery path
-- Initialize Supermemory / Continual Learning / Orchestrate / Thermos unless a DECISION already exists
-- Invent business facts, fake evidence or generic redesign
-
-## DECISION GATES
-- AUTO/REVIEW: proceed within this research/review scope
-- DECISION: stop and surface to owner (framework, infra, provider, material scope, legal, material UX, custom bridge, Supermemory, Continual Learning, Orchestrate, etc.)
-- DANGEROUS: stop (production, secrets, DNS, deletion, destructive migration, real payments, irreversible ops)
-
-## EXPECTED RETURN FORMAT
-### Summary
-### Findings (BLOCKER / MAJOR / MINOR / NO ISSUE as applicable)
-### Evidence (links + dates)
-### Disagreements with Codex local conclusion
-### Recommended next action for Codex local (research-only; not implementation auth)
-### Explicit non-decisions (what must remain owner DECISION)
-```
+Goal, context paths, exact questions, required sources, output artifact, acceptance criteria, prohibited actions. Prefer headless `grok -p` with `--deny` for mutation tools when the challenge is justified by `grokDisposition` triggers. Routine work records `GROK_NOT_NEEDED`.
 
 ## After Grok returns
 
-Codex local must:
-
-1. reconcile against Canon and deterministic gates;
-2. refuse to adopt unverified claims;
-3. escalate DECISION/DANGEROUS items;
-4. treat the return as evidence for the binding loop — not as COMPLETE/implementation approval.
+Reconcile against Canon and tests. Adopt, reject, or defer with local verification. Record `GROK_*` state; optional FZ-CIS learning only after verification.

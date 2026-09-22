@@ -74,8 +74,24 @@ function trackedFiles() {
   return out.toString('utf8').split('\0').filter(Boolean);
 }
 
+const BINARY_EXT = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.zip', '.gz', '.apk', '.pdf',
+  '.woff', '.woff2', '.ico', '.bin', '.wasm', '.mp4', '.mp3',
+]);
+
+/** Hash the Git blob form (LF-normalized text), not raw CRLF checkout bytes. */
+function blobBytes(rel) {
+  const abs = path.join(root, rel);
+  const buf = readFileSync(abs);
+  const ext = path.extname(rel).toLowerCase();
+  if (BINARY_EXT.has(ext) || buf.includes(0)) return buf;
+  let text = buf.toString('utf8');
+  if (text.includes('\r')) text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return Buffer.from(text, 'utf8');
+}
+
 function sha256(rel) {
-  return createHash('sha256').update(readFileSync(path.join(root, rel))).digest('hex');
+  return createHash('sha256').update(blobBytes(rel)).digest('hex');
 }
 
 function renderSums(files) {

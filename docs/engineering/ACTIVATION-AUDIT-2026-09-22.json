@@ -1,0 +1,70 @@
+{
+  "auditId": "FZ-ACTIVATION-AUDIT-2026-09-22",
+  "startingHead": "63c6434c0fc7d231598d4761851c271f2c965f24",
+  "purpose": "Activate existing engineering capabilities that are designed/configured but not used in normal development.",
+  "codeRabbit": {
+    "mechanism": "CLI coderabbit review --committed --base origin/main --agent via scripts/security/coderabbit-checkpoint.mjs",
+    "authenticated": true,
+    "account": "Spawn2018",
+    "defaultReviewAccess": "Spawn2018/Spawn2018",
+    "formaZieleniGitHubVisible": false,
+    "visibilityReason": "CLI default review access is Spawn2018/Spawn2018, not Spawn2018/Forma-Zieleni. gh user/installations returns 403. Owner must select Forma-Zieleni in the CodeRabbit GitHub App/dashboard if web visibility is required. CLI per-checkpoint does not require that.",
+    "perCheckpointActive": true,
+    "quota": {
+      "periodReviewsObserved": 11,
+      "periodResets": "2026-10-21",
+      "usageBilling": "inactive",
+      "projectHourlyBudget": "3 successful CLI reviews / developer / rolling hour",
+      "hourlyCapEmpiricallyVerified": false,
+      "status": "UNKNOWN"
+    },
+    "lastPriorRealReview": "2026-09-21T11:43:51Z commit 2e2155fc52f2463d35848c316af86dc716f6df8f"
+  },
+  "grok": {
+    "bindingChannel": "grok-cli",
+    "installed": true,
+    "authenticated": true,
+    "reachable": true,
+    "callable": true,
+    "syntheticProbe": "PASS",
+    "realModelResponseReceived": true,
+    "readOnly": true,
+    "triggerPath": "scripts/fz-noc/policy.mjs grokDisposition + scripts/security/grok-callable.mjs",
+    "ownerActionRequired": false,
+    "probeStarted": "2026-09-22T15:07:07.654Z"
+  },
+  "capabilities": [
+    {"capability":"CodeRabbit CLI","purpose":"Independent checkpoint review","currentState":"ACTIVATED","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free trial budget","externalAccountRequired":"YES","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"coderabbit-checkpoint.mjs wired into /noc skill","expectedEvidence":"CODERABBIT_* journal states"},
+    {"capability":"CodeRabbit GitHub App visibility","purpose":"Web/dashboard repo activity","currentState":"OWNER_GATED","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"unknown","externalAccountRequired":"YES","secretRequired":"NO","ownerGate":"YES","productionDependency":"NO","activationAction":"Owner selects Spawn2018/Forma-Zieleni in CodeRabbit","keepDeferredReason":"requires external account permission"},
+    {"capability":"Grok CLI","purpose":"Adversarial/research second opinion","currentState":"ACTIVATED","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"account-included","externalAccountRequired":"YES","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"grok-callable.mjs + synthetic probe","expectedEvidence":"GROK_SUCCEEDED probe"},
+    {"capability":"GitHub Actions CI","purpose":"Independent post-push verify","currentState":"OPERATIONAL_BUT_FAILING_ON_CHECKSUMS","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free GH minutes","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"LF-normalized SHA256SUMS so Linux CI matches Windows","expectedEvidence":"ci.yml Verify green after push"},
+    {"capability":"Windows supervisor tests","purpose":"Native process isolation","currentState":"OPERATIONAL_IN_CI","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none local — pwsh absent locally; windows-latest CI job already no-skip PASS","keepDeferredReason":"local pwsh install optional; CI already covers"},
+    {"capability":"Repo integrity / checksums","purpose":"Tracked-tree integrity","currentState":"ACTIVATED_FIXED","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"hash LF-normalized blob form","expectedEvidence":"pnpm repo:check + CI"},
+    {"capability":"Secret pattern scan (tracked)","purpose":"Block secret-like tracked files","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"already in repo-integrity","expectedEvidence":"repo:check"},
+    {"capability":"pnpm audit SCA","purpose":"Known dependency vulns","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"already in CI + pre-push","expectedEvidence":"pnpm audit"},
+    {"capability":"OWASP Dependency-Check","purpose":"SCA depth","currentState":"DEFERRED_WITHOUT_STACK_NEED_RECHECK","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"free tool + Java","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none this pass","keepDeferredReason":"Java not installed; pnpm audit covers current npm graph; full DC later with CMS runtime"},
+    {"capability":"ZAP DAST","purpose":"HTTP security scan","currentState":"DEFERRED","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"free + Java","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none","keepDeferredReason":"no durable local runnable API target + Java absent; production scan OWNER"},
+    {"capability":"FZ-CIS store/policy","purpose":"Learning evidence ladder","currentState":"OPERATIONAL_SCHEMA","normalExecutionUsed":"PARTIAL","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"keep ingesting CR/Grok/test via existing schemas; no second DB","expectedEvidence":"contracts + policy tests"},
+    {"capability":"Context recovery hooks","purpose":"sessionStart/preCompact/stop","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"already tested in fz-noc policy tests","expectedEvidence":"hooks emit documented JSON"},
+    {"capability":"/noc watchdog","purpose":"deadline coordinator","currentState":"CONFIGURED_LAST_WINDOW_STOPPED","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none — live.json status stop; product slices exhausted pending RETURN-ROADMAP","expectedEvidence":".fz-noc/live.json"},
+    {"capability":"Execution journal","purpose":"recovery truth","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"update this audit","expectedEvidence":"execution-journal.json"},
+    {"capability":"OpenAPI validation","purpose":"API contract tests","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"already in pnpm test","expectedEvidence":"contracts/openapi.test.mjs"},
+    {"capability":"docs:check","purpose":"documentation freshness","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"already mandatory","expectedEvidence":"pnpm docs:check"},
+    {"capability":"Requirement registry","purpose":"traceability","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none","expectedEvidence":"scripts/requirements/registry.test.mjs"},
+    {"capability":"Accessibility automation","purpose":"a11y gates","currentState":"DEFERRED","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none","keepDeferredReason":"real UI acceptance later; no axe pipeline yet"},
+    {"capability":"OpenObserve","purpose":"observability","currentState":"DESIGNED_ONLY","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"infra","externalAccountRequired":"YES","secretRequired":"YES","ownerGate":"YES","productionDependency":"YES","activationAction":"none","keepDeferredReason":"production dependency"},
+    {"capability":"Mobile Android/iOS tooling","purpose":"FZ-REQ-MOBILE-001 clients","currentState":"BLOCKED_BY_DEPENDENCY","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"unknown","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"preserve requirement; no app build in this audit","keepDeferredReason":"FZ-REQ-MOBILE-001 BLOCKED_BY_DEPENDENCY; no client yet"},
+    {"capability":"CMS/Search acceptance","purpose":"security acceptance reports","currentState":"OWNER_GATED_REPORT_ONLY","normalExecutionUsed":"NO","safeToActivateNow":"NO","cost":"n/a","externalAccountRequired":"YES","secretRequired":"YES","ownerGate":"YES","productionDependency":"YES","activationAction":"none","keepDeferredReason":"ZAP/DC/live creds/Cloudflare remain open"},
+    {"capability":"Synthetic test-data","purpose":"safe fixtures","currentState":"OPERATIONAL","normalExecutionUsed":"YES","safeToActivateNow":"YES","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"scripts/docs/test-data.mjs already lint-checked","expectedEvidence":"node --check"},
+    {"capability":"Performance/Web Vitals budgets","purpose":"field/lab budgets","currentState":"PARTIAL_DOMAIN_ONLY","normalExecutionUsed":"PARTIAL","safeToActivateNow":"NO","cost":"free","externalAccountRequired":"NO","secretRequired":"NO","ownerGate":"NO","productionDependency":"NO","activationAction":"none","keepDeferredReason":"no invented numeric LCP budget; domain contracts exist"}
+  ],
+  "activatedNow": [
+    "CodeRabbit per-checkpoint policy + script",
+    "Grok CLI callable path + synthetic probe",
+    "LF-normalized repo integrity (CI fix)",
+    "CodeRabbit/Grok disposition states in fz-noc policy"
+  ],
+  "productionGatesPreserved": true,
+  "nextReadyProductSlice": "RETURN-ROADMAP",
+  "mobileRequirement": "FZ-REQ-MOBILE-001 preserved BLOCKED_BY_DEPENDENCY"
+}

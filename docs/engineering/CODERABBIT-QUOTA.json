@@ -1,8 +1,8 @@
 {
   "provider": "CodeRabbit",
-  "source": "Forma Zieleni operational assumption until an account limit is read",
-  "verifiedAt": null,
-  "value": "at most 3 successful CLI reviews per developer per rolling hour",
-  "confidence": "UNVERIFIED",
-  "refresh": "Replace this value only after the authenticated account shows its current limit. Do not treat it as architecture."
+  "source": "Authenticated coderabbit usage on 2026-09-22 plus project conservative hourly budget",
+  "verifiedAt": "2026-09-22T15:00:00.000Z",
+  "value": "at most 3 successful CLI reviews per developer per rolling hour (project budget). Live account period counter observed as 11 reviews; period resets 2026-10-21; usage billing inactive. Official Advanced trial hourly CLI allowance was previously published as 10/hour but is not re-proven here.",
+  "confidence": "PERIOD_COUNTER_OBSERVED_HOURLY_CAP_NOT_REPROBED",
+  "refresh": "Replace only after the authenticated account shows a current hourly limit. Do not treat period totals as the hourly budget."
 }
