@@ -1,4 +1,34 @@
 {
   "version": 1,
-  "records": []
+  "records": [
+    {
+      "patternKey": "projection-drift-after-materialization",
+      "source": "test",
+      "scope": "readme-and-requirements-projections",
+      "signalType": "failure",
+      "severity": "high",
+      "observation": "After package materialization, hardcoded README surface expectations and FZ-MASTER-TRACEABILITY.md lagged registry.mjs, so local/CI Verify failed on main repeatedly.",
+      "evidence": [
+        "scripts/readme/regions.test.mjs expected admin not-built while apps/admin/package.json exists since 582e4e6",
+        "scripts/requirements/registry.test.mjs asserted FZ-MASTER-TRACEABILITY.md equals renderMarkdown from registry.mjs",
+        "commit 675dc3d earlier fixed portal surface drift then admin materialization regressed the same class",
+        "GitHub Actions run 35776765562 Verify Test failed on HEAD 330a514"
+      ],
+      "generalizability": "RECURRING",
+      "privacyClassification": "INTERNAL",
+      "status": "HYPOTHESIS",
+      "hypothesis": "Materializing an apps package or changing registry.mjs without refreshing projection tests and FZ-MASTER-TRACEABILITY.md leaves main red; a deterministic local gate would catch that before push.",
+      "proposedImprovement": "Require the same local deterministic checks that CI runs (including README surface snapshot and registry projection equality) before any fast-forward push to origin main.",
+      "evidenceStrength": "TESTED",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "330a514",
+      "relatedTest": "scripts/readme/regions.test.mjs",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260922-a52d1a35",
+      "occurrences": 1,
+      "firstSeen": "2026-09-22T20:05:32.591Z",
+      "lastSeen": "2026-09-22T20:05:32.591Z"
+    }
+  ]
 }

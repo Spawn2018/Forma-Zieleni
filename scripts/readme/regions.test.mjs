@@ -47,7 +47,7 @@ test('progress projection has no percentage and no private fields', () => {
   assert.equal(rendered.includes('package-present') || rendered.includes('not-built'), true);
   assert.equal(snapshot.surfaces.web, 'package-present');
   assert.equal(snapshot.surfaces.portal, 'package-present');
-  assert.equal(snapshot.surfaces.admin, 'not-built');
+  assert.equal(snapshot.surfaces.admin, 'package-present');
   assert.equal(snapshot.surfaces.api, 'package-present');
 });
 
