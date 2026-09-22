@@ -66,6 +66,17 @@ test('fingerprint stable across line-number changes and differs by class', () =>
   assert.equal(a, b);
   assert.notEqual(a, c);
   assert.equal(a.includes('aaaaaaaa'), false);
+  const sameTitleDifferentBody = fingerprintFinding({
+    fileName: 'scripts/security/coderabbit-parse.mjs',
+    summary: 'Keep distinct findings separate',
+    codegenInstructions: 'Include normalized issue description A in the fingerprint.',
+  });
+  const sameTitleOtherBody = fingerprintFinding({
+    fileName: 'scripts/security/coderabbit-parse.mjs',
+    summary: 'Keep distinct findings separate',
+    codegenInstructions: 'Include normalized issue description B so dispositions cannot collapse.',
+  });
+  assert.notEqual(sameTitleDifferentBody, sameTitleOtherBody);
 });
 
 test('malformed noise ignored; skipped review is not PASS', () => {
@@ -106,6 +117,59 @@ test('lifecycle: findings → accept → repair → re-review required → clean
     state = applyCleanReReviewPure(state, { headSha: 'ccc', findings: [], paths: state.paths });
     assert.equal(state.state, 'CODERABBIT_PASS_AFTER_REPAIR');
     assert.equal(assertReviewDebtClear({ headSha: 'ccc', paths: state.paths }, state).ok, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('ACCEPT without note-repair cannot close via clean re-review', () => {
+  const parsed = parseAgentReview(FIXTURE_FINDING);
+  let state = {
+    ...emptyReviewState(),
+    findings: [parsed.findings[0]],
+    dispositions: {},
+    headSha: 'bbb',
+    paths: ['scripts/fz-noc/cli.mjs'],
+  };
+  state = setDisposition(state, parsed.findings[0].fingerprint, {
+    kind: 'ACCEPT',
+    reason: 'confirmed locally',
+  }).state;
+  assert.equal(state.reReviewRequired, true);
+  assert.equal(state.repairOccurred, false);
+  const closedEarly = applyCleanReReviewPure(state, { headSha: 'bbb', findings: [] });
+  assert.notEqual(closedEarly.state, 'CODERABBIT_PASS');
+  assert.notEqual(closedEarly.state, 'CODERABBIT_PASS_AFTER_REPAIR');
+  assert.equal(assertReviewDebtClear({ headSha: 'bbb' }, closedEarly).ok, false);
+});
+
+test('clean second review does not erase unresolved findings', () => {
+  const parsed = parseAgentReview(FIXTURE_FINDING);
+  const prior = {
+    ...emptyReviewState(),
+    state: 'CODERABBIT_FINDINGS',
+    findings: parsed.findings,
+    dispositions: Object.fromEntries(
+      parsed.findings.map((finding) => [finding.fingerprint, { kind: 'UNRESOLVED', at: 't' }]),
+    ),
+    headSha: 'bbb',
+    paths: ['scripts/fz-noc/cli.mjs'],
+  };
+  const wiped = applyCleanReReviewPure(prior, { headSha: 'bbb', findings: [] });
+  assert.equal((wiped.findings || []).length, 2);
+  assert.equal(assertReviewDebtClear({ headSha: 'bbb' }, wiped).ok, false);
+});
+
+test('invalid existing receipt fails closed for push', async () => {
+  const { loadReviewState } = await import('./coderabbit-state.mjs');
+  const dir = mkdtempSync(path.join(tmpdir(), 'fz-cr-bad-'));
+  const file = path.join(dir, 'coderabbit-review.json');
+  try {
+    writeFileSync(file, '{"version":99,"state":"CODERABBIT_PASS"}\n');
+    const state = loadReviewState(file);
+    assert.equal(state.state, 'CODERABBIT_FAILED');
+    assert.ok(state.loadError);
+    assert.equal(assertReviewDebtClear({ headSha: 'abc' }, state).ok, false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -262,6 +326,53 @@ test('runCheckpointReview with injected agent output records structured findings
     assert.equal(result.findings, 2);
     assert.equal(result.structuredFindings.length, 2);
     assert.equal(result.state, 'CODERABBIT_FINDINGS');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('incomplete or count-mismatched agent stream is not success', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'fz-cr-badstream-'));
+  const stateFile = path.join(dir, 'coderabbit-review.json');
+  try {
+    const incomplete = runCheckpointReview({
+      paths: ['scripts/fz-noc/cli.mjs'],
+      diffText: 'diff --git a/scripts/fz-noc/cli.mjs',
+      bin: 'coderabbit',
+      quota: { status: 'AVAILABLE', remaining: 2 },
+      recordQuota: false,
+      stateFile,
+      headSha: 'dddddddddddddddddddddddddddddddddddddddd',
+      spawnReview: () => ({
+        status: 0,
+        stdout: '{"type":"finding","severity":"minor","fileName":"a.mjs","codegenInstructions":"x"}\n',
+        stderr: '',
+      }),
+      ingestOptions: { dryRun: true },
+    });
+    assert.equal(incomplete.ok, false);
+    assert.equal(incomplete.reason, 'incomplete_review');
+
+    const mismatch = runCheckpointReview({
+      paths: ['scripts/fz-noc/cli.mjs'],
+      diffText: 'diff --git a/scripts/fz-noc/cli.mjs',
+      bin: 'coderabbit',
+      quota: { status: 'AVAILABLE', remaining: 2 },
+      recordQuota: false,
+      stateFile,
+      headSha: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      spawnReview: () => ({
+        status: 0,
+        stdout: [
+          '{"type":"finding","severity":"minor","fileName":"a.mjs","codegenInstructions":"only one finding body"}',
+          '{"type":"complete","status":"review_completed","findings":2}',
+        ].join('\n'),
+        stderr: '',
+      }),
+      ingestOptions: { dryRun: true },
+    });
+    assert.equal(mismatch.ok, false);
+    assert.equal(mismatch.reason, 'finding_count_mismatch');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

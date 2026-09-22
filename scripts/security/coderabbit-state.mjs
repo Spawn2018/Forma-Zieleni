@@ -45,6 +45,7 @@ export function emptyReviewState() {
     repairOccurred: false,
     reReviewRequired: false,
     repairAttempts: {},
+    loadError: null,
     updatedAt: null,
   };
 }
@@ -54,10 +55,21 @@ export function loadReviewState(file = reviewStatePath()) {
   if (!existsSync(resolved)) return emptyReviewState();
   try {
     const parsed = JSON.parse(readFileSync(resolved, 'utf8'));
-    if (!parsed || parsed.version !== 1) return emptyReviewState();
-    return { ...emptyReviewState(), ...parsed };
+    if (!parsed || typeof parsed !== 'object' || parsed.version !== 1) {
+      // Existing invalid receipt must not become EMPTY (push would clear debt).
+      return {
+        ...emptyReviewState(),
+        state: 'CODERABBIT_FAILED',
+        loadError: 'invalid_receipt',
+      };
+    }
+    return { ...emptyReviewState(), ...parsed, loadError: null };
   } catch {
-    return emptyReviewState();
+    return {
+      ...emptyReviewState(),
+      state: 'CODERABBIT_FAILED',
+      loadError: 'invalid_receipt_json',
+    };
   }
 }
 
@@ -229,6 +241,27 @@ export function applyCleanReReviewPure(state, { headSha, findings = [], paths = 
     next.state = 'CODERABBIT_FINDINGS';
     return next;
   }
+  // Accepted findings require note-repair before a clean review can close debt.
+  if (anyAccepted(state) && !state.repairOccurred) {
+    return {
+      ...state,
+      headSha,
+      paths: paths.length ? paths : state.paths,
+      diffFingerprint: diffFingerprint || state.diffFingerprint,
+      reReviewRequired: true,
+      state: 'CODERABBIT_FINDINGS_FIXED',
+    };
+  }
+  if (!state.repairOccurred && (state.findings || []).length > 0 && !allRejected(state)) {
+    // Undispositioned prior findings cannot be erased by a later clean run.
+    return {
+      ...state,
+      headSha,
+      paths: paths.length ? paths : state.paths,
+      diffFingerprint: diffFingerprint || state.diffFingerprint,
+      state: deriveReviewState(state),
+    };
+  }
   return {
     ...state,
     headSha,
@@ -286,7 +319,7 @@ export function assertReviewDebtClear(candidate = {}, state = emptyReviewState()
     return { ok: true, reason: 'no_required_review', state: derived };
   }
   if (derived === 'CODERABBIT_FAILED') {
-    if ((state.findings || []).length > 0 || state.repairOccurred) {
+    if (state.loadError || (state.findings || []).length > 0 || state.repairOccurred) {
       return { ok: false, reason: 'review_debt_failed', state: derived };
     }
     return { ok: true, reason: 'no_required_review', state: derived };

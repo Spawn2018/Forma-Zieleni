@@ -71,15 +71,26 @@ export function extractIssueClass(text) {
 export function fingerprintFinding(finding = {}) {
   const pathNorm = normalizePath(finding.fileName || finding.path || 'unknown');
   const pathToken = slugPart(pathNorm.split('/').slice(-2).join('-') || pathNorm, 'path');
+  // Include summary and codegenInstructions so same-title/different-body findings
+  // do not collapse into one fingerprint/disposition.
+  const issueClass = extractIssueClass(
+    [
+      finding.rule,
+      finding.category,
+      finding.title,
+      finding.summary,
+      finding.message,
+      finding.codegenInstructions,
+    ]
+      .filter(Boolean)
+      .join(' | '),
+  );
   const classToken = slugPart(
-    finding.rule
-      || finding.category
-      || finding.title
-      || extractIssueClass(finding.summary || finding.message || finding.codegenInstructions),
+    finding.rule || finding.category || finding.title || issueClass,
     'finding',
   );
   const digest = createHash('sha256')
-    .update(`coderabbit|${pathToken}|${classToken}|${extractIssueClass(finding.summary || finding.codegenInstructions || '')}`)
+    .update(`coderabbit|${pathToken}|${classToken}|${issueClass}`)
     .digest('hex')
     .slice(0, 8);
   // Fits FZ-CIS PATTERN_KEY: 2–9 hyphenated segments.
@@ -112,15 +123,14 @@ export function parseAgentReview(output) {
     }
     if (event.type === 'finding' || event.finding || (event.severity && (event.fileName || event.file || event.path))) {
       const fileName = normalizePath(event.fileName || event.file || event.path || event.finding?.fileName);
-      const summary = sanitizeText(
-        event.title
-          || event.message
-          || event.summary
-          || extractIssueClass(event.codegenInstructions || event.finding?.codegenInstructions || ''),
-        MAX_SUMMARY,
-      );
+      const codegenRaw = event.codegenInstructions || event.finding?.codegenInstructions || '';
+      const fromCodegen = extractIssueClass(codegenRaw);
+      const fromTitle = sanitizeText(event.title || event.message || event.summary || '', MAX_SUMMARY);
+      // Prefer codegen body; agent titles are often truncated fix prompts.
+      const summary = sanitizeText(fromCodegen || fromTitle, MAX_SUMMARY);
       const severity = normalizeSeverity(event.severity || event.finding?.severity);
       const category = sanitizeText(event.category || event.rule || event.finding?.category || '', 80);
+      const codegenInstructions = sanitizeText(codegenRaw, MAX_SUMMARY);
       const structured = {
         severity,
         category: category || null,
@@ -131,7 +141,8 @@ export function parseAgentReview(output) {
       };
       structured.fingerprint = fingerprintFinding({
         ...structured,
-        codegenInstructions: sanitizeText(event.codegenInstructions || '', MAX_SUMMARY),
+        title: fromTitle || null,
+        codegenInstructions,
       });
       findings.push(structured);
     }

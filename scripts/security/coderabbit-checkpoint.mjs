@@ -26,6 +26,13 @@ import {
   setDisposition,
 } from './coderabbit-state.mjs';
 
+const CLOSED_REVIEW_STATES = new Set([
+  'EMPTY',
+  'CODERABBIT_PASS',
+  'CODERABBIT_PASS_AFTER_REPAIR',
+  'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+]);
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const quotaScript = path.join(root, 'scripts', 'security', 'coderabbit-quota.mjs');
 
@@ -285,15 +292,20 @@ export function runCheckpointReview(options = {}) {
   const completeStatus = String(parsed.complete?.status || parsed.complete?.outcome || '');
   const skipped = /skip/i.test(completeStatus);
   const completed = Boolean(parsed.complete) && !skipped;
-  const success = review.status === 0 && (completed || parsed.findingCount > 0) && !skipped;
+  const reportedCount = typeof parsed.complete?.findings === 'number'
+    ? parsed.complete.findings
+    : null;
+  const countConsistent = reportedCount === null || reportedCount === parsed.findings.length;
+  const success = review.status === 0 && completed && countConsistent && !skipped;
   if (options.recordQuota !== false) {
     recordQuota(review.status === 0 && !skipped ? 'success' : 'fail');
   }
 
   const fingerprint = diffFingerprint(changed.paths, headSha, baseSha);
   if (!success) {
+    const priorFail = loadReviewState(options.stateFile);
     const failedState = saveReviewState({
-      ...loadReviewState(options.stateFile),
+      ...priorFail,
       baseSha,
       headSha,
       paths: changed.paths,
@@ -310,18 +322,35 @@ export function runCheckpointReview(options = {}) {
       exitCode: review.status,
       complete: parsed.complete,
       reviewState: failedState,
+      reason: !completed ? 'incomplete_review' : (!countConsistent ? 'finding_count_mismatch' : 'review_failed'),
     };
   }
 
   const prior = loadReviewState(options.stateFile);
   let reviewState;
-  if (prior.reReviewRequired || prior.repairOccurred) {
+  const priorDerived = deriveReviewState(prior);
+  const priorOpenDebt = priorDerived === 'CODERABBIT_FINDINGS'
+    || priorDerived === 'CODERABBIT_FINDINGS_FIXED'
+    || priorDerived === 'CODERABBIT_RE_REVIEW_REQUIRED'
+    || priorDerived === 'CODERABBIT_REVIEW_BLOCKED'
+    || ((prior.findings || []).length > 0 && !CLOSED_REVIEW_STATES.has(priorDerived));
+
+  if (prior.repairOccurred && prior.reReviewRequired) {
     reviewState = saveReviewState(applyCleanReReviewPure(prior, {
       headSha,
       findings: parsed.findings,
       paths: changed.paths,
       diffFingerprint: fingerprint,
     }), options.stateFile);
+  } else if (parsed.findings.length === 0 && priorOpenDebt) {
+    // A later clean review must not erase undispositioned / unrepaired debt.
+    reviewState = saveReviewState({
+      ...prior,
+      headSha,
+      paths: changed.paths,
+      diffFingerprint: fingerprint,
+      state: priorDerived,
+    }, options.stateFile);
   } else {
     reviewState = recordReviewResult({
       baseSha,
