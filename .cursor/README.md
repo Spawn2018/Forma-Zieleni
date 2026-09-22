@@ -23,10 +23,11 @@ Do not infer stack choices from plugin availability. See `docs/architecture/CURR
 
 ## Unattended /noc permissions
 
-Committed Approvals alignment: [`permissions.json`](./permissions.json),
-[`sandbox.json`](./sandbox.json), and
-[`../docs/cursor-os/UNATTENDED-PERMISSIONS.md`](../docs/cursor-os/UNATTENDED-PERMISSIONS.md).
+See [`../docs/cursor-os/UNATTENDED-PERMISSIONS.md`](../docs/cursor-os/UNATTENDED-PERMISSIONS.md).
 
-Owner must keep Cursor Run Mode on **Auto-review** or **Allowlist**
-(with sandbox). Do not use Run Everything. Dangerous git/Cloudflare
-operations remain denied by FZ hooks.
+On Cursor **3.21.16**, project `.cursor/permissions.json` is schema-valid
+but **does not** populate the Shell allowlist UI (repo-level allowlists
+are not applied yet). Keep **Auto-review**. Populate the IDE Shell
+allowlist via Settings (not Run Everything; not user-level
+`terminalAllowlist`, which forces Allowlist mode). FZ hooks still deny
+dangerous git/Cloudflare operations.

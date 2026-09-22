@@ -1,9 +1,14 @@
 /**
  * Cursor Approvals & Execution alignment for Forma Zieleni /noc.
  * This module owns classification of observed shell prompts and guards
- * the committed .cursor/permissions.json allowlist. It does not replace
- * Decision Gates. Cursor IDE Run Mode still requires Auto-review or
- * Allowlist for permissions.json to take effect.
+ * the committed .cursor/permissions.json allowlist INTENT file.
+ *
+ * Cursor 3.21.16: project .cursor/permissions.json is schema-valid but
+ * repository-level terminalAllowlist is NOT applied to the IDE Shell
+ * allowlist UI (Cursor staff, 2026-08-10). Auto-review must keep using
+ * the IDE-managed allowlist. Do not write ~/.cursor/permissions.json
+ * terminalAllowlist while Auto-review must stay selected (forces
+ * Allowlist mode). Decision Gates remain in policy.mjs.
  */
 
 import { readFileSync } from 'node:fs';
