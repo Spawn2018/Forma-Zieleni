@@ -12,8 +12,18 @@ export type Project = {
   id: string;
   contractId: string;
   status: ProjectStatus;
+  /** Portal client subject authorized to read a client-safe projection. Null = staff-only. */
+  clientSubject: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+/** Fields a portal client may see. No payment, provider, or staff commercial machine. */
+export type PortalProjectProjection = {
+  id: string;
+  contractId: string;
+  status: ProjectStatus;
+  createdAt: string;
 };
 
 const OPAQUE_ID = /^[a-z][a-z0-9]{15,63}$/;
@@ -25,15 +35,36 @@ export function assertOpaqueProjectId(id: string): string {
   return id;
 }
 
-export function createProject(id: string, contract: Contract, at: string): Project {
+export function createProject(
+  id: string,
+  contract: Contract,
+  at: string,
+  clientSubject: string | null = null,
+): Project {
   if (contract.status !== 'draft') {
     throw new Error('CONTRACT_NOT_READY');
+  }
+  if (clientSubject !== null) {
+    const subject = clientSubject.trim();
+    if (!subject || subject.length > 128) throw new Error('CLIENT_SUBJECT_INVALID');
+    clientSubject = subject;
   }
   return {
     id: assertOpaqueProjectId(id),
     contractId: assertOpaqueContractId(contract.id),
     status: 'planned',
+    clientSubject,
     createdAt: at,
     updatedAt: at,
+  };
+}
+
+export function projectProjectForPortal(project: Project, readerSubject: string): PortalProjectProjection | null {
+  if (!project.clientSubject || project.clientSubject !== readerSubject) return null;
+  return {
+    id: project.id,
+    contractId: project.contractId,
+    status: project.status,
+    createdAt: project.createdAt,
   };
 }

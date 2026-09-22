@@ -4,7 +4,7 @@ import { createLead, qualifyLead } from './src/lead.ts';
 import { createOpportunity } from './src/opportunity.ts';
 import { createOffer } from './src/offer.ts';
 import { createContract } from './src/contract.ts';
-import { assertOpaqueProjectId, createProject } from './src/project.ts';
+import { assertOpaqueProjectId, createProject, projectProjectForPortal } from './src/project.ts';
 
 const at = '2026-09-22T12:00:00.000Z';
 const capture = {
@@ -34,6 +34,7 @@ test('project is created only from a draft contract and owns its status', () => 
   const project = createProject('j9k2n4p6q8r0s2t4', contract, '2026-09-22T12:25:00.000Z');
   assert.equal(project.contractId, contract.id);
   assert.equal(project.status, 'planned');
+  assert.equal(project.clientSubject, null);
   assert.equal(Object.hasOwn(project, 'payment'), false);
   assert.equal(Object.hasOwn(project, 'provider'), false);
   assert.equal(Object.hasOwn(project, 'deposit'), false);
@@ -45,4 +46,17 @@ test('non-draft contracts cannot open a project', () => {
     () => createProject('j9k2n4p6q8r0s2t4', /** @type {import('./src/contract.ts').Contract} */ (contract), at),
     /CONTRACT_NOT_READY/,
   );
+});
+
+test('portal projection is BOLA-isolated and omits commercial fields', () => {
+  const contract = draftContract();
+  const project = createProject('j9k2n4p6q8r0s2t4', contract, '2026-09-22T12:25:00.000Z', 'portal-ola');
+  const mine = projectProjectForPortal(project, 'portal-ola');
+  assert.ok(mine);
+  assert.equal(mine.id, project.id);
+  assert.equal(mine.contractId, project.contractId);
+  assert.equal(Object.hasOwn(mine, 'clientSubject'), false);
+  assert.equal(Object.hasOwn(mine, 'payment'), false);
+  assert.equal(projectProjectForPortal(project, 'portal-other'), null);
+  assert.equal(projectProjectForPortal(createProject('j8k2n4p6q8r0s2t4', contract, at), 'portal-ola'), null);
 });

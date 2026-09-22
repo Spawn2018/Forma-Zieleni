@@ -91,10 +91,10 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'PORTAL-PROJECT-PROJECTION');
+  assert.equal(picked.selected, 'ADMIN-APP');
   assert.equal(picked.ready.includes('ADMIN-APP'), true);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
-  assert.equal(picked.ready.includes('PORTAL-PROJECT-PROJECTION'), true);
+  assert.equal(picked.ready.includes('PORTAL-PROJECT-PROJECTION'), false);
   assert.equal(picked.ready.includes('CRM-PROJECT-DOMAIN'), false);
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
@@ -201,7 +201,7 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'PORTAL-PROJECT-PROJECTION');
+  assert.equal(picked.selected, 'ADMIN-APP');
   assert.equal(picked.ready.includes('ADMIN-APP'), true);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);
@@ -397,11 +397,15 @@ test('B: Admin binding without ADMIN-APP slice is an internal gap', () => {
   assert.equal(picked.exhaustionAllowed, false);
 });
 
-test('C: Portal foundation or shell is not product-complete while auth/projections remain', () => {
+test('C: Portal foundation alone is not product-complete; current portal projections complete the capability', () => {
   const rows = requirements().filter((row) => row.productCapability === 'PORTAL' || String(row.id).startsWith('FZ-REQ-PORTAL-'));
-  assert.equal(portalCapabilityIsProductComplete(rows), false);
   assert.ok(rows.some((row) => row.foundationOnly === true && row.status === 'DONE_AT_MAX_DEPTH'));
-  assert.ok(rows.some((row) => row.id === 'FZ-REQ-PORTAL-004' && row.status !== 'DONE_AT_MAX_DEPTH'));
+  assert.equal(portalCapabilityIsProductComplete(rows.filter((row) => row.foundationOnly === true)), false);
+  assert.equal(portalCapabilityIsProductComplete(rows), true);
+  assert.ok(rows.every((row) => row.id === 'FZ-REQ-PORTAL-001' || row.status === 'DONE_AT_MAX_DEPTH' || row.foundationOnly === true));
+  for (const id of ['FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004']) {
+    assert.equal(rows.find((row) => row.id === id).status, 'DONE_AT_MAX_DEPTH');
+  }
 });
 
 test('D: Mobile binding stays materialized on the main graph', () => {
@@ -443,7 +447,7 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.match(main, /ZAP ARMED_WAITING_FOR_TARGET/);
   assert.match(main, /does \*\*not\*\* block unrelated product/);
   const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
-  assert.ok(picked.ready.includes('ADMIN-APP') || picked.ready.includes('PORTAL-PROJECT-PROJECTION'));
+  assert.ok(picked.ready.includes('ADMIN-APP') || picked.ready.includes('MOBILE-CLIENT-BOUNDARY'));
 });
 
 test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {

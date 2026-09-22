@@ -147,7 +147,7 @@ row('FZ-REQ-PORTAL-003', 'Client-safe Offer projection through Core API authoriz
   executableSlice: 'PORTAL-OFFER-PROJECTION',
   executableWhenComplete: ['PORTAL-AUTH', 'CRM-OFFER-CONTRACT'],
 });
-row('FZ-REQ-PORTAL-004', 'Client-safe Project projection through Core API for the authenticated portal client.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'CRM-PROJECT-DOMAIN', 'NONE', 'Offer projection does not complete Portal product capability.', {
+row('FZ-REQ-PORTAL-004', 'Client-safe Project projection through Core API for the authenticated portal client.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'No staff mutation from Portal. Payment and provider stay off the projection.', {
   productCapability: 'PORTAL',
   executableSlice: 'PORTAL-PROJECT-PROJECTION',
   executableWhenComplete: ['CRM-PROJECT-DOMAIN', 'PORTAL-AUTH'],

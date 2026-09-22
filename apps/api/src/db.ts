@@ -43,6 +43,7 @@ export interface Database {
     id: string;
     contract_id: string;
     status: string;
+    client_subject: string | null;
     created_at: Date;
     updated_at: Date;
   };
@@ -562,6 +563,50 @@ DROP TABLE IF EXISTS project;
   },
 };
 
+const PORTAL_PROJECT_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const portalProjectMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE project ADD COLUMN IF NOT EXISTS client_subject text;
+CREATE INDEX IF NOT EXISTS project_client_subject ON project (client_subject) WHERE client_subject IS NOT NULL;
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_PROJECT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability = 'projects:portal-read';
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PROJECT_CAPABILITY_SQL}));
+DROP INDEX IF EXISTS project_client_subject;
+ALTER TABLE project DROP COLUMN IF EXISTS client_subject;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -574,6 +619,7 @@ const provider: MigrationProvider = {
       '007_contract_domain': contractMigration,
       '008_portal_offer_projection': portalOfferMigration,
       '009_project_domain': projectMigration,
+      '010_portal_project_projection': portalProjectMigration,
     };
   },
 };

@@ -1,4 +1,4 @@
-import { createProject, type Project, type ProjectStatus } from '@forma-zieleni/domain';
+import { createProject, projectProjectForPortal, type PortalProjectProjection, type Project, type ProjectStatus } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
 import { newOpaqueId, newProjectId } from './ids.ts';
@@ -50,8 +50,9 @@ export async function createProjectFromContract(
   actor: Actor,
   idempotencyKey: string,
   at: string,
+  clientSubject: string | null = null,
 ): Promise<Project> {
-  const hash = requestHash({ scope: 'project.create', contractId });
+  const hash = requestHash({ scope: 'project.create', contractId, clientSubject });
   return store.transaction(async tx => {
     const replay = await replayOrReserve(tx, 'project.create', idempotencyKey, hash);
     if (replay) return replay.responseBody as Project;
@@ -65,7 +66,7 @@ export async function createProjectFromContract(
     if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
     let project: Project;
     try {
-      project = createProject(newProjectId(), contract, at);
+      project = createProject(newProjectId(), contract, at, clientSubject);
     } catch (error) {
       if (error instanceof Error && error.message === 'CONTRACT_NOT_READY') {
         throw new ApiFailure(409, 'CONTRACT_NOT_READY', 'Project requires a draft contract.');
@@ -124,4 +125,32 @@ export async function listVisibleProjects(
     ? encodeCursor(query.sort, query.sort.includes('updatedAt') ? last.updatedAt : last.createdAt, last.id)
     : null;
   return { items: page, nextCursor };
+}
+
+export async function listPortalProjects(
+  store: LeadStore,
+  readerSubject: string,
+  query: ProjectListQuery,
+): Promise<{ items: PortalProjectProjection[]; nextCursor: string | null }> {
+  const rows = await store.transaction(tx => tx.listProjects({ ...query, limit: 100 }));
+  const projected = rows
+    .map(project => projectProjectForPortal(project, readerSubject))
+    .filter((item): item is PortalProjectProjection => item !== null)
+    .slice(0, query.limit + 1);
+  const page = projected.slice(0, query.limit);
+  const next = projected.length > query.limit ? page[page.length - 1] : null;
+  return {
+    items: page,
+    nextCursor: next ? encodeCursor(query.sort, next.createdAt, next.id) : null,
+  };
+}
+
+export async function readPortalProject(
+  store: LeadStore,
+  id: string,
+  readerSubject: string,
+): Promise<PortalProjectProjection | null> {
+  const project = await readProject(store, id);
+  if (!project) return null;
+  return projectProjectForPortal(project, readerSubject);
 }

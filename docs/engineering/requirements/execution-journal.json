@@ -1,11 +1,11 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "crm-project-domain",
+  "currentPhase": "portal-project-projection",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "675dc3d937d8e2b158ee5e1ab0718f29573455db",
+  "publishedHead": "d66e109",
   "postPushSafety": "PASS",
-  "codeRabbit": "Pending checkpoint review after CRM-PROJECT-DOMAIN.",
+  "codeRabbit": "Pending checkpoint review after PORTAL-PROJECT-PROJECTION.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -25,7 +25,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "CRM-PROJECT-DOMAIN COMPLETE pending push. Next READY: PORTAL-PROJECT-PROJECTION (also ADMIN-APP, boundary slices). Payment provider stays OWNER-DECISION. Do not mark Lead security-accepted.",
+  "nextSafeAction": "PORTAL-PROJECT-PROJECTION COMPLETE pending push. Next READY: ADMIN-APP (also boundary slices). Payment provider stays OWNER-DECISION.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

@@ -8,12 +8,14 @@ const spec = JSON.parse(readFileSync(path.resolve(path.dirname(fileURLToPath(imp
 
 test('shared ProjectRecord fields stay aligned with the OpenAPI Project schema', () => {
   const project = spec.components.schemas.Project;
-  assert.deepEqual(project.required, ['id', 'contractId', 'status', 'createdAt', 'updatedAt']);
+  assert.deepEqual(project.required, ['id', 'contractId', 'status', 'clientSubject', 'createdAt', 'updatedAt']);
   assert.equal(project.properties.status.$ref, '#/components/schemas/ProjectStatus');
   assert.deepEqual(spec.components.schemas.ProjectStatus.enum, ['planned']);
   assert.equal(Object.hasOwn(project.properties, 'payment'), false);
   assert.equal(Object.hasOwn(project.properties, 'provider'), false);
   assert.equal(Object.hasOwn(project.properties, 'deposit'), false);
+  assert.equal(Object.hasOwn(project.properties, 'clientSubject'), true);
   assert.deepEqual(spec.components.schemas.ProjectCreate.required, ['contractId']);
   assert.equal(Object.hasOwn(spec.components.schemas.ProjectCreate.properties, 'status'), false);
+  assert.equal(Object.hasOwn(spec.components.schemas.ProjectCreate.properties, 'clientSubject'), true);
 });

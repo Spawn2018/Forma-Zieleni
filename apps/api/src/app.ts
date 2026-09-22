@@ -9,7 +9,7 @@ import { createContractFromOffer, listVisibleContracts, parseContractListQuery, 
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
-import { createProjectFromContract, listVisibleProjects, parseProjectListQuery, readProject } from './projects.ts';
+import { createProjectFromContract, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
@@ -249,6 +249,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json(projection);
   });
 
+  app.get('/v1/portal/projects', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseProjectListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listPortalProjects(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/projects/:projectId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalProject(options.store, pathProjectId(c.req.param('projectId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    return c.json(projection);
+  });
+
   app.options('*', c => c.body(null, trustedOrigins.includes(c.req.header('origin') ?? '') ? 204 : 403));
 
   if (options.authHandler) {
@@ -407,7 +430,14 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const key = idempotencyKey(c.req.header('idempotency-key'));
     const parsed = validateProjectCreateRequest(await readJson(c.req.raw));
     if (!parsed.ok) throw new ApiFailure(400, 'PROJECT_INVALID', 'Project could not be accepted.', parsed.errors);
-    const project = await createProjectFromContract(options.store, parsed.value.contractId, actor, key, now());
+    const project = await createProjectFromContract(
+      options.store,
+      parsed.value.contractId,
+      actor,
+      key,
+      now(),
+      parsed.value.clientSubject ?? null,
+    );
     return c.json(project, 201);
   });
 

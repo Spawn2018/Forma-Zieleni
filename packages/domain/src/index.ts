@@ -114,8 +114,9 @@ export {
   PROJECT_STATUSES,
   assertOpaqueProjectId,
   createProject,
+  projectProjectForPortal,
 } from './project.ts';
-export type { Project, ProjectStatus } from './project.ts';
+export type { Project, ProjectStatus, PortalProjectProjection } from './project.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

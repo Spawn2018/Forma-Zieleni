@@ -265,14 +265,19 @@ Next: PORTAL-PROJECT-PROJECTION.
 
 Dependencies: CRM-PROJECT-DOMAIN, PORTAL-AUTH.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for client-safe Project projection through Core API
+`GET /v1/portal/projects` and `GET /v1/portal/projects/:id`, authorized
+by `projects:portal-read` and `clientSubject` BOLA. No staff mutation
+from Portal; no payment invent; empty list when unbound. Portal shell
+still refuses invented CRM facts.
 Autonomous: yes.
 Accept: client-safe read projection of Project the authenticated portal
 client is authorized to see. Authorization in Core API. No staff
 mutations from Portal. No invented project facts.
-Tests: Core API projection authz tests; portal loader refuses invented
-facts.
-Security: BOLA; anonymous 401; other clients 404.
+Tests: `packages/domain/project.test.mjs` projection cases,
+`apps/api/src/http.test.mjs` portal project cases,
+`contracts/openapi.test.mjs`, `apps/portal/app/shell.test.mjs`.
+Security: BOLA; anonymous 401; other clients 404; staff portal path 403.
 Next: none until a later portal projection.
 
 ### SITEINTEL-DATA-BOUNDARY

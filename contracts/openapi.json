@@ -1090,6 +1090,98 @@
           }
         }
       }
+    },
+    "/portal/projects": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "listPortalProjects",
+        "summary": "List client-safe Project projections for the authenticated portal client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectStatusFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal project projections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalProjectPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/portal/projects/{projectId}": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "getPortalProject",
+        "summary": "Get one client-safe Project projection",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal project projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalProjectProjection"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1887,6 +1979,11 @@
         "properties": {
           "contractId": {
             "$ref": "#/components/schemas/OpaqueId"
+          },
+          "clientSubject": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Optional portal client subject binding set by staff on create."
           }
         }
       },
@@ -1897,6 +1994,7 @@
           "id",
           "contractId",
           "status",
+          "clientSubject",
           "createdAt",
           "updatedAt"
         ],
@@ -1917,6 +2015,12 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "clientSubject": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 128,
+            "description": "Portal client subject authorized to read a client-safe projection. Null means staff-only."
           }
         }
       },
@@ -2019,6 +2123,66 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PortalOfferProjection"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "PortalProjectProjection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "contractId",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "contractId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProjectStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PortalProjectPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalProjectProjection"
             }
           },
           "meta": {

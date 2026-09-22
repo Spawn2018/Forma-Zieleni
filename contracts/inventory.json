@@ -14,6 +14,8 @@
     "GET /opportunities/{opportunityId}",
     "GET /portal/offers",
     "GET /portal/offers/{offerId}",
+    "GET /portal/projects",
+    "GET /portal/projects/{projectId}",
     "GET /portal/session",
     "GET /projects",
     "GET /projects/{projectId}",
@@ -107,6 +109,7 @@
     "id",
     "contractId",
     "status",
+    "clientSubject",
     "createdAt",
     "updatedAt"
   ],

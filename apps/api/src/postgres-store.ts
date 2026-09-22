@@ -83,6 +83,7 @@ function toProject(row: Database['project']): Project {
     id: row.id,
     contractId: row.contract_id,
     status: row.status as Project['status'],
+    clientSubject: row.client_subject ?? null,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -290,6 +291,7 @@ class PostgresTx implements LeadTx {
       id: project.id,
       contract_id: project.contractId,
       status: project.status,
+      client_subject: project.clientSubject,
       created_at: new Date(project.createdAt),
       updated_at: new Date(project.updatedAt),
     }).execute();

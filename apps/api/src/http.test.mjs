@@ -23,7 +23,7 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: ['offers:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read'],
 };
 
 const portalOther = {
@@ -31,7 +31,7 @@ const portalOther = {
   issuer: 'test-issuer',
   sub: 'portal-other',
   clientId: 'portal',
-  capabilities: ['offers:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
@@ -680,6 +680,51 @@ test('project create rejects missing contract, duplicate contract and client lif
     ...bearer(staff),
   }));
   assert.equal(second.status, 409);
+});
+
+test('portal project projection is read-only, empty without grant, and BOLA-isolated', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/portal/projects')).status, 401);
+  assert.equal((await app.request('/v1/portal/projects', { headers: bearer(staff) })).status, 403);
+  const empty = await app.request('/v1/portal/projects', { headers: bearer(portal) });
+  assert.equal(empty.status, 200);
+  assert.deepEqual((await empty.json()).items, []);
+
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'opp-port-prj',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'off-port-prj',
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'ctr-port-prj',
+    ...bearer(staff),
+  }))).json();
+  const project = await (await app.request('/v1/projects', json({
+    contractId: contract.id,
+    clientSubject: 'portal-ola',
+  }, {
+    'idempotency-key': 'prj-port-1',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(project.clientSubject, 'portal-ola');
+
+  const listed = await app.request('/v1/portal/projects', { headers: bearer(portal) });
+  assert.equal(listed.status, 200);
+  const body = await listed.json();
+  assert.equal(body.items.length, 1);
+  assert.equal(body.items[0].id, project.id);
+  assert.equal(Object.hasOwn(body.items[0], 'payment'), false);
+  assert.equal(Object.hasOwn(body.items[0], 'clientSubject'), false);
+
+  assert.equal((await app.request(`/v1/portal/projects/${project.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/projects/${project.id}`, { headers: bearer(portalOther) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/projects', { headers: bearer(portalOther) })).json();
+  assert.deepEqual(otherList.items, []);
+  assert.equal((await app.request(`/v1/projects/${project.id}`, { headers: bearer(portal) })).status, 403);
 });
 
 test('portal offer projection is read-only, empty without grant, and BOLA-isolated', async () => {
