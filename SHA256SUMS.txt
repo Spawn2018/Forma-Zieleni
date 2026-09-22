@@ -213,7 +213,7 @@ b8217d1c172a5fd22630dd8dbe3b5a6b3d2a211f7c38cc4bfd75b27cb09db22e  docs/cursor-os
 c9977a49983722f43dd36da39f388197b38955fbf8d70bfcfe98747c53550a46  docs/cursor-os/HOOKS-MCP-AUTOMATIONS.md
 cfcf0b79aa4072fca6738ca18be1784123ccfdb24682878b6b4e21d1470a7bc9  docs/cursor-os/NATIVE-EXECUTOR-VERIFICATION.md
 e7b856caf0cec6b732bd0100937a5c09e5d1321ce8573e3b595783a6a6701e9b  docs/cursor-os/ORCHESTRATION-AND-MODEL-ROUTING.md
-cc7a879507e7eeabb33977bee6be7366abd8063d4541abaa117c57ca17d6cf64  docs/cursor-os/PRE-PUSH-ORCHESTRATION.md
+757b8134712f102ac0ddbf2448e1ba292908b0b35ee874efcbe61f885f1a9b47  docs/cursor-os/PRE-PUSH-ORCHESTRATION.md
 6529b6d3a26717af402d0eb7a320e30838b58c7e58718f260b4df15046eb535d  docs/cursor-os/PROJECTS-AND-LOCAL-EXECUTION.md
 5c905bcedb4f05eb9b4140391834cf5e509e78577d2fa40889e1bae29a0f2fd8  docs/cursor-os/SETUP-FOR-NONTECHNICAL-OWNER.md
 83133aa40774cea35ff6b16e9af1c0c7eae7ba2edfaf553bc6982d69a849f6b9  docs/cursor-os/UNATTENDED-PERMISSIONS.md
@@ -695,7 +695,7 @@ bd0c27b049f2b4eef248a950e511d585550b898603078fb95710a67e5d0a9d37  scripts/autono
 8135f15ca27f4b81fb8309f57e4cc0f3cb9b6f4727ce2864f4262e16543b108a  scripts/ci/no-skip.test.mjs
 577cb7158571ceb3d729af1794c4cb0e1772a5bcdfacbdb1c9af785c3258c81b  scripts/ci/post-push-ci.mjs
 9ac6374e6d1697b1f7f472b4d5eec8bbbf5a08e0174132d403b0e1c1defcdf16  scripts/ci/post-push-ci.test.mjs
-3770759e72fcf7c0f20ec31c7e01daf8ef9a1ddae935bd8ad7518f1f55fc493f  scripts/ci/pre-push-gate.mjs
+f3d89f9fdab0b9339d81b6faf711f230329b11c920606b289a97f23399723d9c  scripts/ci/pre-push-gate.mjs
 8f4b32c06a5d2a751bbdf7a9016b36494a91dd30c7ffcb75fa2b4e466c1d2107  scripts/ci/pre-push-gate.test.mjs
 b73fe170c18c0ac8fd618efb16795c6bfe7334d9a6adc4fc6f39fc96e08d562d  scripts/ci/push-main.mjs
 608debb8bdc4b609435470d296f30c7d1a31bb0425e6fe26f8e6028415b0e4e2  scripts/ci/workflow.test.mjs

@@ -200,6 +200,13 @@ export function runPrePushGate(options = {}) {
 
   const after = captureRepoState({ git, cwd });
   if (!after.ok || !statesMatch(before, after)) {
+    const detail = after.ok
+      ? [
+        `head ${before.head}→${after.head}`,
+        `origin ${before.originMain}→${after.originMain}`,
+        `dirty ${JSON.stringify(before.dirtyPaths)}→${JSON.stringify(after.dirtyPaths)}`,
+      ].join('; ')
+      : after.reason;
     return {
       ok: false,
       reason: 'state_changed',
@@ -209,9 +216,7 @@ export function runPrePushGate(options = {}) {
         id: 'state',
         label: 'repository state unchanged through gate',
         exitCode: 1,
-        detail: after.ok
-          ? `head ${before.head}→${after.head}`
-          : after.reason,
+        detail,
       },
       results,
     };

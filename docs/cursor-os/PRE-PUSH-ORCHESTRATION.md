@@ -30,8 +30,10 @@ PASS for all applicable gates.
 
 Result must be PASS or BLOCKED with concrete findings. BLOCKED work is
 repaired and re-run. A safe fast-forward checkpoint push is AUTO after
-the green gate (`docs/workflows/DECISION-GATES.md`). Force-push, deploy,
-DNS, Cloudflare, secrets, and live customer data stay DANGEROUS.
+the green local gate (`docs/workflows/DECISION-GATES.md`), and overall
+quality success additionally requires exact-SHA GitHub CI GREEN via
+`scripts/ci/post-push-ci.mjs`. Force-push, deploy, DNS, Cloudflare,
+secrets, and live customer data stay DANGEROUS.
 
 ## Security-tool integration update --- 2026-09-21
 
