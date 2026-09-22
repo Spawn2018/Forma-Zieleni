@@ -1,0 +1,28 @@
+.compare {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.compare-labels {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--igliwie);
+  font-family: var(--font-text);
+}
+
+.compare input[type='range'] {
+  width: 100%;
+  accent-color: var(--mech);
+}
+
+.compare [data-rcs='handle-root']:focus-visible {
+  outline: 2px solid var(--mech) !important;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare input[type='range'] {
+    scroll-behavior: auto;
+  }
+}

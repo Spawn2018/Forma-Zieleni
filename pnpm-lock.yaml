@@ -54,6 +54,9 @@ importers:
       react:
         specifier: ^19.3.0
         version: 19.3.0
+      react-compare-slider:
+        specifier: 4.0.0
+        version: 4.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
@@ -1106,6 +1109,13 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
+  react-compare-slider@4.0.0:
+    resolution: {integrity: sha512-XNpwfWa8OHvJZIsC+ywhjpRWX8VCY8fIavQ82R63Tever1pQndhicr0ecDuU69GjA+YjesoV7LX3QnKsECtMDw==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+
   react-dom@19.3.0:
     resolution: {integrity: sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q==}
     peerDependencies:
@@ -1999,6 +2009,11 @@ snapshots:
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
+
+  react-compare-slider@4.0.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
 
   react-dom@19.3.0(react@19.3.0):
     dependencies:

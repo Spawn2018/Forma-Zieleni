@@ -100,7 +100,7 @@ Zdecydowany stos, zapisany w [`docs/architecture/CURRENT-ARCHITECTURE.md`](docs/
 | Ścieżka | Rola |
 | --- | --- |
 | `apps/api` | Core API i pion leadów. |
-| `apps/web` | Strona publiczna. Skorupa SSR i trasa galerii. Bez opublikowanych zdjęć i bez wdrożenia. |
+| `apps/web` | Strona publiczna. Skorupa SSR, galeria i porównanie. Bez opublikowanych zdjęć i bez wdrożenia. |
 | `apps/portal` | Portal klienta. Katalog bez aplikacji. |
 | `apps/admin` | Panel pracowni. Katalog bez aplikacji. |
 | `packages/domain` | Reguły domenowe. |

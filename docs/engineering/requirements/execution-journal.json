@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "gallery-www",
+  "currentPhase": "before-after",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -19,14 +19,17 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "BEFORE-AFTER is the next READY slice",
-    "SEARCH-WWW-TECHNICAL is also READY and waits behind the before/after critical path",
+    "SEARCH-WWW-TECHNICAL is the next READY slice",
+    "CMS-WWW still waits on CMS-SEO",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "BEFORE-AFTER is READY. It is the keyboard before/after control on the public gallery. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
+  "nextSafeAction": "SEARCH-WWW-TECHNICAL is READY. It is the public HTML head contract. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
   "evidencePaths": [
+    "apps/web/app/before-after.ts",
+    "apps/web/app/before-after-view.tsx",
+    "apps/web/app/before-after.test.mjs",
     "apps/web/app/gallery.ts",
     "apps/web/app/gallery-view.tsx",
     "apps/web/app/gallery.test.mjs",

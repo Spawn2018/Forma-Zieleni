@@ -153,10 +153,12 @@ Next: BEFORE-AFTER.
 
 Dependencies: GALLERY-WWW.
 Gate: REVIEW + a11y.
+Status: COMPLETE for the labelled comparison. `react-compare-slider@4.0.0` (MIT) is pinned. `/porownanie` stays empty until a published pair exists.
 Autonomous: yes.
 Entry: GALLERY-WWW recorded.
 Accept: mouse/touch/keyboard, labels, matching frame, no pointer-only control.
-Tests: keyboard equivalent; matching crop mode.
+Tests: `apps/web/app/before-after.test.mjs`. Both frames must share crop mode and pixel size. Sources are `w800.webp`.
+Security: asset ids are opaque; no user-supplied URL.
 Next: CMS-WWW (with CMS-PUBLISH + CMS-SEO).
 
 ### CMS-SEO

@@ -157,6 +157,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-GALLERY-WWW', 'The public gallery uses derivative thumbs and a Polish keyboard lightbox. It does not invent published photos.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/gallery.ts', 'apps/web/app/gallery.test.mjs', '', 'NONE', 'The live route stays empty until a published collection exists.');
     continue;
   }
+  if (slice === 'BEFORE-AFTER') {
+    row('FZ-REQ-CMS-SLICE-BEFORE-AFTER', 'A before/after pair shares one crop mode and one frame, and the control is keyboard and pointer.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/before-after.ts', 'apps/web/app/before-after.test.mjs', '', 'NONE', 'The live route stays empty until a published pair exists.');
+    continue;
+  }
   if (slice === 'SEARCH-ATTRIBUTION') {
     row('FZ-REQ-CMS-SLICE-SEARCH-ATTRIBUTION', 'Referral sanitize keeps an unknown referrer unknown and labels only an allowlisted AI host.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/attribution.ts', 'packages/domain/attribution.test.mjs', '', 'NONE', 'Not yet a column on the lead row.');
     continue;
