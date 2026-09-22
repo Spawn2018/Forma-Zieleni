@@ -90,11 +90,11 @@ export function fingerprintFinding(finding = {}) {
     'finding',
   );
   const digest = createHash('sha256')
-    .update(`coderabbit|${pathToken}|${classToken}|${issueClass}`)
+    .update(`coderabbit|${pathNorm}|${pathToken}|${classToken}|${issueClass}`)
     .digest('hex')
-    .slice(0, 8);
-  // Fits FZ-CIS PATTERN_KEY: 2–9 hyphenated segments.
-  return `cr-${classToken}-${pathToken}-${digest}`.replace(/-+/g, '-').slice(0, 80);
+    .slice(0, 10);
+  // Keep ≤3 hyphen segments and short enough for FZ-CIS PATTERN_KEY / slug limits.
+  return `cr-${classToken}-${digest}`.replace(/-+/g, '-').slice(0, 48);
 }
 
 export function occurrenceKey({ baseSha, headSha, fingerprint }) {

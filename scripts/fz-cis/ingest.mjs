@@ -39,6 +39,22 @@ function slug(value, fallback = 'signal') {
   return parts.join('-');
 }
 
+const PATTERN_KEY_RE = /^[a-z0-9]+(?:-[a-z0-9]+){1,8}$/;
+
+function normalizePatternKey(value, fallbackParts = []) {
+  const raw = String(value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+  if (raw && PATTERN_KEY_RE.test(raw) && raw.length <= 48) return raw;
+  if (raw && PATTERN_KEY_RE.test(raw.slice(0, 48))) {
+    // Prefer digest-preserving short form when over length.
+    const parts = raw.split('-').filter(Boolean);
+    if (parts.length >= 2) {
+      const short = `${parts[0]}-${parts[1]}-${parts[parts.length - 1]}`.slice(0, 48);
+      if (PATTERN_KEY_RE.test(short)) return short;
+    }
+  }
+  return fingerprint(fallbackParts.length ? fallbackParts : [raw || 'signal']);
+}
+
 /**
  * Refuse noise. Success/PASS never becomes a learning record.
  * External AI findings stay OBSERVED and not locallyVerified until Cursor verifies them.
@@ -68,7 +84,7 @@ export function toLearningInput(outcome = {}) {
   const mapped = KIND_MAP[outcome.kind];
   const external = mapped.source === 'coderabbit' || mapped.source === 'grok';
   const patternKey = outcome.patternKey
-    ? slug(outcome.patternKey)
+    ? normalizePatternKey(outcome.patternKey, [outcome.kind, outcome.observation?.slice(0, 40)])
     : fingerprint([
       outcome.kind,
       outcome.scope,

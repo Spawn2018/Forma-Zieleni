@@ -382,6 +382,14 @@ export function runCheckpointReview(options = {}) {
   };
 }
 
+function findCisRecordForFingerprint(store, fingerprint) {
+  return (store.records || []).find((item) => (
+    item.patternKey === fingerprint
+    || fingerprint.startsWith(item.patternKey)
+    || (item.evidence || []).some((entry) => String(entry).includes(fingerprint))
+  ));
+}
+
 export function dispositionFinding(options = {}) {
   const state = options.state || loadReviewState(options.stateFile);
   const result = setDisposition(state, options.fingerprint, {
@@ -395,10 +403,11 @@ export function dispositionFinding(options = {}) {
     try {
       // Local verification of reality — not promotion.
       const store = (options.loadStore || loadStore)(options.file);
-      const record = store.records.find((item) => item.patternKey === options.fingerprint);
+      const fingerprint = options.fingerprint;
+      const record = findCisRecordForFingerprint(store, fingerprint);
       if (record) {
         (options.markLocallyVerified || markLocallyVerified)(record.id, {
-          evidence: [`accepted:${options.fingerprint}`, ...(options.evidence || [])],
+          evidence: [`accepted:${fingerprint}`, ...(options.evidence || [])],
         }, options.file);
       }
     } catch {
@@ -408,7 +417,7 @@ export function dispositionFinding(options = {}) {
   if (options.kind === 'REJECT_WITH_REASON' && options.cis !== false) {
     try {
       const store = (options.loadStore || loadStore)(options.file);
-      const record = store.records.find((item) => item.patternKey === options.fingerprint);
+      const record = findCisRecordForFingerprint(store, options.fingerprint);
       if (record) {
         (options.changeStatus || changeStatus)(record.id, 'REJECTED', {
           rejectionReason: options.reason,
