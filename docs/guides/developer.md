@@ -50,8 +50,9 @@ The context window size is not a reason to read every document.
 
 ## Next product slice
 
-`LEAD-ZAP-BASELINE` is COMPLETE as DEFERRED with readiness evidence on
-`docs/architecture/NEXT-SLICES-MAIN.md`. `LEAD-SEC-ACCEPT` is
-report-only and is not ordinary READY implementation work. Lead
-security acceptance stays open. The CMS/Search graph stays acceptance
-history. Do not start a second roadmap.
+`LEAD-SEC-ACCEPT` report is filed
+(`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is still
+**not** security-accepted. No ordinary READY AUTO/REVIEW product slice
+remains on `docs/architecture/NEXT-SLICES-MAIN.md` until a roadmap
+refresh or Owner unblocks deferred security tooling. The CMS/Search
+graph stays acceptance history. Do not start a second roadmap.

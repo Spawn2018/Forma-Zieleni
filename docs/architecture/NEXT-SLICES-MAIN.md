@@ -90,6 +90,11 @@ Next: LEAD-SEC-ACCEPT.
 
 Dependencies: LEAD-ZAP-BASELINE.
 Gate: REVIEW.
+Status: COMPLETE as report-only checklist
+(`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is **not**
+security-accepted while ZAP, Dependency-Check, off-site backup,
+supervised production worker, and private-origin validation remain
+deferred or unmet.
 Autonomous: report only.
 Entry: Lead security slices recorded.
 Accept: checklist report only. Do not mark Lead security-accepted while
