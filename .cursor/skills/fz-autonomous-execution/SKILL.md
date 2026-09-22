@@ -24,7 +24,9 @@ Re-read `START-HERE-CURSOR.md`, `docs/cursor-os/CURSOR-OS-2026.md`, `docs/archit
 
 The CLI applies the deterministic READY rule: completed dependencies, AUTO/REVIEW only, critical path, then work that unblocks the most remaining slices. It records the reason. Do not ask the Owner to pick between equivalent AUTO/REVIEW slices.
 
-Then run the binding loop for that slice: discover, plan, contract, implement, test, refactor, security review when the boundary changes, performance or data review when applicable, UX/a11y/visual/content review when a real UI exists, document, final diff, pre-push gate, complete.
+Then run the binding loop for that slice: discover, plan, contract, implement, test, refactor, security review when the boundary changes, performance or data review when applicable, UX/a11y/visual/content review when a real UI exists, document, final diff, pre-push gate, `pnpm push:main` (exact-SHA GitHub CI must be GREEN), only then `complete`.
+
+`node scripts/fz-noc/cli.mjs select --commit <HEAD>` applies a quality interrupt before product READY selection. If the published `origin/main` SHA has mandatory CI in a failed/pending/unavailable state, `selected` is null and `qualityInterrupt` describes the repair. Do not start an unrelated product slice while current published HEAD is not CI_GREEN. Local unpublished HEAD is not a CI failure, but it also does not authorize selecting a new unrelated product slice.
 
 Delegate, do not duplicate:
 
@@ -35,7 +37,11 @@ Delegate, do not duplicate:
 - CodeRabbit only when review value is high. Use `scripts/security/coderabbit-quota.mjs`. At most 3 free CLI reviews per developer per rolling hour. Paid usage is OWNER-DECISION. Quota exhaustion records DEFERRED and does not stop other READY work.
 - For a coherent checkpoint (not every micro-edit): after deterministic local verification and privacy/secret scope checks, run `node scripts/security/coderabbit-checkpoint.mjs run` when the planner says `action: review`. Record the returned `CODERABBIT_*` state in the execution journal / FZ-CIS. Findings are advisory; verify locally before adoption. Never send secrets, credentials, or customer data.
 
-Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. A safe fast-forward push to `origin` `main` is AUTO after the pre-push gate via `pnpm push:main` only. Do not run `git push` directly; the Cursor shell hook denies it. Force-push, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval for those.
+Update the execution graph in the repository before `node scripts/fz-noc/cli.mjs complete --slice <id> --commit <HEAD>`. Local commit is allowed when the slice is complete and coherent. A safe fast-forward push to `origin` `main` is AUTO after the pre-push gate via `pnpm push:main` only. `pnpm push:main` waits for mandatory GitHub CI on the exact pushed SHA and returns overall success only when that run is GREEN. Direct `git push` stays denied. Force-push, deploy, Cloudflare, DNS, production secrets, spend, and live customer data stay DANGEROUS. A running `/noc` window is not approval for those.
+
+`complete` verifies exact-SHA CI_GREEN for the published commit and refuses otherwise. Do not mark runtime slice COMPLETE before post-push GREEN.
+
+When `qualityInterrupt.type` is `CI_REPAIR_REQUIRED`, the existing FZ orchestrator repairs: read safe CI evidence, reproduce locally, classify root cause, smallest fix, local gate, CodeRabbit if applicable, commit, `pnpm push:main`, wait exact new SHA CI. Record each repair attempt with `node scripts/fz-noc/cli.mjs attempt --slice CI-REPAIR --signature "<failureSignature>" --ci-repair`. Three identical failure signatures block further autonomous product work (`CI_REPAIR_BLOCKED`). Do not work-steal normal product slices over a red published HEAD.
 
 `node scripts/fz-noc/cli.mjs beat` at the start and end of real work. On a repeated identical failure: `node scripts/fz-noc/cli.mjs attempt --slice <id> --commit <HEAD> --signature "<command>"`. Three identical attempts block that slice. Select again and work-steal.
 

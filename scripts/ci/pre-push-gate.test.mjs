@@ -106,6 +106,7 @@ test('repo:check failure refuses the push wrapper', () => {
       pushes.push(argv);
       return { status: 0, stdout: '', stderr: '' };
     },
+    skipCiWait: true,
   });
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'gate_failed');
@@ -141,6 +142,7 @@ test('HEAD change between verification and push refuses push', () => {
       pushes.push(argv);
       return { status: 0, stdout: '', stderr: '' };
     },
+    skipCiWait: true,
   });
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'state_changed_before_push');
@@ -152,6 +154,7 @@ test('wrong branch refuses the safe-main wrapper', () => {
     git: okGit({ branch: 'feature', head: 'ccc333', origin: 'bbb222' }),
     runGate: () => ({ ok: true }),
     push: () => ({ status: 0, stdout: '', stderr: '' }),
+    skipCiWait: true,
   });
   assert.equal(result.ok, false);
   assert.equal(result.reason, 'wrong_branch');

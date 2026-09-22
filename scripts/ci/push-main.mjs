@@ -7,6 +7,14 @@ import {
   runPrePushGate,
   statesMatch,
 } from './pre-push-gate.mjs';
+import {
+  CI_STATES,
+  ingestCiFailure,
+  isGreen,
+  isTerminalFail,
+  statusForSha,
+  waitForSha,
+} from './post-push-ci.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -41,10 +49,6 @@ export function assertSafeMainContext(state) {
   if (state.branch !== 'main') {
     return { ok: false, reason: 'wrong_branch', detail: state.branch };
   }
-  if (state.head !== state.originMain) {
-    // Local commits ahead of origin are expected before push.
-    // Refuse only if origin is ahead or histories diverged (non-ff intent).
-  }
   return { ok: true, reason: 'ready' };
 }
 
@@ -64,7 +68,8 @@ export function assertFastForwardIntent({ git = defaultGit, cwd = root, head, or
 
 /**
  * Canonical autonomous Cursor push path.
- * Runs the pre-push gate, re-checks state, then `git push origin main` only.
+ * Gate → exact SHA push → mandatory exact-SHA CI wait.
+ * Transport success (pushed=true) is separate from quality success (ok + CI_GREEN).
  */
 export function runPushMain(options = {}) {
   const cwd = options.cwd || root;
@@ -72,6 +77,10 @@ export function runPushMain(options = {}) {
   const run = options.run || defaultRun;
   const runGate = options.runGate || ((opts) => runPrePushGate({ ...opts, git, run, cwd }));
   const push = options.push || ((argv) => run(argv, cwd));
+  const waitCi = options.waitCi || ((sha, opts) => waitForSha(sha, opts));
+  const statusCi = options.statusCi || ((sha, opts) => statusForSha(sha, opts));
+  const ingestFailure = options.ingestCiFailure || ingestCiFailure;
+  const skipCiWait = options.skipCiWait === true;
 
   if (Array.isArray(options.argv) && options.argv.length > 0) {
     return { ok: false, reason: 'argv_refused', detail: 'push-main accepts no git push arguments' };
@@ -80,17 +89,20 @@ export function runPushMain(options = {}) {
   const before = captureRepoState({ git, cwd });
   const context = assertSafeMainContext(before);
   if (!context.ok) {
-    return { ok: false, reason: context.reason, state: before, detail: context.detail };
+    return { ok: false, reason: context.reason, state: before, detail: context.detail, pushed: false };
   }
+
+  const baseSha = before.originMain;
+  const candidateSha = before.head;
 
   const ff = assertFastForwardIntent({
     git,
     cwd,
-    head: before.head,
-    originMain: before.originMain,
+    head: candidateSha,
+    originMain: baseSha,
   });
   if (!ff.ok) {
-    return { ok: false, reason: ff.reason, state: before, detail: ff.detail };
+    return { ok: false, reason: ff.reason, state: before, detail: ff.detail, pushed: false };
   }
 
   const gate = runGate({ git, run, cwd, state: before });
@@ -101,6 +113,9 @@ export function runPushMain(options = {}) {
       state: before,
       gate,
       failedCheck: gate.failedCheck,
+      pushed: false,
+      baseSha,
+      candidateSha,
     };
   }
 
@@ -111,6 +126,9 @@ export function runPushMain(options = {}) {
       reason: 'state_changed_before_push',
       state: gate.state,
       afterState: mid,
+      pushed: false,
+      baseSha,
+      candidateSha,
     };
   }
 
@@ -122,6 +140,10 @@ export function runPushMain(options = {}) {
       gate,
       pushArgv: [...SAFE_PUSH_ARGV],
       pushed: false,
+      baseSha,
+      candidateSha,
+      pushedSha: null,
+      ciState: null,
     };
   }
 
@@ -135,17 +157,86 @@ export function runPushMain(options = {}) {
       gate,
       exitCode,
       detail: String(pushed.stderr || pushed.stdout || '').slice(0, 800),
+      pushed: false,
+      baseSha,
+      candidateSha,
+      pushedSha: null,
+      ciState: null,
     };
   }
 
+  const pushedSha = candidateSha;
+
+  if (skipCiWait) {
+    return {
+      ok: true,
+      reason: 'pushed',
+      state: mid,
+      gate,
+      pushArgv: [...SAFE_PUSH_ARGV],
+      pushed: true,
+      exitCode: 0,
+      baseSha,
+      candidateSha,
+      pushedSha,
+      ciState: null,
+    };
+  }
+
+  let baseShaWasGreen = false;
+  if (baseSha) {
+    const baseStatus = statusCi(baseSha, { includeJobs: false, ...(options.ciOptions || {}) });
+    baseShaWasGreen = isGreen(baseStatus.state);
+  }
+
+  const ci = waitCi(pushedSha, options.ciOptions || {});
+  const ciState = ci.state || CI_STATES.CI_UNAVAILABLE;
+
+  if (isGreen(ciState)) {
+    return {
+      ok: true,
+      reason: 'pushed_ci_green',
+      state: mid,
+      gate,
+      pushArgv: [...SAFE_PUSH_ARGV],
+      pushed: true,
+      exitCode: 0,
+      baseSha,
+      candidateSha,
+      pushedSha,
+      ciState,
+      ci,
+      baseShaWasGreen,
+    };
+  }
+
+  let ingest = null;
+  if (isTerminalFail(ciState)) {
+    ingest = ingestFailure(ci, {
+      baseShaWasGreen,
+      ...(options.ingestOptions || {}),
+    });
+  }
+
   return {
-    ok: true,
-    reason: 'pushed',
+    ok: false,
+    reason: ciState === CI_STATES.CI_WAIT_TIMEOUT
+      ? 'ci_wait_timeout'
+      : ciState === CI_STATES.CI_UNAVAILABLE
+        ? 'ci_unavailable'
+        : 'ci_failed',
     state: mid,
     gate,
     pushArgv: [...SAFE_PUSH_ARGV],
     pushed: true,
     exitCode: 0,
+    baseSha,
+    candidateSha,
+    pushedSha,
+    ciState,
+    ci,
+    baseShaWasGreen,
+    ingest,
   };
 }
 
@@ -160,11 +251,17 @@ if (isMain) {
       ok: result.ok,
       reason: result.reason,
       head: result.state?.head,
+      baseSha: result.baseSha || null,
+      pushedSha: result.pushedSha || null,
       failedCheck: result.failedCheck
         ? { id: result.failedCheck.id, label: result.failedCheck.label, exitCode: result.failedCheck.exitCode }
         : null,
       pushArgv: result.pushArgv,
       pushed: result.pushed === true,
+      ciState: result.ciState || null,
+      ciRunId: result.ci?.run?.databaseId || null,
+      ciUrl: result.ci?.run?.url || null,
+      failureSignature: result.ci?.failureSignature || null,
     }, null, 2));
     if (result.detail) console.error(result.detail);
     if (result.gate?.failedCheck?.detail) console.error(result.gate.failedCheck.detail);

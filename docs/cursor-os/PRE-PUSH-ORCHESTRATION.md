@@ -22,9 +22,11 @@ PASS for all applicable gates.
     changed.
 12. Final diff: no debug artifacts, accidental generated files, TODO
     debt or secrets.
-13. Executable gate: `pnpm push:main` (runs `scripts/ci/pre-push-gate.mjs`
-    then a safe fast-forward `git push origin main`). Direct `git push`
-    is denied by the Cursor shell hook.
+13. Executable gate: `pnpm push:main` runs the local deterministic gate,
+    a safe fast-forward `git push origin main`, then waits for mandatory
+    GitHub CI on that exact SHA (`scripts/ci/post-push-ci.mjs`). Overall
+    success requires exact-SHA `CI_GREEN`. Direct `git push` is denied by
+    the Cursor shell hook.
 
 Result must be PASS or BLOCKED with concrete findings. BLOCKED work is
 repaired and re-run. A safe fast-forward checkpoint push is AUTO after

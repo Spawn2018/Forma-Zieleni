@@ -16,8 +16,17 @@ The gate runs the same Verify commands as `.github/workflows/ci.yml`
 plus `git diff --check`, refuses a dirty tree except the Owner-local
 `.cursor/settings.json`, binds PASS to the captured HEAD, and fails
 closed on the first non-zero check. `pnpm push:main` re-checks that
-state, refuses non-fast-forward intent, then runs only
-`git push origin main`.
+state, refuses non-fast-forward intent, runs only
+`git push origin main`, then waits for mandatory GitHub Actions workflow
+`.github/workflows/ci.yml` on the **exact pushed SHA**. Overall success
+requires that exact-SHA run to conclude `success`. Transport success
+(`pushed: true`) is reported even when CI fails; quality success
+(`ok: true`) requires `CI_GREEN`. Final CI failures ingest into the
+existing FZ-CIS path (`CI_FAILED` / `CI_REGRESSION`) with run-id
+idempotency.
+
+Controller: `scripts/ci/post-push-ci.mjs`
+(`node scripts/ci/post-push-ci.mjs status|wait --sha <SHA>`).
 
 Cursor `beforeShellExecution` denies direct `git push` (including
 `--no-verify`) and keeps force/mirror/delete as DANGEROUS. This is
@@ -56,10 +65,14 @@ a human with a raw terminal cannot bypass a local control.
     [`../architecture/FZ-CONTINUOUS-IMPROVEMENT.md`](../architecture/FZ-CONTINUOUS-IMPROVEMENT.md)
     blocks the push. Other Learning Debt does not.
 
-Push is blocked on failures. A passing gate authorizes a fast-forward
-push to the existing `origin` `main` without a separate Owner review
-(AUTO per `docs/workflows/DECISION-GATES.md`). Use `pnpm push:main`.
-`.github/workflows/ci.yml` repeats verification after that push. It does
+Push is blocked on failures. A passing local gate authorizes a
+fast-forward push to the existing `origin` `main` without a separate
+Owner review (AUTO per `docs/workflows/DECISION-GATES.md`). Use
+`pnpm push:main`. Slice completion and the next product READY selection
+require that exact-SHA GitHub CI to be GREEN. A red or pending published
+HEAD is a quality interrupt ahead of product selection — not a second
+execution graph.
+`.github/workflows/ci.yml` is the mandatory post-push verifier. It does
 not deploy, and it does not commit. `pnpm readme:check` is part of that
 verification. It does not rewrite the README.
 Do not silence tests, loosen types, skip

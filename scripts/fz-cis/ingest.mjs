@@ -164,7 +164,11 @@ export function ingestToolingEvent(event = {}, options = {}) {
   if (state === 'CI_FAILED' || state === 'CI_REGRESSION') {
     return ingestOutcome({
       kind: state === 'CI_REGRESSION' ? 'ci_regression' : 'ci_failed',
-      patternKey: event.patternKey || `ci-${state.toLowerCase()}-${event.commit || 'unknown'}`,
+      patternKey: event.patternKey || fingerprint([
+        state === 'CI_REGRESSION' ? 'ci-regression' : 'ci-failed',
+        event.scope || 'independent-ci',
+        event.relatedTest || event.failureSignature,
+      ]),
       scope: 'independent-ci',
       observation: event.observation || `Independent CI ${state}`,
       evidence: event.evidence || [event.url || 'ci', event.commit || 'unknown'].filter(Boolean),
