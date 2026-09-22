@@ -160,6 +160,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-CONNECTORS', 'Fixture connectors expose adapter boundaries, reject live secrets, redact tokens, and record quotas re-read that day.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-connectors.ts', 'packages/domain/search-connectors.test.mjs', 'live OAuth stays DANGEROUS', 'NONE', 'No production credentials in this slice.');
     continue;
   }
+  if (slice === 'SEARCH-SYNC') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-SYNC', 'Fixture sync job keeps per-connector checkpoints, backoff after rate limits or outages, and isolated provider failure.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-sync.ts', 'packages/domain/search-sync.test.mjs', 'scheduler and PostgreSQL job rows stay later', 'NONE', 'Live OAuth and schedulers stay outside this slice.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

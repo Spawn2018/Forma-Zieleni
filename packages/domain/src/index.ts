@@ -107,6 +107,19 @@ export type {
   SearchConnector,
 } from './search-connectors.ts';
 export {
+  SYNC_BACKOFF_BASE_MS,
+  SYNC_BACKOFF_MAX_MS,
+  backoffDelayMs,
+  createSearchSyncJob,
+  runSearchSyncJob,
+} from './search-sync.ts';
+export type {
+  ConnectorCheckpoint,
+  SearchSyncConnectorOutcome,
+  SearchSyncJobState,
+  SearchSyncRunResult,
+} from './search-sync.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,

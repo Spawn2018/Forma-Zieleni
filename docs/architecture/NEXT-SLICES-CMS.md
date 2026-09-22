@@ -301,8 +301,10 @@ Next: SEARCH-SYNC.
 
 Dependencies: SEARCH-CONNECTORS.
 Gate: REVIEW.
+Status: COMPLETE for the in-memory fixture job path. PostgreSQL job rows and a scheduler are not this slice.
 Autonomous: yes on synthetic fixtures.
-Accept: job path, checkpoint, backoff, one provider outage does not blank the other.
+Accept: `packages/domain/src/search-sync.ts` runs fixture connectors through normalize/persist, keeps per-connector checkpoints, applies exponential backoff after rate limits or outages, and isolates provider failure so other connectors still persist. Live OAuth stays DANGEROUS.
+Tests: `packages/domain/search-sync.test.mjs`.
 Next: SEARCH-HISTORY.
 
 ### SEARCH-HISTORY
