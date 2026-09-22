@@ -262,7 +262,7 @@ test('the /noc contract and READY selection stay intact', () => {
   assert.equal(deadline.until, '2026-09-22T09:00:00+02:00');
   const graph = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const picked = selectReady(parseExecutionGraph(graph));
-  assert.equal(picked.selected, 'SEARCH-ADMIN');
+  assert.equal(picked.selected, 'CMS-HARDEN');
   assert.equal(picked.ready.includes('FZ-CIS'), false);
   const low = incorporate([], base({ severity: 'low', source: 'review' })).record;
   assert.equal(pushBlockers([low]).length, 0);

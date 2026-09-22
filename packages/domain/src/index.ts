@@ -208,12 +208,14 @@ export {
   recommendTitleAlignment,
   suggestAiDraft,
 } from './search-content-intelligence.ts';
+export { presentAdminPanel, presentAiCitations, presentAttribution, presentSearchMetric } from './search-admin.ts';
 export type {
   AiDraftField,
   ContentRecommendation,
   PublishedContentKind,
   PublishedContentNode,
 } from './search-content-intelligence.ts';
+export type { AdminMetric, AdminPanelId, AdminPanelView, AttributionModel, EvidenceClass } from './search-admin.ts';
 export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
 export {
   FORBIDDEN_EXPORT_FIELDS,

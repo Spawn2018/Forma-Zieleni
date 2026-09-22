@@ -75,9 +75,9 @@ test('work-stealing prefers another READY slice when the critical one is blocked
 test('the CMS graph reconstructs READY work without executing it', () => {
   const markdown = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const picked = selectReady(parseExecutionGraph(markdown));
-  assert.equal(picked.selected, 'SEARCH-ADMIN');
-  assert.equal(picked.ready.includes('SEARCH-CONTENT-INTELLIGENCE'), false);
-  assert.equal(picked.ready.includes('SEARCH-ADMIN'), true);
+  assert.equal(picked.selected, 'CMS-HARDEN');
+  assert.equal(picked.ready.includes('SEARCH-ADMIN'), false);
+  assert.equal(picked.ready.includes('CMS-HARDEN'), true);
   assert.equal(picked.ready.includes('WWW-APP'), false);
   assert.equal(picked.ready.includes('GALLERY-WWW'), false);
   assert.equal(picked.ready.includes('BEFORE-AFTER'), false);

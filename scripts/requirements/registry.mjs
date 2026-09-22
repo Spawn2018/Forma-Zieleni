@@ -229,6 +229,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-CONTENT-INTELLIGENCE', 'Content recommendations cite a published graph or a measured query. AI drafts stay AI-SUGGESTED. ALT text cannot invent image contents. Nothing publishes.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-content-intelligence.ts', 'packages/domain/search-content-intelligence.test.mjs', '', 'NONE', 'No paid AI service and no automatic link insertion.');
     continue;
   }
+  if (slice === 'SEARCH-ADMIN') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-ADMIN', 'Every admin metric shows definition, source, window, freshness, and evidence class. Absent citation providers stay in limitations. Attribution is not a causal claim.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-admin.ts', 'packages/domain/search-admin.test.mjs', 'No operator screen', 'NONE', 'Synthetic fixture source is labeled. External rank scores stay forbidden.');
+    continue;
+  }
   if (slice === 'SEARCH-SECURITY') {
     row('FZ-REQ-CMS-SLICE-SEARCH-SECURITY', 'Imported search labels and URLs are sanitized, logs redact secrets, and public preview omits draft bodies.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-security.ts', 'packages/domain/search-security.test.mjs', 'ZAP stays deferred', 'NONE', 'No live connector credentials.');
     continue;

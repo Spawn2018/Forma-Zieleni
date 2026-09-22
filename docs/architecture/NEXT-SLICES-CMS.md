@@ -390,8 +390,10 @@ Next: SEARCH-ADMIN.
 
 Dependencies: SEARCH-HISTORY or synthetic fixtures, plus SEARCH-CONTENT-INTELLIGENCE for that panel.
 Gate: REVIEW + UX.
+Status: COMPLETE for the labeled metric panel. No operator screen.
 Autonomous: yes with synthetic data.
-Accept: every metric shows definition, source, window, freshness, evidence class.
+Accept: `packages/domain/src/search-admin.ts` shows definition, source, window, freshness, and evidence class on every metric. Absent citation providers stay in limitations. Attribution is an association under a named model. The source of a fixture is `synthetic-fixture`.
+Tests: `packages/domain/search-admin.test.mjs`. A missing definition or freshness throws. An external GEO score throws.
 Next: SEARCH-ALERTS.
 
 ### SEARCH-ALERTS

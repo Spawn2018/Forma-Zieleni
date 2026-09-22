@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "search-content-intelligence",
+  "currentPhase": "search-admin",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -19,14 +19,16 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "SEARCH-ADMIN is the next READY slice",
-    "CMS-HARDEN and CMS-PERF stay READY beside the critical path",
+    "CMS-HARDEN is the next READY slice",
+    "CMS-PERF and SEARCH-ALERTS stay READY beside the critical path",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "SEARCH-ADMIN is READY. Every metric shows definition, source, window, freshness, and evidence class, using synthetic data. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
+  "nextSafeAction": "CMS-HARDEN is READY. XSS, SVG, SSRF, and upload checks stay local. ZAP runs only if Java exists; otherwise it stays DEFERRED. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
   "evidencePaths": [
+    "packages/domain/src/search-admin.ts",
+    "packages/domain/search-admin.test.mjs",
     "packages/domain/src/search-content-intelligence.ts",
     "packages/domain/search-content-intelligence.test.mjs",
     "packages/domain/src/search-tech-audit.ts",
