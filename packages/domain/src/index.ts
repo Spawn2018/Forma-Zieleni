@@ -27,6 +27,7 @@ export {
   createDraft,
   editDraft,
   publicProjection,
+  publicRedirects,
   publishRevision,
   releaseDue,
   rollbackRevision,

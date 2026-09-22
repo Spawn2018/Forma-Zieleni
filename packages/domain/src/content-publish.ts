@@ -40,10 +40,19 @@ export type ContentStore = {
   revisions: Map<string, Revision>;
   audit: ContentAudit[];
   outbox: ContentOutbox[];
+  redirects: ContentRedirect[];
 };
 
+export type ContentRedirect = { from: string; to: string; documentId: string };
+
 export function createContentStore(): ContentStore {
-  return { documents: new Map(), revisions: new Map(), audit: [], outbox: [] };
+  return { documents: new Map(), revisions: new Map(), audit: [], outbox: [], redirects: [] };
+}
+
+export function publicRedirects(store: ContentStore): Record<string, string> {
+  const table: Record<string, string> = {};
+  for (const item of store.redirects) table[item.from] = item.to;
+  return table;
 }
 
 export function createDraft(
@@ -147,12 +156,31 @@ function makePublic(
   action: ContentAudit['action'],
 ): Revision {
   const document = requiredDocument(store, revision.documentId);
+  rememberSlugRedirect(store, document, revision.fields.title);
   revision.status = 'published';
   revision.publishAt = null;
   document.publicRevisionId = revision.id;
   store.audit.push({ action, actorId, documentId: document.id, revisionId: revision.id, at });
   store.outbox.push({ type: 'content.published', documentId: document.id, revisionId: revision.id, at });
   return revision;
+}
+
+function rememberSlugRedirect(store: ContentStore, document: Document, nextTitle: string): void {
+  if (!document.publicRevisionId) return;
+  const previous = store.revisions.get(document.publicRevisionId);
+  if (!previous) return;
+  const from = publicPath(previous.fields.title);
+  const to = publicPath(nextTitle);
+  if (!from || !to || from === to) return;
+  for (const item of store.redirects) {
+    if (item.documentId === document.id && item.to === from) item.to = to;
+  }
+  store.redirects.push({ from, to, documentId: document.id });
+}
+
+function publicPath(title: string): string {
+  const base = title.normalize('NFKD').replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/\s+/g, '-').slice(0, 60);
+  return base.length >= 3 ? `/${base}` : '';
 }
 
 function requiredDocument(store: ContentStore, documentId: string): Document {

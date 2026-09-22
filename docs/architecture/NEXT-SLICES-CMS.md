@@ -165,10 +165,12 @@ Next: CMS-WWW (with CMS-PUBLISH + CMS-SEO).
 
 Dependencies: CMS-PUBLISH, SEARCH-WWW-TECHNICAL, SEARCH-STRUCTURED-DATA, SEARCH-SITEMAP-ROBOTS.
 Gate: REVIEW.
+Status: COMPLETE as the integration checkpoint. Publishing a new slug writes a redirect. JSON-LD still omits prices. Production robots is not a blanket disallow. Training groups stay absent.
 Autonomous: yes.
 Entry: those four are recorded. This id is the integration checkpoint, not a second SEO implementation.
 Accept: WWW output matches FZ-SEARCH-1 sections 6–7 and 9. Training-crawler groups stay absent while FZ-SEARCH-CRAWL-1 is OPEN.
-Tests: slug change writes redirect; JSON-LD has no placeholder prices; production robots fixture is not `Disallow: /`.
+Tests: `apps/web/app/cms-seo.test.mjs`. A slug change redirects. JSON-LD has no placeholder price. Production robots is not `Disallow: /`.
+Security: the redirect target is the new public path, not an external URL.
 Next: CMS-WWW.
 
 ### CMS-EVENTS
