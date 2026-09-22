@@ -5,7 +5,7 @@
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "b049f732142a3b8314d715381131e0ac2af9dcf9",
   "postPushSafety": "PASS",
-  "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record. Independent CI for 444e98a: PASS (run 35747728773 Verify+Windows supervisor).",
+  "codeRabbit": "CLI checkpoint 2026-09-22T18:27Z on 7911dae: CODERABBIT_FINDINGS (1 minor). Fixed in acb7b68: offer validation returns CLIENT_COMMERCIAL_FORBIDDEN before UNKNOWN_FIELD. State=CODERABBIT_FINDINGS_FIXED. Prior: CLI checkpoint 2026-09-22T15:12:25Z on 0414697.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
