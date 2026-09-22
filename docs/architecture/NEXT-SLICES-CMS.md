@@ -221,10 +221,11 @@ Next: CMS-ACCEPT.
 
 Dependencies: CMS-DATA, MEDIA-CORE.
 Gate: REVIEW.
+Status: COMPLETE for structured portable export. Vendor dump formats stay later.
 Autonomous: yes.
 Entry: CMS-DATA and MEDIA-CORE recorded.
-Accept: structured export of content, slugs, SEO, relations, originals, regeneration rules.
-Tests: export omits private GPS; re-import or documented remap.
+Accept: `packages/domain/src/cms-export.ts` exports documents with slugs/SEO/relations, media checksums and regeneration rules (`stripGps`), omits private GPS/customer fields, and re-imports onto a fresh store.
+Tests: `packages/domain/cms-export.test.mjs`.
 Next: CMS-ACCEPT.
 
 ### CMS-ACCEPT
