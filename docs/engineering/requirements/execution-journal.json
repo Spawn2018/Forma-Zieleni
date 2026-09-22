@@ -28,7 +28,7 @@
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "No READY AUTO/REVIEW slice. Next product unlock is a www app slice (GALLERY-WWW / SEARCH-WWW-TECHNICAL) or an Owner gate (FZ-SEARCH-CRAWL-1, CMS-ACCEPT when deps exist). main is ahead locally; fast-forward push stays AUTO after pre-push.",
+  "nextSafeAction": "NOC window stopped: no READY AUTO/REVIEW slice. Unlock: introduce the React Router www app so GALLERY-WWW / SEARCH-WWW-TECHNICAL can start; or decide FZ-SEARCH-CRAWL-1 / CMS-ACCEPT when their deps exist. Local main is ahead of origin; fast-forward push is AUTO outside /noc if Owner wants it.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
     "packages/domain/cms-export.test.mjs",
