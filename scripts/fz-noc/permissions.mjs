@@ -67,9 +67,8 @@ export function classifyObservedPrompt(command) {
     return 'SAFE_READ_ONLY';
   }
   if (/^git\s+(add|commit)\b/i.test(text)) return 'SAFE_CHECKPOINT_GIT';
-  if (/^git\s+push\b/i.test(text) && !/(--force|--force-with-lease|--mirror|--delete|\s\+\S)/i.test(text)) {
-    return 'SAFE_CHECKPOINT_GIT';
-  }
+  if (/^git\s+push\b/i.test(text)) return 'DANGEROUS';
+  if (/^(pnpm\s+push:main|node\s+scripts\/ci\/push-main\.mjs)\b/i.test(text)) return 'SAFE_CHECKPOINT_GIT';
   if (/^(node|pnpm|npm\s+(test|run)|npx|turbo)\b/i.test(text)) return 'SAFE_VERIFICATION';
   if (/\b(curl|WebFetch|web-search|grok|coderabbit)\b/i.test(text)) return 'EXTERNAL_READ_ONLY';
   return 'SAFE_REPO_LOCAL';

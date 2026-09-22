@@ -32,15 +32,17 @@ test('observed safe prompts classify as SAFE_* and are covered by the allowlist'
     ['pnpm docs:check', 'SAFE_VERIFICATION'],
     ['git add docs/architecture/NEXT-SLICES-MAIN.md', 'SAFE_CHECKPOINT_GIT'],
     ['git commit -m msg', 'SAFE_CHECKPOINT_GIT'],
-    ['git push origin main', 'SAFE_CHECKPOINT_GIT'],
+    ['pnpm push:main', 'SAFE_CHECKPOINT_GIT'],
   ];
   for (const [command, expected] of cases) {
     assert.equal(classifyObservedPrompt(command), expected, command);
-    if (expected !== 'SAFE_CHECKPOINT_GIT' || !command.startsWith('git push')) {
+    if (expected !== 'SAFE_CHECKPOINT_GIT' || !command.startsWith('pnpm push')) {
       assert.equal(terminalAllowlistCovers(command), true, command);
     }
   }
+  assert.equal(classifyObservedPrompt('git push origin main'), 'DANGEROUS');
   assert.equal(terminalAllowlistCovers('git push origin main'), false);
+  assert.equal(terminalAllowlistCovers('pnpm push:main'), true);
 });
 
 test('dangerous and owner-gated prompts stay denied or classified away from allow', () => {

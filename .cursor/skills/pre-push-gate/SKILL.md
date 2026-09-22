@@ -6,9 +6,11 @@ name: pre-push-gate
 
 # pre-push-gate
 
+.cursor/skills/pre-push-gate/SKILL.md
 Execute docs/engineering/PRE-PUSH-GATE.md. Inspect the actual diff. Run
-every applicable repository command rather than assuming success. Block
-the push on failures or unresolved DECISION/DANGEROUS items. Return a
+`pnpm pre-push:gate` (or `pnpm push:main` when a safe fast-forward push
+is intended) rather than assuming success or running `git push` directly.
+Block the push on failures or unresolved DECISION/DANGEROUS items. Return a
 concise PASS/FAIL report with evidence and commands run.
 
 ## Security-tool integration update --- 2026-09-21

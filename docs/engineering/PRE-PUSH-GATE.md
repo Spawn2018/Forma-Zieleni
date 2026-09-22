@@ -4,6 +4,26 @@ Current workflow is direct-to-main by owner decision. Therefore every
 push must pass a local/CI-quality gate equivalent to a disciplined
 software-house review.
 
+## Executable control (source of truth)
+
+Autonomous Cursor must not run `git push` directly. The mandatory
+deterministic gate and the only AUTO safe-main push path are:
+
+- Gate: `pnpm pre-push:gate` → `scripts/ci/pre-push-gate.mjs`
+- Push: `pnpm push:main` → `scripts/ci/push-main.mjs`
+
+The gate runs the same Verify commands as `.github/workflows/ci.yml`
+plus `git diff --check`, refuses a dirty tree except the Owner-local
+`.cursor/settings.json`, binds PASS to the captured HEAD, and fails
+closed on the first non-zero check. `pnpm push:main` re-checks that
+state, refuses non-fast-forward intent, then runs only
+`git push origin main`.
+
+Cursor `beforeShellExecution` denies direct `git push` (including
+`--no-verify`) and keeps force/mirror/delete as DANGEROUS. This is
+mechanical enforcement of the autonomous Cursor path, not a claim that
+a human with a raw terminal cannot bypass a local control.
+
 ## Mandatory sequence for a changed slice
 
 1.  Scope check: diff contains only intended work; no generated junk,
@@ -23,9 +43,9 @@ software-house review.
 9.  Accessibility review for user-facing UI.
 10. Build/package verification.
 11. Documentation/ADR/OpenAPI synchronization where applicable.
-12. Final `git diff` review, `git diff --check`, and `pnpm repo:check`
-    (current tracked-file manifest plus repository hygiene). Semantics:
-    `docs/engineering/REPOSITORY-INTEGRITY.md`.
+12. Final `git diff` review, then the executable gate above
+    (`pnpm pre-push:gate` / `pnpm push:main`). Semantics for repository
+    integrity: `docs/engineering/REPOSITORY-INTEGRITY.md`.
 13. Security-tool evidence when applicable: deterministic tests, then
     SCA once the stack exists, then one CodeRabbit review per coherent
     green slice when quota is available, then ZAP when a runnable
@@ -37,13 +57,32 @@ software-house review.
     blocks the push. Other Learning Debt does not.
 
 Push is blocked on failures. A passing gate authorizes a fast-forward
-push to the existing `origin` `main` without a separate Owner review.
+push to the existing `origin` `main` without a separate Owner review
+(AUTO per `docs/workflows/DECISION-GATES.md`). Use `pnpm push:main`.
 `.github/workflows/ci.yml` repeats verification after that push. It does
 not deploy, and it does not commit. `pnpm readme:check` is part of that
 verification. It does not rewrite the README.
 Do not silence tests, loosen types, skip
 security checks or raise performance budgets just to make the gate
 green.
+
+## Future VERIFY EFFECT evidence (contract only)
+
+FZ-CIS record `projection-drift-after-materialization` is VALIDATING
+against this control. A later VERIFY EFFECT slice should be able to
+distinguish, without a second learning store:
+
+A. A push was attempted after a local deterministic failure and was
+   blocked by `pre-push-gate` / `push-main` (gate `reason=check_failed`).
+B. The same projection-drift class recurred locally but did not escape
+   to `main` because the gate refused the push.
+C. The class still reached GitHub CI on `main`, meaning this control was
+   insufficient or bypassed outside the autonomous Cursor path.
+D. The gate produced excessive false blocks / toil (repeated
+   `disallowed_dirty` / unrelated failures with no product defect).
+
+Do not invent production metrics here. Runtime VERIFY EFFECT remains a
+later slice.
 
 ## Security-tool integration update --- 2026-09-21
 

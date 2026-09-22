@@ -118,12 +118,24 @@ test('activeExecutionGraph stays on CMS until RETURN-ROADMAP is COMPLETE', () =>
   assert.match(sign, /OPEN/);
 });
 
-test('a fast-forward checkpoint push is AUTO inside noc and dangerous pushes stay gated', () => {
-  assert.equal(classifyShell('git push origin main').permission, 'allow');
-  assert.equal(classifyShell('git push').permission, 'allow');
+test('git commit messages mentioning git push are not false-denied', () => {
+  assert.equal(
+    classifyShell('git commit -m "feat: use pnpm push:main instead of git push"').permission,
+    'allow',
+  );
+  assert.equal(classifyShell('git status && git push origin main').permission, 'deny');
+});
+
+test('direct git push is denied; force stays DANGEROUS; pnpm push:main is the AUTO path', () => {
+  assert.equal(classifyShell('git push origin main').permission, 'deny');
+  assert.equal(classifyShell('git push').permission, 'deny');
+  assert.match(classifyShell('git push origin main').agent_message, /pnpm push:main/);
+  assert.equal(classifyShell('pnpm push:main').permission, 'allow');
   for (const command of ['git push --force', 'git push --force-with-lease', 'git push --mirror', 'git push origin --delete branch']) {
     assert.equal(classifyShell(command).permission, 'deny', command);
+    assert.match(classifyShell(command).user_message, /git-push-force/);
   }
+  assert.equal(classifyShell('git push --no-verify').permission, 'deny');
 });
 
 test('an omitted www app row is an internal gap and does not authorize exhaustion', () => {
@@ -283,9 +295,10 @@ test('silent turns stall and then stop', () => {
 test('shell and MCP guards deny dangerous operations and allow ordinary ones', () => {
   assert.equal(classifyShell('git status').permission, 'allow');
   assert.equal(classifyShell('git commit -m "chore: add autonomous Cursor orchestration"').permission, 'allow');
-  assert.equal(classifyShell('git push').permission, 'allow');
-  assert.equal(classifyShell('powershell -Command "git push"').permission, 'allow');
-  assert.equal(classifyShell('git -C D:\\repo push origin main').permission, 'allow');
+  assert.equal(classifyShell('git push').permission, 'deny');
+  assert.equal(classifyShell('powershell -Command "git push"').permission, 'deny');
+  assert.equal(classifyShell('git -C D:\\repo push origin main').permission, 'deny');
+  assert.equal(classifyShell('pnpm push:main').permission, 'allow');
   assert.equal(classifyShell('git push --force').permission, 'deny');
   assert.equal(classifyShell('git push --force-with-lease').permission, 'deny');
   assert.equal(classifyShell('git reset --hard HEAD').permission, 'deny');

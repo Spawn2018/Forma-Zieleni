@@ -27,7 +27,8 @@ export const SHUTDOWN_MESSAGE =
 
 const GIT = '(?:^|[;&|]|\\n|\\s|["\'])git(?:\\.exe)?(?:\\s+-C\\s+\\S+|\\s+-[^\\s]+)*\\s+';
 const GIT_PUSH = new RegExp(`${GIT}push\\b`, 'i');
-const PUSH_NOT_AUTO = /--force(?:-with-lease)?|--mirror|--delete|\s\+\S/;
+const PUSH_DANGEROUS = /--force(?:-with-lease)?|--mirror|--delete|\s\+\S/;
+const PUSH_NO_VERIFY = /--no-verify\b/;
 const SHELL_ASK = [
   { id: 'git-reset-hard', re: new RegExp(`${GIT}reset\\s+--hard\\b`, 'i') },
   { id: 'git-clean', re: new RegExp(`${GIT}clean\\b`, 'i') },
@@ -482,11 +483,30 @@ export function shellCommandForPolicy(command) {
 
 export function classifyShell(command) {
   const text = shellCommandForPolicy(command);
-  if (GIT_PUSH.test(text) && PUSH_NOT_AUTO.test(text)) {
+  const trimmed = text.trim();
+  // A lone git checkpoint/read command must not deny merely because the
+  // commit message or args mention the words "git push".
+  const loneGitCheckpoint = /^git(?:\.exe)?\s+(commit|add|status|diff|show|log|rev-parse|branch|fetch|merge-base|ls-files|grep|symbolic-ref|cat-file|describe|name-rev|shortlog|check-ignore|config)\b/i.test(trimmed)
+    && !/(?:&&|\|\||;|\n)/.test(trimmed);
+  if (!loneGitCheckpoint && GIT_PUSH.test(text)) {
+    if (PUSH_DANGEROUS.test(text)) {
+      return {
+        permission: 'deny',
+        user_message: 'This shell command matches a protected operation (git-push-force) and is blocked.',
+        agent_message: 'Force, mirror, and delete pushes are DANGEROUS and stay denied. A /noc window is not approval for history rewrite. Owner may run the command manually outside the agent if intentionally required.',
+      };
+    }
+    if (PUSH_NO_VERIFY.test(text)) {
+      return {
+        permission: 'deny',
+        user_message: 'This shell command matches a protected operation (git-push-no-verify) and is blocked.',
+        agent_message: 'git push --no-verify is not a bypass. Use pnpm push:main, which runs scripts/ci/pre-push-gate.mjs before a safe fast-forward push.',
+      };
+    }
     return {
       permission: 'deny',
-      user_message: 'This shell command matches a protected operation (git-push-force) and is blocked.',
-      agent_message: 'A fast-forward checkpoint push is AUTO. Force, mirror, and delete pushes are denied. A /noc window is not approval for history rewrite. Owner may run the command manually outside the agent if intentionally required.',
+      user_message: 'Direct git push is blocked. Use the canonical safe push path.',
+      agent_message: 'Do not run git push directly. A safe fast-forward checkpoint push is AUTO only through pnpm push:main (scripts/ci/push-main.mjs), which runs the mandatory local pre-push gate first.',
     };
   }
   const hit = SHELL_ASK.find((rule) => rule.re.test(text));

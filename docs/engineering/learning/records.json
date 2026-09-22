@@ -12,11 +12,14 @@
         "scripts/readme/regions.test.mjs expected admin not-built while apps/admin/package.json exists since 582e4e6",
         "scripts/requirements/registry.test.mjs asserted FZ-MASTER-TRACEABILITY.md equals renderMarkdown from registry.mjs",
         "commit 675dc3d earlier fixed portal surface drift then admin materialization regressed the same class",
-        "GitHub Actions run 35776765562 Verify Test failed on HEAD 330a514"
+        "GitHub Actions run 35776765562 Verify Test failed on HEAD 330a514",
+        "scripts/ci/pre-push-gate.mjs and scripts/ci/push-main.mjs enforce Verify-equivalent checks before safe push",
+        "scripts/fz-noc/policy.mjs classifyShell denies direct git push and --no-verify; force remains DANGEROUS",
+        "scripts/ci/pre-push-gate.test.mjs covers gate fail, push refuse, HEAD mutation, wrong branch, and shell bypass cases"
       ],
       "generalizability": "RECURRING",
       "privacyClassification": "INTERNAL",
-      "status": "HYPOTHESIS",
+      "status": "VALIDATING",
       "hypothesis": "Materializing an apps package or changing registry.mjs without refreshing projection tests and FZ-MASTER-TRACEABILITY.md leaves main red; a deterministic local gate would catch that before push.",
       "proposedImprovement": "Require the same local deterministic checks that CI runs (including README surface snapshot and registry projection equality) before any fast-forward push to origin main.",
       "evidenceStrength": "TESTED",
@@ -28,7 +31,9 @@
       "id": "LR-20260922-a52d1a35",
       "occurrences": 1,
       "firstSeen": "2026-09-22T20:05:32.591Z",
-      "lastSeen": "2026-09-22T20:05:32.591Z"
+      "lastSeen": "2026-09-22T20:05:32.591Z",
+      "validationMethod": "Deterministic scripts/ci/pre-push-gate.mjs plus Cursor shell deny of direct git push and pnpm push:main wrapper with unit bypass tests",
+      "promotionTarget": "AUTOMATION"
     }
   ]
 }
