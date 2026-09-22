@@ -411,8 +411,11 @@ Next: SEARCH-PERFORMANCE.
 
 Dependencies: MEDIA-PROCESS, SEARCH-WWW-TECHNICAL.
 Gate: REVIEW.
+Status: COMPLETE for separate field and lab notes. No field score is invented from a lab image.
 Autonomous: yes.
 Accept: field CWV and lab data are different fields. LCP/CLS notes use the media pipeline.
+Tests: `packages/domain/search-performance.test.mjs`. A lab note uses `w800.webp` with width and height. A missing field measurement stays null.
+Security: the lab candidate cannot be a master path.
 Next: SEARCH-RECOVERY.
 
 ### SEARCH-RECOVERY

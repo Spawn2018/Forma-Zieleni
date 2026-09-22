@@ -225,6 +225,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-SECURITY', 'Imported search labels and URLs are sanitized, logs redact secrets, and public preview omits draft bodies.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-security.ts', 'packages/domain/search-security.test.mjs', 'ZAP stays deferred', 'NONE', 'No live connector credentials.');
     continue;
   }
+  if (slice === 'SEARCH-PERFORMANCE') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-PERFORMANCE', 'Field CWV and lab media notes stay in different fields. The lab LCP candidate is a derivative with width and height.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-performance.ts', 'packages/domain/search-performance.test.mjs', '', 'NONE', 'No field score is copied from a lab image.');
+    continue;
+  }
   if (slice === 'CMS-EXPORT') {
     row('FZ-REQ-CMS-SLICE-CMS-EXPORT', 'Structured CMS export carries slugs, SEO, media regeneration rules, omits private GPS, and re-imports onto a fresh store.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/cms-export.ts', 'packages/domain/cms-export.test.mjs', 'vendor dump formats stay later', 'NONE', 'No customer GPS in the export.');
     continue;

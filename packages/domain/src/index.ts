@@ -197,6 +197,8 @@ export {
   sanitizeImportedLabel,
   sanitizeSearchUrl,
 } from './search-security.ts';
+export { notePerformance } from './search-performance.ts';
+export type { FieldCwv, LabMediaNote, PerformanceNotes } from './search-performance.ts';
 export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
 export {
   FORBIDDEN_EXPORT_FIELDS,
