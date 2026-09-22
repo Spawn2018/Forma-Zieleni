@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readPublishedHome, PublishedHomeUnavailable } from './published-home.ts';
+import { readPublishedHome, PublishedHomeUnavailable, retainPublishedHome } from './published-home.ts';
+import { homeShell } from './shell.ts';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const origin = 'http://127.0.0.1:8787';
 const documentId = 'pg8k2n4p6q8r0s2t';
@@ -92,4 +94,22 @@ test('a bad origin, id, or payload fails closed', async () => {
     () => readPublishedHome({ origin, documentId, fetchImpl: async () => json(500, { id: documentId }) }),
     PublishedHomeUnavailable,
   );
+});
+
+test('the last published title survives when the editorial read stops', async () => {
+  let open = true;
+  const read = async () => {
+    if (!open) throw new PublishedHomeUnavailable();
+    return { state: 'published', title: 'Projekt ogrodu' };
+  };
+  const first = await retainPublishedHome(null, read);
+  assert.deepEqual(first.home, { state: 'published', title: 'Projekt ogrodu' });
+  open = false;
+  const served = await retainPublishedHome(first.snapshot, read);
+  assert.deepEqual(served.home, { state: 'published', title: 'Projekt ogrodu' });
+  const html = renderToStaticMarkup(homeShell(served.home));
+  assert.match(html, /Projekt ogrodu/);
+  assert.equal(html.includes('Szkic'), false);
+  const missed = await retainPublishedHome(null, async () => ({ state: 'absent' }));
+  await assert.rejects(() => retainPublishedHome(missed.snapshot, read), PublishedHomeUnavailable);
 });

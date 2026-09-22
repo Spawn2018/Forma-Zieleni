@@ -4,6 +4,22 @@ import type { PublicHome } from './shell.ts';
 const HOME_ID = /^[a-z][a-z0-9]{15,63}$/;
 const TITLE_LIMIT = 180;
 
+export type PublishedSnapshot = { title: string };
+
+export async function retainPublishedHome(
+  snapshot: PublishedSnapshot | null,
+  read: () => Promise<PublicHome>,
+): Promise<{ home: PublicHome; snapshot: PublishedSnapshot | null }> {
+  try {
+    const home = await read();
+    if (home.state === 'published') return { home, snapshot: { title: home.title } };
+    return { home, snapshot };
+  } catch (error) {
+    if (snapshot) return { home: { state: 'published', title: snapshot.title }, snapshot };
+    throw error;
+  }
+}
+
 export class PublishedHomeUnavailable extends Error {
   constructor() {
     super('PUBLISHED_HOME_UNAVAILABLE');

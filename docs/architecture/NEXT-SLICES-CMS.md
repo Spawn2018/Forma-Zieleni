@@ -197,10 +197,12 @@ Next: CMS-ACCEPT after CMS-WWW/HARDEN/PERF.
 
 Dependencies: CMS-PUBLISH, GALLERY-WWW, CMS-SEO.
 Gate: REVIEW + visual/content.
+Status: COMPLETE for the published-title snapshot. The home keeps the last published title when a later editorial read throws. It does not render an unpublished draft.
 Autonomous: yes.
 Entry: CMS-PUBLISH, GALLERY-WWW, CMS-SEO recorded.
 Accept: WWW reads published projections only; no hard-coded marketing facts; last published snapshot survives editorial outage.
-Tests: WWW still renders last snapshot when the editorial store is stopped in lab.
+Tests: `apps/web/app/published-home.test.mjs`. The shell still shows `Projekt ogrodu` after the read stops, and it does not show `Szkic`.
+Security: a failed first read does not invent a title.
 Next: CMS-HARDEN and CMS-PERF.
 
 ### CMS-HARDEN

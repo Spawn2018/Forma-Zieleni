@@ -173,6 +173,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-CMS-SEO', 'A published slug change writes a redirect. JSON-LD has no placeholder price. Production robots is not a blanket disallow.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/domain/src/content-publish.ts', 'apps/web/app/cms-seo.test.mjs', '', 'NONE', 'Training-crawler groups stay absent while FZ-SEARCH-CRAWL-1 is OPEN.');
     continue;
   }
+  if (slice === 'CMS-WWW') {
+    row('FZ-REQ-CMS-SLICE-CMS-WWW', 'The public home keeps the last published title when a later editorial read fails. An unpublished draft is not shown.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', '', 'NONE', 'The retained title lives in the server process.');
+    continue;
+  }
   if (slice === 'SEARCH-SITEMAP-ROBOTS') {
     row('FZ-REQ-CMS-SLICE-SEARCH-SITEMAP-ROBOTS', 'Robots and sitemap are generated from policy. Non-production disallows indexing. Production is not a blanket disallow. Training groups stay absent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Cloudflare apply stays DANGEROUS', 'NONE', 'FZ-SEARCH-CRAWL-1 remains OPEN.');
     continue;
