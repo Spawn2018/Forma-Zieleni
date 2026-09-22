@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 import { syntheticImage } from '../native/src/png.mjs';
 import { cropWindow } from '../native/src/media.mjs';
@@ -59,19 +58,6 @@ test('public derivatives drop synthetic GPS that is present on the master jpeg',
   assert.equal(bufferMentionsSyntheticGps(jpeg.buffer), false);
   assert.equal((await sharp(webp.buffer).metadata()).exif, undefined);
   assert.equal(JSON.stringify(webp.buffer).includes(String(SYNTHETIC_GPS.lat)), false);
-  writeFileSync(path.join(root, 'evidence', 'exif-gps.json'), JSON.stringify({
-    researchDate: '2026-09-21',
-    syntheticGps: SYNTHETIC_GPS,
-    masterHasGpsMarker: true,
-    masterHasExif: true,
-    derivativeHasGpsMarker: false,
-    derivativeHasExif: false,
-    masterBytes: tagged.length,
-    webpBytes: webp.bytes,
-    avifBytes: avif.bytes,
-    masterChecksum: createHash('sha256').update(tagged).digest('hex'),
-    note: 'Master is preserved separately. Public derivatives were encoded with sharp defaults that omit EXIF.',
-  }, null, 2));
 });
 
 test('executed crop modes keep aspect and honor left/center/right focal points', () => {
