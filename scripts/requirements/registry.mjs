@@ -180,6 +180,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-AI-VISIBILITY', 'Bing citations stay absent without an API; other AI providers stay NO_RELIABLE_MEASUREMENT; composite AI scores are rejected.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-ai-visibility.ts', 'packages/domain/search-ai-visibility.test.mjs', 'Bing export importer stays later', 'NONE', 'No invented citation counts.');
     continue;
   }
+  if (slice === 'SEARCH-CRAWLER-INTELLIGENCE') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-CRAWLER-INTELLIGENCE', 'Crawler taxonomy A–E is encoded; free-plan Cloudflare referrals stay absent; live zone mutation is refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-crawler-intelligence.ts', 'packages/domain/search-crawler-intelligence.test.mjs', 'Cloudflare mutation stays DANGEROUS', 'NONE', 'Training tokens remain OPEN under FZ-SEARCH-CRAWL-1.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

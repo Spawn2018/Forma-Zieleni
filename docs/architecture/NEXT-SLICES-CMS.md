@@ -341,8 +341,10 @@ Next: SEARCH-CRAWLER-INTELLIGENCE.
 
 Dependencies: SEARCH-AI-VISIBILITY. Cloudflare mutation is DANGEROUS and out of slice.
 Gate: REVIEW.
+Status: COMPLETE for taxonomy and a free-plan synthetic fixture. Live zone mutation stays DANGEROUS.
 Autonomous: yes for the model and a synthetic Cloudflare fixture.
-Accept: taxonomy A–E; referrals absent rather than zero on a free-plan fixture.
+Accept: `packages/domain/src/search-crawler-intelligence.ts` encodes classes A–E, classifies known tokens, keeps free-plan referrals `null` (`ABSENT_FREE_PLAN`), disables Pay Per Crawl, and refuses zone mutation intents.
+Tests: `packages/domain/search-crawler-intelligence.test.mjs`.
 Next: SEARCH-CONTENT-INTELLIGENCE.
 
 ### SEARCH-CONTENT-INTELLIGENCE

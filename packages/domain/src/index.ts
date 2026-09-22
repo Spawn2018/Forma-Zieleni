@@ -171,6 +171,20 @@ export type {
   CitationAvailability,
 } from './search-ai-visibility.ts';
 export {
+  CRAWLER_CLASSES,
+  CRAWLER_TAXONOMY,
+  assertNoLiveCloudflareMutation,
+  assertReferralsAbsentOnFreePlan,
+  classifyCrawlerToken,
+  createFreePlanCloudflareFixture,
+} from './search-crawler-intelligence.ts';
+export type {
+  CloudflareCrawlerFixture,
+  CloudflarePlan,
+  CrawlerClass,
+  CrawlerTaxonomyEntry,
+} from './search-crawler-intelligence.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
