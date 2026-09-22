@@ -24,6 +24,10 @@ const suites = [
     lint: ['labs/fz-cms-1/admin/cms-admin.test.mjs', 'labs/fz-cms-1/schemas/apostrophe-modules.mjs'],
   },
   {
+    test: 'labs/fz-cms-1/restore/cms-restore.test.mjs',
+    lint: ['labs/fz-cms-1/restore/cms-restore.test.mjs'],
+  },
+  {
     test: 'labs/fz-cms-1/media/process.test.mjs',
     lint: [
       'labs/fz-cms-1/media/process.test.mjs',

@@ -172,6 +172,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-CMS-ADMIN', 'Bound publisher creates Service and ProjectCaseStudy without client authority or CRM writes; Apostrophe piece schemas and lab insert evidence recorded.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/content-admin.ts', 'packages/domain/content-admin.test.mjs', 'Admin UI click-path is CMS-ACCEPT item B', 'NONE', 'Live Admin UI visual/UX stays deferred.');
     continue;
   }
+  if (slice === 'CMS-RESTORE') {
+    row('FZ-REQ-CMS-SLICE-CMS-RESTORE', 'Synthetic content and media restore returns one published ProjectCaseStudy and its master checksums. restic/pgBackRest stay later.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/cms-restore.ts', 'labs/fz-cms-1/restore/cms-restore.test.mjs', 'PostgreSQL/restic horizons', 'NONE', 'No claim of off-site backup.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

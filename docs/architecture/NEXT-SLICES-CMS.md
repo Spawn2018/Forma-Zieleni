@@ -210,10 +210,11 @@ Next: CMS-ACCEPT.
 
 Dependencies: MEDIA-CORE, CMS-DATA.
 Gate: REVIEW.
+Status: COMPLETE for synthetic local restore. restic/pgBackRest remain later horizons.
 Autonomous: yes on local PostgreSQL.
 Entry: MEDIA-CORE and CMS-DATA recorded.
-Accept: DB + media restore of synthetic data. restic/pgBackRest remain later horizons.
-Tests: restore read-back of one published case study and its masters.
+Accept: `packages/domain/src/cms-restore.ts` restores published content documents; `packages/media/src/restore.mjs` restores master bytes by checksum and document references. Integration proves one ProjectCaseStudy plus its masters.
+Tests: `packages/domain/cms-restore.test.mjs`, `packages/media/restore.test.mjs`, `labs/fz-cms-1/restore/cms-restore.test.mjs`.
 Next: CMS-ACCEPT.
 
 ### CMS-EXPORT

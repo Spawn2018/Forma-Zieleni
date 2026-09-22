@@ -147,6 +147,15 @@ export type {
   YearOverYearComparison,
 } from './search-history.ts';
 export {
+  readRestoredCaseStudy,
+  restoreContentStore,
+  snapshotContentStore,
+} from './cms-restore.ts';
+export type {
+  ContentDocumentSnapshot,
+  ContentRestoreBundle,
+} from './cms-restore.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,

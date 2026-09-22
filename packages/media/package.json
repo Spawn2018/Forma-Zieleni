@@ -7,9 +7,9 @@
     "./derivatives": "./src/derivatives.mjs"
   },
   "scripts": {
-    "test": "node --test master.test.mjs derivatives.test.mjs library.test.mjs collections.test.mjs",
-    "lint": "node --check src/master.mjs && node --check src/derivatives.mjs && node --check src/library.mjs && node --check src/collections.mjs && node --check master.test.mjs && node --check derivatives.test.mjs && node --check library.test.mjs && node --check collections.test.mjs",
-    "typecheck": "node --check src/master.mjs && node --check src/derivatives.mjs"
+    "test": "node --test master.test.mjs derivatives.test.mjs library.test.mjs collections.test.mjs restore.test.mjs",
+    "lint": "node --check src/master.mjs && node --check src/derivatives.mjs && node --check src/library.mjs && node --check src/collections.mjs && node --check src/restore.mjs && node --check master.test.mjs && node --check derivatives.test.mjs && node --check library.test.mjs && node --check collections.test.mjs && node --check restore.test.mjs",
+    "typecheck": "node --check src/master.mjs && node --check src/derivatives.mjs && node --check src/restore.mjs"
   },
   "dependencies": {
     "sharp": "0.35.4"
