@@ -38,6 +38,9 @@ software-house review.
 
 Push is blocked on failures. A passing gate authorizes a fast-forward
 push to the existing `origin` `main` without a separate Owner review.
+`.github/workflows/ci.yml` repeats verification after that push. It does
+not deploy, and it does not commit. `pnpm readme:check` is part of that
+verification. It does not rewrite the README.
 Do not silence tests, loosen types, skip
 security checks or raise performance budgets just to make the gate
 green.

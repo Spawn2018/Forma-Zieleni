@@ -14,7 +14,7 @@ this repository, not a survey band.
 | Code maintainability | FOUNDATION | `docs/engineering/ENGINEERING-STANDARD.md` |
 | Version control | OPERATIONAL | Git on `main`. The remote is public. |
 | Working in small batches | FOUNDATION | One writer and slice commits. Not measured as lead time. |
-| Continuous integration | FOUNDATION | Local `pnpm test`. No hosted CI requirement was added here. |
+| Continuous integration | FOUNDATION | `.github/workflows/ci.yml` verifies a push to `main`. It does not deploy. |
 | Continuous delivery | FOUNDATION | Release readiness page. Deploy is gated. |
 | Deployment automation | NOT_APPLICABLE | No hosting decision and no production deploy. |
 | Database change management | FOUNDATION | Kysely migrations with down paths. |
