@@ -177,11 +177,12 @@ export function selectReady(slices, options = {}) {
   const blocked = new Set(options.blockedIds || []);
   const known = new Set(slices.map((slice) => slice.id));
   const complete = new Set(slices.filter((slice) => slice.status === 'COMPLETE').map((slice) => slice.id));
+  const acceptance = new Set(slices.filter((slice) => slice.reportOnly).map((slice) => slice.id));
   const ready = slices.filter((slice) => {
     if (slice.status === 'COMPLETE' || slice.reportOnly || !slice.autonomous) return false;
     if (blocked.has(slice.id) || slice.externalUnmet) return false;
     if (BLOCKING_GATES.has(slice.gate)) return false;
-    return slice.dependsOn.filter((id) => known.has(id)).every((id) => complete.has(id));
+    return slice.dependsOn.filter((id) => known.has(id) && !acceptance.has(id)).every((id) => complete.has(id));
   });
   const critical = new Set();
   for (const slice of slices) {
@@ -223,6 +224,28 @@ export function selectReady(slices, options = {}) {
     internalGap,
     exhaustionAllowed: selected == null && internalGap == null,
   };
+}
+
+/** Routine work does not call Grok. Research or an adversarial challenge does. Grok stays evidence. */
+export const GROK_STATES = Object.freeze([
+  'GROK_NOT_NEEDED',
+  'GROK_REQUESTED',
+  'GROK_SUCCEEDED',
+  'GROK_FAILED',
+  'GROK_DEFERRED',
+  'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION',
+  'GROK_FINDING_REJECTED',
+]);
+
+export function grokDisposition(input = {}) {
+  const triggered = input.externalResearch === true || input.adversarial === true;
+  if (!triggered || input.routine === true) return 'GROK_NOT_NEEDED';
+  if (input.unavailable === true) return 'GROK_DEFERRED';
+  if (input.failed === true) return 'GROK_FAILED';
+  if (input.succeeded === true && input.adopted === true) return 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION';
+  if (input.succeeded === true && input.rejected === true) return 'GROK_FINDING_REJECTED';
+  if (input.succeeded === true) return 'GROK_SUCCEEDED';
+  return 'GROK_REQUESTED';
 }
 
 export function emptySession(deadline, now = new Date()) {

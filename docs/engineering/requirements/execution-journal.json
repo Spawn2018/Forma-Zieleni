@@ -19,13 +19,14 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "No AUTO/REVIEW slice is READY",
-    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
+    "RETURN-ROADMAP is the next READY slice",
+    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only and are not accepted",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "No AUTO/REVIEW slice is READY. CMS-ACCEPT and SEARCH-ACCEPT stay report-only. Do not mark them accepted while ZAP, Dependency-Check, live credentials, or Cloudflare policy remain deferred. RETURN-ROADMAP waits on CMS-ACCEPT.",
+  "nextSafeAction": "RETURN-ROADMAP is READY. CMS-ACCEPT and SEARCH-ACCEPT stay open reports. Do not mark them accepted while ZAP, Dependency-Check, live credentials, or Cloudflare policy remain deferred.",
+  "grok": "GROK_NOT_NEEDED for the completed CMS and Search slices. The installed grok CLI is not signed in, so the synthetic probe is GROK_DEFERRED. The orchestrator does not invoke Grok and Grok is not a writer.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",
     "packages/domain/search-alerts.test.mjs",

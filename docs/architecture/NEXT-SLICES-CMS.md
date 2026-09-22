@@ -25,8 +25,9 @@ Cursor must do this without a new ChatGPT prompt:
    Do not change Gate A, FZ-SIGN-1, or Lead security-acceptance.
 5. Start CMS-ARCH. Then execute AUTO/REVIEW slices in order.
 6. Stop only at a genuine OWNER-DECISION / OWNER-ONLY / DANGEROUS gate.
-7. After CMS-ACCEPT, execute RETURN-ROADMAP. Lead deferred controls stay
-   visible.
+7. CMS-ACCEPT stays a report and is not marked accepted. Deferred ZAP,
+   Dependency-Check, live credentials, and Cloudflare policy block
+   acceptance, not RETURN-ROADMAP. Lead deferred controls stay visible.
 
 ## Shared rules for every slice
 
@@ -256,7 +257,7 @@ Dependencies: previous slices.
 Gate: REVIEW.
 Autonomous: report only.
 Entry: previous CMS/media slices recorded.
-Accept: checklist below. Do not mark security-accepted if ZAP/SCA/ingress remain deferred.
+Accept: checklist below. Do not mark security-accepted if ZAP/SCA/ingress remain deferred. This report does not block RETURN-ROADMAP or unrelated implementation.
 Next: RETURN-ROADMAP.
 
 ### SEARCH-ARCH
@@ -451,7 +452,7 @@ Next: RETURN-ROADMAP. CMS-ACCEPT and SEARCH-ACCEPT are separate checklists.
 
 ### RETURN-ROADMAP
 
-Dependencies: CMS-ACCEPT. SEARCH-ACCEPT is a separate checklist and does not block the return. Open FZ-SEARCH-CRAWL-1 does not block it either.
+Dependencies: none for implementation. CMS-ACCEPT stays open and is not an implementation blocker. SEARCH-ACCEPT is a separate checklist and does not block the return. Open FZ-SEARCH-CRAWL-1 does not block it either.
 Gate: AUTO.
 Autonomous: yes.
 Entry: CMS-ACCEPT recorded.

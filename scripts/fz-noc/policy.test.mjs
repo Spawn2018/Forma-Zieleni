@@ -14,6 +14,7 @@ import {
   noteAttempt,
   parseExecutionGraph,
   selectReady,
+  grokDisposition,
   STALL_MESSAGE,
 } from './policy.mjs';
 
@@ -75,10 +76,12 @@ test('work-stealing prefers another READY slice when the critical one is blocked
 test('the CMS graph reconstructs READY work without executing it', () => {
   const markdown = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const picked = selectReady(parseExecutionGraph(markdown));
-  assert.equal(picked.selected, null);
+  assert.equal(picked.selected, 'RETURN-ROADMAP');
   assert.equal(picked.ready.includes('SEARCH-ALERTS'), false);
-  assert.equal(picked.ready.length, 0);
-  assert.equal(picked.exhaustionAllowed, true);
+  assert.equal(picked.ready.includes('CMS-ACCEPT'), false);
+  assert.equal(picked.ready.includes('SEARCH-ACCEPT'), false);
+  assert.equal(picked.ready.includes('RETURN-ROADMAP'), true);
+  assert.equal(picked.exhaustionAllowed, false);
   assert.equal(picked.ready.includes('WWW-APP'), false);
   assert.equal(picked.ready.includes('GALLERY-WWW'), false);
   assert.equal(picked.ready.includes('BEFORE-AFTER'), false);
@@ -125,6 +128,28 @@ test('an omitted www app row is an internal gap and does not authorize exhaustio
   assert.equal(picked.exhaustionAllowed, false);
   const session = emptySession(nextWarsawDeadline(9, new Date('2026-09-21T19:17:00.000Z')));
   assert.equal(session.exhausted, false);
+});
+
+test('a report-only acceptance checkpoint does not block the return', () => {
+  const slices = [
+    { id: 'CMS-ACCEPT', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: ['RETURN-ROADMAP'], autonomous: true, reportOnly: true, externalUnmet: false },
+    { id: 'RETURN-ROADMAP', status: 'OPEN', gate: 'AUTO', dependsOn: ['CMS-ACCEPT'], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices);
+  assert.equal(picked.selected, 'RETURN-ROADMAP');
+  assert.equal(picked.ready.includes('CMS-ACCEPT'), false);
+});
+
+test('routine work does not request Grok and an unavailable challenge stays deferred', () => {
+  assert.equal(grokDisposition({ routine: true }), 'GROK_NOT_NEEDED');
+  assert.equal(grokDisposition({}), 'GROK_NOT_NEEDED');
+  assert.equal(grokDisposition({ adversarial: true, routine: true }), 'GROK_NOT_NEEDED');
+  assert.equal(grokDisposition({ externalResearch: true }), 'GROK_REQUESTED');
+  assert.equal(grokDisposition({ adversarial: true, unavailable: true }), 'GROK_DEFERRED');
+  assert.equal(grokDisposition({ adversarial: true, failed: true }), 'GROK_FAILED');
+  assert.equal(grokDisposition({ adversarial: true, succeeded: true, adopted: true }), 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION');
+  assert.equal(grokDisposition({ adversarial: true, succeeded: true, rejected: true }), 'GROK_FINDING_REJECTED');
+  assert.equal(grokDisposition({ adversarial: true, succeeded: true }), 'GROK_SUCCEEDED');
 });
 
 test('repeated identical attempts block a slice', () => {
