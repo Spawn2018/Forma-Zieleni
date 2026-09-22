@@ -23,8 +23,12 @@ test('this foundation does not add a graph database or a second ORM', () => {
   }
 });
 
-test('the repository has no open-source license file for project code', () => {
-  for (const name of ['LICENSE', 'LICENSE.md', 'LICENCE', 'COPYING']) {
+test('project code reserves all rights and does not grant an open-source license', () => {
+  const license = readFileSync(new URL('../../LICENSE', import.meta.url), 'utf8');
+  assert.match(license, /Wszelkie prawa zastrzeżone/);
+  assert.match(license, /zabronione jest używanie/);
+  assert.equal(/permission is hereby granted|apache license|gnu general public|mit license|bsd license/i.test(license), false);
+  for (const name of ['LICENSE.md', 'LICENCE', 'COPYING']) {
     assert.equal(existsSync(new URL(`../../${name}`, import.meta.url)), false);
   }
 });

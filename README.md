@@ -181,4 +181,4 @@ Praca idzie wprost na `main`. Nie otwieraj pull requesta tylko po to, żeby uruc
 
 Do gita nie wchodzą sekrety, klucze, dane klientów ani zrzuty. Wymagania bezpieczeństwa: [`docs/architecture/SECURITY.md`](docs/architecture/SECURITY.md).
 
-W repozytorium nie ma pliku licencji. Pakiety npm są oznaczone jako prywatne. Brak licencji nie jest zgodą na kopiowanie kodu.
+Prawa są zastrzeżone w [`LICENSE`](LICENSE). Kodu, funkcji i pozostałej zawartości nie wolno używać ani kopiować. Pakiety npm są oznaczone jako prywatne.
