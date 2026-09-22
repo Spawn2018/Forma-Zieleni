@@ -291,8 +291,10 @@ Next: SEARCH-CONNECTORS. Live OAuth stays DANGEROUS.
 
 Dependencies: SEARCH-DATA-MODEL. Live OAuth to a business property is DANGEROUS.
 Gate: REVIEW for interfaces and fixtures. DANGEROUS for real credentials.
+Status: COMPLETE for fixture adapters. Live credentials stay DANGEROUS.
 Autonomous: fixtures only.
-Accept: adapter boundaries, no token logs, recorded quotas re-read that day.
+Accept: `packages/domain/src/search-connectors.ts` defines GSC, Bing Webmaster, Cloudflare crawler, and first-party analytics adapters. Fixtures reject injected secrets. `redactForLog` strips tokens. Quotas and Bing read methods were re-read on 2026-09-22. Bing AI citations stay absent (no API).
+Tests: `packages/domain/search-connectors.test.mjs`.
 Next: SEARCH-SYNC.
 
 ### SEARCH-SYNC

@@ -83,9 +83,14 @@ The Bing help URL returned no usable body in this pass. Do not treat
 a search snippet about CSV export as verified. Re-fetch that help page
 before modeling an importer.
 
-Project Search Analytics QPM was not on the pages fetched (`/limits`
-404). Re-read the Cloud console quota at connector time. Do not invent
-it.
+Project Search Analytics load and QPS quotas were re-read on
+2026-09-22 from
+[Usage Limits](https://developers.google.com/webmaster-tools/limits)
+(last updated 2025-08-28): Search Analytics 1,200 QPM per site and per
+user; 40,000 QPM / 30,000,000 QPD per project; URL Inspection 2,000 QPD
+and 600 QPM per property. The 50,000 rows/day/search-type data cap and
+25,000 page size remain on the all-your-data how-to. Do not invent an
+additional Cloud Console number beyond that published page.
 
 ## 4. Measurable now, and what is not
 
@@ -97,8 +102,12 @@ submission/status where the sitemaps API still exposes it at
 implementation time. Not promised: a query Google anonymizes away, a
 row past the 50k daily cap, or a live rank.
 
-**Bing traditional Webmaster API:** authentication exists. Exact
-methods are **not** frozen here. Re-list them in SEARCH-CONNECTORS.
+**Bing traditional Webmaster API:** authentication exists (OAuth 2.0 or
+one user-scoped API key). Read methods re-listed in SEARCH-CONNECTORS
+(`BING_WEBMASTER_READ_METHODS`, 2026-09-22) from
+`IWebmasterApi`: GetQueryStats, GetPageStats, GetCrawlStats,
+GetUrlInfo, feeds/fetch/quota getters, and related traffic helpers.
+Mutation methods on that interface are out of the fixture connector.
 **Bing AI citations:** MEASURED in the product UI as of 2026-02-10,
 including a sampled grounding-query set. **Not an API** as of the
 2026-02-19 staff reply. Manual or exported import may be added later

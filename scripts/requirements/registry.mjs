@@ -156,6 +156,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-DATA-MODEL', 'Search observations keep provenance and an idempotency key, and reject a form body.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-data.ts', 'packages/domain/search-data.test.mjs', 'connector before PostgreSQL rows', 'NONE', 'No search tables until a connector writes them.');
     continue;
   }
+  if (slice === 'SEARCH-CONNECTORS') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-CONNECTORS', 'Fixture connectors expose adapter boundaries, reject live secrets, redact tokens, and record quotas re-read that day.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-connectors.ts', 'packages/domain/search-connectors.test.mjs', 'live OAuth stays DANGEROUS', 'NONE', 'No production credentials in this slice.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

@@ -88,6 +88,25 @@ export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';
 export type { SearchEntityName, SearchObservation } from './search-data.ts';
 export {
+  BING_WEBMASTER_READ_METHODS,
+  CONNECTOR_IDS,
+  QUOTA_REREAD_DATE,
+  RECORDED_QUOTAS,
+  assertFixtureOnly,
+  createFixtureConnectors,
+  redactForLog,
+} from './search-connectors.ts';
+export type {
+  ConnectorFetchResult,
+  ConnectorId,
+  ConnectorMode,
+  ConnectorSecret,
+  ConnectorStatus,
+  NormalizedObservation,
+  RecordedQuota,
+  SearchConnector,
+} from './search-connectors.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,

@@ -64,7 +64,9 @@ ADR-014). Implementation and security acceptance are not complete.
   private.
 - Search Intelligence is a bounded FZ capability
   ([`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md)). It does not live in
-  Apostrophe tables and does not write CRM state. Training-crawler
+  Apostrophe tables and does not write CRM state. Fixture connector
+  adapters exist (`packages/domain/src/search-connectors.ts`); live
+  OAuth to a business property stays DANGEROUS. Training-crawler
   production policy is OPEN
   ([`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md)).
 
