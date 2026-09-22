@@ -11,11 +11,12 @@ test('ZAP stays armed until a lab target and runtime exist', () => {
   assert.equal(armed.hasPlan, true);
 });
 
-test('ZAP refuses production-like targets', () => {
+test('ZAP refuses non-lab hosts', () => {
   const blocked = evaluateZapReadiness({
-    env: { FZ_ZAP_TARGET_URL: 'https://forma-zieleni.pl' },
+    env: { FZ_ZAP_TARGET_URL: 'https://customer.example.com' },
     targetReachable: true,
     zapBin: 'zap.sh',
+    syntheticData: true,
   });
   assert.equal(blocked.state, 'BLOCKED_BY_REAL_DEPENDENCY');
 });
@@ -29,6 +30,12 @@ test('ZAP reports ACTIVE_REAL_TARGET only when lab conditions are met', () => {
   });
   assert.equal(ready.state, 'ACTIVE_REAL_TARGET');
   assert.equal(ready.realScanPerformed, false);
+  const missingSynthetic = evaluateZapReadiness({
+    env: { FZ_ZAP_TARGET_URL: 'http://127.0.0.1:3000' },
+    targetReachable: true,
+    zapBin: 'zap.sh',
+  });
+  assert.equal(missingSynthetic.state, 'ARMED_WAITING_FOR_TARGET');
 });
 
 test('Dependency-Check is not justified while pnpm audit covers the npm graph', () => {

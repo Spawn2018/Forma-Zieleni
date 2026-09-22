@@ -58,13 +58,27 @@ export function shouldIngest(outcome = {}) {
   return { ok: true, reason: 'ingest' };
 }
 
+function fingerprint(parts) {
+  return slug(parts.filter(Boolean).join('-').slice(0, 80), 'signal-event');
+}
+
 export function toLearningInput(outcome = {}) {
   const gate = shouldIngest(outcome);
   if (!gate.ok) return { ok: false, reason: gate.reason, record: null };
   const mapped = KIND_MAP[outcome.kind];
   const external = mapped.source === 'coderabbit' || mapped.source === 'grok';
+  const patternKey = outcome.patternKey
+    ? slug(outcome.patternKey)
+    : fingerprint([
+      outcome.kind,
+      outcome.scope,
+      outcome.relatedTest,
+      outcome.relatedCommit,
+      outcome.evidence?.[0],
+      outcome.observation?.slice(0, 40),
+    ]);
   const record = {
-    patternKey: slug(outcome.patternKey || `${outcome.kind}-${outcome.scope || 'dev'}`),
+    patternKey,
     source: mapped.source,
     scope: String(outcome.scope || 'engineering').slice(0, 120),
     signalType: mapped.signalType,
@@ -88,6 +102,7 @@ export function toLearningInput(outcome = {}) {
   return { ok: true, reason: 'ready', record: checked.record };
 }
 
+
 /** Persist through the existing store. Dedupes on patternKey via incorporate(). */
 export function ingestOutcome(outcome, options = {}) {
   const prepared = toLearningInput(outcome);
@@ -108,9 +123,22 @@ export function ingestOutcome(outcome, options = {}) {
 /** Connect checkpoint tooling states into optional learning rows without inventing authority. */
 export function ingestToolingEvent(event = {}, options = {}) {
   const state = String(event.state || '');
+  const knownNoise = new Set([
+    'CODERABBIT_PASS',
+    'CODERABBIT_NOT_NEEDED',
+    'CODERABBIT_DEFERRED_RATE_LIMIT',
+    'CODERABBIT_DEFERRED_UNAVAILABLE',
+    'GROK_NOT_NEEDED',
+    'GROK_DEFERRED',
+    'CI_PASS',
+  ]);
+  if (knownNoise.has(state) || (state === 'GROK_SUCCEEDED' && event.material !== true)) {
+    return { ingested: false, reason: 'noise_skip', wroteCanon: false };
+  }
   if (state === 'CODERABBIT_FINDINGS' || state === 'CODERABBIT_FINDINGS_FIXED') {
     return ingestOutcome({
       kind: 'coderabbit_finding',
+      patternKey: event.patternKey || `coderabbit-${event.commit || 'local'}-${event.findings || 'n'}`,
       scope: 'checkpoint-review',
       observation: event.observation || `CodeRabbit checkpoint reported ${event.findings || 'findings'}`,
       evidence: event.evidence || [state, event.commit || 'local'].filter(Boolean),
@@ -120,17 +148,15 @@ export function ingestToolingEvent(event = {}, options = {}) {
       severity: 'medium',
     }, options);
   }
-  if (state === 'GROK_SUCCEEDED' || state === 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION' || state === 'GROK_FINDING_REJECTED') {
-    if (state === 'GROK_SUCCEEDED' && event.material !== true) {
-      return { ingested: false, reason: 'noise_skip', wroteCanon: false };
-    }
+  if (state === 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION' || state === 'GROK_FINDING_REJECTED') {
     return ingestOutcome({
       kind: 'grok_finding',
+      patternKey: event.patternKey || `grok-${event.commit || 'local'}-${state.toLowerCase()}`,
       scope: 'adversarial-review',
       observation: event.observation || `Grok challenge state ${state}`,
       evidence: event.evidence || [state],
       relatedCommit: event.commit,
-      locallyVerified: state !== 'GROK_SUCCEEDED',
+      locallyVerified: true,
       validatedLocally: state === 'GROK_FINDING_ADOPTED_AFTER_LOCAL_VERIFICATION',
       severity: 'medium',
     }, options);
@@ -138,6 +164,7 @@ export function ingestToolingEvent(event = {}, options = {}) {
   if (state === 'CI_FAILED' || state === 'CI_REGRESSION') {
     return ingestOutcome({
       kind: state === 'CI_REGRESSION' ? 'ci_regression' : 'ci_failed',
+      patternKey: event.patternKey || `ci-${state.toLowerCase()}-${event.commit || 'unknown'}`,
       scope: 'independent-ci',
       observation: event.observation || `Independent CI ${state}`,
       evidence: event.evidence || [event.url || 'ci', event.commit || 'unknown'].filter(Boolean),
@@ -148,6 +175,7 @@ export function ingestToolingEvent(event = {}, options = {}) {
   if (state === 'SECURITY_FINDING') {
     return ingestOutcome({
       kind: 'security_finding',
+      patternKey: event.patternKey || `security-${event.scope || 'check'}-${event.commit || 'local'}`,
       scope: event.scope || 'security',
       observation: event.observation || 'Security check reported a finding',
       evidence: event.evidence || ['security'],
@@ -155,5 +183,5 @@ export function ingestToolingEvent(event = {}, options = {}) {
       severity: event.severity || 'high',
     }, options);
   }
-  return { ingested: false, reason: 'noise_skip', wroteCanon: false };
+  return { ingested: false, reason: 'unknown_state', wroteCanon: false };
 }

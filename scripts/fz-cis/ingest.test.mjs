@@ -56,6 +56,8 @@ test('CodeRabbit and Grok findings stay non-authoritative until locally verified
   const grokSkip = ingestToolingEvent({ state: 'GROK_SUCCEEDED' });
   assert.equal(grokSkip.ingested, false);
   assert.equal(grokSkip.reason, 'noise_skip');
+  const unknown = ingestToolingEvent({ state: 'NOT_A_REAL_STATE' });
+  assert.equal(unknown.reason, 'unknown_state');
 });
 
 test('CI failure and security findings ingest through the existing store', (t) => {

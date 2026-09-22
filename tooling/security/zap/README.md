@@ -15,10 +15,10 @@ Current default without a lab listen URL: `ARMED_WAITING_FOR_TARGET`.
 Activation requires all of:
 
 1. `tooling/security/zap/automation.yaml` and `contracts/openapi.json`
-2. `FZ_ZAP_TARGET_URL` pointing at an isolated localhost/CI lab service
-3. Target readiness probe success (`targetReachable`)
-4. ZAP runtime (`ZAP_BIN` or authorized CI image)
-5. Synthetic/non-sensitive data only
+2. `FZ_ZAP_TARGET_URL` pointing at loopback lab only (`127.0.0.1` / `localhost`)
+3. Target readiness probe success (CLI probes the URL)
+4. ZAP runtime via `ZAP_BIN`
+5. `FZ_ZAP_SYNTHETIC=1` (synthetic/non-sensitive data only)
 6. Not production, not Cloudflare production ingress, not CT8
 
 `apps/api` currently needs PostgreSQL and secrets to listen, so it is not an automatic free-standing ZAP target. Do not invent an app solely for ZAP.
