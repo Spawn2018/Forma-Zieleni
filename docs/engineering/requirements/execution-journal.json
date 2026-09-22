@@ -1,9 +1,9 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "lead-sec-accept-report-only",
+  "currentPhase": "main-graph-exhausted-pending-roadmap",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "16a1b7b",
+  "publishedHead": "b049f732142a3b8314d715381131e0ac2af9dcf9",
   "postPushSafety": "PASS",
   "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record. Independent CI for 444e98a: PASS (run 35747728773 Verify+Windows supervisor).",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
@@ -26,7 +26,8 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "LEAD-SEC-ACCEPT report filed; Lead NOT security-accepted. No remaining READY AUTO/REVIEW product slice on NEXT-SLICES-MAIN.md until a roadmap refresh or Owner unblocks deferred security tooling. CODERABBIT_DEFERRED.",
+  "nextSafeAction": "NEXT-SLICES-MAIN exhausted for READY AUTO/REVIEW. Owner: refresh product roadmap and/or install Java+ZAP with loopback synthetic target. Learning: no material product learning this idle cycle; Cursor allowlist docs corrected on b049f73. Leave .cursor/settings.json local. Do not mark Lead security-accepted.",
+  "learningCheck": "NO_MATERIAL_LEARNING for product; LOCAL ops doc correction for Cursor 3.21.16 allowlist gap already shipped.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",
