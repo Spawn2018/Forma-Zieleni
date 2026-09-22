@@ -437,21 +437,36 @@ export function decideFollowup(session, input, now = new Date()) {
   return { followup: CONTINUE_MESSAGE, session: next };
 }
 
-export function classifyShell(command) {
+/**
+ * For node -e/--eval fixtures only, remove quoted literals so classifyShell
+ * does not false-positive on embedded example strings. PowerShell/cmd
+ * wrappers keep their quoted payloads so `powershell -Command "git push
+ * --force"` remains denied.
+ */
+export function shellCommandForPolicy(command) {
   const text = String(command || '');
+  if (!/\bnode(?:\.exe)?\s+(-e|--eval|--input-type=module\s+-e)\b/i.test(text)) return text;
+  return text
+    .replace(/'(?:\\.|[^'\\])*'/g, "''")
+    .replace(/"(?:\\.|[^"\\])*"/g, '""')
+    .replace(/`(?:\\.|[^`\\])*`/g, '``');
+}
+
+export function classifyShell(command) {
+  const text = shellCommandForPolicy(command);
   if (GIT_PUSH.test(text) && PUSH_NOT_AUTO.test(text)) {
     return {
-      permission: 'ask',
-      user_message: 'This shell command matches a protected operation (git-push-force) and needs Owner approval.',
-      agent_message: 'A fast-forward checkpoint push is AUTO. Force, mirror, and delete pushes are not. A /noc window is not approval for history rewrite.',
+      permission: 'deny',
+      user_message: 'This shell command matches a protected operation (git-push-force) and is blocked.',
+      agent_message: 'A fast-forward checkpoint push is AUTO. Force, mirror, and delete pushes are denied. A /noc window is not approval for history rewrite. Owner may run the command manually outside the agent if intentionally required.',
     };
   }
   const hit = SHELL_ASK.find((rule) => rule.re.test(text));
   if (!hit) return { permission: 'allow' };
   return {
-    permission: 'ask',
-    user_message: `This shell command matches a protected operation (${hit.id}) and needs Owner approval.`,
-    agent_message: `Do not run ${hit.id} without explicit Owner approval in this turn. A /noc window is not approval. Local commit is separate from push, deploy, and production mutation.`,
+    permission: 'deny',
+    user_message: `This shell command matches a protected operation (${hit.id}) and is blocked.`,
+    agent_message: `Do not run ${hit.id} without explicit Owner action outside the agent. Cursor hook ask is unreliable; deny enforces the Decision Gate. A /noc window is not approval. Local commit is separate from push, deploy, and production mutation.`,
   };
 }
 
@@ -461,9 +476,9 @@ export function classifyMcp(input) {
   const cloudflareServer = /cloudflare/i.test(server);
   if (MCP_ASK.has(tool) && (server.length === 0 || cloudflareServer)) {
     return {
-      permission: 'ask',
-      user_message: `MCP tool ${tool} can mutate infrastructure and needs Owner approval.`,
-      agent_message: 'Do not treat an active /noc window as approval for Cloudflare, DNS, database, or credential mutation.',
+      permission: 'deny',
+      user_message: `MCP tool ${tool} can mutate infrastructure and is blocked.`,
+      agent_message: 'Do not treat an active /noc window as approval for Cloudflare, DNS, database, or credential mutation. Owner may run an approved mutation outside the agent.',
     };
   }
   return { permission: 'allow' };

@@ -20,3 +20,13 @@ That does **not** approve application hosting on Cloudflare compute/data product
 - Pages = **not selected**
 
 Do not infer stack choices from plugin availability. See `docs/architecture/CURRENT-ARCHITECTURE.md` and `infra/cloudflare/README.md`.
+
+## Unattended /noc permissions
+
+Committed Approvals alignment: [`permissions.json`](./permissions.json),
+[`sandbox.json`](./sandbox.json), and
+[`../docs/cursor-os/UNATTENDED-PERMISSIONS.md`](../docs/cursor-os/UNATTENDED-PERMISSIONS.md).
+
+Owner must keep Cursor Run Mode on **Auto-review** or **Allowlist**
+(with sandbox). Do not use Run Everything. Dangerous git/Cloudflare
+operations remain denied by FZ hooks.

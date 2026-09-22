@@ -54,6 +54,7 @@ const linkScope = [
   'docs/DOCUMENTATION-MAP.md',
   'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md',
   'docs/cursor-os/CURSOR-OS-2026.md',
+  'docs/cursor-os/UNATTENDED-PERMISSIONS.md',
   'docs/workflows/DECISION-GATES.md',
   'docs/domain/DOMAIN-MAP.md',
   'docs/domain/README.md',

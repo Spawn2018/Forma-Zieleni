@@ -12,9 +12,9 @@ function emit(value) {
   process.stdout.write(JSON.stringify(value));
 }
 
-function ask(userMessage, agentMessage) {
+function deny(userMessage, agentMessage) {
   emit({
-    permission: 'ask',
+    permission: 'deny',
     user_message: userMessage,
     agent_message: agentMessage,
   });
@@ -35,7 +35,7 @@ export function runDangerousShell() {
   try {
     emit(classifyShell(readInput().command || ''));
   } catch {
-    ask(
+    deny(
       'The safety hook could not read the shell command.',
       'Do not run this command until the hook input can be read.',
     );
@@ -46,7 +46,7 @@ export function runDangerousMcp() {
   try {
     emit(classifyMcp(readInput()));
   } catch {
-    ask(
+    deny(
       'The safety hook could not read the MCP call.',
       'Do not run this MCP call until the hook input can be read.',
     );

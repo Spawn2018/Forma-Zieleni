@@ -116,7 +116,7 @@ test('a fast-forward checkpoint push is AUTO inside noc and dangerous pushes sta
   assert.equal(classifyShell('git push origin main').permission, 'allow');
   assert.equal(classifyShell('git push').permission, 'allow');
   for (const command of ['git push --force', 'git push --force-with-lease', 'git push --mirror', 'git push origin --delete branch']) {
-    assert.equal(classifyShell(command).permission, 'ask', command);
+    assert.equal(classifyShell(command).permission, 'deny', command);
   }
 });
 
@@ -209,20 +209,25 @@ test('silent turns stall and then stop', () => {
   assert.equal(decideFollowup(session, { status: 'completed' }, now).followup, null);
 });
 
-test('shell and MCP guards ask for dangerous operations and allow ordinary ones', () => {
+test('shell and MCP guards deny dangerous operations and allow ordinary ones', () => {
   assert.equal(classifyShell('git status').permission, 'allow');
   assert.equal(classifyShell('git commit -m "chore: add autonomous Cursor orchestration"').permission, 'allow');
   assert.equal(classifyShell('git push').permission, 'allow');
   assert.equal(classifyShell('powershell -Command "git push"').permission, 'allow');
   assert.equal(classifyShell('git -C D:\\repo push origin main').permission, 'allow');
-  assert.equal(classifyShell('git push --force').permission, 'ask');
-  assert.equal(classifyShell('git push --force-with-lease').permission, 'ask');
-  assert.equal(classifyShell('git reset --hard HEAD').permission, 'ask');
-  assert.equal(classifyShell('git clean -fd').permission, 'ask');
-  assert.equal(classifyShell('npx wrangler deploy').permission, 'ask');
-  assert.equal(classifyShell('psql -c "DROP TABLE leads"').permission, 'ask');
+  assert.equal(classifyShell('git push --force').permission, 'deny');
+  assert.equal(classifyShell('git push --force-with-lease').permission, 'deny');
+  assert.equal(classifyShell('git reset --hard HEAD').permission, 'deny');
+  assert.equal(classifyShell('git clean -fd').permission, 'deny');
+  assert.equal(classifyShell('npx wrangler deploy').permission, 'deny');
+  assert.equal(classifyShell('psql -c "DROP TABLE leads"').permission, 'deny');
+  assert.equal(
+    classifyShell(`node -e "console.log('git push --force')"`).permission,
+    'allow',
+  );
+  assert.equal(classifyShell('powershell -Command "git push --force"').permission, 'deny');
   assert.equal(classifyMcp({ tool_name: 'search_cloudflare_documentation', mcp_server_name: 'plugin-cloudflare-cloudflare-docs' }).permission, 'allow');
-  assert.equal(classifyMcp({ tool_name: 'd1_database_delete', mcp_server_name: 'plugin-cloudflare-cloudflare-bindings' }).permission, 'ask');
+  assert.equal(classifyMcp({ tool_name: 'd1_database_delete', mcp_server_name: 'plugin-cloudflare-cloudflare-bindings' }).permission, 'deny');
   assert.equal(classifyMcp({ tool_name: 'd1_database_query', mcp_server_name: 'other' }).permission, 'allow');
 });
 
