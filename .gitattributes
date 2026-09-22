@@ -1,0 +1,11 @@
+# Keep these worktrees LF. Their git blobs are LF, and SHA256SUMS follows the blob.
+.env.example text eol=lf
+docs/README.md text eol=lf
+docs/architecture/DECISIONS.md text eol=lf
+docs/cursor-os/AUTONOMOUS-SESSION-CONTROLLER.md text eol=lf
+docs/knowledge/POST-V2-DECISIONS.md text eol=lf
+docs/knowledge/SOURCE-INVENTORY.csv text eol=lf
+docs/quality/DEFINITION-OF-DONE.md text eol=lf
+docs/security/SECURITY-ASSURANCE.md text eol=lf
+docs/vision/MASTER-PLAN.md text eol=lf
+pnpm-workspace.yaml text eol=lf
