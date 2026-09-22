@@ -110,6 +110,12 @@ export {
   createContract,
 } from './contract.ts';
 export type { Contract, ContractStatus } from './contract.ts';
+export {
+  PROJECT_STATUSES,
+  assertOpaqueProjectId,
+  createProject,
+} from './project.ts';
+export type { Project, ProjectStatus } from './project.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

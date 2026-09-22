@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Lead, Offer, Opportunity } from '@forma-zieleni/domain';
+import type { Contract, Lead, Offer, Opportunity, Project } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -11,6 +11,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  ProjectListQuery,
   StoredReply,
 } from './store.ts';
 
@@ -72,6 +73,16 @@ function toContract(row: Database['contract']): Contract {
     id: row.id,
     offerId: row.offer_id,
     status: row.status as Contract['status'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
+function toProject(row: Database['project']): Project {
+  return {
+    id: row.id,
+    contractId: row.contract_id,
+    status: row.status as Project['status'],
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -272,6 +283,42 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toContract);
+  }
+
+  async insertProject(project: Project): Promise<void> {
+    await this.trx.insertInto('project').values({
+      id: project.id,
+      contract_id: project.contractId,
+      status: project.status,
+      created_at: new Date(project.createdAt),
+      updated_at: new Date(project.updatedAt),
+    }).execute();
+  }
+
+  async findProject(id: string): Promise<Project | null> {
+    const row = await this.trx.selectFrom('project').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toProject(row) : null;
+  }
+
+  async findProjectByContract(contractId: string): Promise<Project | null> {
+    const row = await this.trx.selectFrom('project').selectAll().where('contract_id', '=', contractId).executeTakeFirst();
+    return row ? toProject(row) : null;
+  }
+
+  async listProjects(query: ProjectListQuery): Promise<Project[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('project').selectAll();
+    if (query.status) request = request.where('status', '=', query.status);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toProject);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

@@ -39,6 +39,13 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  project: {
+    id: string;
+    contract_id: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -502,6 +509,59 @@ ALTER TABLE offer DROP COLUMN IF EXISTS client_subject;
   },
 };
 
+const PROJECT_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'projects:read',
+  'projects:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const projectMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE project (
+  id text PRIMARY KEY,
+  contract_id text NOT NULL REFERENCES contract (id),
+  status text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT project_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT project_status_known CHECK (status IN ('planned')),
+  CONSTRAINT project_contract_unique UNIQUE (contract_id)
+);
+CREATE INDEX project_list_created ON project (created_at DESC, id DESC);
+CREATE INDEX project_list_updated ON project (updated_at DESC, id DESC);
+CREATE INDEX project_list_status_created ON project (status, created_at DESC, id DESC);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PROJECT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability IN ('projects:read', 'projects:create');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_OFFER_CAPABILITY_SQL}));
+DROP TABLE IF EXISTS project;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -513,6 +573,7 @@ const provider: MigrationProvider = {
       '006_offer_contract': offerMigration,
       '007_contract_domain': contractMigration,
       '008_portal_offer_projection': portalOfferMigration,
+      '009_project_domain': projectMigration,
     };
   },
 };

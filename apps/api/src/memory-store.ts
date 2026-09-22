@@ -7,6 +7,8 @@ import type {
   OfferStatus,
   Opportunity,
   OpportunityStatus,
+  Project,
+  ProjectStatus,
 } from '@forma-zieleni/domain';
 import type {
   AuditEvent,
@@ -17,6 +19,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  ProjectListQuery,
   StoredReply,
 } from './store.ts';
 
@@ -25,6 +28,7 @@ type MemoryState = {
   opportunities: Opportunity[];
   offers: Offer[];
   contracts: Contract[];
+  projects: Project[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -44,6 +48,7 @@ export class MemoryLeadStore implements LeadStore {
     opportunities: [],
     offers: [],
     contracts: [],
+    projects: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -55,6 +60,7 @@ export class MemoryLeadStore implements LeadStore {
       opportunities: this.state.opportunities,
       offers: this.state.offers,
       contracts: this.state.contracts,
+      projects: this.state.projects,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -66,6 +72,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.opportunities = snapshot.opportunities;
       this.state.offers = snapshot.offers;
       this.state.contracts = snapshot.contracts;
+      this.state.projects = snapshot.projects;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -220,6 +227,41 @@ class MemoryTx implements LeadTx {
           const at = stamp(contract, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && contract.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && contract.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertProject(project: Project): Promise<void> {
+    if (this.state.projects.some(item => item.contractId === project.contractId)) {
+      throw new Error('PROJECT_EXISTS');
+    }
+    this.state.projects.push(clone(project));
+  }
+
+  async findProject(id: string): Promise<Project | null> {
+    return clone(this.state.projects.find(item => item.id === id) ?? null);
+  }
+
+  async findProjectByContract(contractId: string): Promise<Project | null> {
+    return clone(this.state.projects.find(item => item.contractId === contractId) ?? null);
+  }
+
+  async listProjects(query: ProjectListQuery): Promise<Project[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.projects.filter(
+      project => !query.status || project.status === (query.status as ProjectStatus),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(project => {
+          const at = stamp(project, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && project.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && project.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

@@ -15,13 +15,16 @@
     "GET /portal/offers",
     "GET /portal/offers/{offerId}",
     "GET /portal/session",
+    "GET /projects",
+    "GET /projects/{projectId}",
     "GET /ready",
     "POST /contracts",
     "POST /growth/plans",
     "POST /leads",
     "POST /leads/{leadId}/qualify",
     "POST /offers",
-    "POST /opportunities"
+    "POST /opportunities",
+    "POST /projects"
   ],
   "requiredHeaders": {
     "POST /leads": [
@@ -37,6 +40,9 @@
       "Idempotency-Key"
     ],
     "POST /contracts": [
+      "Idempotency-Key"
+    ],
+    "POST /projects": [
       "Idempotency-Key"
     ]
   },
@@ -96,5 +102,18 @@
     "provider",
     "price",
     "value"
+  ],
+  "requiredProjectFields": [
+    "id",
+    "contractId",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenProjectFields": [
+    "payment",
+    "provider",
+    "deposit",
+    "price"
   ]
 }

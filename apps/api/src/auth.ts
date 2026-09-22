@@ -8,8 +8,9 @@ export type LeadCapability = 'leads:read' | 'leads:qualify';
 export type OpportunityCapability = 'opportunities:read' | 'opportunities:create';
 export type OfferCapability = 'offers:read' | 'offers:create' | 'offers:portal-read';
 export type ContractCapability = 'contracts:read' | 'contracts:create';
+export type ProjectCapability = 'projects:read' | 'projects:create';
 export type GrowthCapability = 'growth:plan' | 'semantic:review';
-export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ContentCapability | GrowthCapability;
+export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ProjectCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -40,6 +41,7 @@ function isCapability(value: unknown): value is Capability {
     || value === 'opportunities:read' || value === 'opportunities:create'
     || value === 'offers:read' || value === 'offers:create' || value === 'offers:portal-read'
     || value === 'contracts:read' || value === 'contracts:create'
+    || value === 'projects:read' || value === 'projects:create'
     || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 

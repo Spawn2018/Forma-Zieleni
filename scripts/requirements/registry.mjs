@@ -182,7 +182,7 @@ row('FZ-REQ-SKETCHUP-001', 'SketchUp is not the source of business truth.', 'BLO
   executableSlice: 'SKETCHUP-ADAPTER-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-PROJECT-002', 'Project domain foundations may be contracted after Contract without a live payment provider.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'CRM-CONTRACT-DOMAIN', 'NONE', 'Payment provider stays OWNER-DECISION; domain modeling is safe pre-blocker work.', {
+row('FZ-REQ-PROJECT-002', 'Project domain foundations may be contracted after Contract without a live payment provider.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project.ts', 'packages/domain/project.test.mjs', '', 'NONE', 'Payment provider stays OWNER-DECISION; domain modeling is safe pre-blocker work.', {
   productCapability: 'PROJECT',
   executableSlice: 'CRM-PROJECT-DOMAIN',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],

@@ -10,3 +10,5 @@ export { validateOfferCreateRequest } from './offer.ts';
 export type { OfferCreateRequest } from './offer.ts';
 export { validateContractCreateRequest } from './contract.ts';
 export type { ContractCreateRequest } from './contract.ts';
+export { validateProjectCreateRequest } from './project.ts';
+export type { ProjectCreateRequest } from './project.ts';

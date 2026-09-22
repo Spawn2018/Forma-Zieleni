@@ -1,5 +1,11 @@
 import { randomBytes } from 'node:crypto';
-import { assertOpaqueLeadId, assertOpaqueContractId, assertOpaqueOfferId, assertOpaqueOpportunityId } from '@forma-zieleni/domain';
+import {
+  assertOpaqueLeadId,
+  assertOpaqueContractId,
+  assertOpaqueOfferId,
+  assertOpaqueOpportunityId,
+  assertOpaqueProjectId,
+} from '@forma-zieleni/domain';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -24,4 +30,8 @@ export function newOfferId(): string {
 
 export function newContractId(): string {
   return assertOpaqueContractId(newOpaqueId('c'));
+}
+
+export function newProjectId(): string {
+  return assertOpaqueProjectId(newOpaqueId('j'));
 }

@@ -7,6 +7,8 @@ import type {
   OfferStatus,
   Opportunity,
   OpportunityStatus,
+  Project,
+  ProjectStatus,
 } from '@forma-zieleni/domain';
 
 export type SortField = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt';
@@ -39,6 +41,13 @@ export type ContractListQuery = {
   cursor?: { at: string; id: string };
 };
 
+export type ProjectListQuery = {
+  limit: number;
+  sort: SortField;
+  status?: ProjectStatus;
+  cursor?: { at: string; id: string };
+};
+
 export type StoredReply = {
   requestHash: string;
   responseStatus: number;
@@ -47,7 +56,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'project.created';
   leadId: string;
   payload: {
     leadId: string;
@@ -56,13 +65,14 @@ export type OutboxMessage = {
     opportunityId?: string;
     offerId?: string;
     contractId?: string;
+    projectId?: string;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'project.created';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -74,6 +84,7 @@ export type AuditEvent = {
     opportunityId?: string;
     offerId?: string;
     contractId?: string;
+    projectId?: string;
   };
 };
 
@@ -96,6 +107,10 @@ export interface LeadTx {
   findContract(id: string): Promise<Contract | null>;
   findContractByOffer(offerId: string): Promise<Contract | null>;
   listContracts(query: ContractListQuery): Promise<Contract[]>;
+  insertProject(project: Project): Promise<void>;
+  findProject(id: string): Promise<Project | null>;
+  findProjectByContract(contractId: string): Promise<Project | null>;
+  listProjects(query: ProjectListQuery): Promise<Project[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

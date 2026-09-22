@@ -44,6 +44,11 @@ test('breaking-change inventory of lead paths and required fields remains exact'
     assert.equal(Object.hasOwn(spec.components.schemas.Contract.properties, field), false);
     assert.equal(Object.hasOwn(spec.components.schemas.ContractCreate.properties, field), false);
   }
+  assert.deepEqual(spec.components.schemas.Project.required, inventory.requiredProjectFields);
+  for (const field of inventory.forbiddenProjectFields) {
+    assert.equal(Object.hasOwn(spec.components.schemas.Project.properties, field), false);
+    assert.equal(Object.hasOwn(spec.components.schemas.ProjectCreate.properties, field), false);
+  }
 });
 
 test('mutations require idempotency and public capture has no bearer requirement', () => {
@@ -75,6 +80,13 @@ test('mutations require idempotency and public capture has no bearer requirement
   ]);
   assert.deepEqual(spec.paths['/contracts'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/contracts/{contractId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/projects'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/projects'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
+  assert.deepEqual(spec.paths['/projects'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/projects/{projectId}'].get.security, [{ bearerAuth: [] }]);
 });
 
 test('public capture cannot assert internal sources and qualify declares idempotency conflict', () => {

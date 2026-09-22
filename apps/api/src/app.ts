@@ -1,14 +1,15 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateContractCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
+import { createProjectFromContract, listVisibleProjects, parseProjectListQuery, readProject } from './projects.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
@@ -75,6 +76,14 @@ function pathContractId(value: string): string {
     return assertOpaqueContractId(decodeURIComponent(value));
   } catch {
     throw badRequest('CONTRACT_ID_INVALID', 'Contract id is not valid.');
+  }
+}
+
+function pathProjectId(value: string): string {
+  try {
+    return assertOpaqueProjectId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('PROJECT_ID_INVALID', 'Project id is not valid.');
   }
 }
 
@@ -390,6 +399,37 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const contract = await readContract(options.store, pathContractId(c.req.param('contractId')));
     if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
     return c.json(contract);
+  });
+
+  app.post('/v1/projects', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateProjectCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PROJECT_INVALID', 'Project could not be accepted.', parsed.errors);
+    const project = await createProjectFromContract(options.store, parsed.value.contractId, actor, key, now());
+    return c.json(project, 201);
+  });
+
+  app.get('/v1/projects', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:read');
+    c.set('actorId', actor.actorId);
+    const query = parseProjectListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listVisibleProjects(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/projects/:projectId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:read');
+    c.set('actorId', actor.actorId);
+    const project = await readProject(options.store, pathProjectId(c.req.param('projectId')));
+    if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    return c.json(project);
   });
 
   app.post('/v1/growth/plans', async c => {

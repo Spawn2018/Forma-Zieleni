@@ -244,14 +244,20 @@ Next: none until a later portal projection.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for OpenAPI + domain Project created only from an
+existing Contract, with staff create/list/get through Core API
+authorization. No payment provider, no payment capture, no signing SaaS,
+no Admin ceremony UI. Payment stays OWNER-DECISION.
 Autonomous: yes.
 Accept: Project as a first-class Core API domain foundation after
 Contract, without a live payment provider or payment capture. Opaque
 ids; tenant/authz; BOLA; staff create/list/get minimum. No payment
 activation, no signing SaaS, no Admin ceremony UI, no invented client
 facts.
-Tests: domain/OpenAPI/Core API project cases.
+Tests: `packages/domain/project.test.mjs`,
+`packages/validation/project.test.mjs`,
+`packages/types/project.test.mjs`, `contracts/openapi.test.mjs`,
+`apps/api/src/http.test.mjs` project cases.
 Security: anonymous 401; portal without project caps 403; BOLA.
 Next: PORTAL-PROJECT-PROJECTION.
 
