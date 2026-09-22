@@ -119,11 +119,58 @@ export function lightboxAnimation(reducedMotion: boolean): { fade: number; swipe
   return reducedMotion ? { fade: 0, swipe: 0 } : { fade: 240, swipe: 320 };
 }
 
+export type GalleryCard = {
+  src: string;
+  width: number;
+  height: number;
+  loading: 'eager' | 'lazy';
+  alt: string;
+};
+
+export type GalleryPerformanceNotes = {
+  lcpCandidate: string;
+  cls: 'width-height';
+  originalsOnCards: false;
+  count: number;
+};
+
+export function galleryCards(slides: readonly GallerySlide[]): GalleryCard[] {
+  return slides.map((slide, index) => {
+    const src = assertPublicDerivative(slide.thumb);
+    if (!src.endsWith('/w400.webp')) throw new Error('CARD_WIDTH');
+    if (!Number.isInteger(slide.thumbWidth) || !Number.isInteger(slide.thumbHeight) || slide.thumbWidth < 1 || slide.thumbHeight < 1) {
+      throw new Error('CLS_DIMENSIONS');
+    }
+    return {
+      src,
+      width: slide.thumbWidth,
+      height: slide.thumbHeight,
+      loading: index === 0 ? 'eager' : 'lazy',
+      alt: slide.alt,
+    };
+  });
+}
+
+export function galleryPerformanceNotes(cards: readonly GalleryCard[]): GalleryPerformanceNotes {
+  if (cards.length < 1) throw new Error('GALLERY_EMPTY');
+  const lcp = cards[0];
+  if (!lcp || lcp.loading !== 'eager' || cards.slice(1).some((card) => card.loading !== 'lazy')) throw new Error('THUMB_LOADING');
+  return {
+    lcpCandidate: lcp.src,
+    cls: 'width-height',
+    originalsOnCards: false,
+    count: cards.length,
+  };
+}
+
 export function carouselElement(slides: readonly GallerySlide[], index: number, onOpen: (index: number, triggerId: string) => void): ReactNode {
+  const cards = galleryCards(slides);
   return createElement(
     'section',
     { className: 'gallery', role: 'region', 'aria-roledescription': 'carousel', 'aria-label': 'Galeria' },
     slides.map((slide, itemIndex) => {
+      const card = cards[itemIndex];
+      if (!card) throw new Error('CARD_MISSING');
       const triggerId = `thumb-${slide.id}`;
       return createElement(
         'button',
@@ -138,11 +185,11 @@ export function carouselElement(slides: readonly GallerySlide[], index: number, 
           onClick: () => onOpen(itemIndex, triggerId),
         },
         createElement('img', {
-          src: assertPublicDerivative(slide.thumb),
-          alt: slide.alt,
-          width: slide.thumbWidth,
-          height: slide.thumbHeight,
-          loading: itemIndex === 0 ? 'eager' : 'lazy',
+          src: card.src,
+          alt: card.alt,
+          width: card.width,
+          height: card.height,
+          loading: card.loading,
         }),
       );
     }),

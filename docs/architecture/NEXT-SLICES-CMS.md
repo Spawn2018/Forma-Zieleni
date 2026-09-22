@@ -221,10 +221,11 @@ Next: CMS-ACCEPT (after CMS-PERF/RESTORE/EXPORT).
 
 Dependencies: CMS-WWW.
 Gate: REVIEW.
+Status: COMPLETE for derivative cards and reserved dimensions. No numeric LCP budget is invented.
 Autonomous: yes.
 Entry: CMS-WWW recorded.
-Accept: no original on cards; lazy thumbs; LCP/CLS notes; gallery of 30+ images.
-Tests: card src is a derivative width; CLS width/height present.
+Accept: `apps/web/app/gallery.ts` puts a `w400.webp` derivative on each card, lazy-loads every thumb after the first, and records the first card as the LCP candidate with width and height. Originals stay off the cards.
+Tests: `apps/web/app/cms-perf.test.mjs`. A gallery of 32 cards has one eager image and 31 lazy images. Each card src is `w400.webp` with width and height.
 Next: CMS-ACCEPT.
 
 ### CMS-RESTORE

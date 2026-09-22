@@ -181,6 +181,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-CMS-HARDEN', 'Public HTML escapes hostile titles and omits unpublished tokens. SVG uploads are denied. Outbound URLs reject private targets. Logs redact secrets.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/domain/src/cms-harden.ts', 'packages/domain/cms-harden.test.mjs', 'ZAP and Dependency-Check stay deferred', 'NONE', 'pnpm audit --audit-level=moderate reported no known vulnerabilities on 2026-09-22. DNS is not resolved.');
     continue;
   }
+  if (slice === 'CMS-PERF') {
+    row('FZ-REQ-CMS-SLICE-CMS-PERF', 'Gallery cards use a w400.webp derivative, reserve width and height, and lazy-load every thumb after the LCP candidate.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/gallery.ts', 'apps/web/app/cms-perf.test.mjs', '', 'NONE', 'No numeric LCP budget. Originals stay off the cards.');
+    continue;
+  }
   if (slice === 'SEARCH-SITEMAP-ROBOTS') {
     row('FZ-REQ-CMS-SLICE-SEARCH-SITEMAP-ROBOTS', 'Robots and sitemap are generated from policy. Non-production disallows indexing. Production is not a blanket disallow. Training groups stay absent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Cloudflare apply stays DANGEROUS', 'NONE', 'FZ-SEARCH-CRAWL-1 remains OPEN.');
     continue;
