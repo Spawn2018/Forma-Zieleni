@@ -206,6 +206,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/NEXT-SLICES-MAIN.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md",
       "docType": "DOCUMENT",
       "audience": "developer",
@@ -435,6 +447,18 @@
     },
     {
       "path": "docs/cursor-os/SETUP-FOR-NONTECHNICAL-OWNER.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
+      "path": "docs/cursor-os/UNATTENDED-PERMISSIONS.md",
       "docType": "DOCUMENT",
       "audience": "developer",
       "owner": "ENGINEERING",
@@ -1131,6 +1155,18 @@
     },
     {
       "path": "docs/security/ASVS-5.0.0-LEAD-SLICE.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "SECURITY",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
+      "path": "docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md",
       "docType": "DOCUMENT",
       "audience": "developer",
       "owner": "SECURITY",
