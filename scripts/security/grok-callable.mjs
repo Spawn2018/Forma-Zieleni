@@ -66,6 +66,9 @@ export function planGrokChallenge(input = {}) {
  */
 export function runSyntheticProbe(options = {}) {
   const status = grokChannelStatus();
+  if (options.dryRun === true) {
+    return { ok: true, state: 'GROK_REQUESTED', dryRun: true, status };
+  }
   if (!status.installed) {
     return { ok: false, state: 'GROK_DEFERRED', reason: 'not_installed', status };
   }
@@ -77,9 +80,6 @@ export function runSyntheticProbe(options = {}) {
       ownerAction: 'Run `grok login` (browser or --device-auth). Do not paste API keys into the repo.',
       status,
     };
-  }
-  if (options.dryRun === true) {
-    return { ok: true, state: 'GROK_REQUESTED', dryRun: true, status };
   }
   const args = [
     '-p',

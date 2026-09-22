@@ -5,7 +5,7 @@
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
-  "codeRabbit": "CLI authenticated (Spawn2018). Per-checkpoint via scripts/security/coderabbit-checkpoint.mjs. Default review access Spawn2018/Spawn2018 — Forma-Zieleni not visible in CR GitHub default. Period reviews observed=11; hourly cap UNKNOWN (project budget 3/hour). Usage billing inactive.",
+  "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",

@@ -44,6 +44,15 @@ test('checkpoint planner skips trivial or rate-limited reviews', () => {
     }).state,
     'CODERABBIT_DEFERRED_UNAVAILABLE',
   );
+  assert.equal(
+    planCheckpointReview({
+      paths: ['apps/api/src/config.ts'],
+      diffText: 'password = "hunter2hunter2"',
+      quota: { status: 'AVAILABLE', remaining: 2 },
+      bin: 'coderabbit',
+    }).state,
+    'CODERABBIT_DEFERRED_UNAVAILABLE',
+  );
 });
 
 test('dry-run checkpoint review does not invoke the CLI', () => {

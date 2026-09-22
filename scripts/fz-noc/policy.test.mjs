@@ -17,6 +17,7 @@ import {
   grokDisposition,
   coderabbitDisposition,
   coderabbitPrivacyBlocked,
+  coderabbitDiffContentBlocked,
   STALL_MESSAGE,
 } from './policy.mjs';
 
@@ -162,6 +163,8 @@ test('CodeRabbit checkpoint states stay advisory and privacy-gated', () => {
   assert.equal(coderabbitDisposition({ rateLimited: true }), 'CODERABBIT_DEFERRED_RATE_LIMIT');
   assert.equal(coderabbitDisposition({ privacyBlocked: true }), 'CODERABBIT_DEFERRED_UNAVAILABLE');
   assert.deepEqual(coderabbitPrivacyBlocked(['apps/web/x.tsx', '.env']), ['.env']);
+  assert.ok(coderabbitDiffContentBlocked('api_key=supersecretvalue99').length > 0);
+  assert.equal(coderabbitDiffContentBlocked('ordinary feature flag').length, 0);
 });
 
 test('repeated identical attempts block a slice', () => {

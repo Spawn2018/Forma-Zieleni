@@ -273,6 +273,14 @@ const EXTERNAL_REVIEW_DENY = [
   /\b(payment|iban|pesel|passport)\b/i,
 ];
 
+const EXTERNAL_REVIEW_CONTENT = [
+  /-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----/,
+  /AKIA[0-9A-Z]{16}/,
+  /Bearer [A-Za-z0-9\-._~+/]{20,}/i,
+  /(?:api[_-]?key|secret|password|token)\s*[:=]\s*['"]?[^\s'"]{12,}/i,
+  /\b(?:pesel|iban|customer[_-]?email)\b\s*[:=]/i,
+];
+
 /** Paths that must not leave the machine for external AI review. */
 export function coderabbitPrivacyBlocked(paths = []) {
   const blocked = [];
@@ -282,6 +290,17 @@ export function coderabbitPrivacyBlocked(paths = []) {
     if (EXTERNAL_REVIEW_DENY.some((re) => re.test(file))) blocked.push(file);
   }
   return [...new Set(blocked)];
+}
+
+/** Diff body that must not leave the machine for external AI review. */
+export function coderabbitDiffContentBlocked(diffText = '') {
+  const text = String(diffText || '');
+  if (!text) return [];
+  const hits = [];
+  for (const re of EXTERNAL_REVIEW_CONTENT) {
+    if (re.test(text)) hits.push(re.source.slice(0, 48));
+  }
+  return hits;
 }
 
 export function coderabbitDisposition(input = {}) {

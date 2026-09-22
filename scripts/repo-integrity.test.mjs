@@ -38,7 +38,6 @@ test('manifest hashes match Git blob bytes, not platform checkout bytes', () => 
   if (text.includes('\r')) text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const expected = createHash('sha256').update(Buffer.from(text, 'utf8')).digest('hex');
   assert.equal(recorded, expected);
-  // Prove the check is not naively hashing raw checkout bytes when CRLF is present.
   if (disk.includes(0x0d)) {
     const raw = createHash('sha256').update(disk).digest('hex');
     assert.notEqual(raw, recorded);

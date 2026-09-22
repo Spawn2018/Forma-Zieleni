@@ -8,10 +8,12 @@ artifact means in this repository.
 `SHA256SUMS.txt` at the repository root is the **current** integrity
 manifest.
 
-It records SHA-256 of the **Git blob form** of every Git-tracked path
-(after clean filters / line-ending normalization), sorted by path, in
-`sha256sum` form (`<hex>  <path>`). Raw Windows CRLF checkouts must not
-produce a different manifest than Linux CI.
+It records SHA-256 of the **LF-normalized text blob form** (and raw
+bytes for binary) of every Git-tracked path, sorted by path, in
+`sha256sum` form (`<hex>  <path>`). This matches Git `text=auto` /
+Linux CI checkouts. Raw Windows CRLF working trees must not produce a
+different manifest. Full per-file `git hash-object -w` is intentionally
+not used in the gate (object-store churn).
 
 It does **not** list:
 

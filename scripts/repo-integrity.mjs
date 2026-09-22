@@ -79,7 +79,12 @@ const BINARY_EXT = new Set([
   '.woff', '.woff2', '.ico', '.bin', '.wasm', '.mp4', '.mp3',
 ]);
 
-/** Hash the Git blob form (LF-normalized text), not raw CRLF checkout bytes. */
+/**
+ * Hash the repository blob form for integrity.
+ * Text is LF-normalized to match Git `text=auto` / Linux CI checkouts.
+ * Full `git hash-object -w` per file is rejected as the checkpoint gate:
+ * it writes hundreds of loose objects and is not proportionate.
+ */
 function blobBytes(rel) {
   const abs = path.join(root, rel);
   const buf = readFileSync(abs);
