@@ -10,5 +10,13 @@ Portal klienta Forma Zieleni.
 
 ## Status
 
-Szkielet katalogu. Framework aplikacji nie został jeszcze wybrany ani zainstalowany.
-Oddzielna aplikacja od `apps/web` i `apps/admin`.
+Aplikacja React Router Framework Mode (SSR). Układ, trasa `/` i granica
+błędu są w `app/`. Strona startowa jest bramką wylogowaną: nie pokazuje
+projektów, ofert ani plików i nie zmyśla faktów CRM. Logowanie klienta
+i odczyt projekcji z Core API są kolejnymi slice'ami.
+
+Kolory są tokenami kanonu. Kroje Newsreader i Schibsted Grotesk są
+wskazane w CSS. Pliki fontów nie są dołączone.
+
+Oddzielna strefa zaufania od `apps/web` i `apps/admin`. Brak wdrożenia,
+DNS i Cloudflare. Meta `noindex` jest ustawione na portalu.

@@ -1,0 +1,26 @@
+{
+  "name": "@forma-zieleni/portal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "build": "react-router build",
+    "typecheck": "react-router typegen && tsc -p tsconfig.json --noEmit",
+    "lint": "node --check app/shell.test.mjs",
+    "test": "node --test app/shell.test.mjs"
+  },
+  "dependencies": {
+    "@react-router/node": "^8.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^8.4.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
+  }
+}

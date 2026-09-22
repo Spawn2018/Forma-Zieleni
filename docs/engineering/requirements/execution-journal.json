@@ -1,9 +1,9 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "return-roadmap-complete",
+  "currentPhase": "portal-app-complete",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "444e98aa0c1135d3abafa4e34720ab17b00ddd2b",
+  "publishedHead": "286c6187de4e05990b96d5106d6efaf44614a0b9",
   "postPushSafety": "PASS",
   "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record. Independent CI for 444e98a: PASS (run 35747728773 Verify+Windows supervisor).",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
@@ -21,11 +21,12 @@
   "blockers": [
     "Lead security-acceptance OPEN (ZAP/SCA/off-site/private-origin deferred)",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
+    "LEAD-SEC-SESSION may be session-blocked after repeated identical selects",
     "ZAP ARMED_WAITING_FOR_TARGET (lab listen + runtime)",
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "RETURN-ROADMAP COMPLETE. Next READY is LEAD-SEC-SESSION on NEXT-SLICES-MAIN.md (PORTAL-APP also READY). Do not mark Lead or CMS security-accepted.",
+  "nextSafeAction": "PORTAL-APP COMPLETE. Next READY is CRM-OPPORTUNITY-CONTRACT on NEXT-SLICES-MAIN.md. Work-steal LEAD-SEC-SESSION if unblocked. Do not mark Lead or CMS security-accepted.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",

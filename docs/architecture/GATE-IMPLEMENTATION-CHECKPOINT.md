@@ -63,10 +63,13 @@ REVIEW progress for lead rules only:
 
 ## Gate D product surfaces
 
-Not started:
+Review progress:
 
-- WWW, Portal and Admin stay unbuilt. Their framework is selected.
-- The lead vertical does not include those surfaces.
+- WWW (`apps/web`) is a React Router Framework Mode shell with
+  published-content projection.
+- Portal (`apps/portal`) is a React Router Framework Mode signed-out
+  shell. Client auth and project projections are not built.
+- Admin stays a directory skeleton.
 - Mobile still waits on a later product slice.
 - No generic UI was added.
 

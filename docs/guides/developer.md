@@ -50,8 +50,9 @@ The context window size is not a reason to read every document.
 
 ## Next product slice
 
-After `RETURN-ROADMAP`, ordinary READY work is selected from
-`docs/architecture/NEXT-SLICES-MAIN.md`. First READY is Lead session
-logout evidence (`LEAD-SEC-SESSION`), with `PORTAL-APP` also READY.
+After `PORTAL-APP`, ordinary READY work on
+`docs/architecture/NEXT-SLICES-MAIN.md` is `CRM-OPPORTUNITY-CONTRACT`.
+`LEAD-SEC-SESSION` may still be blocked in a running `/noc` session
+after repeated identical selects; clear or work-steal as policy allows.
 The CMS/Search graph stays acceptance history. Do not start a second
 roadmap.

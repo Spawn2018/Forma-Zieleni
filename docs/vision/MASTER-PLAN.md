@@ -65,7 +65,8 @@ are acceptance history after `RETURN-ROADMAP`. Ordinary READY work
 continues on
 [`../architecture/NEXT-SLICES-MAIN.md`](../architecture/NEXT-SLICES-MAIN.md)
 (Lead security evidence, then Portal). Content is not CRM. The CMS
-decision is not CMS-ACCEPT.
+decision is not CMS-ACCEPT. `apps/portal` now has a signed-out React
+Router shell; client auth and project projections remain later slices.
 
 ## Cross-cutting operational readiness
 

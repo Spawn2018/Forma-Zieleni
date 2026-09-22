@@ -92,16 +92,18 @@ Next: none from this report.
 Dependencies: none. ADR-014 already requires `apps/portal` as React
 Router Framework Mode.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for the SSR signed-out shell. React Router 8.4.0
+Framework Mode, Vite 8, React 19. No Tailwind, no font files, no deploy,
+no client CRM data.
 Autonomous: yes.
 Accept: a real `apps/portal` React Router Framework Mode application
 in the monorepo, wired into workspace test/typecheck/lint/build, with
 root layout, route module, and error boundary. Client-only shell; no
 CRM writes; no invented project or offer facts. Separate trust zone
 from WWW and Admin. No deploy, DNS, or Cloudflare mutation.
-Tests: portal shell tests. Build succeeds.
-Security: no anonymous access to client project data; loaders do not
-become a second business API.
+Tests: `apps/portal/app/shell.test.mjs`. `pnpm --filter @forma-zieleni/portal build` succeeds. Client CSS is about 0.93 kB.
+Security: anonymous visitors see only the signed-out gate; loaders do
+not fetch client project data; `noindex` is set.
 Next: CRM-OPPORTUNITY-CONTRACT.
 
 ### CRM-OPPORTUNITY-CONTRACT

@@ -33,8 +33,7 @@ Nie oceniaj ich po tym pliku jako gotowych.
 
 ## Następna bezpieczna praca produktowa
 
-Po `RETURN-ROADMAP` zwykły READY jest na
-`docs/architecture/NEXT-SLICES-MAIN.md`: najpierw dowody sesji Lead
-(`LEAD-SEC-SESSION`), równolegle portal klienta (`PORTAL-APP`).
-CMS-ACCEPT i akceptacja bezpieczeństwa Lead pozostają otwarte.
-To nie jest prośba o wdrożenie.
+Po `PORTAL-APP` kolejny READY na `docs/architecture/NEXT-SLICES-MAIN.md`
+to `CRM-OPPORTUNITY-CONTRACT` (oraz osobno odblokowanie
+`LEAD-SEC-SESSION`, jeśli sesja go zablokowała). CMS-ACCEPT i akceptacja
+bezpieczeństwa Lead pozostają otwarte. To nie jest prośba o wdrożenie.
