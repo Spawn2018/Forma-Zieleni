@@ -48,6 +48,7 @@ function greenGate(head = SHA_A, origin = SHA_B) {
       failedCheck: null,
       results: [],
     }),
+    reviewDebtForPush: () => ({ ok: true }),
   };
 }
 
