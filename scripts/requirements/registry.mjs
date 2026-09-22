@@ -96,7 +96,7 @@ row('FZ-REQ-API-001', 'Core API remains the business authority.', 'DONE_AT_MAX_D
 row('FZ-REQ-DATA-001', 'PostgreSQL and Kysely remain persistence. New unused tables were not added.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/api/src/db.ts', 'apps/api/src/postgres.integration.test.mjs', 'A shared fabric table waits for a product consumer', 'NONE', 'Domain contract is in memory, matching the content-publish precedent.');
 row('FZ-REQ-SEC-001', 'The lead vertical is implemented and is not security-accepted.', 'BLOCKED_BY_DEPENDENCY', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md', 'packages/domain/src/lead.ts', 'packages/domain/lead.test.mjs', 'ZAP, Dependency-Check, offsite backup, production ingress', 'REVIEW', 'Do not mark security-accepted.');
 row('FZ-REQ-PRIV-001', 'No live customer tracking, session replay or analytics ingestion is activated.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', GROWTH, PLAN, TEST, '', 'NONE', '');
-row('FZ-REQ-WWW-001', 'WWW reads a published projection and must not invent business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/content-publish.ts', 'packages/domain/content-publish.test.mjs', '', 'NONE', 'The public site application is not built yet.');
+row('FZ-REQ-WWW-001', 'WWW reads a published projection and must not invent business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', '', 'NONE', 'Gallery and offer pages are later slices. Font files are not shipped.');
 row('FZ-REQ-PORTAL-001', 'Portal customer isolation is enforced in the domain contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, CODE, TEST, 'apps/portal is a boundary note', 'NONE', 'No portal UI.');
 row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.');
 row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'No mobile client', 'NONE', '');
@@ -146,7 +146,7 @@ const OPEN_SLICES = [
 ];
 for (const slice of OPEN_SLICES) {
   if (slice === 'WWW-APP') {
-    row('FZ-REQ-CMS-SLICE-WWW-APP', 'apps/web is the React Router Framework Mode foundation already required by ADR-014 and FZ-REQ-WWW-001.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, 'apps/web/README.md', SLICES, 'application not installed', 'REVIEW', 'Not a second product requirement. The missing app is an internal slice, not an external dependency.');
+    row('FZ-REQ-CMS-SLICE-WWW-APP', 'apps/web is the React Router Framework Mode foundation already required by ADR-014 and FZ-REQ-WWW-001.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/root.tsx', 'apps/web/app/shell.test.mjs', '', 'NONE', 'Font files stay out until a measured OFL subset exists. No deploy.');
     continue;
   }
   if (slice === 'MEDIA-COLLECTIONS') {

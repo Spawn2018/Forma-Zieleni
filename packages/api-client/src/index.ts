@@ -10,6 +10,10 @@ export const leadPaths = Object.freeze({
   qualify: (leadId: string) => `${API_PREFIX}/leads/${leadId}/qualify`,
 });
 
+export const contentPaths = Object.freeze({
+  document: (contentId: string) => `${API_PREFIX}/content/${contentId}`,
+});
+
 export type LeadClientContract = {
   createLead(body: LeadCaptureBody, headers: { 'Idempotency-Key': string; 'X-Request-Id'?: string }): Promise<LeadRecord>;
   listLeads(query: { limit?: number; cursor?: string; sort?: string; status?: LeadRecord['status'] }): Promise<{ items: LeadRecord[]; meta: { limit: number; nextCursor: string | null } }>;

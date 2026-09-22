@@ -12,7 +12,7 @@ ADR-014). Implementation and security acceptance are not complete.
 ## Applications
 
 - `apps/api` = Hono on Node 24. Core API remains canonical.
-- `apps/web` = React Router Framework Mode
+- `apps/web` = React Router Framework Mode. The shell reads one published title from Core API `GET /v1/content/:id` and does not invent public copy.
 - `apps/portal` = React Router Framework Mode
 - `apps/admin` = React Router Framework Mode
 - WWW, Portal and Admin stay separate applications and trust zones.

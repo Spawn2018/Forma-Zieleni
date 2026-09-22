@@ -288,6 +288,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     if (decision === 'unauthenticated') throw new ApiFailure(401, 'UNAUTHENTICATED', 'Authentication is required.');
     if (decision === 'forbidden') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
     if (actor) c.set('actorId', actor.actorId);
+    if (document.status !== 'published') c.header('Cache-Control', 'private, no-store');
     return c.json({ id: contentId, title: document.title, status: document.status });
   });
 

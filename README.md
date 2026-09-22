@@ -49,7 +49,8 @@ Garden OS ma być trwałym zapisem ogrodu po oddaniu projektu: działka, projekt
 | Obszar | Teraz | Jeszcze nie |
 | --- | --- | --- |
 | Core API | Hono na Node 24. Publiczne przyjęcie leada, lista, odczyt i kwalifikacja. Sesje Better Auth. Uprawnienia w Core API. Jednorazowe wysłanie outboxa. PostgreSQL przez Kysely. | Nadzorowany worker. ZAP. Dependency-Check. |
-| Strona, portal, panel | Framework wybrany: React Router. Katalogi `apps/web`, `apps/portal`, `apps/admin` istnieją. | Same aplikacje. |
+| Strona publiczna | React Router Framework Mode. Skorupa SSR czyta opublikowany tytuł z Core API. | Galeria, oferta, pliki fontów i wdrożenie. |
+| Portal i panel | Framework wybrany: React Router. Katalogi `apps/portal` i `apps/admin` istnieją. | Same aplikacje. |
 | Kontrakt | OpenAPI 3.0.4 w `contracts/openapi.json`. Testy kontraktu. | Wygenerowany klient HTTP. Klient Ruby dla SketchUp. |
 | Domena | Reguły tworzenia i kwalifikacji leada w `packages/domain`. | Reszta CRM, sprzedaży, projektów i płatności. |
 | Tożsamość | Better Auth w procesie API. Stabilne `actorId`. | Osobny dostawca tożsamości. |
@@ -99,7 +100,7 @@ Zdecydowany stos, zapisany w [`docs/architecture/CURRENT-ARCHITECTURE.md`](docs/
 | Ścieżka | Rola |
 | --- | --- |
 | `apps/api` | Core API i pion leadów. |
-| `apps/web` | Strona publiczna. Katalog bez aplikacji. |
+| `apps/web` | Strona publiczna. Skorupa SSR bez galerii i bez wdrożenia. |
 | `apps/portal` | Portal klienta. Katalog bez aplikacji. |
 | `apps/admin` | Panel pracowni. Katalog bez aplikacji. |
 | `packages/domain` | Reguły domenowe. |

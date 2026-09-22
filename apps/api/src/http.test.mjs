@@ -93,8 +93,10 @@ test('unpublished content stays private and a content role does not grant CRM ac
   const allowed = await app.request(`/v1/content/${draftId}`, { headers: bearer(editor) });
   assert.equal(allowed.status, 200);
   assert.equal((await allowed.json()).status, 'draft');
+  assert.equal(allowed.headers.get('cache-control'), 'private, no-store');
   const published = await app.request(`/v1/content/${publicId}`);
   assert.equal(published.status, 200);
+  assert.equal(published.headers.get('cache-control'), null);
   const supplied = await app.request(`/v1/content/${draftId}?role=admin`);
   assert.equal(supplied.status, 400);
   const leads = await app.request('/v1/leads', { headers: bearer(editor) });

@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "www-app-slice-recorded",
+  "currentPhase": "www-app-shell",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -19,15 +19,19 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "WWW-APP is the next READY slice (React Router Framework Mode foundation)",
-    "GALLERY-WWW waits on WWW-APP and MEDIA-COLLECTIONS",
-    "SEARCH-WWW-TECHNICAL waits on WWW-APP",
+    "GALLERY-WWW is the next READY slice",
+    "SEARCH-WWW-TECHNICAL is also READY and waits behind the gallery critical path",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "WWW-APP is READY. It is the internal React Router Framework Mode foundation for apps/web. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
+  "nextSafeAction": "GALLERY-WWW is READY. It is the gallery on the public shell. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
   "evidencePaths": [
+    "apps/web/app/root.tsx",
+    "apps/web/app/routes/home.tsx",
+    "apps/web/app/published-home.ts",
+    "apps/web/app/shell.test.mjs",
+    "apps/web/app/published-home.test.mjs",
     "packages/domain/ecosystem.test.mjs",
     "packages/domain/cms-export.test.mjs",
     "packages/domain/src/cms-export.ts",

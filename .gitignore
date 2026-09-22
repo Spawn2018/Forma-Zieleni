@@ -13,6 +13,7 @@ secrets/
 credentials/
 dist/
 build/
+.react-router/
 .next/
 coverage/
 .turbo/

@@ -130,9 +130,11 @@ Next: WWW-APP, then GALLERY-WWW.
 
 Dependencies: none. ADR-014 already requires `apps/web` as React Router Framework Mode.
 Gate: REVIEW.
+Status: COMPLETE for the SSR shell. React Router 8.4.0 Framework Mode, Vite 8, React 19. No Tailwind, no `isbot`, no font files, no deploy.
 Autonomous: yes.
 Accept: a real `apps/web` React Router Framework Mode application in the monorepo, wired into workspace test/typecheck/lint/build, with root layout, route module, and error boundary. It reads published content only through the Core API boundary and does not invent business facts. Design tokens and fonts already defined in Canon are the visual source. No deploy, hosting choice, DNS, or Cloudflare mutation.
-Tests: the app builds and a route test renders the shell without marketing claims.
+Tests: `apps/web/app/shell.test.mjs` and `apps/web/app/published-home.test.mjs`. `pnpm --filter @forma-zieleni/web build` succeeds. Client CSS is 0.78 kB; the framework entry chunk gzips to about 67 kB.
+Security: the loader keeps a published title only, refuses draft responses, and does not follow redirects.
 Next: GALLERY-WWW.
 
 ### GALLERY-WWW
