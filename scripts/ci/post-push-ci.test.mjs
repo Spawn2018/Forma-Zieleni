@@ -150,6 +150,7 @@ test('bounded wait timeout returns CI_WAIT_TIMEOUT', () => {
     listRuns: () => ({ ok: true, runs: [] }),
   });
   assert.equal(result.state, CI_STATES.CI_WAIT_TIMEOUT);
+  assert.equal(result.reason, 'run_not_found');
 });
 
 test('old successful run cannot mask newer exact-SHA failure', () => {

@@ -368,7 +368,14 @@ export function waitForSha(sha, options = {}) {
       return { ...last, waitedMs: now() - started };
     }
     if (last.state === CI_STATES.CI_NOT_FOUND_YET && now() - started > findTimeoutMs) {
-      // Keep waiting until overall timeout — run may still appear.
+      return {
+        ...last,
+        ok: false,
+        state: CI_STATES.CI_WAIT_TIMEOUT,
+        reason: 'run_not_found',
+        lastState: CI_STATES.CI_NOT_FOUND_YET,
+        waitedMs: now() - started,
+      };
     }
     sleep(pollMs);
   }
@@ -571,6 +578,13 @@ export function evaluateQualityInterrupt({
 export function noteCiRepairAttempt(session, { signature }) {
   const key = `ci-repair|${signature}`;
   const attempts = { ...(session.attempts || {}), [key]: ((session.attempts || {})[key] || 0) + 1 };
+  return { ...session, attempts };
+}
+
+export function clearCiRepairAttempts(session) {
+  const attempts = Object.fromEntries(
+    Object.entries(session.attempts || {}).filter(([key]) => !key.startsWith('ci-repair|')),
+  );
   return { ...session, attempts };
 }
 

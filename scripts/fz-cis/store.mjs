@@ -80,6 +80,34 @@ export function changeStatus(id, next, extra = {}, file = storeFile()) {
   return { record: updated, wroteCanon: false };
 }
 
+/**
+ * Mark an external finding as locally verified without promoting it.
+ * Does not change lifecycle status.
+ */
+export function markLocallyVerified(id, extra = {}, file = storeFile()) {
+  if (typeof id !== 'string' || id.includes('/') || id.includes('\\') || id.includes('..')) {
+    throw Object.assign(new Error('REFUSED_PATH'), { code: 'REFUSED_PATH' });
+  }
+  const store = loadStore(file);
+  const current = store.records.find((record) => record.id === id);
+  if (!current) throw Object.assign(new Error('NOT_FOUND'), { code: 'NOT_FOUND' });
+  const evidence = [...new Set([
+    ...(current.evidence || []),
+    ...((extra.evidence || []).map(String)),
+  ])].slice(0, 20);
+  const updated = {
+    ...current,
+    locallyVerified: true,
+    evidence,
+    lastSeen: new Date().toISOString(),
+  };
+  saveStore({
+    version: 1,
+    records: store.records.map((record) => (record.id === id ? updated : record)),
+  }, file);
+  return { record: updated, wroteCanon: false };
+}
+
 export function reportDebt(file = storeFile()) {
   return learningDebt(loadStore(file).records);
 }

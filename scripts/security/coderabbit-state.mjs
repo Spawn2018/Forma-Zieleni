@@ -1,0 +1,303 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { FINDING_DISPOSITIONS, occurrenceKey } from './coderabbit-parse.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const DEFAULT_STATE_DIR = path.join(root, '.fz-noc');
+const DEFAULT_STATE_FILE = path.join(DEFAULT_STATE_DIR, 'coderabbit-review.json');
+
+export const REVIEW_STATES = Object.freeze([
+  'EMPTY',
+  'CODERABBIT_PASS',
+  'CODERABBIT_FINDINGS',
+  'CODERABBIT_FINDINGS_FIXED',
+  'CODERABBIT_RE_REVIEW_REQUIRED',
+  'CODERABBIT_PASS_AFTER_REPAIR',
+  'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+  'CODERABBIT_REVIEW_BLOCKED',
+  'CODERABBIT_DEFERRED_RATE_LIMIT',
+  'CODERABBIT_DEFERRED_UNAVAILABLE',
+  'CODERABBIT_FAILED',
+]);
+
+const TERMINAL_CLOSED = new Set([
+  'CODERABBIT_PASS',
+  'CODERABBIT_PASS_AFTER_REPAIR',
+  'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+  'EMPTY',
+]);
+
+export function reviewStatePath(file = process.env.FZ_CR_REVIEW_STATE || DEFAULT_STATE_FILE) {
+  return path.resolve(file);
+}
+
+export function emptyReviewState() {
+  return {
+    version: 1,
+    state: 'EMPTY',
+    baseSha: null,
+    headSha: null,
+    diffFingerprint: null,
+    paths: [],
+    findings: [],
+    dispositions: {},
+    repairOccurred: false,
+    reReviewRequired: false,
+    repairAttempts: {},
+    updatedAt: null,
+  };
+}
+
+export function loadReviewState(file = reviewStatePath()) {
+  const resolved = reviewStatePath(file);
+  if (!existsSync(resolved)) return emptyReviewState();
+  try {
+    const parsed = JSON.parse(readFileSync(resolved, 'utf8'));
+    if (!parsed || parsed.version !== 1) return emptyReviewState();
+    return { ...emptyReviewState(), ...parsed };
+  } catch {
+    return emptyReviewState();
+  }
+}
+
+export function saveReviewState(state, file = reviewStatePath()) {
+  const resolved = reviewStatePath(file);
+  mkdirSync(path.dirname(resolved), { recursive: true });
+  const next = {
+    ...emptyReviewState(),
+    ...state,
+    version: 1,
+    updatedAt: new Date().toISOString(),
+  };
+  writeFileSync(resolved, `${JSON.stringify(next, null, 2)}\n`);
+  return next;
+}
+
+export function clearReviewState(file = reviewStatePath()) {
+  return saveReviewState(emptyReviewState(), file);
+}
+
+function allDispositioned(state) {
+  const findings = state.findings || [];
+  if (findings.length === 0) return true;
+  return findings.every((finding) => {
+    const disposition = state.dispositions?.[finding.fingerprint];
+    return disposition && disposition.kind && disposition.kind !== 'UNRESOLVED';
+  });
+}
+
+function anyAccepted(state) {
+  return Object.values(state.dispositions || {}).some((item) => item.kind === 'ACCEPT');
+}
+
+function allRejected(state) {
+  const findings = state.findings || [];
+  if (findings.length === 0) return false;
+  return findings.every((finding) => state.dispositions?.[finding.fingerprint]?.kind === 'REJECT_WITH_REASON');
+}
+
+export function deriveReviewState(state) {
+  if (!state || state.state === 'EMPTY' && !(state.findings || []).length) return 'EMPTY';
+  if (state.state === 'CODERABBIT_DEFERRED_RATE_LIMIT'
+    || state.state === 'CODERABBIT_DEFERRED_UNAVAILABLE'
+    || state.state === 'CODERABBIT_FAILED'
+    || state.state === 'CODERABBIT_REVIEW_BLOCKED') {
+    return state.state;
+  }
+  if ((state.findings || []).length === 0) {
+    return state.repairOccurred ? 'CODERABBIT_PASS_AFTER_REPAIR' : 'CODERABBIT_PASS';
+  }
+  if (!allDispositioned(state)) return 'CODERABBIT_FINDINGS';
+  if (anyAccepted(state)) {
+    if (state.reReviewRequired || !state.repairOccurred) {
+      return state.repairOccurred ? 'CODERABBIT_RE_REVIEW_REQUIRED' : 'CODERABBIT_FINDINGS_FIXED';
+    }
+    return 'CODERABBIT_RE_REVIEW_REQUIRED';
+  }
+  if (allRejected(state)) return 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON';
+  return 'CODERABBIT_FINDINGS';
+}
+
+export function recordReviewResult({
+  baseSha,
+  headSha,
+  paths = [],
+  diffFingerprint,
+  findings = [],
+  stateLabel,
+}, file = reviewStatePath()) {
+  const current = loadReviewState(file);
+  const next = {
+    ...current,
+    baseSha,
+    headSha,
+    paths: [...paths],
+    diffFingerprint,
+    findings: findings.map((finding) => ({ ...finding })),
+    dispositions: {},
+    repairOccurred: false,
+    reReviewRequired: false,
+    state: stateLabel || (findings.length ? 'CODERABBIT_FINDINGS' : 'CODERABBIT_PASS'),
+  };
+  for (const finding of next.findings) {
+    next.dispositions[finding.fingerprint] = {
+      kind: 'UNRESOLVED',
+      at: new Date().toISOString(),
+    };
+  }
+  next.state = deriveReviewState(next);
+  return saveReviewState(next, file);
+}
+
+export function setDisposition(state, fingerprint, {
+  kind,
+  reason = '',
+  evidence = [],
+} = {}) {
+  if (!FINDING_DISPOSITIONS.includes(kind)) {
+    return { ok: false, reason: 'invalid_disposition', state };
+  }
+  if ((kind === 'REJECT_WITH_REASON' || kind === 'DEFER') && String(reason || '').trim().length < 8) {
+    return { ok: false, reason: 'missing_reason', state };
+  }
+  if (kind === 'DEFER') {
+    // Autonomous policy: defer is not an escape for open findings.
+    return { ok: false, reason: 'defer_not_allowed', state };
+  }
+  const finding = (state.findings || []).find((item) => item.fingerprint === fingerprint);
+  if (!finding) return { ok: false, reason: 'unknown_fingerprint', state };
+  const dispositions = {
+    ...state.dispositions,
+    [fingerprint]: {
+      kind,
+      reason: String(reason || '').slice(0, 500),
+      evidence: (evidence || []).map(String).slice(0, 10),
+      at: new Date().toISOString(),
+    },
+  };
+  let next = { ...state, dispositions };
+  if (kind === 'ACCEPT') {
+    next.reReviewRequired = true;
+  }
+  next.state = deriveReviewState(next);
+  if (kind === 'ACCEPT' && next.state === 'CODERABBIT_FINDINGS') {
+    // Still unresolved siblings may keep FINDINGS; accepted ones require repair path.
+    const acceptedOnly = Object.values(dispositions).some((item) => item.kind === 'ACCEPT');
+    if (acceptedOnly && allDispositioned(next)) {
+      next.state = 'CODERABBIT_FINDINGS_FIXED';
+      next.reReviewRequired = true;
+    }
+  }
+  return { ok: true, reason: 'dispositioned', state: next };
+}
+
+export function noteRepair(state, { fingerprints = null } = {}) {
+  const targets = fingerprints || Object.entries(state.dispositions || {})
+    .filter(([, value]) => value.kind === 'ACCEPT')
+    .map(([key]) => key);
+  const repairAttempts = { ...(state.repairAttempts || {}) };
+  for (const fingerprint of targets) {
+    repairAttempts[fingerprint] = (repairAttempts[fingerprint] || 0) + 1;
+  }
+  const blocked = Object.entries(repairAttempts).some(([, count]) => count >= 3);
+  const next = {
+    ...state,
+    repairOccurred: true,
+    reReviewRequired: true,
+    repairAttempts,
+    state: blocked ? 'CODERABBIT_REVIEW_BLOCKED' : 'CODERABBIT_RE_REVIEW_REQUIRED',
+  };
+  return next;
+}
+
+export function applyCleanReReviewPure(state, { headSha, findings = [], paths = [], diffFingerprint } = {}) {
+  if ((findings || []).length > 0) {
+    const next = {
+      ...state,
+      headSha,
+      paths: paths.length ? paths : state.paths,
+      diffFingerprint: diffFingerprint || state.diffFingerprint,
+      findings: findings.map((finding) => ({ ...finding })),
+      dispositions: {},
+      repairOccurred: false,
+      reReviewRequired: false,
+    };
+    for (const finding of next.findings) {
+      next.dispositions[finding.fingerprint] = { kind: 'UNRESOLVED', at: new Date().toISOString() };
+    }
+    next.state = 'CODERABBIT_FINDINGS';
+    return next;
+  }
+  return {
+    ...state,
+    headSha,
+    paths: paths.length ? paths : state.paths,
+    diffFingerprint: diffFingerprint || state.diffFingerprint,
+    findings: [],
+    dispositions: {},
+    reReviewRequired: false,
+    state: state.repairOccurred ? 'CODERABBIT_PASS_AFTER_REPAIR' : 'CODERABBIT_PASS',
+  };
+}
+
+/**
+ * Whether unresolved CodeRabbit debt blocks pushing this candidate HEAD.
+ */
+export function assertReviewDebtClear(candidate = {}, state = emptyReviewState()) {
+  const head = String(candidate.headSha || candidate.head || '').toLowerCase();
+  const derived = deriveReviewState(state);
+  if (TERMINAL_CLOSED.has(derived) || derived === 'EMPTY') {
+    if ((derived === 'CODERABBIT_PASS' || derived === 'CODERABBIT_PASS_AFTER_REPAIR')
+      && state.headSha && head && state.headSha.toLowerCase() !== head) {
+      const candidatePaths = new Set((candidate.paths || []).map(String));
+      const reviewed = (state.paths || []).filter((file) => file !== '.cursor/settings.json');
+      if (reviewed.length === 0) {
+        return { ok: true, reason: 'clear', state: derived };
+      }
+      const overlap = candidatePaths.size === 0
+        || reviewed.some((file) => candidatePaths.has(file));
+      if (overlap) {
+        return {
+          ok: false,
+          reason: 'stale_review_head',
+          state: derived,
+          detail: `reviewed ${state.headSha} cannot authorize ${head}`,
+        };
+      }
+    }
+    return { ok: true, reason: 'clear', state: derived };
+  }
+  if (derived === 'CODERABBIT_FINDINGS'
+    || derived === 'CODERABBIT_FINDINGS_FIXED'
+    || derived === 'CODERABBIT_RE_REVIEW_REQUIRED'
+    || derived === 'CODERABBIT_REVIEW_BLOCKED') {
+    return {
+      ok: false,
+      reason: 'review_debt_open',
+      state: derived,
+      findings: (state.findings || []).map((item) => item.fingerprint),
+    };
+  }
+  if (derived === 'CODERABBIT_DEFERRED_RATE_LIMIT' || derived === 'CODERABBIT_DEFERRED_UNAVAILABLE') {
+    if ((state.findings || []).length > 0 || state.repairOccurred) {
+      return { ok: false, reason: 'review_debt_deferred', state: derived };
+    }
+    return { ok: true, reason: 'no_required_review', state: derived };
+  }
+  if (derived === 'CODERABBIT_FAILED') {
+    if ((state.findings || []).length > 0 || state.repairOccurred) {
+      return { ok: false, reason: 'review_debt_failed', state: derived };
+    }
+    return { ok: true, reason: 'no_required_review', state: derived };
+  }
+  return { ok: true, reason: 'clear', state: derived };
+}
+
+export function occurrenceEvidence(state, fingerprint) {
+  return occurrenceKey({
+    baseSha: state.baseSha,
+    headSha: state.headSha,
+    fingerprint,
+  });
+}

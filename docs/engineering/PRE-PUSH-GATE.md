@@ -33,6 +33,12 @@ Cursor `beforeShellExecution` denies direct `git push` (including
 mechanical enforcement of the autonomous Cursor path, not a claim that
 a human with a raw terminal cannot bypass a local control.
 
+When CodeRabbit has produced unresolved findings for the candidate,
+`pnpm push:main` also refuses until the closed review loop reaches a
+terminal disposition (`CODERABBIT_PASS`, `CODERABBIT_PASS_AFTER_REPAIR`,
+or `CODERABBIT_FINDINGS_REJECTED_WITH_REASON`). See
+`docs/security/SECURITY-ASSURANCE.md`.
+
 ## Mandatory sequence for a changed slice
 
 1.  Scope check: diff contains only intended work; no generated junk,

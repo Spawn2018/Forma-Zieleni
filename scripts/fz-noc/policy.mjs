@@ -302,7 +302,10 @@ export const CODERABBIT_STATES = Object.freeze([
   'CODERABBIT_PASS',
   'CODERABBIT_FINDINGS',
   'CODERABBIT_FINDINGS_FIXED',
+  'CODERABBIT_RE_REVIEW_REQUIRED',
+  'CODERABBIT_PASS_AFTER_REPAIR',
   'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+  'CODERABBIT_REVIEW_BLOCKED',
   'CODERABBIT_DEFERRED_RATE_LIMIT',
   'CODERABBIT_DEFERRED_UNAVAILABLE',
   'CODERABBIT_FAILED',
@@ -353,6 +356,9 @@ export function coderabbitDisposition(input = {}) {
   if (input.rateLimited === true) return 'CODERABBIT_DEFERRED_RATE_LIMIT';
   if (input.unavailable === true) return 'CODERABBIT_DEFERRED_UNAVAILABLE';
   if (input.failed === true) return 'CODERABBIT_FAILED';
+  if (input.reviewBlocked === true) return 'CODERABBIT_REVIEW_BLOCKED';
+  if (input.passAfterRepair === true) return 'CODERABBIT_PASS_AFTER_REPAIR';
+  if (input.reReviewRequired === true) return 'CODERABBIT_RE_REVIEW_REQUIRED';
   if (input.findingsFixed === true) return 'CODERABBIT_FINDINGS_FIXED';
   if (input.findingsRejected === true) return 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON';
   if (input.findings === true) return 'CODERABBIT_FINDINGS';

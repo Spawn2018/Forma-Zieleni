@@ -32,6 +32,7 @@ Thumbs.db
 backups/
 .autonomous-sessions/
 .fz-noc/live.json
+.fz-noc/coderabbit-review.json
 tmp/
 temp/
 private/

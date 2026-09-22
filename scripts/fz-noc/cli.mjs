@@ -13,6 +13,7 @@ import {
 import { livePath, readSession, repoRoot, writeSession } from './live.mjs';
 import {
   CI_STATES,
+  clearCiRepairAttempts,
   evaluateQualityInterrupt,
   isGreen,
   noteCiRepairAttempt,
@@ -59,14 +60,19 @@ export function selectionWithQuality(session, options = {}) {
       exhaustionAllowed: false,
       qualityInterrupt: interrupt.qualityInterrupt,
       repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
+      sessionPatch: null,
     };
   }
 
-  const picked = productSelection(session);
+  const cleared = interrupt.reason === 'ci_green'
+    ? clearCiRepairAttempts(session || { attempts: {} })
+    : session;
+  const picked = productSelection(cleared);
   return {
     ...picked,
     qualityInterrupt: null,
     repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
+    sessionPatch: interrupt.reason === 'ci_green' ? { attempts: cleared.attempts } : null,
   };
 }
 
@@ -89,7 +95,8 @@ export function requireExactCiGreen(commit, options = {}) {
   const state = options.repoState || captureRepoState({ cwd: repoRoot() });
   const published = String(state.originMain || '').trim().toLowerCase();
   const head = String(state.head || '').trim().toLowerCase();
-  if (!want || (want !== published && want !== head)) {
+  const matches = (full) => /^[0-9a-f]{7,40}$/.test(want) && full.startsWith(want);
+  if (!want || (!matches(published) && !matches(head))) {
     return {
       ok: false,
       reason: 'commit_not_current_published_or_head',
@@ -103,7 +110,7 @@ export function requireExactCiGreen(commit, options = {}) {
       detail: { commit: want, head, originMain: published },
     };
   }
-  const status = (options.statusFor || statusForSha)(want);
+  const status = (options.statusFor || statusForSha)(published);
   if (!isGreen(status.state)) {
     return {
       ok: false,
@@ -113,10 +120,15 @@ export function requireExactCiGreen(commit, options = {}) {
       url: status.run?.url || null,
     };
   }
-  if (status.run?.headSha && String(status.run.headSha).toLowerCase() !== want) {
+  if (status.run?.headSha && String(status.run.headSha).toLowerCase() !== published) {
     return { ok: false, reason: 'ci_sha_mismatch', ciState: status.state };
   }
-  return { ok: true, ciState: CI_STATES.CI_GREEN, runId: status.run?.databaseId || null };
+  return {
+    ok: true,
+    ciState: CI_STATES.CI_GREEN,
+    runId: status.run?.databaseId || null,
+    sha: published,
+  };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
@@ -190,10 +202,15 @@ if (command === 'deadline') {
     session.nextCandidates = [];
     session.selectionReason = picked.reason;
     session.exhausted = picked.exhaustionAllowed === true;
+    if (picked.sessionPatch?.attempts) session.attempts = picked.sessionPatch.attempts;
     writeSession(session);
     print(picked);
   } else {
-    const noted = noteSelection(session, { slice: picked.selected, commit });
+    let working = session;
+    if (picked.sessionPatch?.attempts) {
+      working = { ...session, attempts: picked.sessionPatch.attempts };
+    }
+    const noted = noteSelection(working, { slice: picked.selected, commit });
     const next = noted.repeated ? selection(noted.session) : picked;
     if (noted.repeated) {
       noted.session.currentSlice = next.selected;
@@ -254,7 +271,7 @@ if (command === 'deadline') {
     session.lastCompletedSlice = slice;
     session.completed = [...new Set([...(session.completed || []), slice])];
     session.currentSlice = null;
-    session.lastVerifiedCommit = commit;
+    session.lastVerifiedCommit = ciGate.sha || commit;
     session.status = 'idle';
     session.lastBeat = new Date().toISOString();
     session.silentFollowups = 0;

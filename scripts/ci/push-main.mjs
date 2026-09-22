@@ -15,6 +15,7 @@ import {
   statusForSha,
   waitForSha,
 } from './post-push-ci.mjs';
+import { reviewDebtForPush } from '../security/coderabbit-checkpoint.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -116,6 +117,25 @@ export function runPushMain(options = {}) {
       pushed: false,
       baseSha,
       candidateSha,
+    };
+  }
+
+  const reviewDebt = (options.reviewDebtForPush || reviewDebtForPush)({
+    headSha: candidateSha,
+    paths: options.reviewPaths,
+    state: options.reviewState,
+    stateFile: options.reviewStateFile,
+  });
+  if (!reviewDebt.ok) {
+    return {
+      ok: false,
+      reason: 'coderabbit_review_debt',
+      state: before,
+      gate,
+      pushed: false,
+      baseSha,
+      candidateSha,
+      reviewDebt,
     };
   }
 

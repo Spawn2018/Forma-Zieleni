@@ -70,6 +70,17 @@ test('complete requires exact CI GREEN and matching published SHA', () => {
     }),
   });
   assert.equal(green.ok, true);
+  assert.equal(green.sha, SHA);
+
+  const short = requireExactCiGreen(SHA.slice(0, 7), {
+    repoState: { head: SHA, originMain: SHA, branch: 'main' },
+    statusFor: () => ({
+      state: CI_STATES.CI_GREEN,
+      run: { databaseId: 9, headSha: SHA },
+    }),
+  });
+  assert.equal(short.ok, true);
+  assert.equal(short.sha, SHA);
 
   const red = requireExactCiGreen(SHA, {
     repoState: { head: SHA, originMain: SHA, branch: 'main' },

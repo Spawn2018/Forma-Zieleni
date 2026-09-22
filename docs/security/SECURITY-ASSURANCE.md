@@ -48,6 +48,20 @@ CodeRabbit findings are inputs, not Canon authority. High/critical
 findings must be resolved or explicitly dispositioned before push.
 Lower-severity findings must be triaged with evidence.
 
+Executable closed loop (`scripts/security/coderabbit-checkpoint.mjs`):
+
+1.  Parse structured `--agent` findings (not count-only).
+2.  Fingerprint each finding class (path + issue class; not commit SHA).
+3.  Disposition every finding: `ACCEPT`, `REJECT_WITH_REASON`,
+    `OWNER_GATE` (autonomous `DEFER` is refused).
+4.  `ACCEPT` → repair by the FZ orchestrator → `note-repair` →
+    mandatory CodeRabbit re-review.
+5.  `CODERABBIT_FINDINGS_FIXED` is intermediate only.
+    Terminal clean-after-repair is `CODERABBIT_PASS_AFTER_REPAIR`.
+6.  Unresolved review debt mechanically blocks `pnpm push:main` for the
+    candidate HEAD. Ephemeral receipt: `.fz-noc/coderabbit-review.json`
+    (gitignored). Runtime findings ingest into existing FZ-CIS.
+
 ## OWASP baseline
 
 "OWASP" is not a single SaaS account. Use free/open standards and tools:
