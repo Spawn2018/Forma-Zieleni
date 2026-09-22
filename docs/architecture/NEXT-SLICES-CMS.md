@@ -331,8 +331,10 @@ Next: SEARCH-AI-VISIBILITY.
 
 Dependencies: SEARCH-DATA-MODEL.
 Gate: REVIEW.
+Status: COMPLETE for the observation model. No Bing export importer.
 Autonomous: yes.
-Accept: Bing citations stay empty unless a real export/API was re-verified. No composite AI score.
+Accept: `packages/domain/src/search-ai-visibility.ts` keeps Bing citation rows empty (`ABSENT_NO_API`, not zero). OpenAI/Anthropic/Perplexity stay `NO_RELIABLE_MEASUREMENT`. Composite AI/GEO/ChatGPT scores are rejected. Quotas re-read note stays 2026-09-22.
+Tests: `packages/domain/search-ai-visibility.test.mjs`.
 Next: SEARCH-CRAWLER-INTELLIGENCE.
 
 ### SEARCH-CRAWLER-INTELLIGENCE

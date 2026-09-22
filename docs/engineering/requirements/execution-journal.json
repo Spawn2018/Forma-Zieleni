@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "cms-restore-recorded",
+  "currentPhase": "search-ai-visibility-recorded",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate. Force-push, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -27,9 +27,11 @@
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "SEARCH-AI-VISIBILITY is next among READY slices. Live OAuth stays DANGEROUS. GALLERY-WWW stays blocked.",
+  "nextSafeAction": "SEARCH-CRAWLER-INTELLIGENCE is next (synthetic Cloudflare fixture; mutation stays DANGEROUS).",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
+    "packages/domain/search-ai-visibility.test.mjs",
+    "packages/domain/src/search-ai-visibility.ts",
     "labs/fz-cms-1/restore/cms-restore.test.mjs",
     "packages/domain/cms-restore.test.mjs",
     "packages/domain/src/cms-restore.ts",

@@ -176,6 +176,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-CMS-RESTORE', 'Synthetic content and media restore returns one published ProjectCaseStudy and its master checksums. restic/pgBackRest stay later.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/cms-restore.ts', 'labs/fz-cms-1/restore/cms-restore.test.mjs', 'PostgreSQL/restic horizons', 'NONE', 'No claim of off-site backup.');
     continue;
   }
+  if (slice === 'SEARCH-AI-VISIBILITY') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-AI-VISIBILITY', 'Bing citations stay absent without an API; other AI providers stay NO_RELIABLE_MEASUREMENT; composite AI scores are rejected.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-ai-visibility.ts', 'packages/domain/search-ai-visibility.test.mjs', 'Bing export importer stays later', 'NONE', 'No invented citation counts.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

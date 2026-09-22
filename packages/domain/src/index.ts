@@ -156,6 +156,21 @@ export type {
   ContentRestoreBundle,
 } from './cms-restore.ts';
 export {
+  AI_VISIBILITY_PROVIDERS,
+  BING_AI_API_STATUS,
+  assertNoCompositeAiScore,
+  bingCitationRows,
+  createAiVisibilitySnapshot,
+  defaultProviderStates,
+  summarizeAiVisibility,
+} from './search-ai-visibility.ts';
+export type {
+  AiVisibilityProvider,
+  AiVisibilityProviderState,
+  AiVisibilitySnapshot,
+  CitationAvailability,
+} from './search-ai-visibility.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
