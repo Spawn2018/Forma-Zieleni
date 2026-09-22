@@ -21,6 +21,7 @@ Jedno Core API trzyma stan. Strona publiczna, portal klienta i panel pracowni s�
 - [Mapa repozytorium](#mapa-repozytorium)
 - [Uruchomienie lokalne](#uruchomienie-lokalne)
 - [Od czego zacząć czytanie](#od-czego-zacząć-czytanie)
+- [Dokumentacja](#dokumentacja)
 - [Czego ten opis nie rozstrzyga](#czego-ten-opis-nie-rozstrzyga)
 - [Integralność](#integralność)
 
@@ -138,6 +139,27 @@ Dokumenty wiążące są po angielsku. Kolejność:
 5. [`docs/DOCUMENTATION-MAP.md`](docs/DOCUMENTATION-MAP.md), gdy szukasz jednego dokumentu, a nie całego drzewa
 
 Nie zaczynaj od `legacy/`. Nie wybieraj stamtąd frameworka, bazy, hostingu ani magazynu.
+
+## Dokumentacja
+
+Katalog [Documentation OS](docs/architecture/FZ-DOCUMENTATION-OS.md). Każdy wiersz ma typ i czytelnika. To nie jest spis wszystkich plików Markdown. `legacy/` nie wchodzi. Pomoc dla portalu i aplikacji mobilnej nie jest napisana, bo tych produktów nie ma w repozytorium.
+
+<!-- FZ:AUTO:START docs -->
+| Typ | Czytelnik | Dokument |
+| --- | --- | --- |
+| Kanon | developer | [Current architecture](docs/architecture/CURRENT-ARCHITECTURE.md) |
+| Kanon | developer | [Documentation OS](docs/architecture/FZ-DOCUMENTATION-OS.md) |
+| Kanon | developer | [AI usage policy](docs/engineering/FZ-AI-USAGE-POLICY.md) |
+| Przewodnik | właściciel | [Owner guide](docs/guides/wlasciciel.md) |
+| Przewodnik | Agnieszka | [Agnieszka guide](docs/guides/agnieszka.md) |
+| Przewodnik | developer | [Developer guide](docs/guides/developer.md) |
+| Odnośnik | developer | [Documentation map](docs/DOCUMENTATION-MAP.md) |
+| Odnośnik | developer | [API pointer](docs/engineering/API.md) |
+| Odnośnik | developer | [Domain events](docs/engineering/EVENTS.md) |
+| Wyjaśnienie | developer | [Golden paths](docs/engineering/GOLDEN-PATHS.md) |
+| Dowód | developer | [Documentation quality baseline](docs/engineering/DOCUMENTATION-QUALITY-BASELINE.md) |
+| Dowód | developer | [DORA capability coverage](docs/engineering/DORA-CAPABILITY-COVERAGE.md) |
+<!-- FZ:AUTO:END docs -->
 
 ## Czego ten opis nie rozstrzyga
 

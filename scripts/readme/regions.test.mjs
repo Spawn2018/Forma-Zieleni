@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { applyRegions } from './regions.mjs';
-import { loadPublicSnapshot, renderProgress } from './status.mjs';
+import { documentationRows, loadPublicSnapshot, renderDocumentationCatalog, renderProgress } from './status.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const progress = () => '\nclassification: UPDATED_AT_CHECKPOINT\nnormative-sections: 1\n';
@@ -51,12 +51,33 @@ test('progress projection has no percentage and no private fields', () => {
   assert.equal(snapshot.surfaces.api, 'package-present');
 });
 
+test('documentation catalog rejects a type outside the OS set', () => {
+  assert.throws(() => documentationRows([{
+    type: 'NOTE',
+    audience: 'developer',
+    title: 'Loose note',
+    path: 'docs/README.md',
+  }]), /not in the OS set/);
+});
+
+test('documentation catalog is the OS set and has no completion percentage', () => {
+  const rendered = renderDocumentationCatalog(root);
+  assert.equal(rendered, renderDocumentationCatalog(root));
+  assert.equal(rendered.includes('legacy/'), false);
+  assert.equal(rendered.includes('%'), false);
+  assert.match(rendered, /\| Kanon \| developer \| \[Current architecture\]\(docs\/architecture\/CURRENT-ARCHITECTURE\.md\) \|/);
+  assert.match(rendered, /\| Przewodnik \| właściciel \|/);
+});
+
 test('readme check and write do not change the current README', () => {
-  const before = readFileSync(path.join(root, 'README.md'));
+  const readme = path.join(root, 'README.md');
+  const before = readFileSync(readme);
   for (const mode of ['check', 'write']) {
     const result = spawnSync(process.execPath, ['scripts/readme/cli.mjs', mode], { cwd: root, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
-    assert.deepEqual(readFileSync(path.join(root, 'README.md')), before);
+    assert.deepEqual(readFileSync(readme), before);
   }
-  assert.equal(before.includes(Buffer.from('FZ:AUTO')), false);
+  const text = before.toString('utf8');
+  assert.equal(text.split('<!-- FZ:AUTO:START docs -->').length, 2);
+  assert.equal(text.split('<!-- FZ:AUTO:END docs -->').length, 2);
 });

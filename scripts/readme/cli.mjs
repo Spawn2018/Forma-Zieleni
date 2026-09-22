@@ -2,7 +2,7 @@ import { readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { applyRegions } from './regions.mjs';
-import { loadPublicSnapshot, renderProgress } from './status.mjs';
+import { loadPublicSnapshot, renderDocumentationCatalog, renderProgress } from './status.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const readmePath = path.join(root, 'README.md');
@@ -11,6 +11,9 @@ export function projectReadme(text, snapshot = loadPublicSnapshot(root)) {
   return applyRegions(text, {
     progress() {
       return renderProgress(snapshot);
+    },
+    docs() {
+      return renderDocumentationCatalog(root);
     },
   });
 }
