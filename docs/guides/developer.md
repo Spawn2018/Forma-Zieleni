@@ -50,10 +50,8 @@ The context window size is not a reason to read every document.
 
 ## Next product slice
 
-`PORTAL-APP` and `CRM-OPPORTUNITY-CONTRACT` are COMPLETE on
-`docs/architecture/NEXT-SLICES-MAIN.md`. No further ordinary READY
-product slice is named until a later roadmap refresh.
-`LEAD-SEC-SESSION` may still be blocked in a running `/noc` session
-after repeated identical selects; clear or work-steal as policy allows.
+`PORTAL-APP`, `CRM-OPPORTUNITY-CONTRACT`, and `LEAD-SEC-SESSION` are
+COMPLETE on `docs/architecture/NEXT-SLICES-MAIN.md`. Next READY is
+`LEAD-OUTBOX-SUPERVISOR`. Lead security acceptance stays open.
 The CMS/Search graph stays acceptance history. Do not start a second
 roadmap.

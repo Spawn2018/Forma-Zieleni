@@ -1,9 +1,9 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "crm-opportunity-contract-complete",
+  "currentPhase": "lead-sec-session-complete",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "ed845926b6dc659e49c219dd16c6b3fd19e6ab72",
+  "publishedHead": "e55ee88eedd34283d26b4cf464ee74c615bb8ed7",
   "postPushSafety": "PASS",
   "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record. Independent CI for 444e98a: PASS (run 35747728773 Verify+Windows supervisor).",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
@@ -26,7 +26,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "CRM-OPPORTUNITY-CONTRACT COMPLETE. No named READY product slice remains on NEXT-SLICES-MAIN.md until a roadmap refresh. Work-steal LEAD-SEC-SESSION if unblocked. Do not mark Lead or CMS security-accepted. CODERABBIT_DEFERRED this checkpoint (quota/auth boundary).",
+  "nextSafeAction": "LEAD-SEC-SESSION COMPLETE. Next READY is LEAD-OUTBOX-SUPERVISOR on NEXT-SLICES-MAIN.md. Do not mark Lead security-accepted. CODERABBIT_DEFERRED this checkpoint.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",

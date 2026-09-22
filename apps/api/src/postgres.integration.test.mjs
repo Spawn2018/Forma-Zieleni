@@ -324,3 +324,106 @@ test('postgresql hardening covers sessions, outbox delivery, rollback and local 
     await database.stop();
   }
 });
+
+test('postgresql staff logout invalidates lead list, get and qualify sessions', { timeout: 90_000 }, async t => {
+  const database = await ephemeralDatabase();
+  if (!database) {
+    t.skip('DEFERRED: no LEAD_DATABASE_URL and no local PostgreSQL binaries');
+    return;
+  }
+  const opened = openDatabase(database.url);
+  const secret = 'better-auth-secret-value-32-chars-min';
+  const origin = 'http://127.0.0.1:3000';
+  try {
+    await migrate(opened.db);
+    const store = new PostgresLeadStore(opened.db);
+    const signup = createLeadAuth({ pool: opened.pool, secret, baseURL: origin, trustedOrigins: [origin], allowSignUp: true });
+    const createdUser = await signup.handler(new Request(`${origin}/api/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin },
+      body: JSON.stringify({ email: 'logout@example.invalid', password: 'synthetic-pass-0002', name: 'Logout Staff' }),
+    }));
+    assert.equal(createdUser.status, 200);
+    const runtimeAuth = createLeadAuth({ pool: opened.pool, secret, baseURL: origin, trustedOrigins: [origin], allowSignUp: false });
+    const signedIn = await runtimeAuth.handler(new Request(`${origin}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin },
+      body: JSON.stringify({ email: 'logout@example.invalid', password: 'synthetic-pass-0002' }),
+    }));
+    assert.equal(signedIn.status, 200);
+    const token = signedIn.headers.get('set-auth-token');
+    assert.equal(typeof token, 'string');
+    const cookie = signedIn.headers.get('set-cookie') ?? '';
+    const sessionCookie = cookie.split(',').map(item => item.trim()).find(item => item.startsWith('better-auth.session_token='))?.split(';')[0];
+    assert.ok(sessionCookie);
+    const logs = [];
+    const app = createApp({
+      store,
+      logs,
+      authenticator: betterAuthAuthenticator({
+        lookup: headers => runtimeAuth.lookup(headers),
+        loadActor: subject => ensureActor(opened.db, 'better-auth', subject),
+        trustedOrigins: [origin],
+      }),
+      authHandler: request => runtimeAuth.handler(request),
+      addressOf: () => '198.51.100.51',
+      trustedOrigins: [origin],
+    });
+    const session = await runtimeAuth.lookup(new Headers({ authorization: `Bearer ${token}` }));
+    const actor = await ensureActor(opened.db, 'better-auth', session.userId);
+    await opened.db.updateTable('identity_principal').set({ client_id: 'admin' }).where('actor_id', '=', actor.actorId).execute();
+    await opened.db.insertInto('actor_capability').values([
+      { actor_id: actor.actorId, capability: 'leads:read' },
+      { actor_id: actor.actorId, capability: 'leads:qualify' },
+    ]).execute();
+    const captured = await app.request('/v1/leads', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'idempotency-key': 'logout-lead-0001' },
+      body: JSON.stringify({
+        source: 'www',
+        name: 'Dana Testowa',
+        phone: '+48 600 333 444',
+        locality: 'Kraków',
+        siteAnalysisRequested: false,
+      }),
+    });
+    assert.equal(captured.status, 201);
+    const lead = await captured.json();
+    const before = await app.request('/v1/leads', { headers: { authorization: `Bearer ${token}` } });
+    assert.equal(before.status, 200);
+    const signedOut = await app.request('/api/auth/sign-out', {
+      method: 'POST',
+      headers: {
+        cookie: sessionCookie,
+        origin,
+        'content-type': 'application/json',
+      },
+      body: '{}',
+    });
+    assert.ok(signedOut.status >= 200 && signedOut.status < 300);
+    const listed = await app.request('/v1/leads', { headers: { authorization: `Bearer ${token}` } });
+    assert.equal(listed.status, 401);
+    const got = await app.request(`/v1/leads/${lead.id}`, { headers: { authorization: `Bearer ${token}` } });
+    assert.equal(got.status, 401);
+    const qualify = await app.request(`/v1/leads/${lead.id}/qualify`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+        'idempotency-key': 'logout-qual-0001',
+      },
+      body: JSON.stringify({ capacityHold: false }),
+    });
+    assert.equal(qualify.status, 401);
+    const cookieAfter = await app.request('/v1/leads', {
+      headers: { cookie: sessionCookie, origin },
+    });
+    assert.equal(cookieAfter.status, 401);
+    assert.equal(JSON.stringify(logs).includes(token), false);
+    assert.equal(JSON.stringify(logs).includes('synthetic-pass'), false);
+    assert.equal(JSON.stringify(logs).includes('session_token'), false);
+  } finally {
+    await opened.pool.end();
+    await database.stop();
+  }
+});

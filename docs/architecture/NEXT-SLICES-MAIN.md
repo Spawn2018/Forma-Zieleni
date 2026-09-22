@@ -36,13 +36,16 @@ UNDECIDED. FZ-SEARCH-CRAWL-1 stays OPEN.
 
 Dependencies: none. Lead Core API is already implemented.
 Gate: AUTO.
-Status: OPEN.
+Status: COMPLETE for staff logout and post-logout invalidation of
+Better Auth sessions used by list/get/qualify. MFA and operator
+provisioning stay out of scope.
 Autonomous: yes.
 Accept: HTTP evidence for staff logout and session invalidation after
 logout for Better Auth sessions used by list/get/qualify. Close the
 ASVS V7 “later” row only where a runtime test exists. Do not claim
 MFA or operator provisioning.
-Tests: `apps/api` HTTP session tests.
+Tests: `apps/api/src/postgres.integration.test.mjs` logout case;
+`apps/api/src/session.test.mjs` origin checks.
 Security: cookies stay origin-checked; tokens do not appear in logs.
 Next: LEAD-OUTBOX-SUPERVISOR.
 

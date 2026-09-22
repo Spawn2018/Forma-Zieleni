@@ -10,7 +10,7 @@ Baseline: OWASP Application Security Verification Standard 5.0.0. Chapter index 
 | V4.1 Generic Web Service Security | Shared `ApiError`; `/v1`; no stack traces in contract | `contracts/openapi.test.mjs` and HTTP error bodies | ZAP baseline/API scan. Java and ZAP are not installed here |
 | V4.2 HTTP Message Structure Validation | JSON schemas, required headers | OpenAPI 3.0.4 and HTTP malformed-JSON test | — |
 | V6 Authentication | Staff list/get/qualify require a server-derived session | Better Auth email/password session, signed bearer, and explicit `AUTH_MODE=test` HMAC. Sign-up is disabled on the mounted handler | Operator provisioning UI, MFA, and an authenticated ZAP scan |
-| V7 Session Management | Opaque signed session, expiry, cookie origin check | PostgreSQL session test, expired session 401, CSRF origin 403 | Logout and rotation evidence beyond the library defaults |
+| V7 Session Management | Opaque signed session, expiry, cookie origin check, staff logout invalidates list/get/qualify | PostgreSQL session test, expired session 401, CSRF origin 403, logout invalidation test | Session rotation beyond Better Auth defaults; MFA |
 | V8.2 General Authorization Design | Object GET is authorized before existence is revealed to an unauthorized caller | Anonymous 401 and ungranted 403 for existing and missing ids | — |
 | V8.3 Operation Level Authorization | Qualify requires `leads:qualify` from `actor_capability` | Reader 403 and staff 200 tests | — |
 | V13.3 Secret Management | No secrets in contract or fixtures | HTTP log test rejects tokens | SOPS+age when encrypted material is needed |

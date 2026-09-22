@@ -15,7 +15,7 @@ Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/ar
 - `POST /v1/leads/{leadId}/qualify` — domain rules, `leads:qualify`, idempotency `409`.
 - `POST /v1/opportunities` — staff create from a qualified Lead only (`opportunities:create`). Body is `leadId`; status is domain-owned (`open`). Idempotency `409`. Duplicate lead → `409 OPPORTUNITY_EXISTS`.
 - `GET /v1/opportunities` and `GET /v1/opportunities/{opportunityId}` — require `opportunities:read`.
-- Better Auth email/password sessions in schema `auth`. The mounted handler has sign-up disabled. Bearer tokens are signed session tokens. Cookie mutations require a trusted `Origin`.
+- Better Auth email/password sessions in schema `auth`. The mounted handler has sign-up disabled. Bearer tokens are signed session tokens. Cookie mutations require a trusted `Origin`. Staff `POST /api/auth/sign-out` invalidates the session for subsequent list/get/qualify (see postgres logout test).
 - Capabilities live in `actor_capability`. The stable `actor_id` is an opaque Core API id mapped from issuer + Better Auth user id, not from email.
 - `AUTH_MODE=test` is a separate HMAC signer. It starts only when `ALLOW_TEST_AUTH=1` and `NODE_ENV` is not `production`.
 - Lead, Opportunity, idempotency, outbox, and audit rows share one transaction.
