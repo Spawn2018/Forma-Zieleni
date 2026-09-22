@@ -391,8 +391,10 @@ Next: SEARCH-RECOVERY.
 
 Dependencies: SEARCH-DATA-MODEL, CMS-RESTORE.
 Gate: REVIEW.
+Status: COMPLETE for synthetic observation restore. PostgreSQL/restic stay later.
 Autonomous: yes on local PostgreSQL.
-Accept: restore of synthetic observations; a written list of rows that cannot be re-synced after upstream retention.
+Accept: `packages/domain/src/search-recovery.ts` restores a search observation store and writes an unresyncable list when upstream retention is UNKNOWN or a row is past a known window. Does not invent a retention length.
+Tests: `packages/domain/search-recovery.test.mjs`.
 Next: SEARCH-ACCEPT.
 
 ### SEARCH-ACCEPT

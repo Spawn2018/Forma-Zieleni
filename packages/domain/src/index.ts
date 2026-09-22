@@ -185,6 +185,12 @@ export type {
   CrawlerTaxonomyEntry,
 } from './search-crawler-intelligence.ts';
 export {
+  listUnresyncableAfterUpstreamRetention,
+  restoreSearchStore,
+  snapshotSearchStore,
+} from './search-recovery.ts';
+export type { SearchRestoreBundle, UnresyncableRow } from './search-recovery.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,

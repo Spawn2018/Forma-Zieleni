@@ -184,6 +184,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-CRAWLER-INTELLIGENCE', 'Crawler taxonomy A–E is encoded; free-plan Cloudflare referrals stay absent; live zone mutation is refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-crawler-intelligence.ts', 'packages/domain/search-crawler-intelligence.test.mjs', 'Cloudflare mutation stays DANGEROUS', 'NONE', 'Training tokens remain OPEN under FZ-SEARCH-CRAWL-1.');
     continue;
   }
+  if (slice === 'SEARCH-RECOVERY') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-RECOVERY', 'Synthetic search observations restore and list rows that cannot be re-synced when retention is unknown or past a known window.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-recovery.ts', 'packages/domain/search-recovery.test.mjs', 'PostgreSQL/restic stay later', 'NONE', 'Does not invent a retention length.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [
