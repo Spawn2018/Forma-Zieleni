@@ -5,8 +5,9 @@ import { ApiFailure } from './errors.ts';
 export const CLIENTS = ['web', 'portal', 'admin', 'mobile', 'sketchup', 'm2m'] as const;
 export type ClientId = (typeof CLIENTS)[number];
 export type LeadCapability = 'leads:read' | 'leads:qualify';
+export type OpportunityCapability = 'opportunities:read' | 'opportunities:create';
 export type GrowthCapability = 'growth:plan' | 'semantic:review';
-export type Capability = LeadCapability | ContentCapability | GrowthCapability;
+export type Capability = LeadCapability | OpportunityCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -33,7 +34,9 @@ function isClient(value: unknown): value is ClientId {
 }
 
 function isCapability(value: unknown): value is Capability {
-  return value === 'leads:read' || value === 'leads:qualify' || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
+  return value === 'leads:read' || value === 'leads:qualify'
+    || value === 'opportunities:read' || value === 'opportunities:create'
+    || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 
 export function mintTestSession(secret: string, actor: Actor): string {

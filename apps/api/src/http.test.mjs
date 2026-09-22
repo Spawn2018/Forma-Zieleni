@@ -15,7 +15,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create'],
 };
 
 const portal = {
@@ -373,4 +373,83 @@ test('a marketing plan route compiles a synthetic plan and cannot authorize spen
   assert.equal(plan.authorizesPublication, false);
   assert.equal(plan.simulator.status, 'NOT_ENOUGH_DATA');
   assert.ok(plan.articleCount >= 1);
+});
+
+async function captureAndQualify(app) {
+  const created = await app.request('/v1/leads', json({
+    source: 'www',
+    name: NAME,
+    phone: PHONE,
+    locality: 'Kraków',
+    siteAnalysisRequested: true,
+  }, { 'idempotency-key': `lead-${Math.random().toString(36).slice(2, 10)}` }));
+  assert.equal(created.status, 201);
+  const lead = await created.json();
+  const qualified = await app.request(`/v1/leads/${lead.id}/qualify`, json({ capacityHold: false }, {
+    'idempotency-key': `qual-${Math.random().toString(36).slice(2, 10)}`,
+    ...bearer(staff),
+  }));
+  assert.equal(qualified.status, 200);
+  return qualified.json();
+}
+
+test('anonymous and portal actors cannot create, list or get opportunities; staff can', async () => {
+  const { app } = appFor();
+  const lead = await captureAndQualify(app);
+  const createPath = '/v1/opportunities';
+  assert.equal((await app.request(createPath, json({ leadId: lead.id }))).status, 401);
+  assert.equal((await app.request(createPath, json({ leadId: lead.id }, bearer(portal)))).status, 403);
+  assert.equal((await app.request('/v1/opportunities', { headers: bearer(portal) })).status, 403);
+  const created = await app.request(createPath, json({ leadId: lead.id }, {
+    'idempotency-key': 'opp-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const opportunity = await created.json();
+  assert.equal(opportunity.status, 'open');
+  assert.equal(opportunity.leadId, lead.id);
+  assert.equal(Object.hasOwn(opportunity, 'price'), false);
+  const listed = await app.request('/v1/opportunities', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  const page = await listed.json();
+  assert.equal(page.items.length, 1);
+  const got = await app.request(`/v1/opportunities/${opportunity.id}`, { headers: bearer(staff) });
+  assert.equal(got.status, 200);
+  assert.equal((await app.request(`/v1/opportunities/${opportunity.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/opportunities/missingopp00000000', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/opportunities/missingopp00000000', { headers: bearer(staff) })).status, 404);
+});
+
+test('opportunity create rejects unqualified leads, duplicate leads and client status', async () => {
+  const { app } = appFor();
+  const captured = await app.request('/v1/leads', json({
+    source: 'www',
+    name: NAME,
+    phone: PHONE,
+    locality: 'Kraków',
+    siteAnalysisRequested: false,
+  }, { 'idempotency-key': 'opp-unqual-lead' }));
+  assert.equal(captured.status, 201);
+  const lead = await captured.json();
+  const unqual = await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'opp-unqual-1',
+    ...bearer(staff),
+  }));
+  assert.equal(unqual.status, 409);
+  const qualified = await captureAndQualify(app);
+  const withStatus = await app.request('/v1/opportunities', json({ leadId: qualified.id, status: 'open' }, {
+    'idempotency-key': 'opp-status-1',
+    ...bearer(staff),
+  }));
+  assert.equal(withStatus.status, 400);
+  const first = await app.request('/v1/opportunities', json({ leadId: qualified.id }, {
+    'idempotency-key': 'opp-dup-1',
+    ...bearer(staff),
+  }));
+  assert.equal(first.status, 201);
+  const second = await app.request('/v1/opportunities', json({ leadId: qualified.id }, {
+    'idempotency-key': 'opp-dup-2',
+    ...bearer(staff),
+  }));
+  assert.equal(second.status, 409);
 });

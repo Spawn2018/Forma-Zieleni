@@ -110,16 +110,22 @@ Next: CRM-OPPORTUNITY-CONTRACT.
 
 Dependencies: PORTAL-APP.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for OpenAPI + domain Opportunity created only from a
+qualified Lead, with staff create/list/get through Core API
+authorization. No Admin UI, signing provider, payment path, or portal
+projection UI.
 Autonomous: yes.
 Accept: OpenAPI + `packages/domain` Opportunity created only from a
 qualified Lead. No Admin UI, no signing provider, no payment path.
 Staff create/list/get only through Core API authorization. Portal may
 read a client-safe projection later; this slice does not invent that
 UI.
-Tests: domain and contract tests.
+Tests: `packages/domain/opportunity.test.mjs`,
+`packages/validation/opportunity.test.mjs`,
+`packages/types/opportunity.test.mjs`, `contracts/openapi.test.mjs`,
+`apps/api/src/http.test.mjs` opportunity cases.
 Security: BOLA on opportunity ids; anonymous callers get 401; no
-client-supplied status machine.
+client-supplied status machine; one Opportunity per Lead.
 Next: none until a later roadmap refresh.
 
 ## Deferred and Owner-gated (visible, not READY)

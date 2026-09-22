@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { assertOpaqueLeadId } from '@forma-zieleni/domain';
+import { assertOpaqueLeadId, assertOpaqueOpportunityId } from '@forma-zieleni/domain';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -12,4 +12,8 @@ export function newOpaqueId(prefix: string): string {
 
 export function newLeadId(): string {
   return assertOpaqueLeadId(newOpaqueId('l'));
+}
+
+export function newOpportunityId(): string {
+  return assertOpaqueOpportunityId(newOpaqueId('p'));
 }

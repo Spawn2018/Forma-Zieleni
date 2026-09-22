@@ -3,7 +3,7 @@
   "info": {
     "title": "Forma Zieleni Core API",
     "version": "0.1.0",
-    "description": "Current-tree Core API contract. This document is the source of truth for the visitor lead-qualification slice. Legacy OpenAPI under legacy/ is reference only."
+    "description": "Current-tree Core API contract. Source of truth for visitor lead qualification and staff Opportunity creation from a qualified Lead. Legacy OpenAPI under legacy/ is reference only."
   },
   "servers": [
     {
@@ -19,6 +19,7 @@
   "tags": [
     { "name": "System" },
     { "name": "Leads" },
+    { "name": "Opportunities" },
     { "name": "Content" },
     { "name": "Growth" }
   ],
@@ -237,6 +238,89 @@
           "403": { "$ref": "#/components/responses/Forbidden" }
         }
       }
+    },
+    "/opportunities": {
+      "post": {
+        "tags": ["Opportunities"],
+        "operationId": "createOpportunity",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Staff create an Opportunity only from a qualified Lead. Status is assigned by the domain; callers must not supply a status machine.",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OpportunityCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Opportunity recorded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Opportunity" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      },
+      "get": {
+        "tags": ["Opportunities"],
+        "operationId": "listOpportunities",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/Sort" },
+          { "$ref": "#/components/parameters/OpportunityStatusFilter" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of opportunities visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OpportunityPage" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/opportunities/{opportunityId}": {
+      "get": {
+        "tags": ["Opportunities"],
+        "operationId": "getOpportunity",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/OpportunityId" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Opportunity visible to the authorized caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Opportunity" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
     }
   },
   "components": {
@@ -250,6 +334,12 @@
     "parameters": {
       "LeadId": {
         "name": "leadId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
+      "OpportunityId": {
+        "name": "opportunityId",
         "in": "path",
         "required": true,
         "schema": { "$ref": "#/components/schemas/OpaqueId" }
@@ -273,6 +363,11 @@
         "name": "status",
         "in": "query",
         "schema": { "$ref": "#/components/schemas/LeadStatus" }
+      },
+      "OpportunityStatusFilter": {
+        "name": "status",
+        "in": "query",
+        "schema": { "$ref": "#/components/schemas/OpportunityStatus" }
       },
       "IdempotencyKey": {
         "name": "Idempotency-Key",
@@ -428,6 +523,51 @@
           "items": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/Lead" }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["limit", "nextCursor"],
+            "properties": {
+              "limit": { "type": "integer", "minimum": 1, "maximum": 100 },
+              "nextCursor": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "OpportunityStatus": {
+        "type": "string",
+        "enum": ["open"],
+        "description": "Domain-owned Opportunity status. Callers cannot supply or advance the status machine on create."
+      },
+      "OpportunityCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["leadId"],
+        "properties": {
+          "leadId": { "$ref": "#/components/schemas/OpaqueId" }
+        }
+      },
+      "Opportunity": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "leadId", "status", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "leadId": { "$ref": "#/components/schemas/OpaqueId" },
+          "status": { "$ref": "#/components/schemas/OpportunityStatus" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "OpportunityPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items", "meta"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Opportunity" }
           },
           "meta": {
             "type": "object",

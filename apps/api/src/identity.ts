@@ -13,7 +13,9 @@ function isUnique(error: unknown): boolean {
 }
 
 function isCapability(value: string): value is Capability {
-  return value === 'leads:read' || value === 'leads:qualify' || isContentCapability(value) || isGrowthCapability(value);
+  return value === 'leads:read' || value === 'leads:qualify'
+    || value === 'opportunities:read' || value === 'opportunities:create'
+    || isContentCapability(value) || isGrowthCapability(value);
 }
 
 export async function ensureActor(db: Kysely<Database>, issuer: string, subject: string): Promise<Actor> {

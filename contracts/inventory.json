@@ -8,12 +8,16 @@
     "GET /leads",
     "GET /leads/{leadId}",
     "POST /leads/{leadId}/qualify",
+    "POST /opportunities",
+    "GET /opportunities",
+    "GET /opportunities/{opportunityId}",
     "GET /content/{contentId}",
     "POST /growth/plans"
   ],
   "requiredHeaders": {
     "POST /leads": ["Idempotency-Key"],
-    "POST /leads/{leadId}/qualify": ["Idempotency-Key"]
+    "POST /leads/{leadId}/qualify": ["Idempotency-Key"],
+    "POST /opportunities": ["Idempotency-Key"]
   },
   "requiredLeadFields": [
     "id",
@@ -31,5 +35,18 @@
     "budget_max_pln",
     "price",
     "testimonial"
+  ],
+  "requiredOpportunityFields": [
+    "id",
+    "leadId",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenOpportunityFields": [
+    "price",
+    "stage",
+    "probability",
+    "value"
   ]
 }

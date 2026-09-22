@@ -44,11 +44,13 @@ REVIEW progress, not a complete runtime:
 
 - Current OpenAPI 3.0.4: `contracts/openapi.json`
 - Errors, `/v1`, cursor pagination, filter, sort, idempotency: present
-  for the lead slice. `qualifyLead` declares 409 Conflict. Public
+  for the lead slice and for staff Opportunity create/list/get.
+  `qualifyLead` and `createOpportunity` declare 409 Conflict. Public
   `LeadCapture.source` is `PublicLeadSource` (`www`, `other`).
+  Opportunity create accepts only `leadId`; status is domain-owned.
 - Typed client surfaces for web/portal/admin/mobile:
-  `packages/api-client` paths only. The lead HTTP server is `apps/api`.
-  This package is not a generated transport client.
+  `packages/api-client` paths only. The lead/opportunity HTTP server is
+  `apps/api`. This package is not a generated transport client.
 - Contract and breaking-change tests: `contracts/openapi.test.mjs`
 - Generated runtime clients, CI publish and SketchUp Ruby client remain
   later adapter work. The framework choice no longer blocks them; the
@@ -56,10 +58,14 @@ REVIEW progress, not a complete runtime:
 
 ## Gate C core domain
 
-REVIEW progress for lead rules only:
+REVIEW progress for lead and opportunity rules:
 
-- `packages/domain` create/qualify invariants
-- Persistence, outbox dispatch, and the lead qualify/list/get runtime are in `apps/api`. Better Auth identifies the session. Capability grants stay in Core API tables. Admin CRM UI is not done.
+- `packages/domain` create/qualify lead invariants and
+  `createOpportunity` from a qualified Lead
+- Persistence, outbox dispatch, and the lead qualify/list/get plus
+  opportunity create/list/get runtime are in `apps/api`. Better Auth
+  identifies the session. Capability grants stay in Core API tables.
+  Admin CRM UI is not done.
 
 ## Gate D product surfaces
 
@@ -88,7 +94,9 @@ CMS-ACCEPT. The CMS/Search graph in
 [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) is acceptance history after
 `RETURN-ROADMAP`. Ordinary READY work continues on
 [`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md): Lead remaining security
-evidence first, then Portal. The isolated lab in `labs/fz-cms-1`
+evidence first when unblocked. `PORTAL-APP` and
+`CRM-OPPORTUNITY-CONTRACT` are COMPLETE. The isolated lab in
+`labs/fz-cms-1`
 remains evidence, not acceptance. Search Intelligence architecture is
 [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler production policy
 stays OPEN. Lead remains not security-accepted.

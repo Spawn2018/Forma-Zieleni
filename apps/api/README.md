@@ -1,7 +1,8 @@
 # apps/api
 
 Core API for Forma Zieleni. Hono on Node 24. PostgreSQL through Kysely.
-This package serves the visitor lead vertical from `contracts/openapi.json`.
+This package serves the visitor lead vertical and staff Opportunity
+endpoints from `contracts/openapi.json`.
 
 Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/architecture/CURRENT-ARCHITECTURE.md).
 
@@ -12,10 +13,12 @@ Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/ar
 - `POST /v1/leads` — public capture, strict JSON validation, idempotency, 8 KiB streamed body cap.
 - `GET /v1/leads` and `GET /v1/leads/{leadId}` — require a server-derived actor with `leads:read`.
 - `POST /v1/leads/{leadId}/qualify` — domain rules, `leads:qualify`, idempotency `409`.
+- `POST /v1/opportunities` — staff create from a qualified Lead only (`opportunities:create`). Body is `leadId`; status is domain-owned (`open`). Idempotency `409`. Duplicate lead → `409 OPPORTUNITY_EXISTS`.
+- `GET /v1/opportunities` and `GET /v1/opportunities/{opportunityId}` — require `opportunities:read`.
 - Better Auth email/password sessions in schema `auth`. The mounted handler has sign-up disabled. Bearer tokens are signed session tokens. Cookie mutations require a trusted `Origin`.
 - Capabilities live in `actor_capability`. The stable `actor_id` is an opaque Core API id mapped from issuer + Better Auth user id, not from email.
 - `AUTH_MODE=test` is a separate HMAC signer. It starts only when `ALLOW_TEST_AUTH=1` and `NODE_ENV` is not `production`.
-- Lead, idempotency, outbox, and audit rows share one transaction.
+- Lead, Opportunity, idempotency, outbox, and audit rows share one transaction.
 - `node src/dispatch-once.ts` claims pending outbox rows with `FOR UPDATE SKIP LOCKED`, delivers them to a local stdout sink, and records retry or poison. There is no broker and no long-running worker.
 - Structured JSON request logs. No contact fields, cookies, tokens, or raw bodies.
 - Public capture rate limit keys the direct TCP peer. `X-Forwarded-For` is used only when `TRUST_PROXY=1` and the peer is listed in `TRUSTED_PROXIES`, and then only the last hop. The limiter is in-process, bounded, and replaceable.

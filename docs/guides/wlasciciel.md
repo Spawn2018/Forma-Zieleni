@@ -33,7 +33,8 @@ Nie oceniaj ich po tym pliku jako gotowych.
 
 ## Następna bezpieczna praca produktowa
 
-Po `PORTAL-APP` kolejny READY na `docs/architecture/NEXT-SLICES-MAIN.md`
-to `CRM-OPPORTUNITY-CONTRACT` (oraz osobno odblokowanie
-`LEAD-SEC-SESSION`, jeśli sesja go zablokowała). CMS-ACCEPT i akceptacja
+`PORTAL-APP` i `CRM-OPPORTUNITY-CONTRACT` są COMPLETE na
+`docs/architecture/NEXT-SLICES-MAIN.md`. Do odświeżenia roadmapy nie ma
+kolejnego nazwanego READY slice produktowego. Osobno: odblokowanie
+`LEAD-SEC-SESSION`, jeśli sesja go zablokowała. CMS-ACCEPT i akceptacja
 bezpieczeństwa Lead pozostają otwarte. To nie jest prośba o wdrożenie.

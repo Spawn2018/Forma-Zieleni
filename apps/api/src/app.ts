@@ -1,11 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, assertOpaqueOpportunityId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOpportunityCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
+import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
@@ -48,6 +49,14 @@ function pathLeadId(value: string): string {
     return assertOpaqueLeadId(decodeURIComponent(value));
   } catch {
     throw badRequest('LEAD_ID_INVALID', 'Lead id is not valid.');
+  }
+}
+
+function pathOpportunityId(value: string): string {
+  try {
+    return assertOpaqueOpportunityId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('OPPORTUNITY_ID_INVALID', 'Opportunity id is not valid.');
   }
 }
 
@@ -229,6 +238,37 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     if (!parsed.ok) throw new ApiFailure(400, 'LEAD_INVALID', 'Qualification could not be accepted.', parsed.errors);
     const lead = await qualifyExistingLead(options.store, pathLeadId(c.req.param('leadId')), parsed.value.capacityHold, actor, key, now());
     return c.json(lead);
+  });
+
+  app.post('/v1/opportunities', async c => {
+    const actor = await requireActor(c, options.authenticator, 'opportunities:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateOpportunityCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'OPPORTUNITY_INVALID', 'Opportunity could not be accepted.', parsed.errors);
+    const opportunity = await createOpportunityFromLead(options.store, parsed.value.leadId, actor, key, now());
+    return c.json(opportunity, 201);
+  });
+
+  app.get('/v1/opportunities', async c => {
+    const actor = await requireActor(c, options.authenticator, 'opportunities:read');
+    c.set('actorId', actor.actorId);
+    const query = parseOpportunityListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listVisibleOpportunities(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/opportunities/:opportunityId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'opportunities:read');
+    c.set('actorId', actor.actorId);
+    const opportunity = await readOpportunity(options.store, pathOpportunityId(c.req.param('opportunityId')));
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    return c.json(opportunity);
   });
 
   app.post('/v1/growth/plans', async c => {

@@ -10,4 +10,6 @@ Warstwa reguł i modelu domenowego Forma Zieleni.
 
 ## Status
 
-Lead capture and qualification rules are implemented in `src/lead.ts`. Persistence, other CRM modules and UI remain open.
+Lead capture and qualification rules are implemented in `src/lead.ts`.
+Opportunity creation from a qualified Lead is in `src/opportunity.ts`.
+Persistence and UI for later CRM stages remain open.

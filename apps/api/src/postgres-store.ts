@@ -1,8 +1,16 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Lead } from '@forma-zieleni/domain';
+import type { Lead, Opportunity } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
-import type { AuditEvent, LeadStore, LeadTx, ListQuery, OutboxMessage, StoredReply } from './store.ts';
+import type {
+  AuditEvent,
+  LeadStore,
+  LeadTx,
+  ListQuery,
+  OpportunityListQuery,
+  OutboxMessage,
+  StoredReply,
+} from './store.ts';
 
 type Executor = Kysely<Database> | Transaction<Database>;
 
@@ -36,6 +44,16 @@ function toLead(row: Database['lead']): Lead {
   };
 }
 
+function toOpportunity(row: Database['opportunity']): Opportunity {
+  return {
+    id: row.id,
+    leadId: row.lead_id,
+    status: row.status as Opportunity['status'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
 function isPg(error: unknown): error is { code?: string; constraint?: string } {
   return Boolean(error && typeof error === 'object' && 'code' in error);
 }
@@ -54,6 +72,9 @@ export class PostgresLeadStore implements LeadStore {
       } catch (error) {
         if (attempt === 0 && isPg(error) && error.code === '23505' && error.constraint === 'idempotency_record_pkey') continue;
         if (error instanceof ApiFailure) throw error;
+        if (isPg(error) && error.code === '23505' && error.constraint === 'opportunity_lead_unique') {
+          throw new ApiFailure(409, 'OPPORTUNITY_EXISTS', 'An opportunity already exists for this lead.');
+        }
         if (isPg(error)) throw new PersistenceFailure();
         throw error;
       }
@@ -87,11 +108,11 @@ class PostgresTx implements LeadTx {
   }
 
   async insertLead(lead: Lead): Promise<void> {
-    await this.trx.insertInto('lead').values(this.values(lead)).execute();
+    await this.trx.insertInto('lead').values(this.leadValues(lead)).execute();
   }
 
   async saveLead(lead: Lead): Promise<void> {
-    await this.trx.updateTable('lead').set(this.values(lead)).where('id', '=', lead.id).execute();
+    await this.trx.updateTable('lead').set(this.leadValues(lead)).where('id', '=', lead.id).execute();
   }
 
   async findLead(id: string): Promise<Lead | null> {
@@ -113,6 +134,42 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toLead);
+  }
+
+  async insertOpportunity(opportunity: Opportunity): Promise<void> {
+    await this.trx.insertInto('opportunity').values({
+      id: opportunity.id,
+      lead_id: opportunity.leadId,
+      status: opportunity.status,
+      created_at: new Date(opportunity.createdAt),
+      updated_at: new Date(opportunity.updatedAt),
+    }).execute();
+  }
+
+  async findOpportunity(id: string): Promise<Opportunity | null> {
+    const row = await this.trx.selectFrom('opportunity').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toOpportunity(row) : null;
+  }
+
+  async findOpportunityByLead(leadId: string): Promise<Opportunity | null> {
+    const row = await this.trx.selectFrom('opportunity').selectAll().where('lead_id', '=', leadId).executeTakeFirst();
+    return row ? toOpportunity(row) : null;
+  }
+
+  async listOpportunities(query: OpportunityListQuery): Promise<Opportunity[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('opportunity').selectAll();
+    if (query.status) request = request.where('status', '=', query.status);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toOpportunity);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {
@@ -143,7 +200,7 @@ class PostgresTx implements LeadTx {
     }).execute();
   }
 
-  private values(lead: Lead): Database['lead'] {
+  private leadValues(lead: Lead): Database['lead'] {
     return {
       id: lead.id,
       source: lead.source,

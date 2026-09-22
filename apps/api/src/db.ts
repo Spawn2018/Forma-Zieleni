@@ -17,6 +17,13 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  opportunity: {
+    id: string;
+    lead_id: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -295,6 +302,52 @@ const growthCapabilityMigration: Migration = {
   },
 };
 
+const OPPORTUNITY_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const opportunityMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE opportunity (
+  id text PRIMARY KEY,
+  lead_id text NOT NULL REFERENCES lead (id),
+  status text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT opportunity_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT opportunity_status_known CHECK (status IN ('open')),
+  CONSTRAINT opportunity_lead_unique UNIQUE (lead_id)
+);
+CREATE INDEX opportunity_list_created ON opportunity (created_at DESC, id DESC);
+CREATE INDEX opportunity_list_updated ON opportunity (updated_at DESC, id DESC);
+CREATE INDEX opportunity_list_status_created ON opportunity (status, created_at DESC, id DESC);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${OPPORTUNITY_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability IN ('opportunities:read', 'opportunities:create');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${GROWTH_CAPABILITY_SQL}));
+DROP TABLE IF EXISTS opportunity;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -302,6 +355,7 @@ const provider: MigrationProvider = {
       '002_security_runtime': securityMigration,
       '003_content_capabilities': contentCapabilityMigration,
       '004_growth_capabilities': growthCapabilityMigration,
+      '005_opportunity_contract': opportunityMigration,
     };
   },
 };

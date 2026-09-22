@@ -1,0 +1,8 @@
+export {
+  problem,
+  validateLeadCaptureRequest,
+  validateLeadQualifyRequest,
+} from './lead.ts';
+export type { FieldError, LeadCaptureRequest } from './lead.ts';
+export { validateOpportunityCreateRequest } from './opportunity.ts';
+export type { OpportunityCreateRequest } from './opportunity.ts';

@@ -256,3 +256,9 @@ export type {
   QualificationReason,
   QualificationResult,
 } from './lead.ts';
+export {
+  OPPORTUNITY_STATUSES,
+  assertOpaqueOpportunityId,
+  createOpportunity,
+} from './opportunity.ts';
+export type { Opportunity, OpportunityStatus } from './opportunity.ts';
