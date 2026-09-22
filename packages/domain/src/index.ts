@@ -199,6 +199,8 @@ export {
 } from './search-security.ts';
 export { notePerformance } from './search-performance.ts';
 export type { FieldCwv, LabMediaNote, PerformanceNotes } from './search-performance.ts';
+export { applyAuditRecommendation, auditTechnicalPages } from './search-tech-audit.ts';
+export type { TechIssue, TechIssueCode, TechnicalAudit } from './search-tech-audit.ts';
 export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
 export {
   FORBIDDEN_EXPORT_FIELDS,

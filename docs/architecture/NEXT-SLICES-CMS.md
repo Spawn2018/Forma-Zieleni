@@ -349,8 +349,11 @@ Next: SEARCH-TECH-AUDIT.
 
 Dependencies: SEARCH-SITEMAP-ROBOTS, CMS-WWW.
 Gate: REVIEW.
+Status: COMPLETE for issue reports. Recommendations cannot publish.
 Autonomous: yes.
 Accept: issues for noindex, broken canonical, missing ALT, sitemap/robots health. Recommendations do not publish.
+Tests: `packages/domain/search-tech-audit.test.mjs`. A healthy page is quiet. Applying a recommendation throws.
+Security: the audit result has no publish operation.
 Next: SEARCH-AI-VISIBILITY.
 
 ### SEARCH-AI-VISIBILITY
