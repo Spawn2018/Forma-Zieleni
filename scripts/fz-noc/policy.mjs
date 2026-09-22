@@ -147,10 +147,30 @@ export function parseExecutionGraph(markdown) {
       next: [...new Set(identifiers(field(body, 'Next')))],
       reportOnly: /report only/i.test(autonomous),
       autonomous: /^yes\b/i.test(autonomous) || /fixtures only/i.test(autonomous),
-      externalUnmet: /www app slice/i.test(dependencies),
+      dependencyText: dependencies,
+      externalUnmet: false,
     });
   }
+  const ids = new Set(slices.map((slice) => slice.id));
+  for (const slice of slices) {
+    // A named internal app is not an external dependency. The phrase is unmet
+    // only while the graph has no executable WWW-APP row.
+    slice.externalUnmet = /www app slice/i.test(slice.dependencyText) && !ids.has('WWW-APP');
+  }
   return slices;
+}
+
+/** Canon already requires apps/web. An omitted WWW-APP row is a graph gap, not exhaustion. */
+export function internalPrerequisiteGap(slices) {
+  const ids = new Set(slices.map((slice) => slice.id));
+  const namedMissingApp = slices.some((slice) => /www app slice/i.test(slice.dependencyText || ''));
+  if (namedMissingApp && !ids.has('WWW-APP')) {
+    return {
+      id: 'WWW-APP',
+      reason: 'ADR-014 requires a React Router Framework Mode WWW app. The graph named that prerequisite without an executable WWW-APP slice.',
+    };
+  }
+  return null;
 }
 
 export function selectReady(slices, options = {}) {
@@ -189,6 +209,10 @@ export function selectReady(slices, options = {}) {
   } else if (selected) {
     reason = `${selected.id} is the highest-priority safe READY slice after the critical path`;
   }
+  const internalGap = internalPrerequisiteGap(slices);
+  if (!selected && internalGap) {
+    reason = `${internalGap.reason} Do not mark the session exhausted for an omitted internal prerequisite.`;
+  }
   return {
     selected: selected ? selected.id : null,
     reason,
@@ -196,6 +220,8 @@ export function selectReady(slices, options = {}) {
     withheld: slices
       .filter((slice) => slice.status !== 'COMPLETE' && BLOCKING_GATES.has(slice.gate))
       .map((slice) => ({ id: slice.id, gate: slice.gate })),
+    internalGap,
+    exhaustionAllowed: selected == null && internalGap == null,
   };
 }
 

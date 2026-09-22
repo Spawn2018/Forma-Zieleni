@@ -75,10 +75,10 @@ test('work-stealing prefers another READY slice when the critical one is blocked
 test('the CMS graph reconstructs READY work without executing it', () => {
   const markdown = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const picked = selectReady(parseExecutionGraph(markdown));
-  assert.equal(picked.selected, null);
-  assert.deepEqual(picked.ready, []);
-  assert.equal(picked.ready.includes('CMS-EXPORT'), false);
+  assert.equal(picked.selected, 'WWW-APP');
+  assert.equal(picked.ready.includes('WWW-APP'), true);
   assert.equal(picked.ready.includes('GALLERY-WWW'), false);
+  assert.equal(picked.internalGap, null);
   assert.equal(picked.ready.includes('MEDIA-COLLECTIONS'), false);
   assert.equal(picked.ready.includes('SEARCH-ATTRIBUTION'), false);
   assert.equal(picked.ready.includes('SEARCH-DATA-MODEL'), false);
@@ -98,6 +98,30 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   const sign = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md'), 'utf8');
   assert.match(crawl, /Status:\s*OPEN/i);
   assert.match(sign, /OPEN/);
+});
+
+test('a fast-forward checkpoint push is AUTO inside noc and dangerous pushes stay gated', () => {
+  assert.equal(classifyShell('git push origin main').permission, 'allow');
+  assert.equal(classifyShell('git push').permission, 'allow');
+  for (const command of ['git push --force', 'git push --force-with-lease', 'git push --mirror', 'git push origin --delete branch']) {
+    assert.equal(classifyShell(command).permission, 'ask', command);
+  }
+});
+
+test('an omitted www app row is an internal gap and does not authorize exhaustion', () => {
+  const markdown = [
+    '### GALLERY-WWW',
+    'Dependencies: MEDIA-COLLECTIONS. Blocked until the www app slice exists.',
+    'Gate: REVIEW.',
+    'Autonomous: yes.',
+    '',
+  ].join('\n');
+  const picked = selectReady(parseExecutionGraph(markdown));
+  assert.equal(picked.selected, null);
+  assert.equal(picked.internalGap.id, 'WWW-APP');
+  assert.equal(picked.exhaustionAllowed, false);
+  const session = emptySession(nextWarsawDeadline(9, new Date('2026-09-21T19:17:00.000Z')));
+  assert.equal(session.exhausted, false);
 });
 
 test('repeated identical attempts block a slice', () => {

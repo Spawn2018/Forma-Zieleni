@@ -124,11 +124,20 @@ Gate: REVIEW.
 Status: COMPLETE for the local collection contract. No gallery UI.
 Accept: reorder, hero, captions, ALT, focal/safe region, before/after pair, reuse without copying masters.
 Tests: `packages/media/collections.test.mjs`.
-Next: GALLERY-WWW. That slice needs a React Router app, which is not in the tree.
+Next: WWW-APP, then GALLERY-WWW.
+
+### WWW-APP
+
+Dependencies: none. ADR-014 already requires `apps/web` as React Router Framework Mode.
+Gate: REVIEW.
+Autonomous: yes.
+Accept: a real `apps/web` React Router Framework Mode application in the monorepo, wired into workspace test/typecheck/lint/build, with root layout, route module, and error boundary. It reads published content only through the Core API boundary and does not invent business facts. Design tokens and fonts already defined in Canon are the visual source. No deploy, hosting choice, DNS, or Cloudflare mutation.
+Tests: the app builds and a route test renders the shell without marketing claims.
+Next: GALLERY-WWW.
 
 ### GALLERY-WWW
 
-Dependencies: MEDIA-COLLECTIONS. Blocked until the www app slice exists.
+Dependencies: MEDIA-COLLECTIONS, WWW-APP.
 Gate: REVIEW + visual/UX.
 Autonomous: yes.
 Entry: MEDIA-COLLECTIONS recorded.
@@ -247,7 +256,7 @@ Next: SEARCH-CONTENT-CONTRACT inside CMS-DATA.
 
 ### SEARCH-WWW-TECHNICAL
 
-Dependencies: CMS-DATA, and the WWW app slice that first renders published content.
+Dependencies: CMS-DATA, WWW-APP.
 Gate: REVIEW.
 Autonomous: yes.
 Accept: SSR HTML, title, description, canonical, robots meta, status codes, 404, redirects, trailing-slash and query policies, no staging index leak.

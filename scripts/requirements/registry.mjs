@@ -136,6 +136,7 @@ row('FZ-REQ-DOCINV-001', 'Every Markdown file under docs/ is classified. Unexpla
 row('FZ-REQ-RECOVERY-001', 'Mutation does not start when the recovery marker and HEAD disagree. The hook reminds; it cannot stop a writer who ignores it.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/execution-journal.json', 'scripts/requirements/closure.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', 'Cursor cannot refuse an edit solely from this marker.');
 
 const OPEN_SLICES = [
+  'WWW-APP',
   'MEDIA-COLLECTIONS', 'GALLERY-WWW', 'BEFORE-AFTER', 'CMS-SEO', 'CMS-ADMIN', 'CMS-WWW', 'CMS-HARDEN',
   'CMS-PERF', 'CMS-RESTORE', 'CMS-EXPORT', 'CMS-ACCEPT', 'SEARCH-WWW-TECHNICAL', 'SEARCH-STRUCTURED-DATA',
   'SEARCH-SITEMAP-ROBOTS', 'SEARCH-ATTRIBUTION', 'SEARCH-DATA-MODEL', 'SEARCH-CONNECTORS', 'SEARCH-SYNC',
@@ -144,6 +145,10 @@ const OPEN_SLICES = [
   'SEARCH-RECOVERY', 'SEARCH-ACCEPT', 'RETURN-ROADMAP',
 ];
 for (const slice of OPEN_SLICES) {
+  if (slice === 'WWW-APP') {
+    row('FZ-REQ-CMS-SLICE-WWW-APP', 'apps/web is the React Router Framework Mode foundation already required by ADR-014 and FZ-REQ-WWW-001.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, 'apps/web/README.md', SLICES, 'application not installed', 'REVIEW', 'Not a second product requirement. The missing app is an internal slice, not an external dependency.');
+    continue;
+  }
   if (slice === 'MEDIA-COLLECTIONS') {
     row('FZ-REQ-CMS-SLICE-MEDIA-COLLECTIONS', 'Collections reorder, set a hero, store ALT and focal data, and reuse one master.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/collections.mjs', 'packages/media/collections.test.mjs', '', 'NONE', 'Gallery UI is the next slice and needs a web app.');
     continue;

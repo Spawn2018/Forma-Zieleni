@@ -10,4 +10,4 @@ Publiczna strona WWW Forma Zieleni — aplikacja sprzedażowa i marketingowa.
 
 ## Status
 
-Szkielet katalogu. Framework aplikacji nie został jeszcze wybrany ani zainstalowany.
+Szkielet katalogu. Framework jest zdecydowany (ADR-014): React Router Framework Mode. Instalacja aplikacji jest slice `WWW-APP`, nie osobna decyzja.
