@@ -304,16 +304,25 @@ export function runCheckpointReview(options = {}) {
   const fingerprint = diffFingerprint(changed.paths, headSha, baseSha);
   if (!success) {
     const priorFail = loadReviewState(options.stateFile);
+    const openFindings = parsed.findings || [];
     const failedState = saveReviewState({
       ...priorFail,
       baseSha,
       headSha,
       paths: changed.paths,
       diffFingerprint: fingerprint,
-      state: skipped ? 'CODERABBIT_DEFERRED_UNAVAILABLE' : 'CODERABBIT_FAILED',
+      findings: openFindings.length ? openFindings.map((finding) => ({ ...finding })) : priorFail.findings,
+      dispositions: openFindings.length
+        ? Object.fromEntries(
+          openFindings.map((finding) => [finding.fingerprint, { kind: 'UNRESOLVED', at: new Date().toISOString() }]),
+        )
+        : priorFail.dispositions,
+      state: skipped
+        ? 'CODERABBIT_DEFERRED_UNAVAILABLE'
+        : (openFindings.length ? 'CODERABBIT_FINDINGS' : 'CODERABBIT_FAILED'),
     }, options.stateFile);
     return {
-      state: skipped ? 'CODERABBIT_DEFERRED_UNAVAILABLE' : 'CODERABBIT_FAILED',
+      state: failedState.state,
       ok: false,
       paths: changed.paths,
       findings: parsed.findingCount,
@@ -383,11 +392,15 @@ export function runCheckpointReview(options = {}) {
 }
 
 function findCisRecordForFingerprint(store, fingerprint) {
-  return (store.records || []).find((item) => (
-    item.patternKey === fingerprint
-    || fingerprint.startsWith(item.patternKey)
-    || (item.evidence || []).some((entry) => String(entry).includes(fingerprint))
-  ));
+  const want = String(fingerprint || '');
+  if (!want) return null;
+  return (store.records || []).find((item) => {
+    if (item.patternKey === want) return true;
+    return (item.evidence || []).some((entry) => {
+      const text = String(entry);
+      return text === want || text.endsWith(`:${want}`);
+    });
+  });
 }
 
 export function dispositionFinding(options = {}) {

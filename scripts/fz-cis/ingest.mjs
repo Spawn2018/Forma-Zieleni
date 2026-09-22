@@ -44,13 +44,13 @@ const PATTERN_KEY_RE = /^[a-z0-9]+(?:-[a-z0-9]+){1,8}$/;
 function normalizePatternKey(value, fallbackParts = []) {
   const raw = String(value || '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
   if (raw && PATTERN_KEY_RE.test(raw) && raw.length <= 48) return raw;
-  if (raw && PATTERN_KEY_RE.test(raw.slice(0, 48))) {
-    // Prefer digest-preserving short form when over length.
-    const parts = raw.split('-').filter(Boolean);
-    if (parts.length >= 2) {
-      const short = `${parts[0]}-${parts[1]}-${parts[parts.length - 1]}`.slice(0, 48);
-      if (PATTERN_KEY_RE.test(short)) return short;
-    }
+  const parts = raw.split('-').filter(Boolean);
+  if (parts.length >= 2) {
+    const digest = parts[parts.length - 1];
+    const budget = Math.max(8, 48 - digest.length - 1);
+    const head = parts.slice(0, -1).join('-').slice(0, budget).replace(/-+$/g, '');
+    const short = `${head}-${digest}`.replace(/-+/g, '-').slice(0, 48);
+    if (PATTERN_KEY_RE.test(short)) return short;
   }
   return fingerprint(fallbackParts.length ? fallbackParts : [raw || 'signal']);
 }

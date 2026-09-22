@@ -50,12 +50,29 @@ export function emptyReviewState() {
   };
 }
 
+function isValidReceiptShape(parsed) {
+  if (!parsed || typeof parsed !== 'object' || parsed.version !== 1) return false;
+  if (typeof parsed.state !== 'string' || !parsed.state) return false;
+  if (!Array.isArray(parsed.findings)) return false;
+  if (parsed.dispositions != null && typeof parsed.dispositions !== 'object') return false;
+  if (!Array.isArray(parsed.paths)) return false;
+  const closed = parsed.state === 'CODERABBIT_PASS'
+    || parsed.state === 'CODERABBIT_PASS_AFTER_REPAIR'
+    || parsed.state === 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON';
+  if (closed && (!parsed.headSha || typeof parsed.headSha !== 'string')) return false;
+  if ((parsed.findings || []).length > 0) {
+    const bad = parsed.findings.some((item) => !item || typeof item.fingerprint !== 'string' || !item.fingerprint);
+    if (bad) return false;
+  }
+  return true;
+}
+
 export function loadReviewState(file = reviewStatePath()) {
   const resolved = reviewStatePath(file);
   if (!existsSync(resolved)) return emptyReviewState();
   try {
     const parsed = JSON.parse(readFileSync(resolved, 'utf8'));
-    if (!parsed || typeof parsed !== 'object' || parsed.version !== 1) {
+    if (!isValidReceiptShape(parsed)) {
       // Existing invalid receipt must not become EMPTY (push would clear debt).
       return {
         ...emptyReviewState(),
@@ -208,6 +225,9 @@ export function noteRepair(state, { fingerprints = null } = {}) {
   const targets = fingerprints || Object.entries(state.dispositions || {})
     .filter(([, value]) => value.kind === 'ACCEPT')
     .map(([key]) => key);
+  if (!targets.length) {
+    return { ...state, state: deriveReviewState(state) };
+  }
   const repairAttempts = { ...(state.repairAttempts || {}) };
   for (const fingerprint of targets) {
     repairAttempts[fingerprint] = (repairAttempts[fingerprint] || 0) + 1;
@@ -252,14 +272,33 @@ export function applyCleanReReviewPure(state, { headSha, findings = [], paths = 
       state: 'CODERABBIT_FINDINGS_FIXED',
     };
   }
-  if (!state.repairOccurred && (state.findings || []).length > 0 && !allRejected(state)) {
-    // Undispositioned prior findings cannot be erased by a later clean run.
+  // Every prior finding must be dispositioned; unresolved siblings cannot vanish.
+  if ((state.findings || []).length > 0 && !allDispositioned(state)) {
     return {
       ...state,
       headSha,
       paths: paths.length ? paths : state.paths,
       diffFingerprint: diffFingerprint || state.diffFingerprint,
       state: deriveReviewState(state),
+    };
+  }
+  if (!state.repairOccurred && (state.findings || []).length > 0 && !allRejected(state)) {
+    return {
+      ...state,
+      headSha,
+      paths: paths.length ? paths : state.paths,
+      diffFingerprint: diffFingerprint || state.diffFingerprint,
+      state: deriveReviewState(state),
+    };
+  }
+  if (anyAccepted(state) && state.repairOccurred && !allDispositioned(state)) {
+    return {
+      ...state,
+      headSha,
+      paths: paths.length ? paths : state.paths,
+      diffFingerprint: diffFingerprint || state.diffFingerprint,
+      reReviewRequired: true,
+      state: 'CODERABBIT_RE_REVIEW_REQUIRED',
     };
   }
   return {
@@ -274,6 +313,12 @@ export function applyCleanReReviewPure(state, { headSha, findings = [], paths = 
   };
 }
 
+const OWNER_LOCAL_PATHS = new Set(['.cursor/settings.json']);
+
+function relevantPaths(paths = []) {
+  return [...new Set((paths || []).map(String).filter((file) => file && !OWNER_LOCAL_PATHS.has(file)))];
+}
+
 /**
  * Whether unresolved CodeRabbit debt blocks pushing this candidate HEAD.
  */
@@ -281,23 +326,22 @@ export function assertReviewDebtClear(candidate = {}, state = emptyReviewState()
   const head = String(candidate.headSha || candidate.head || '').toLowerCase();
   const derived = deriveReviewState(state);
   if (TERMINAL_CLOSED.has(derived) || derived === 'EMPTY') {
-    if ((derived === 'CODERABBIT_PASS' || derived === 'CODERABBIT_PASS_AFTER_REPAIR')
-      && state.headSha && head && state.headSha.toLowerCase() !== head) {
-      const candidatePaths = new Set((candidate.paths || []).map(String));
-      const reviewed = (state.paths || []).filter((file) => file !== '.cursor/settings.json');
-      if (reviewed.length === 0) {
+    const closedAuthorizing = derived === 'CODERABBIT_PASS'
+      || derived === 'CODERABBIT_PASS_AFTER_REPAIR'
+      || derived === 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON';
+    if (closedAuthorizing && state.headSha && head && state.headSha.toLowerCase() !== head) {
+      const candidateRelevant = relevantPaths(candidate.paths || []);
+      // Owner-local-only candidate paths may keep a closed receipt on a new HEAD.
+      // Any product path on a different HEAD is unreviewed.
+      if (candidateRelevant.length === 0) {
         return { ok: true, reason: 'clear', state: derived };
       }
-      const overlap = candidatePaths.size === 0
-        || reviewed.some((file) => candidatePaths.has(file));
-      if (overlap) {
-        return {
-          ok: false,
-          reason: 'stale_review_head',
-          state: derived,
-          detail: `reviewed ${state.headSha} cannot authorize ${head}`,
-        };
-      }
+      return {
+        ok: false,
+        reason: 'stale_review_head',
+        state: derived,
+        detail: `reviewed ${state.headSha} cannot authorize ${head}`,
+      };
     }
     return { ok: true, reason: 'clear', state: derived };
   }

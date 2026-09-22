@@ -170,9 +170,33 @@ test('invalid existing receipt fails closed for push', async () => {
     assert.equal(state.state, 'CODERABBIT_FAILED');
     assert.ok(state.loadError);
     assert.equal(assertReviewDebtClear({ headSha: 'abc' }, state).ok, false);
+
+    writeFileSync(file, '{"version":1,"state":"CODERABBIT_PASS","findings":[],"paths":[]}\n');
+    const incomplete = loadReviewState(file);
+    assert.equal(incomplete.state, 'CODERABBIT_FAILED');
+    assert.equal(assertReviewDebtClear({ headSha: 'abc' }, incomplete).ok, false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('clean re-review cannot drop unresolved sibling findings', () => {
+  const parsed = parseAgentReview(FIXTURE_FINDING);
+  let state = {
+    ...emptyReviewState(),
+    findings: parsed.findings,
+    dispositions: {
+      [parsed.findings[0].fingerprint]: { kind: 'ACCEPT', at: 't' },
+      [parsed.findings[1].fingerprint]: { kind: 'UNRESOLVED', at: 't' },
+    },
+    repairOccurred: true,
+    reReviewRequired: true,
+    headSha: 'bbb',
+    paths: ['scripts/fz-noc/cli.mjs'],
+  };
+  const closed = applyCleanReReviewPure(state, { headSha: 'ccc', findings: [] });
+  assert.equal((closed.findings || []).length, 2);
+  assert.notEqual(closed.state, 'CODERABBIT_PASS_AFTER_REPAIR');
 });
 
 test('all rejected-with-reason is closed but not PASS', () => {
