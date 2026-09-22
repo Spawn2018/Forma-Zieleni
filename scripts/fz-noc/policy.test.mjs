@@ -20,8 +20,11 @@ import {
   coderabbitDisposition,
   coderabbitPrivacyBlocked,
   coderabbitDiffContentBlocked,
+  portalCapabilityIsProductComplete,
+  missingExecutablePathDeclarations,
   STALL_MESSAGE,
 } from './policy.mjs';
+import { requirements } from '../requirements/registry.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const node = process.execPath;
@@ -88,10 +91,11 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'PORTAL-AUTH');
-  assert.equal(picked.ready.includes('PORTAL-AUTH'), true);
+  assert.equal(picked.selected, 'PORTAL-OFFER-PROJECTION');
+  assert.equal(picked.ready.includes('PORTAL-OFFER-PROJECTION'), true);
   assert.equal(picked.ready.includes('ADMIN-APP'), true);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
+  assert.equal(picked.ready.includes('CRM-PROJECT-DOMAIN'), true);
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.exhaustionAllowed, false);
@@ -139,6 +143,15 @@ test('an omitted www app row is an internal gap and does not authorize exhaustio
 });
 
 test('missing Offer after Opportunity is a materialization gap, not Owner roadmap refresh', () => {
+  const offerRequired = [{
+    id: 'FZ-REQ-CRM-OFFER-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: 'CRM-OFFER-CONTRACT',
+    executableWhenComplete: ['CRM-OPPORTUNITY-CONTRACT'],
+    safePreblockerWork: true,
+  }];
   const slices = [
     {
       id: 'CRM-OPPORTUNITY-CONTRACT',
@@ -161,9 +174,9 @@ test('missing Offer after Opportunity is a materialization gap, not Owner roadma
       externalUnmet: false,
     },
   ];
-  const gap = bindingMaterializationGap(slices);
+  const gap = bindingMaterializationGap(slices, offerRequired);
   assert.equal(gap.id, 'CRM-OFFER-CONTRACT');
-  const picked = selectReady(slices);
+  const picked = selectReady(slices, { requirements: offerRequired });
   assert.equal(picked.selected, 'ADMIN-APP');
   assert.equal(picked.exhaustionAllowed, false);
   const exhausted = selectReady([
@@ -177,18 +190,18 @@ test('missing Offer after Opportunity is a materialization gap, not Owner roadma
       reportOnly: false,
       externalUnmet: false,
     },
-  ]);
+  ], { requirements: offerRequired });
   assert.equal(exhausted.selected, null);
   assert.equal(exhausted.internalGap.id, 'CRM-OFFER-CONTRACT');
   assert.equal(exhausted.exhaustionAllowed, false);
-  assert.match(exhausted.reason, /Materialize CRM-OFFER-CONTRACT/);
+  assert.match(exhausted.reason, /FZ-REQ-CRM-OFFER-001|CRM-OFFER-CONTRACT/);
 });
 
 test('main graph after Opportunity keeps product READY without ZAP or Lead acceptance', () => {
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'PORTAL-AUTH');
+  assert.equal(picked.selected, 'PORTAL-OFFER-PROJECTION');
   assert.equal(picked.ready.includes('ADMIN-APP'), true);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);
@@ -343,6 +356,143 @@ test('new controller files do not import another product queue', () => {
     const text = readFileSync(file, 'utf8');
     for (const word of banned) assert.equal(text.includes(word), false, `${file} contains ${word}`);
   }
+});
+
+test('A: omitted Offer after Opportunity is an internal gap and blocks exhaustion', () => {
+  const reqs = [{
+    id: 'FZ-REQ-CRM-OFFER-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: 'CRM-OFFER-CONTRACT',
+    executableWhenComplete: ['CRM-OPPORTUNITY-CONTRACT'],
+    safePreblockerWork: true,
+  }];
+  const slices = [{
+    id: 'CRM-OPPORTUNITY-CONTRACT', status: 'COMPLETE', gate: 'REVIEW',
+    dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false,
+  }];
+  const picked = selectReady(slices, { requirements: reqs });
+  assert.equal(picked.selected, null);
+  assert.equal(picked.internalGap.id, 'CRM-OFFER-CONTRACT');
+  assert.equal(picked.exhaustionAllowed, false);
+});
+
+test('B: Admin binding without ADMIN-APP slice is an internal gap', () => {
+  const reqs = [{
+    id: 'FZ-REQ-ADMIN-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: 'ADMIN-APP',
+    executableWhenComplete: ['PORTAL-APP'],
+    safePreblockerWork: true,
+  }];
+  const slices = [{
+    id: 'PORTAL-APP', status: 'COMPLETE', gate: 'REVIEW',
+    dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false,
+  }];
+  const picked = selectReady(slices, { requirements: reqs });
+  assert.equal(picked.internalGap.id, 'ADMIN-APP');
+  assert.equal(picked.exhaustionAllowed, false);
+});
+
+test('C: Portal foundation or shell is not product-complete while auth/projections remain', () => {
+  const rows = requirements().filter((row) => row.productCapability === 'PORTAL' || String(row.id).startsWith('FZ-REQ-PORTAL-'));
+  assert.equal(portalCapabilityIsProductComplete(rows), false);
+  assert.ok(rows.some((row) => row.foundationOnly === true && row.status === 'DONE_AT_MAX_DEPTH'));
+  assert.ok(rows.some((row) => row.id === 'FZ-REQ-PORTAL-003' && row.status !== 'DONE_AT_MAX_DEPTH'));
+});
+
+test('D: Mobile binding stays materialized on the main graph', () => {
+  const main = parseExecutionGraph(readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8'));
+  assert.ok(main.some((slice) => slice.id === 'MOBILE-CLIENT-BOUNDARY'));
+  const mobile = requirements().find((row) => row.id === 'FZ-REQ-MOBILE-001');
+  assert.equal(mobile.executableSlice, 'MOBILE-CLIENT-BOUNDARY');
+  assert.equal(mobile.status, 'BLOCKED_BY_DEPENDENCY');
+});
+
+test('E: Garden OS and SketchUp keep executable future chains', () => {
+  const main = parseExecutionGraph(readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8'));
+  assert.ok(main.some((slice) => slice.id === 'GARDENOS-RELATION-BOUNDARY'));
+  assert.ok(main.some((slice) => slice.id === 'SKETCHUP-ADAPTER-BOUNDARY'));
+  assert.equal(requirements().find((row) => row.id === 'FZ-REQ-GARDENOS-001').executableSlice, 'GARDENOS-RELATION-BOUNDARY');
+  assert.equal(requirements().find((row) => row.id === 'FZ-REQ-SKETCHUP-001').executableSlice, 'SKETCHUP-ADAPTER-BOUNDARY');
+});
+
+test('F: CMS-ACCEPT open does not block an independent Offer slice', () => {
+  const slices = [
+    { id: 'CMS-ACCEPT', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: true, externalUnmet: false },
+    { id: 'CRM-OFFER-CONTRACT', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices, { requirements: [] });
+  assert.equal(picked.selected, 'CRM-OFFER-CONTRACT');
+});
+
+test('G: Lead security acceptance open does not block Admin', () => {
+  const slices = [
+    { id: 'LEAD-SEC-ACCEPT', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: true, externalUnmet: false },
+    { id: 'ADMIN-APP', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices, { requirements: [] });
+  assert.equal(picked.selected, 'ADMIN-APP');
+});
+
+test('H: ZAP waiting does not appear as a READY product blocker', () => {
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  assert.match(main, /ZAP ARMED_WAITING_FOR_TARGET/);
+  assert.match(main, /does \*\*not\*\* block unrelated product/);
+  const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
+  assert.ok(picked.ready.includes('ADMIN-APP') || picked.ready.includes('PORTAL-OFFER-PROJECTION'));
+});
+
+test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  assert.match(main, /Dependency-Check SCA/);
+  assert.match(main, /Does \*\*not\*\* block Offer\/Admin\/Portal/);
+  const graph = parseExecutionGraph(main);
+  assert.equal(graph.some((slice) => /DEPENDENCY-CHECK/i.test(slice.id)), false);
+});
+
+test('J: only genuine Owner gates remaining may allow exhaustion', () => {
+  const slices = [
+    { id: 'PAY', status: 'OPEN', gate: 'OWNER-DECISION', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+    { id: 'SIGN', status: 'OPEN', gate: 'OWNER-DECISION', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices, { requirements: [] });
+  assert.equal(picked.selected, null);
+  assert.equal(picked.exhaustionAllowed, true);
+  assert.equal(picked.withheld.length, 2);
+});
+
+test('K: missing executableSlice declaration fails roadmap validation', () => {
+  const missing = missingExecutablePathDeclarations([{
+    id: 'FZ-REQ-SYNTH-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: '',
+    safePreblockerWork: true,
+  }]);
+  assert.deepEqual(missing, ['FZ-REQ-SYNTH-001']);
+});
+
+test('L: a synthetic unknown internal requirement omitted from the graph is caught without hard-coding its name', () => {
+  const sliceId = 'SYNTHETIC-CAPABILITY-BOUNDARY';
+  const reqs = [{
+    id: 'FZ-REQ-SYNTHETIC-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: sliceId,
+    executableWhenComplete: [],
+    safePreblockerWork: true,
+  }];
+  const picked = selectReady([], { requirements: reqs });
+  assert.equal(picked.selected, null);
+  assert.equal(picked.internalGap.id, sliceId);
+  assert.equal(picked.exhaustionAllowed, false);
+  assert.match(picked.reason, /FZ-REQ-SYNTHETIC-001/);
 });
 
 function walk(directory) {

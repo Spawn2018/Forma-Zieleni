@@ -14,7 +14,7 @@ const HTTP = 'apps/api/src/http.test.mjs';
 
 const rows = [];
 
-function row(id, description, status, actual, max, architecture, implementation, test, dependency, gate, gap) {
+function row(id, description, status, actual, max, architecture, implementation, test, dependency, gate, gap, extras = {}) {
   rows.push({
     id,
     description,
@@ -28,6 +28,12 @@ function row(id, description, status, actual, max, architecture, implementation,
     dependency: dependency || '',
     gate: gate || 'NONE',
     gap: gap || '',
+    executableSlice: extras.executableSlice || '',
+    executableWhenComplete: extras.executableWhenComplete || [],
+    blockerClass: extras.blockerClass || '',
+    productCapability: extras.productCapability || '',
+    foundationOnly: extras.foundationOnly === true,
+    safePreblockerWork: extras.safePreblockerWork !== false,
   });
 }
 
@@ -53,7 +59,10 @@ tested('FZ-REQ-PROJECT-001', 'REAL, CONCEPT and ILLUSTRATIVE projects are distin
 tested('FZ-REQ-PROJECTGROWTH-001', 'A verified real project proposes content candidates and does not publish them.', GROWTH, PLAN);
 tested('FZ-REQ-PROJECTGROWTH-002', 'Private facts and missing rights do not become marketing content.', GROWTH, PLAN);
 tested('FZ-REQ-PROJECTGROWTH-003', 'The system rejects an invented or private project fact on the public path.', GROWTH, PLAN);
-tested('FZ-REQ-ATLAS-001', 'Botanical sources are taxonomic authorities, not horticultural proof.', GROWTH, PLAN);
+row('FZ-REQ-ATLAS-001', 'Botanical sources are taxonomic authorities, not horticultural proof.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', GROWTH, PLAN, TEST, '', 'NONE', 'Foundation depth only. Runtime atlas UI stays a separate requirement.', {
+  productCapability: 'ATLAS',
+  foundationOnly: true,
+});
 tested('FZ-REQ-GROWTH-001', 'Goal, budget ceiling and horizon compile a versioned synthetic plan.', GROWTH, PLAN);
 tested('FZ-REQ-GROWTH-002', 'The plan includes articles, prompts, a concept brief, channels, an experiment and measurement.', GROWTH, PLAN);
 tested('FZ-REQ-GROWTH-003', 'Budget allocations sum to the ceiling and do not authorize spend.', GROWTH, PLAN);
@@ -73,38 +82,115 @@ tested('FZ-REQ-CREATIVE-001', 'Platform specs stay UNVERIFIED until a dated offi
 tested('FZ-REQ-EXPERIENCE-001', 'Behavior events reject name, email, phone, address and message. They are not conclusions.', GROWTH, PLAN);
 tested('FZ-REQ-EXPERIENCE-002', 'Session replay is off and cannot be enabled by this module.', GROWTH, PLAN);
 tested('FZ-REQ-CRM-001', 'Qualified path outranks raw lead volume when both numbers exist.', GROWTH, PLAN);
+row('FZ-REQ-CRM-OFFER-001', 'Offer is a first-class Core API domain object created from an Opportunity.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/offer.ts', 'packages/domain/offer.test.mjs', '', 'NONE', 'Staff create/list/get only. Portal projection and Admin UI stay later.', {
+  productCapability: 'OFFER',
+  executableSlice: 'CRM-OFFER-CONTRACT',
+  executableWhenComplete: ['CRM-OPPORTUNITY-CONTRACT'],
+});
+row('FZ-REQ-CRM-CONTRACT-001', 'Contract is a first-class Core API domain object created from an Offer without a signing provider.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/contract.ts', 'packages/domain/contract.test.mjs', '', 'NONE', 'FZ-SIGN-1 provider stays UNDECIDED.', {
+  productCapability: 'CONTRACT',
+  executableSlice: 'CRM-CONTRACT-DOMAIN',
+  executableWhenComplete: ['CRM-OFFER-CONTRACT'],
+});
 tested('FZ-REQ-OFFERINTEL-001', 'Marketing code cannot change price or commercial terms.', GROWTH, PLAN);
 tested('FZ-REQ-OFFERLEARN-001', 'A rejected offer records hypotheses, including price, and does not change the price.', GROWTH, PLAN);
 tested('FZ-REQ-INTEGRATION-001', 'The integration registry refuses live mutation. Providers stay discovered or planned.', GROWTH, PLAN);
 tested('FZ-REQ-OPS-001', 'Operations domains are not DORA metrics and are not measured yet.', GROWTH, PLAN);
 row('FZ-REQ-DORA-001', 'DORA stays five software-delivery metrics. No score and no certification.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', '', 'NONE', 'No production series. Numbers stay NOT MEASURABLE.');
-row('FZ-REQ-DORA-002', 'Production DORA numbers are not measurable until deployment events exist.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', 'no production deployments', 'NONE', 'NOT MEASURABLE');
+row('FZ-REQ-DORA-002', 'Production DORA numbers are not measurable until deployment events exist.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', 'docs/engineering/DORA-MEASUREMENT.md', 'no production deployments', 'NONE', 'NOT MEASURABLE', {
+  blockerClass: 'PRODUCTION_ONLY',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-CIS-001', 'FZ-CIS remains the only learning system. External text cannot edit Canon.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CIS, 'scripts/fz-cis/policy.mjs', 'scripts/fz-cis/policy.test.mjs', '', 'NONE', '');
 row('FZ-REQ-CIS-002', 'Reviewer corrections are signals. They do not auto-promote or remove review.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CIS, CODE, TEST, '', 'NONE', '');
 row('FZ-REQ-AUTO-001', '/noc uses the next Europe/Warsaw hour. 9 means 09:00.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/cursor-os/CURSOR-OS-2026.md', 'scripts/fz-noc/policy.mjs', 'scripts/fz-noc/policy.test.mjs', '', 'NONE', '');
 row('FZ-REQ-AUTO-002', 'The orchestrator uses one execution loop and does not resolve Owner gates.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', '.cursor/agents/fz-orchestrator.md', '.cursor/agents/fz-orchestrator.md', '.cursor/agents/fz-orchestrator.md', '', 'NONE', 'Agent text is the control. No second loop was added.');
 row('FZ-REQ-GOV-001', 'Owner authority stays above Canon, the orchestrator and tools.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/workflows/DECISION-GATES.md', 'docs/workflows/DECISION-GATES.md', 'docs/workflows/DECISION-GATES.md', '', 'NONE', '');
-row('FZ-REQ-GOV-002', 'FZ-SIGN-1 provider remains undecided.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'Owner selection', 'OWNER-DECISION', 'UNDECIDED');
+row('FZ-REQ-GOV-002', 'FZ-SIGN-1 provider remains undecided.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
+  blockerClass: 'OWNER_GATED',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-SEARCH-001', 'FZ-SEARCH-1 remains the search architecture. No universal AI rank or GEO score.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', SEARCH, SEARCH, 'contracts/content-contract.test.mjs', '', 'NONE', 'Connector runtime is a later slice, not this foundation.');
-row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 training-crawler policy stays open.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'Owner policy', 'OWNER-DECISION', 'OPEN');
-row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeline stay the CMS decision. CMS-ACCEPT stays open.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', SLICES, 'scripts/cms-lab-gate.mjs', 'Apostrophe Admin UI and PostgreSQL lab not executed', 'REVIEW', 'CMS-ACCEPT OPEN');
+row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 training-crawler policy stays open.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'Owner policy', 'OWNER-DECISION', 'OPEN', {
+  blockerClass: 'OWNER_GATED',
+  safePreblockerWork: false,
+});
+row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeline stay the CMS decision. CMS-ACCEPT stays open.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', SLICES, 'scripts/cms-lab-gate.mjs', 'Apostrophe Admin UI and PostgreSQL lab not executed', 'REVIEW', 'CMS-ACCEPT OPEN', {
+  blockerClass: 'VENDOR_ACCEPTANCE',
+  executableSlice: 'CMS-ACCEPT',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-CMS-002', 'Published content stays a projection. Drafts stay private.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/content-publish.ts', 'packages/domain/content-publish.test.mjs', '', 'NONE', '');
 row('FZ-REQ-MEDIA-001', 'Private checksummed masters and public derivatives without GPS stay the media contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/derivatives.mjs', 'packages/media/derivatives.test.mjs', '', 'NONE', 'The public gallery route exists and stays empty until a published collection.');
 row('FZ-REQ-ARCH-001', 'Gate A stays Hono, PostgreSQL, Kysely, outbox, Better Auth, local files, later Garage, OpenObserve, SOPS+age, restic, pgBackRest, Cloudflare Tunnel, Compose later, no overlay.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, '', 'NONE', 'Production hosting and object storage remain undecided.');
 row('FZ-REQ-ARCH-002', 'No graph database, Prisma, Drizzle or Kafka is introduced by this foundation.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, 'package.json', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 row('FZ-REQ-API-001', 'Core API remains the business authority.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', '');
 row('FZ-REQ-DATA-001', 'PostgreSQL and Kysely remain persistence. New unused tables were not added.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/api/src/db.ts', 'apps/api/src/postgres.integration.test.mjs', 'A shared fabric table waits for a product consumer', 'NONE', 'Domain contract is in memory, matching the content-publish precedent.');
-row('FZ-REQ-SEC-001', 'The lead vertical is implemented and is not security-accepted.', 'BLOCKED_BY_DEPENDENCY', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md', 'packages/domain/src/lead.ts', 'packages/domain/lead.test.mjs', 'ZAP, Dependency-Check, offsite backup, production ingress', 'REVIEW', 'Do not mark security-accepted.');
+row('FZ-REQ-SEC-001', 'The lead vertical is implemented and is not security-accepted.', 'BLOCKED_BY_DEPENDENCY', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md', 'packages/domain/src/lead.ts', 'packages/domain/lead.test.mjs', 'ZAP, Dependency-Check, offsite backup, production ingress', 'REVIEW', 'Do not mark security-accepted.', {
+  blockerClass: 'SECURITY_ACCEPTANCE_ONLY',
+  executableSlice: 'LEAD-SEC-ACCEPT',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-PRIV-001', 'No live customer tracking, session replay or analytics ingestion is activated.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', GROWTH, PLAN, TEST, '', 'NONE', '');
 row('FZ-REQ-WWW-001', 'WWW reads a published projection and must not invent business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', '', 'NONE', 'The gallery route is empty until a published collection. Offer pages and font files are later.');
-row('FZ-REQ-PORTAL-001', 'Portal customer isolation is enforced in the domain contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, CODE, TEST, 'apps/portal is a boundary note', 'NONE', 'No portal UI.');
-row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.');
-row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'No mobile client', 'NONE', '');
-row('FZ-REQ-SITEINTEL-001', 'Site Intelligence stays DATA, then RULES, then DOMAIN, then AI.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No site-intelligence runtime', 'NONE', '');
-row('FZ-REQ-GARDENOS-001', 'Garden OS is a future relation, not a digital-twin runtime.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CONNECTED, CODE, TEST, 'No Garden OS product', 'NONE', '');
-row('FZ-REQ-SKETCHUP-001', 'SketchUp is not the source of business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No SketchUp plugin', 'NONE', '');
-row('FZ-REQ-PAY-001', 'Payment provider remains undecided. No transaction is started.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED');
-row('FZ-REQ-HOST-001', 'Production hosting remains undecided. No deploy, DNS or Cloudflare mutation.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED');
+row('FZ-REQ-PORTAL-001', 'Portal customer isolation is enforced in the domain contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, CODE, TEST, '', 'NONE', 'Foundation depth only. Auth and client projections remain separate unfinished Portal requirements.', {
+  productCapability: 'PORTAL',
+  foundationOnly: true,
+});
+row('FZ-REQ-PORTAL-002', 'Portal client Better Auth identity, session cookie and origin rules for the portal trust zone.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/session.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'Signed-in empty shell is not offer projection. FZ-REQ-PORTAL-003 remains open.', {
+  productCapability: 'PORTAL',
+  executableSlice: 'PORTAL-AUTH',
+  executableWhenComplete: ['PORTAL-APP'],
+});
+row('FZ-REQ-PORTAL-003', 'Client-safe Offer projection through Core API authorization for the authenticated portal client.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'PORTAL-AUTH and CRM-OFFER-CONTRACT', 'NONE', 'No staff mutation from Portal.', {
+  productCapability: 'PORTAL',
+  executableSlice: 'PORTAL-OFFER-PROJECTION',
+  executableWhenComplete: ['PORTAL-AUTH', 'CRM-OFFER-CONTRACT'],
+});
+row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.', {
+  productCapability: 'ADMIN',
+  executableSlice: 'ADMIN-APP',
+  executableWhenComplete: ['PORTAL-APP'],
+});
+row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'No mobile client', 'NONE', 'Executable boundary precedes runtime apps.', {
+  productCapability: 'MOBILE',
+  executableSlice: 'MOBILE-CLIENT-BOUNDARY',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-SITEINTEL-001', 'Site Intelligence stays DATA, then RULES, then DOMAIN, then AI.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No site-intelligence runtime', 'NONE', 'Ordering is binding; runtime is later.', {
+  productCapability: 'SITEINTEL',
+  executableSlice: 'SITEINTEL-DATA-BOUNDARY',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-ATLAS-002', 'Plant Atlas taxonomy and provenance stay source-of-truth boundaries before any runtime atlas UI.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', GROWTH, PLAN, TEST, 'No atlas runtime product', 'NONE', 'FZ-REQ-ATLAS-001 foundation stays; runtime needs an executable path.', {
+  productCapability: 'ATLAS',
+  executableSlice: 'ATLAS-PROVENANCE-BOUNDARY',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-GARDENOS-001', 'Garden OS is a future client relation after project delivery, not a disconnected microsystem.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CONNECTED, CODE, TEST, 'No Garden OS product', 'NONE', 'Relation boundary precedes twin runtime.', {
+  productCapability: 'GARDENOS',
+  executableSlice: 'GARDENOS-RELATION-BOUNDARY',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-SKETCHUP-001', 'SketchUp is not the source of business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No SketchUp plugin', 'NONE', 'Adapter boundary precedes plugin runtime.', {
+  productCapability: 'SKETCHUP',
+  executableSlice: 'SKETCHUP-ADAPTER-BOUNDARY',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-PROJECT-002', 'Project domain foundations may be contracted after Contract without a live payment provider.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'CRM-CONTRACT-DOMAIN', 'NONE', 'Payment provider stays OWNER-DECISION; domain modeling is safe pre-blocker work.', {
+  productCapability: 'PROJECT',
+  executableSlice: 'CRM-PROJECT-DOMAIN',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-PAY-001', 'Payment provider remains undecided. No transaction is started.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
+  blockerClass: 'OWNER_GATED',
+  productCapability: 'PAYMENT',
+  safePreblockerWork: false,
+});
+row('FZ-REQ-HOST-001', 'Production hosting remains undecided. No deploy, DNS or Cloudflare mutation.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
+  blockerClass: 'OWNER_GATED',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-GOV-003', 'Project code stays all rights reserved. No repository OSS license is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 row('FZ-REQ-GOV-004', 'Legal facts, font files and the legacy CT8 site are not changed or invented here.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'Re-verify before public use', 'NONE', 'NIP and font delivery were not re-fetched.');
 row('FZ-REQ-EXECINTEGRITY-001', 'Material claims in this registry name an artifact. Synthetic plans are labeled synthetic.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md', 'scripts/requirements/registry.mjs', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
@@ -126,7 +212,10 @@ row('FZ-REQ-PLATFORM-001', 'Golden paths reuse Cursor OS. One writer. No interna
 row('FZ-REQ-DORA-003', 'DORA capability coverage is evidenced per capability. There is no combined score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', DOCS_CHECK, 'No production deployment series', 'NONE', 'Several capabilities stay DESIGNED or NOT MEASURABLE.');
 row('FZ-REQ-DORA-004', 'AI use is classified. Customer data and secrets are prohibited in external tools. Token count is not productivity.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FZ-AI-USAGE-POLICY.md', 'docs/engineering/FZ-AI-USAGE-POLICY.md', DOCS_CHECK, '', 'NONE', 'Vendor privacy promises were not re-verified.');
 row('FZ-REQ-DORA-005', 'Release readiness is local and reproducible. Deploy, hosting, and alert thresholds stay gated or unmeasured.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/RELEASE-READINESS.md', 'docs/engineering/RELEASE-READINESS.md', DOCS_CHECK, 'production hosting UNDECIDED', 'OWNER-DECISION', '');
-row('FZ-REQ-DORA-006', 'Value stream stages are named. Durations stay not measurable until a release clock exists.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/VALUE-STREAM.md', 'docs/engineering/VALUE-STREAM.md', 'scripts/requirements/closure.test.mjs', 'no production release clock', 'NONE', 'NOT MEASURABLE');
+row('FZ-REQ-DORA-006', 'Value stream stages are named. Durations stay not measurable until a release clock exists.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/VALUE-STREAM.md', 'docs/engineering/VALUE-STREAM.md', 'scripts/requirements/closure.test.mjs', 'no production release clock', 'NONE', 'NOT MEASURABLE', {
+  blockerClass: 'PRODUCTION_ONLY',
+  safePreblockerWork: false,
+});
 row('FZ-REQ-DORA-007', 'Data domains name an owner, a contract, and visibility. There is no data-quality score.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/HEALTHY-DATA.md', 'docs/engineering/HEALTHY-DATA.md', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
 row('FZ-REQ-DORA-008', 'A future alert needs a decision and a baseline. No numeric threshold is invented.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FAILURE-ALERTS.md', 'docs/engineering/FAILURE-ALERTS.md', 'scripts/requirements/closure.test.mjs', 'no production baseline', 'NONE', '');
 row('FZ-REQ-DORA-009', 'Test data rejects a customer-database copy and an unlabeled marketing plan.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/TEST-DATA-POLICY.md', 'scripts/docs/test-data.mjs', 'scripts/requirements/closure.test.mjs', '', 'NONE', '');
@@ -261,7 +350,11 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-RETURN-ROADMAP', 'RETURN-ROADMAP stands up NEXT-SLICES-MAIN and resumes Lead security plus Portal selection without marking Lead or CMS security-accepted.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/NEXT-SLICES-MAIN.md', 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', '', 'NONE', 'CMS-ACCEPT and Lead security-acceptance stay open.');
     continue;
   }
-  row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
+  row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.', {
+    executableSlice: slice,
+    blockerClass: /ACCEPT$/.test(slice) ? 'VENDOR_ACCEPTANCE' : 'INTERNAL',
+    safePreblockerWork: !/ACCEPT$/.test(slice),
+  });
 }
 const ACCEPTANCE = [
   ['A', 'Apostrophe plus PostgreSQL in the intended architecture'],
@@ -283,7 +376,11 @@ const ACCEPTANCE = [
   ['Q', 'React Router WWW integration'],
 ];
 for (const [letter, text] of ACCEPTANCE) {
-  row(`FZ-REQ-CMS-ACCEPT-${letter}`, text, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'CMS-ACCEPT is open', 'REVIEW', 'Domain contracts do not close vendor acceptance.');
+  row(`FZ-REQ-CMS-ACCEPT-${letter}`, text, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'CMS-ACCEPT is open', 'REVIEW', 'Domain contracts do not close vendor acceptance.', {
+    blockerClass: 'VENDOR_ACCEPTANCE',
+    executableSlice: 'CMS-ACCEPT',
+    safePreblockerWork: false,
+  });
 }
 
 const PREFIXES = [
@@ -308,6 +405,11 @@ export function requirements() {
   return rows.map(item => ({ ...item }));
 }
 
+import {
+  missingExecutablePathDeclarations,
+  registryMaterializationGap,
+} from '../requirements/executable-path.mjs';
+
 export function validateRequirements() {
   const errors = [];
   const seen = new Set();
@@ -321,9 +423,14 @@ export function validateRequirements() {
   for (const prefix of PREFIXES) {
     if (!rows.some(item => item.id.startsWith(`${prefix}-`))) errors.push(`PREFIX ${prefix}`);
   }
+  for (const id of missingExecutablePathDeclarations(rows)) {
+    errors.push(`EXECUTABLE_PATH ${id}`);
+  }
   const incomplete = rows.filter(item => item.status === 'INCOMPLETE_SAFE' || rank(item.actualDepth) < rank(item.maxDepth));
   return { errors, total: rows.length, incomplete: incomplete.length, ids: [...seen] };
 }
+
+export { registryMaterializationGap };
 
 export function ledger() {
   const counts = {

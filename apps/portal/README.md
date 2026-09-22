@@ -11,9 +11,11 @@ Portal klienta Forma Zieleni.
 ## Status
 
 Aplikacja React Router Framework Mode (SSR). Układ, trasa `/` i granica
-błędu są w `app/`. Strona startowa jest bramką wylogowaną: nie pokazuje
-projektów, ofert ani plików i nie zmyśla faktów CRM. Logowanie klienta
-i odczyt projekcji z Core API są kolejnymi slice'ami.
+błędu są w `app/`. Sesja portalu klasyfikuje stany: wylogowany,
+nieuprawniony, zalogowany (pusty). Tożsamość pochodzi z Core API
+`GET /v1/portal/session` (Better Auth). Loader nie zmyśla ofert,
+projektów ani plików. Projekcja ofert to osobny slice
+`PORTAL-OFFER-PROJECTION`.
 
 Kolory są tokenami kanonu. Kroje Newsreader i Schibsted Grotesk są
 wskazane w CSS. Pliki fontów nie są dołączone.

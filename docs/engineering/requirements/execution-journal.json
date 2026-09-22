@@ -1,11 +1,11 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "main-graph-product-resumed-after-false-exhaustion-repair",
+  "currentPhase": "generic-executable-path-repair-and-portal-auth",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "b049f732142a3b8314d715381131e0ac2af9dcf9",
+  "publishedHead": "eb561b4e810563293b28615c24e45946808ee642",
   "postPushSafety": "PASS",
-  "codeRabbit": "CLI checkpoint 2026-09-22T18:27Z on 7911dae: CODERABBIT_FINDINGS (1 minor). Fixed in acb7b68: offer validation returns CLIENT_COMMERCIAL_FORBIDDEN before UNKNOWN_FIELD. State=CODERABBIT_FINDINGS_FIXED. Prior: CLI checkpoint 2026-09-22T15:12:25Z on 0414697.",
+  "codeRabbit": "Pending checkpoint review after PORTAL-AUTH + generic executable-path repair.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -25,8 +25,8 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "False exhaustion repaired: binding materialization gap + CRM-OFFER-CONTRACT COMPLETE. Next READY: CRM-CONTRACT-DOMAIN (also ADMIN-APP, PORTAL-AUTH). Do not treat missing slices as Owner roadmap refresh. Do not mark Lead security-accepted.",
-  "learningCheck": "MATERIAL: exhaustionAllowed must stay false when unfinished binding Canon requirements lack executable slices (bindingMaterializationGap). Owner roadmap refresh is not the correct classification for internal materialization defects.",
+  "nextSafeAction": "PORTAL-AUTH COMPLETE pending push. Next READY: PORTAL-OFFER-PROJECTION (also ADMIN-APP, CRM-PROJECT-DOMAIN, boundary slices). Do not mark Lead security-accepted. Do not treat acceptance reports as global blockers.",
+  "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",
@@ -101,6 +101,12 @@
     "scripts/fz-cis/ingest.mjs",
     "scripts/security/zap-readiness.mjs",
     "scripts/security/dependency-check-policy.mjs",
+    "scripts/requirements/executable-path.mjs",
+    "scripts/requirements/executable-path.test.mjs",
+    "apps/portal/app/session.ts",
+    "apps/portal/app/shell.ts",
+    "apps/api/src/app.ts",
+    "contracts/openapi.json",
     "https://github.com/Spawn2018/Forma-Zieleni/actions/runs/35747728773"
   ],
   "contextRecoveryHints": [

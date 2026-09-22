@@ -206,6 +206,17 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json({ ok: true });
   });
 
+  app.get('/v1/portal/session', async c => {
+    const actor = await options.authenticator.authenticate(c.req.raw);
+    if (!actor) throw new ApiFailure(401, 'UNAUTHENTICATED', 'Authentication is required.');
+    c.set('actorId', actor.actorId);
+    // Identity only — no offers, projects, files, or payments.
+    return c.json({
+      authenticated: true,
+      clientId: actor.clientId,
+    });
+  });
+
   app.options('*', c => c.body(null, trustedOrigins.includes(c.req.header('origin') ?? '') ? 204 : 403));
 
   if (options.authHandler) {

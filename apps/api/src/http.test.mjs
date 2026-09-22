@@ -188,6 +188,20 @@ test('anonymous and portal actors cannot list, get or qualify; staff can', async
   assert.equal(forged.status, 401);
 });
 
+test('portal session returns identity only and refuses anonymous callers', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/portal/session')).status, 401);
+  const portalSession = await app.request('/v1/portal/session', { headers: bearer(portal) });
+  assert.equal(portalSession.status, 200);
+  const portalBody = await portalSession.json();
+  assert.deepEqual(portalBody, { authenticated: true, clientId: 'portal' });
+  assert.equal(Object.hasOwn(portalBody, 'offers'), false);
+  assert.equal(Object.hasOwn(portalBody, 'projects'), false);
+  const staffSession = await app.request('/v1/portal/session', { headers: bearer(staff) });
+  assert.equal(staffSession.status, 200);
+  assert.equal((await staffSession.json()).clientId, 'admin');
+});
+
 test('qualification uses domain rules, records one audit, and keeps idempotency', async () => {
   const { app, store } = appFor();
   const created = await (await app.request('/v1/leads', json(capture))).json();

@@ -13,8 +13,10 @@ ADR-014). Implementation and security acceptance are not complete.
 
 - `apps/api` = Hono on Node 24. Core API remains canonical. Lead capture/qualification, staff Opportunity/Offer/Contract create/list/get are live in the current tree.
 - `apps/web` = React Router Framework Mode. The shell reads one published title from Core API `GET /v1/content/:id` and does not invent public copy.
-- `apps/portal` = React Router Framework Mode. Signed-out client gate only; does not invent project, offer, or file facts. Client auth and Core API projections are later slices.
-- `apps/admin` = React Router Framework Mode
+- `apps/portal` = React Router Framework Mode. Portal trust-zone session
+  classification (signed-out / unauthorized / signed-in empty). Does not
+  invent project, offer, or file facts. Client offer projections remain later.
+- `apps/admin` = README only until ADMIN-APP ships a real React Router app.
 - WWW, Portal and Admin stay separate applications and trust zones.
 - React Router loaders and actions may act as BFF adapters only. They
   are not domain or business truth.

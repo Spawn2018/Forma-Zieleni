@@ -184,6 +184,7 @@ Tests: `packages/domain/contract.test.mjs`,
 Security: BOLA on contract ids; anonymous 401; no client-supplied
 lifecycle overwrite.
 Next: none until a later product slice; payment stays OWNER-DECISION.
+Safe pre-provider work may continue via CRM-PROJECT-DOMAIN.
 
 ### ADMIN-APP
 
@@ -206,13 +207,17 @@ Next: none from this shell alone.
 
 Dependencies: PORTAL-APP.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for portal trust-zone session classification against
+Core API Better Auth identity: signed-out, unauthorized, and signed-in
+empty states; `GET /v1/portal/session` identity-only; origin/cookie
+helpers. No offer/project/file projection, no payment or signing.
 Autonomous: yes.
 Accept: client Better Auth identity for the portal trust zone; session
 cookie and origin rules; anonymous visitors still see the signed-out
 gate. Loaders still must not invent project, offer, or file facts. No
 payment or signing ceremony.
-Tests: portal session/auth HTTP or route tests.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/api/src/http.test.mjs`
+portal session cases, `contracts/openapi.test.mjs`.
 Security: cookies origin-checked; tokens absent from logs; BOLA stays in
 Core API for later projections.
 Next: PORTAL-OFFER-PROJECTION.
@@ -230,6 +235,48 @@ Tests: Core API projection authz tests; portal loader refuses invented
 facts.
 Security: BOLA; anonymous 401; other clients 403.
 Next: none until a later portal projection.
+
+### CRM-PROJECT-DOMAIN
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Project as a first-class Core API domain foundation after
+Contract, without a live payment provider or payment capture. Opaque
+ids; tenant/authz; BOLA; staff create/list/get minimum. No payment
+activation, no signing SaaS, no Admin ceremony UI, no invented client
+facts.
+Tests: domain/OpenAPI/Core API project cases.
+Security: anonymous 401; portal without project caps 403; BOLA.
+Next: none until payment Owner decision or later project lifecycle.
+
+### SITEINTEL-DATA-BOUNDARY
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: document and contract Site Intelligence DATA → RULES → DOMAIN
+→ AI ordering for FZ-REQ-SITEINTEL-001. No live third-party dependency
+in critical UX; no invented geospatial facts. No twin database.
+Tests: documentation/registry check against Canon ordering.
+Security: no production third-party credentials.
+Next: none until a later Site Intelligence runtime slice.
+
+### ATLAS-PROVENANCE-BOUNDARY
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: document Plant Atlas taxonomy/provenance source-of-truth
+boundary for FZ-REQ-ATLAS-002. Botanical sources stay taxonomic
+authorities, not horticultural proof. No atlas runtime UI in this
+slice.
+Tests: documentation/registry check.
+Security: no invented plant advice as product truth.
+Next: none until a later Atlas product slice.
 
 ### MOBILE-CLIENT-BOUNDARY
 

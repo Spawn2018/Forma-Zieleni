@@ -1,8 +1,24 @@
 import type { Route } from './+types/home';
-import { portalShell, type PortalHome } from '../shell.ts';
+import { portalShell, resolvePortalHome, type PortalHome } from '../shell.ts';
 
-export function loader(): PortalHome {
-  return { state: 'signed-out' };
+export async function loader(): Promise<PortalHome> {
+  // Session probe is wired when CORE_API_URL is configured. Without it the
+  // portal stays signed-out — never invents client CRM facts.
+  const base = typeof process !== 'undefined' ? process.env.FZ_API_ORIGIN || process.env.CORE_API_URL : undefined;
+  if (!base) return resolvePortalHome({});
+  return resolvePortalHome({
+    async probe() {
+      const response = await fetch(new URL('/v1/portal/session', base), {
+        credentials: 'include',
+        headers: { accept: 'application/json' },
+      });
+      if (response.status === 401) return null;
+      if (!response.ok) return null;
+      const body = (await response.json()) as { clientId?: string };
+      if (typeof body.clientId !== 'string') return null;
+      return { clientId: body.clientId };
+    },
+  });
 }
 
 export function meta() {

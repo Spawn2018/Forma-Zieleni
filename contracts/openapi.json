@@ -815,6 +815,37 @@
           }
         }
       }
+    },
+    "/portal/session": {
+      "get": {
+        "operationId": "getPortalSession",
+        "summary": "Portal trust-zone session identity (no commercial projection)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated session identity for the portal trust zone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalSession"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1564,6 +1595,33 @@
                 "nullable": true
               }
             }
+          }
+        }
+      },
+      "PortalSession": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authenticated",
+          "clientId"
+        ],
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "clientId": {
+            "type": "string",
+            "enum": [
+              "web",
+              "portal",
+              "admin",
+              "mobile",
+              "sketchup",
+              "m2m"
+            ]
           }
         }
       }
