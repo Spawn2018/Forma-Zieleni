@@ -31,6 +31,13 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  contract: {
+    id: string;
+    offer_id: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -403,6 +410,56 @@ DROP TABLE IF EXISTS offer;
   },
 };
 
+const CONTRACT_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'contracts:read',
+  'contracts:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const contractMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE contract (
+  id text PRIMARY KEY,
+  offer_id text NOT NULL REFERENCES offer (id),
+  status text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT contract_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT contract_status_known CHECK (status IN ('draft')),
+  CONSTRAINT contract_offer_unique UNIQUE (offer_id)
+);
+CREATE INDEX contract_list_created ON contract (created_at DESC, id DESC);
+CREATE INDEX contract_list_updated ON contract (updated_at DESC, id DESC);
+CREATE INDEX contract_list_status_created ON contract (status, created_at DESC, id DESC);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${CONTRACT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability IN ('contracts:read', 'contracts:create');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${OFFER_CAPABILITY_SQL}));
+DROP TABLE IF EXISTS contract;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -412,6 +469,7 @@ const provider: MigrationProvider = {
       '004_growth_capabilities': growthCapabilityMigration,
       '005_opportunity_contract': opportunityMigration,
       '006_offer_contract': offerMigration,
+      '007_contract_domain': contractMigration,
     };
   },
 };

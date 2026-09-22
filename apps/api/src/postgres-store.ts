@@ -1,9 +1,10 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Lead, Offer, Opportunity } from '@forma-zieleni/domain';
+import type { Contract, Lead, Offer, Opportunity } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
   AuditEvent,
+  ContractListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
@@ -65,6 +66,16 @@ function toOffer(row: Database['offer']): Offer {
   };
 }
 
+function toContract(row: Database['contract']): Contract {
+  return {
+    id: row.id,
+    offerId: row.offer_id,
+    status: row.status as Contract['status'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
 function isPg(error: unknown): error is { code?: string; constraint?: string } {
   return Boolean(error && typeof error === 'object' && 'code' in error);
 }
@@ -88,6 +99,9 @@ export class PostgresLeadStore implements LeadStore {
         }
         if (isPg(error) && error.code === '23505' && error.constraint === 'offer_opportunity_unique') {
           throw new ApiFailure(409, 'OFFER_EXISTS', 'An offer already exists for this opportunity.');
+        }
+        if (isPg(error) && error.code === '23505' && error.constraint === 'contract_offer_unique') {
+          throw new ApiFailure(409, 'CONTRACT_EXISTS', 'A contract already exists for this offer.');
         }
         if (isPg(error)) throw new PersistenceFailure();
         throw error;
@@ -220,6 +234,42 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toOffer);
+  }
+
+  async insertContract(contract: Contract): Promise<void> {
+    await this.trx.insertInto('contract').values({
+      id: contract.id,
+      offer_id: contract.offerId,
+      status: contract.status,
+      created_at: new Date(contract.createdAt),
+      updated_at: new Date(contract.updatedAt),
+    }).execute();
+  }
+
+  async findContract(id: string): Promise<Contract | null> {
+    const row = await this.trx.selectFrom('contract').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toContract(row) : null;
+  }
+
+  async findContractByOffer(offerId: string): Promise<Contract | null> {
+    const row = await this.trx.selectFrom('contract').selectAll().where('offer_id', '=', offerId).executeTakeFirst();
+    return row ? toContract(row) : null;
+  }
+
+  async listContracts(query: ContractListQuery): Promise<Contract[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('contract').selectAll();
+    if (query.status) request = request.where('status', '=', query.status);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toContract);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

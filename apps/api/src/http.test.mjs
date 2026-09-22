@@ -15,7 +15,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create'],
 };
 
 const portal = {
@@ -513,6 +513,74 @@ test('offer create rejects missing opportunity, duplicate opportunity and client
   assert.equal(first.status, 201);
   const second = await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
     'idempotency-key': 'offer-dup-2',
+    ...bearer(staff),
+  }));
+  assert.equal(second.status, 409);
+});
+
+test('anonymous and portal actors cannot create, list or get contracts; staff can', async () => {
+  const { app } = appFor();
+  const lead = await captureAndQualify(app);
+  const opportunityCreated = await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'ctr-opp-1',
+    ...bearer(staff),
+  }));
+  const opportunity = await opportunityCreated.json();
+  const offerCreated = await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'ctr-offer-1',
+    ...bearer(staff),
+  }));
+  assert.equal(offerCreated.status, 201);
+  const offer = await offerCreated.json();
+  const createPath = '/v1/contracts';
+  assert.equal((await app.request(createPath, json({ offerId: offer.id }))).status, 401);
+  assert.equal((await app.request(createPath, json({ offerId: offer.id }, bearer(portal)))).status, 403);
+  assert.equal((await app.request('/v1/contracts', { headers: bearer(portal) })).status, 403);
+  const created = await app.request(createPath, json({ offerId: offer.id }, {
+    'idempotency-key': 'ctr-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const contract = await created.json();
+  assert.equal(contract.status, 'draft');
+  assert.equal(contract.offerId, offer.id);
+  assert.equal(Object.hasOwn(contract, 'provider'), false);
+  const listed = await app.request('/v1/contracts', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).items.length, 1);
+  assert.equal((await app.request(`/v1/contracts/${contract.id}`, { headers: bearer(staff) })).status, 200);
+  assert.equal((await app.request(`/v1/contracts/${contract.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/contracts/missingcontract000', { headers: bearer(staff) })).status, 404);
+});
+
+test('contract create rejects missing offer, duplicate offer and client lifecycle fields', async () => {
+  const { app } = appFor();
+  const missing = await app.request('/v1/contracts', json({ offerId: 'f9k2n4p6q8r0s2t4' }, {
+    'idempotency-key': 'ctr-missing-1',
+    ...bearer(staff),
+  }));
+  assert.equal(missing.status, 404);
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'ctr-opp-2',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'ctr-offer-2',
+    ...bearer(staff),
+  }))).json();
+  const withProvider = await app.request('/v1/contracts', json({ offerId: offer.id, provider: 'x' }, {
+    'idempotency-key': 'ctr-provider-1',
+    ...bearer(staff),
+  }));
+  assert.equal(withProvider.status, 400);
+  const first = await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'ctr-dup-1',
+    ...bearer(staff),
+  }));
+  assert.equal(first.status, 201);
+  const second = await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'ctr-dup-2',
     ...bearer(staff),
   }));
   assert.equal(second.status, 409);

@@ -1,4 +1,13 @@
-import type { Lead, LeadStatus, Offer, OfferStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
+import type {
+  Contract,
+  ContractStatus,
+  Lead,
+  LeadStatus,
+  Offer,
+  OfferStatus,
+  Opportunity,
+  OpportunityStatus,
+} from '@forma-zieleni/domain';
 
 export type SortField = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt';
 
@@ -23,6 +32,13 @@ export type OfferListQuery = {
   cursor?: { at: string; id: string };
 };
 
+export type ContractListQuery = {
+  limit: number;
+  sort: SortField;
+  status?: ContractStatus;
+  cursor?: { at: string; id: string };
+};
+
 export type StoredReply = {
   requestHash: string;
   responseStatus: number;
@@ -31,7 +47,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created';
   leadId: string;
   payload: {
     leadId: string;
@@ -39,13 +55,14 @@ export type OutboxMessage = {
     source?: string;
     opportunityId?: string;
     offerId?: string;
+    contractId?: string;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -56,6 +73,7 @@ export type AuditEvent = {
     capacityHold?: boolean;
     opportunityId?: string;
     offerId?: string;
+    contractId?: string;
   };
 };
 
@@ -74,6 +92,10 @@ export interface LeadTx {
   findOffer(id: string): Promise<Offer | null>;
   findOfferByOpportunity(opportunityId: string): Promise<Offer | null>;
   listOffers(query: OfferListQuery): Promise<Offer[]>;
+  insertContract(contract: Contract): Promise<void>;
+  findContract(id: string): Promise<Contract | null>;
+  findContractByOffer(offerId: string): Promise<Contract | null>;
+  listContracts(query: ContractListQuery): Promise<Contract[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

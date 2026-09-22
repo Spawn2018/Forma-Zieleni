@@ -168,13 +168,19 @@ Next: CRM-CONTRACT-DOMAIN.
 
 Dependencies: CRM-OFFER-CONTRACT.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for OpenAPI + domain Contract created only from an
+existing Offer, with staff create/list/get through Core API
+authorization. No signing-provider SDK, no payment capture, no Admin
+ceremony UI. FZ-SIGN-1 provider stays UNDECIDED.
 Autonomous: yes.
 Accept: OpenAPI + domain Contract (and version) owned by Core API with
 explicit lifecycle transitions from an Offer path. Staff create/list/get
 only. No signing-provider SDK, no payment capture, no Admin ceremony UI.
 FZ-SIGN-1 provider stays UNDECIDED.
-Tests: domain and contract tests plus Core API authz.
+Tests: `packages/domain/contract.test.mjs`,
+`packages/validation/contract.test.mjs`,
+`packages/types/contract.test.mjs`, `contracts/openapi.test.mjs`,
+`apps/api/src/http.test.mjs` contract cases.
 Security: BOLA on contract ids; anonymous 401; no client-supplied
 lifecycle overwrite.
 Next: none until a later product slice; payment stays OWNER-DECISION.

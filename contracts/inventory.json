@@ -15,13 +15,27 @@
     "GET /offers",
     "GET /offers/{offerId}",
     "GET /content/{contentId}",
-    "POST /growth/plans"
+    "POST /growth/plans",
+    "POST /contracts",
+    "GET /contracts",
+    "GET /contracts/{contractId}"
   ],
   "requiredHeaders": {
-    "POST /leads": ["Idempotency-Key"],
-    "POST /leads/{leadId}/qualify": ["Idempotency-Key"],
-    "POST /opportunities": ["Idempotency-Key"],
-    "POST /offers": ["Idempotency-Key"]
+    "POST /leads": [
+      "Idempotency-Key"
+    ],
+    "POST /leads/{leadId}/qualify": [
+      "Idempotency-Key"
+    ],
+    "POST /opportunities": [
+      "Idempotency-Key"
+    ],
+    "POST /offers": [
+      "Idempotency-Key"
+    ],
+    "POST /contracts": [
+      "Idempotency-Key"
+    ]
   },
   "requiredLeadFields": [
     "id",
@@ -64,6 +78,19 @@
     "price",
     "amountPln",
     "terms",
+    "value"
+  ],
+  "requiredContractFields": [
+    "id",
+    "offerId",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenContractFields": [
+    "signedAt",
+    "provider",
+    "price",
     "value"
   ]
 }

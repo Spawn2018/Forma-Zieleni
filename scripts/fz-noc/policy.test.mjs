@@ -88,10 +88,10 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'CRM-CONTRACT-DOMAIN');
-  assert.equal(picked.ready.includes('CRM-CONTRACT-DOMAIN'), true);
-  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.selected, 'PORTAL-AUTH');
   assert.equal(picked.ready.includes('PORTAL-AUTH'), true);
+  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.exhaustionAllowed, false);
@@ -188,7 +188,7 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'CRM-CONTRACT-DOMAIN');
+  assert.equal(picked.selected, 'PORTAL-AUTH');
   assert.equal(picked.ready.includes('ADMIN-APP'), true);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);

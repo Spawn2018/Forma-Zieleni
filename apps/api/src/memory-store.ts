@@ -1,6 +1,16 @@
-import type { Lead, LeadStatus, Offer, OfferStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
+import type {
+  Contract,
+  ContractStatus,
+  Lead,
+  LeadStatus,
+  Offer,
+  OfferStatus,
+  Opportunity,
+  OpportunityStatus,
+} from '@forma-zieleni/domain';
 import type {
   AuditEvent,
+  ContractListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
@@ -14,6 +24,7 @@ type MemoryState = {
   leads: Lead[];
   opportunities: Opportunity[];
   offers: Offer[];
+  contracts: Contract[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -32,6 +43,7 @@ export class MemoryLeadStore implements LeadStore {
     leads: [],
     opportunities: [],
     offers: [],
+    contracts: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -42,6 +54,7 @@ export class MemoryLeadStore implements LeadStore {
       leads: this.state.leads,
       opportunities: this.state.opportunities,
       offers: this.state.offers,
+      contracts: this.state.contracts,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -52,6 +65,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.leads = snapshot.leads;
       this.state.opportunities = snapshot.opportunities;
       this.state.offers = snapshot.offers;
+      this.state.contracts = snapshot.contracts;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -171,6 +185,41 @@ class MemoryTx implements LeadTx {
           const at = stamp(offer, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && offer.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && offer.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertContract(contract: Contract): Promise<void> {
+    if (this.state.contracts.some(item => item.offerId === contract.offerId)) {
+      throw new Error('CONTRACT_EXISTS');
+    }
+    this.state.contracts.push(clone(contract));
+  }
+
+  async findContract(id: string): Promise<Contract | null> {
+    return clone(this.state.contracts.find(item => item.id === id) ?? null);
+  }
+
+  async findContractByOffer(offerId: string): Promise<Contract | null> {
+    return clone(this.state.contracts.find(item => item.offerId === offerId) ?? null);
+  }
+
+  async listContracts(query: ContractListQuery): Promise<Contract[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.contracts.filter(
+      contract => !query.status || contract.status === (query.status as ContractStatus),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(contract => {
+          const at = stamp(contract, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && contract.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && contract.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

@@ -103,6 +103,12 @@ export {
   createOffer,
 } from './offer.ts';
 export type { Offer, OfferStatus } from './offer.ts';
+export {
+  CONTRACT_STATUSES,
+  assertOpaqueContractId,
+  createContract,
+} from './contract.ts';
+export type { Contract, ContractStatus } from './contract.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';
