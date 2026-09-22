@@ -311,8 +311,10 @@ Next: SEARCH-HISTORY.
 
 Dependencies: SEARCH-SYNC.
 Gate: REVIEW.
+Status: COMPLETE for in-memory snapshot history. PostgreSQL rollups stay later.
 Autonomous: yes.
-Accept: 7/28/90/180/365-day views from stored snapshots; year-over-year only when both sides exist.
+Accept: `packages/domain/src/search-history.ts` exposes 7/28/90/180/365-day views from stored snapshots and year-over-year comparison only when both sides have rows.
+Tests: `packages/domain/search-history.test.mjs`.
 Next: SEARCH-TECH-AUDIT.
 
 ### SEARCH-TECH-AUDIT

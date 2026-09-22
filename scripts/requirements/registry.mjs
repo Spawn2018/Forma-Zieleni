@@ -164,6 +164,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-SYNC', 'Fixture sync job keeps per-connector checkpoints, backoff after rate limits or outages, and isolated provider failure.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-sync.ts', 'packages/domain/search-sync.test.mjs', 'scheduler and PostgreSQL job rows stay later', 'NONE', 'Live OAuth and schedulers stay outside this slice.');
     continue;
   }
+  if (slice === 'SEARCH-HISTORY') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-HISTORY', 'History windows read stored snapshots for 7/28/90/180/365 days and compare year-over-year only when both sides exist.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-history.ts', 'packages/domain/search-history.test.mjs', 'PostgreSQL rollups stay later', 'NONE', 'No invented retention length.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

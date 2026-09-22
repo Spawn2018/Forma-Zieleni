@@ -120,6 +120,20 @@ export type {
   SearchSyncRunResult,
 } from './search-sync.ts';
 export {
+  HISTORY_WINDOW_DAYS,
+  compareYearOverYear,
+  createSnapshotStore,
+  rememberSnapshot,
+  viewHistoryWindow,
+} from './search-history.ts';
+export type {
+  HistoryWindowDays,
+  HistoryWindowView,
+  SearchSnapshotRecord,
+  SearchSnapshotStore,
+  YearOverYearComparison,
+} from './search-history.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
