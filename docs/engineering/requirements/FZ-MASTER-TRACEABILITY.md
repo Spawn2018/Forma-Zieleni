@@ -2,7 +2,7 @@
 
 Status: CURRENT registry for the master-audit foundation.
 Machine source: `scripts/requirements/registry.mjs`.
-This is not a second roadmap. Product execution stays in `docs/architecture/NEXT-SLICES-CMS.md`.
+This is not a second roadmap. Product execution stays in `docs/architecture/NEXT-SLICES-MAIN.md` after RETURN-ROADMAP.
 
 Depth is the highest honest depth of that row. A blocked row is not a shell when the maximum possible depth is the same as the actual depth.
 
@@ -135,7 +135,7 @@ Depth is the highest honest depth of that row. A blocked row is not a shell when
 | FZ-REQ-CMS-SLICE-SEARCH-PERFORMANCE | DONE_AT_MAX_DEPTH | TESTED | TESTED | Field CWV and lab media notes stay in different fields. The lab LCP candidate is a derivative with width and height. | packages/domain/search-performance.test.mjs | NONE | No field score is copied from a lab image. |
 | FZ-REQ-CMS-SLICE-SEARCH-RECOVERY | DONE_AT_MAX_DEPTH | TESTED | TESTED | Synthetic search observations restore and list rows that cannot be re-synced when retention is unknown or past a known window. | packages/domain/search-recovery.test.mjs | NONE | Does not invent a retention length. |
 | FZ-REQ-CMS-SLICE-SEARCH-ACCEPT | BLOCKED_BY_DEPENDENCY | DOCUMENTED | DOCUMENTED | SEARCH-ACCEPT remains in the CMS and Search graph and is not marked complete by this audit. | docs/architecture/NEXT-SLICES-CMS.md | REVIEW | Acceptance text is in NEXT-SLICES-CMS.md. |
-| FZ-REQ-CMS-SLICE-RETURN-ROADMAP | BLOCKED_BY_DEPENDENCY | DOCUMENTED | DOCUMENTED | RETURN-ROADMAP remains in the CMS and Search graph and is not marked complete by this audit. | docs/architecture/NEXT-SLICES-CMS.md | REVIEW | Acceptance text is in NEXT-SLICES-CMS.md. |
+| FZ-REQ-CMS-SLICE-RETURN-ROADMAP | DONE_AT_MAX_DEPTH | DOCUMENTED | DOCUMENTED | RETURN-ROADMAP stands up NEXT-SLICES-MAIN and resumes Lead security plus Portal selection without marking Lead or CMS security-accepted. | scripts/fz-noc/policy.test.mjs | NONE | CMS-ACCEPT and Lead security-acceptance stay open. |
 | FZ-REQ-CMS-ACCEPT-A | BLOCKED_BY_DEPENDENCY | DOCUMENTED | DOCUMENTED | Apostrophe plus PostgreSQL in the intended architecture | docs/architecture/NEXT-SLICES-CMS.md | REVIEW | Domain contracts do not close vendor acceptance. |
 | FZ-REQ-CMS-ACCEPT-B | BLOCKED_BY_DEPENDENCY | DOCUMENTED | DOCUMENTED | Real Apostrophe Admin and editor UI | docs/architecture/NEXT-SLICES-CMS.md | REVIEW | Domain contracts do not close vendor acceptance. |
 | FZ-REQ-CMS-ACCEPT-C | BLOCKED_BY_DEPENDENCY | DOCUMENTED | DOCUMENTED | Real page, project, article, and service editing | docs/architecture/NEXT-SLICES-CMS.md | REVIEW | Domain contracts do not close vendor acceptance. |

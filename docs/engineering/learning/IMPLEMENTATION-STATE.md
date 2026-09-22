@@ -5,7 +5,8 @@ Status: COMPLETE for the foundation slice. This is recovery state, not a roadmap
 - Slice: FZ-CIS foundation
 - Started from HEAD: `c300d31d7d55f2452e926aaa1c53bf638b1f613a`
 - Canon: `docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md`
-- Product graph: `docs/architecture/NEXT-SLICES-CMS.md` (selection unchanged)
+- Product graph: `docs/architecture/NEXT-SLICES-MAIN.md` after RETURN-ROADMAP
+  (`NEXT-SLICES-CMS.md` remains acceptance history)
 
 ## Phases
 
@@ -28,4 +29,5 @@ None inside AUTO/REVIEW. Push, deploy, DNS, Cloudflare, spend, customer data, an
 
 ## Next
 
-Do not restart this foundation. Next product READY remains on the CMS execution graph.
+Do not restart this foundation. Next product READY is on
+`docs/architecture/NEXT-SLICES-MAIN.md` (`LEAD-SEC-SESSION`).

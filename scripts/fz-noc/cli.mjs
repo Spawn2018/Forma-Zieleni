@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  activeExecutionGraph,
   emptySession,
   nextWarsawDeadline,
   noteAttempt,
   noteSelection,
-  parseExecutionGraph,
   parseHour,
   selectReady,
 } from './policy.mjs';
@@ -17,8 +17,10 @@ function fail(message) {
 }
 
 function graph() {
-  const file = path.join(repoRoot(), 'docs', 'architecture', 'NEXT-SLICES-CMS.md');
-  return parseExecutionGraph(readFileSync(file, 'utf8'));
+  const architecture = path.join(repoRoot(), 'docs', 'architecture');
+  const cms = readFileSync(path.join(architecture, 'NEXT-SLICES-CMS.md'), 'utf8');
+  const main = readFileSync(path.join(architecture, 'NEXT-SLICES-MAIN.md'), 'utf8');
+  return activeExecutionGraph(cms, main);
 }
 
 function selection(session) {

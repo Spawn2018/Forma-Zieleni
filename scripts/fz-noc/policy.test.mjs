@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
+  activeExecutionGraph,
   classifyMcp,
   classifyShell,
   decideFollowup,
@@ -77,32 +78,34 @@ test('work-stealing prefers another READY slice when the critical one is blocked
 });
 
 test('the CMS graph reconstructs READY work without executing it', () => {
-  const markdown = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
-  const picked = selectReady(parseExecutionGraph(markdown));
-  assert.equal(picked.selected, 'RETURN-ROADMAP');
-  assert.equal(picked.ready.includes('SEARCH-ALERTS'), false);
-  assert.equal(picked.ready.includes('CMS-ACCEPT'), false);
-  assert.equal(picked.ready.includes('SEARCH-ACCEPT'), false);
-  assert.equal(picked.ready.includes('RETURN-ROADMAP'), true);
+  const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  const cmsOnly = selectReady(parseExecutionGraph(cms));
+  assert.equal(cmsOnly.selected, null);
+  assert.equal(cmsOnly.ready.includes('RETURN-ROADMAP'), false);
+  assert.equal(cmsOnly.ready.includes('CMS-ACCEPT'), false);
+  assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
+  assert.equal(cmsOnly.exhaustionAllowed, true);
+  const picked = selectReady(activeExecutionGraph(cms, main));
+  assert.equal(picked.selected, 'LEAD-SEC-SESSION');
+  assert.equal(picked.ready.includes('LEAD-SEC-SESSION'), true);
+  assert.equal(picked.ready.includes('PORTAL-APP'), true);
+  assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
+  assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.exhaustionAllowed, false);
-  assert.equal(picked.ready.includes('WWW-APP'), false);
-  assert.equal(picked.ready.includes('GALLERY-WWW'), false);
-  assert.equal(picked.ready.includes('BEFORE-AFTER'), false);
   assert.equal(picked.internalGap, null);
-  assert.equal(picked.ready.includes('MEDIA-COLLECTIONS'), false);
-  assert.equal(picked.ready.includes('SEARCH-ATTRIBUTION'), false);
-  assert.equal(picked.ready.includes('SEARCH-DATA-MODEL'), false);
-  assert.equal(picked.ready.includes('SEARCH-CONNECTORS'), false);
-  assert.equal(picked.ready.includes('SEARCH-SYNC'), false);
-  assert.equal(picked.ready.includes('SEARCH-HISTORY'), false);
-  assert.equal(picked.ready.includes('CMS-ADMIN'), false);
-  assert.equal(picked.ready.includes('CMS-RESTORE'), false);
-  assert.equal(picked.ready.includes('SEARCH-AI-VISIBILITY'), false);
-  assert.equal(picked.ready.includes('SEARCH-CRAWLER-INTELLIGENCE'), false);
-  assert.equal(picked.ready.includes('SEARCH-RECOVERY'), false);
-  assert.equal(picked.ready.includes('SEARCH-SECURITY'), false);
-  assert.equal(picked.ready.includes('CMS-EXPORT'), false);
-  assert.equal(picked.ready.includes('CMS-ACCEPT'), false);
+});
+
+test('activeExecutionGraph stays on CMS until RETURN-ROADMAP is COMPLETE', () => {
+  const cmsOpen = `### RETURN-ROADMAP\n\nGate: AUTO.\nStatus: OPEN.\nAutonomous: yes.\nDependencies: none.\nNext: LEAD-SEC-SESSION.\n`;
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  const before = activeExecutionGraph(cmsOpen, main);
+  assert.equal(before.some((slice) => slice.id === 'RETURN-ROADMAP'), true);
+  assert.equal(before.some((slice) => slice.id === 'LEAD-SEC-SESSION'), false);
+  const cmsDone = cmsOpen.replace('Status: OPEN.', 'Status: COMPLETE.');
+  const after = activeExecutionGraph(cmsDone, main);
+  assert.equal(after.some((slice) => slice.id === 'LEAD-SEC-SESSION'), true);
+  assert.equal(after.some((slice) => slice.id === 'RETURN-ROADMAP'), false);
   const crawl = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md'), 'utf8');
   const sign = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md'), 'utf8');
   assert.match(crawl, /Status:\s*OPEN/i);

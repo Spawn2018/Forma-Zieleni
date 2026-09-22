@@ -50,6 +50,8 @@ The context window size is not a reason to read every document.
 
 ## Next product slice
 
-`docs/architecture/NEXT-SLICES-CMS.md` still lists MEDIA-COLLECTIONS as
-the next ordinary READY slice after the documentation rows in the
-requirement registry. Do not start a second roadmap.
+After `RETURN-ROADMAP`, ordinary READY work is selected from
+`docs/architecture/NEXT-SLICES-MAIN.md`. First READY is Lead session
+logout evidence (`LEAD-SEC-SESSION`), with `PORTAL-APP` also READY.
+The CMS/Search graph stays acceptance history. Do not start a second
+roadmap.

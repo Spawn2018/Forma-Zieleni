@@ -5,8 +5,10 @@ NOT APPLICABLE YET. Research date: 2026-09-21.
 
 This file is the only binding definition of how Forma Zieleni learns.
 The only binding execution loop remains
-[`CURSOR-OS-2026.md`](../cursor-os/CURSOR-OS-2026.md). The only product
-execution graph remains [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md).
+[`CURSOR-OS-2026.md`](../cursor-os/CURSOR-OS-2026.md). After
+`RETURN-ROADMAP`, the product execution graph is
+[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md). The CMS/Search graph
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) remains acceptance history.
 Product architecture remains [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.md).
 
 ## Purpose

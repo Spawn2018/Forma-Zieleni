@@ -19,7 +19,8 @@ Contract lifecycle (provider undecided, not a Gate A blocker):
 `docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md`.
 CMS / public content is DECIDED (ADR-015, Apostrophe; CMS-ACCEPT remains open):
 `docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md` and
-`docs/architecture/NEXT-SLICES-CMS.md`.
+`docs/architecture/NEXT-SLICES-CMS.md`. After RETURN-ROADMAP, ordinary
+READY work is `docs/architecture/NEXT-SLICES-MAIN.md`.
 
 Rules: - Current canon outranks legacy implementation. - Legacy material
 is preserved for provenance and detailed domain/UX knowledge. - Supplied

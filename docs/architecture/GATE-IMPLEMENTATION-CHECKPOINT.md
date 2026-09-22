@@ -81,8 +81,11 @@ backup are not done. Architecture selection is still not
 security acceptance.
 
 CMS / public content is DECIDED (FZ-CMS-1 option B) and not
-CMS-ACCEPT. Execute
-[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md). The isolated lab in
-`labs/fz-cms-1` remains evidence, not acceptance. Search Intelligence
-architecture is [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler
-production policy stays OPEN.
+CMS-ACCEPT. The CMS/Search graph in
+[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) is acceptance history after
+`RETURN-ROADMAP`. Ordinary READY work continues on
+[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md): Lead remaining security
+evidence first, then Portal. The isolated lab in `labs/fz-cms-1`
+remains evidence, not acceptance. Search Intelligence architecture is
+[`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler production policy
+stays OPEN. Lead remains not security-accepted.

@@ -56,11 +56,15 @@ not build all surfaces in parallel.
 WWW public copy, service pages, articles, project case studies and
 public media follow the decided FZ-CMS-1 architecture
 ([`../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md`](../architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md)).
-Do not hard-code unverified marketing facts into React Router. Execute
-[`../architecture/NEXT-SLICES-CMS.md`](../architecture/NEXT-SLICES-CMS.md),
-including Search Intelligence from
-[`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md),
-then return to this product sequence. Content is not CRM. The CMS
+Do not hard-code unverified marketing facts into React Router. The
+CMS/Search graph
+([`../architecture/NEXT-SLICES-CMS.md`](../architecture/NEXT-SLICES-CMS.md))
+and Search Intelligence
+([`../architecture/FZ-SEARCH-1.md`](../architecture/FZ-SEARCH-1.md))
+are acceptance history after `RETURN-ROADMAP`. Ordinary READY work
+continues on
+[`../architecture/NEXT-SLICES-MAIN.md`](../architecture/NEXT-SLICES-MAIN.md)
+(Lead security evidence, then Portal). Content is not CRM. The CMS
 decision is not CMS-ACCEPT.
 
 ## Cross-cutting operational readiness

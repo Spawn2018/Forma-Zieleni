@@ -18,7 +18,7 @@ Session window only. The binding execution loop remains `docs/cursor-os/CURSOR-O
 
 ## Each cycle
 
-Re-read `START-HERE-CURSOR.md`, `docs/cursor-os/CURSOR-OS-2026.md`, `docs/architecture/CURRENT-ARCHITECTURE.md`, and `docs/architecture/NEXT-SLICES-CMS.md`. Inspect git HEAD and status. Ignore chat history as project state.
+Re-read `START-HERE-CURSOR.md`, `docs/cursor-os/CURSOR-OS-2026.md`, `docs/architecture/CURRENT-ARCHITECTURE.md`, `docs/architecture/NEXT-SLICES-CMS.md`, and `docs/architecture/NEXT-SLICES-MAIN.md`. Inspect git HEAD and status. Ignore chat history as project state.
 
 `node scripts/fz-noc/cli.mjs select --commit <HEAD>`
 

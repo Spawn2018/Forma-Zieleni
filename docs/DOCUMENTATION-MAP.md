@@ -21,7 +21,7 @@ point remains `START-HERE-CURSOR.md`.
 | Where do facts connect? | [`architecture/FZ-CONNECTED-ECOSYSTEM.md`](architecture/FZ-CONNECTED-ECOSYSTEM.md) |
 | How does a plan behave? | [`architecture/FZ-GROWTH-OS.md`](architecture/FZ-GROWTH-OS.md) |
 | What does search allow? | [`architecture/FZ-SEARCH-1.md`](architecture/FZ-SEARCH-1.md) |
-| What is the next product slice? | [`architecture/NEXT-SLICES-CMS.md`](architecture/NEXT-SLICES-CMS.md) |
+| What is the next product slice? | [`architecture/NEXT-SLICES-MAIN.md`](architecture/NEXT-SLICES-MAIN.md) |
 | What do the words mean? | [`domain/GLOSSARY.md`](domain/GLOSSARY.md) |
 | Which HTTP shapes are contractual? | [`engineering/API.md`](engineering/API.md) |
 | Which events exist? | [`engineering/EVENTS.md`](engineering/EVENTS.md) |

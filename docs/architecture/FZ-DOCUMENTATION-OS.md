@@ -4,8 +4,10 @@ Status: CURRENT subordinate Canon. The architecture entrypoint remains
 [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.md). This file does
 not add an execution loop, a learning system, or a roadmap.
 
-The product execution graph remains
-[`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md). Learning remains
+The product execution graph is
+[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md) after `RETURN-ROADMAP`.
+The CMS/Search graph [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md)
+remains acceptance history. Learning remains
 [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md).
 The map of documents is [`../DOCUMENTATION-MAP.md`](../DOCUMENTATION-MAP.md).
 Pointers for agents are [`../engineering/FZ-CONTEXT-MAP.json`](../engineering/FZ-CONTEXT-MAP.json).

@@ -33,5 +33,8 @@ Nie oceniaj ich po tym pliku jako gotowych.
 
 ## Następna bezpieczna praca produktowa
 
-Po uzupełnieniu rejestru wymagań kolejny zwykły wycinek to MEDIA-COLLECTIONS.
+Po `RETURN-ROADMAP` zwykły READY jest na
+`docs/architecture/NEXT-SLICES-MAIN.md`: najpierw dowody sesji Lead
+(`LEAD-SEC-SESSION`), równolegle portal klienta (`PORTAL-APP`).
+CMS-ACCEPT i akceptacja bezpieczeństwa Lead pozostają otwarte.
 To nie jest prośba o wdrożenie.

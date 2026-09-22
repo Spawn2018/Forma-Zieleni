@@ -20,7 +20,8 @@ All active documents and agents must link here for “current architecture”.
 | [`GATE-IMPLEMENTATION-CHECKPOINT.md`](./GATE-IMPLEMENTATION-CHECKPOINT.md) | Architecture decided versus implementation not done. |
 | [`NEXT-SLICE-LEAD-VERTICAL.md`](./NEXT-SLICE-LEAD-VERTICAL.md) | Lead Core API vertical. Implemented, not security-accepted. |
 | [`OWNER-DECISION-PACKET-FZ-CMS-1.md`](./OWNER-DECISION-PACKET-FZ-CMS-1.md) | CMS / media / visual publishing. DECIDED: option B, vendor-native visual editing, FZ media pipeline. Not CMS-ACCEPT. |
-| [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | CMS and Search Intelligence execution graph. |
+| [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) | CMS and Search Intelligence execution graph (acceptance history after RETURN-ROADMAP). |
+| [`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md) | Main product execution graph after RETURN-ROADMAP. Lead security + Portal. |
 | [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md) | Binding Search Intelligence architecture: SEO contract, crawlers, attribution, data model, Admin IA. |
 | [`FZ-CONTINUOUS-IMPROVEMENT.md`](./FZ-CONTINUOUS-IMPROVEMENT.md) | Binding continuous-improvement rules. Not an execution loop. |
 | [`FZ-CONNECTED-ECOSYSTEM.md`](./FZ-CONNECTED-ECOSYSTEM.md) | Connected facts, relations, review and visibility. Subordinate to current architecture. |

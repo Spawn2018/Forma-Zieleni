@@ -454,10 +454,11 @@ Next: RETURN-ROADMAP. CMS-ACCEPT and SEARCH-ACCEPT are separate checklists.
 
 Dependencies: none for implementation. CMS-ACCEPT stays open and is not an implementation blocker. SEARCH-ACCEPT is a separate checklist and does not block the return. Open FZ-SEARCH-CRAWL-1 does not block it either.
 Gate: AUTO.
+Status: COMPLETE. The main product execution graph is [`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md). Lead deferred security stays visible. CMS-ACCEPT is not Lead security-acceptance.
 Autonomous: yes.
 Entry: CMS-ACCEPT recorded.
 Accept: resume Lead remaining security work and the next product vertical. WWW/Admin content rules stay binding.
-Next: main Forma Zieleni execution roadmap. Lead deferred security stays visible. Do not treat CMS completion as Lead security-acceptance.
+Next: LEAD-SEC-SESSION (main graph).
 
 ## CMS acceptance still required (not PASS)
 
@@ -501,5 +502,6 @@ add a slice id. The connected-ecosystem and growth-plan contracts are
 recorded in
 [`FZ-CONNECTED-ECOSYSTEM.md`](./FZ-CONNECTED-ECOSYSTEM.md) and
 [`FZ-GROWTH-OS.md`](./FZ-GROWTH-OS.md). They do not replace this graph.
-Next ordinary READY work remains MEDIA-COLLECTIONS. Approval UI waits
+After RETURN-ROADMAP, ordinary READY work is selected from
+[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md). Approval UI waits
 until `apps/admin` is a real application. Do not mark CMS-ACCEPT.

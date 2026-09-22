@@ -130,6 +130,19 @@ function classifyGate(line) {
   return 'REVIEW';
 }
 
+/**
+ * After RETURN-ROADMAP is COMPLETE on the CMS graph, /noc selects from
+ * the main product graph. Until then, selection stays on CMS/Search.
+ */
+export function activeExecutionGraph(cmsMarkdown, mainMarkdown) {
+  const cms = parseExecutionGraph(cmsMarkdown);
+  const returned = cms.find((slice) => slice.id === 'RETURN-ROADMAP');
+  if (returned && returned.status === 'COMPLETE') {
+    return parseExecutionGraph(mainMarkdown);
+  }
+  return cms;
+}
+
 export function parseExecutionGraph(markdown) {
   const slices = [];
   for (const chunk of markdown.split(/^### /m).slice(1)) {

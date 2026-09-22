@@ -45,6 +45,7 @@ const linkScope = [
   'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md',
   'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md',
   'docs/architecture/NEXT-SLICES-CMS.md',
+  'docs/architecture/NEXT-SLICES-MAIN.md',
   'docs/architecture/FZ-SEARCH-1.md',
   'docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md',
   'docs/architecture/FZ-CONNECTED-ECOSYSTEM.md',

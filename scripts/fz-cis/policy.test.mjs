@@ -23,7 +23,7 @@ import {
   validateRecord,
 } from './policy.mjs';
 import { changeStatus, saveStore } from './store.mjs';
-import { emptySession, nextWarsawDeadline, noteAttempt, parseExecutionGraph, selectReady } from '../fz-noc/policy.mjs';
+import { activeExecutionGraph, emptySession, nextWarsawDeadline, noteAttempt, selectReady } from '../fz-noc/policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const node = process.execPath;
@@ -260,9 +260,10 @@ test('repeated identical attempts still block a slice', () => {
 test('the /noc contract and READY selection stay intact', () => {
   const deadline = nextWarsawDeadline(9, new Date('2026-09-21T19:17:00.000Z'));
   assert.equal(deadline.until, '2026-09-22T09:00:00+02:00');
-  const graph = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
-  const picked = selectReady(parseExecutionGraph(graph));
-  assert.equal(picked.selected, 'RETURN-ROADMAP');
+  const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  const picked = selectReady(activeExecutionGraph(cms, main));
+  assert.equal(picked.selected, 'LEAD-SEC-SESSION');
   assert.equal(picked.ready.includes('FZ-CIS'), false);
   const low = incorporate([], base({ severity: 'low', source: 'review' })).record;
   assert.equal(pushBlockers([low]).length, 0);

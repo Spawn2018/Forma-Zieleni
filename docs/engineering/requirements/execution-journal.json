@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "tooling-closure",
+  "currentPhase": "return-roadmap-complete",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "444e98aa0c1135d3abafa4e34720ab17b00ddd2b",
   "postPushSafety": "PASS",
@@ -19,13 +19,13 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "RETURN-ROADMAP is the next READY product slice (not executed in tooling closure)",
+    "Lead security-acceptance OPEN (ZAP/SCA/off-site/private-origin deferred)",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
     "ZAP ARMED_WAITING_FOR_TARGET (lab listen + runtime)",
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "Tooling activation closed after this closure slice. Next product READY remains RETURN-ROADMAP. Do not execute it in the tooling closure.",
+  "nextSafeAction": "RETURN-ROADMAP COMPLETE. Next READY is LEAD-SEC-SESSION on NEXT-SLICES-MAIN.md (PORTAL-APP also READY). Do not mark Lead or CMS security-accepted.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",

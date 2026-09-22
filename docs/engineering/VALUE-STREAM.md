@@ -6,7 +6,7 @@ The engineering line is:
 
 Owner need, requirement, READY slice, work start, implementation, verification, commit, release, user effect, business outcome, learning.
 
-Git can show commit time. `docs/architecture/NEXT-SLICES-CMS.md` shows READY and blocked slices. The execution journal shows the current phase. FZ-CIS can record learning after a slice.
+Git can show commit time. `docs/architecture/NEXT-SLICES-MAIN.md` shows READY and blocked slices after RETURN-ROADMAP. The CMS graph remains acceptance history. The execution journal shows the current phase. FZ-CIS can record learning after a slice.
 
 These durations are NOT MEASURABLE YET, because the repository has no production release clock and no collected wait log:
 

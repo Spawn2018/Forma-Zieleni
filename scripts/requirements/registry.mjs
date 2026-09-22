@@ -257,6 +257,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-CMS-EXPORT', 'Structured CMS export carries slugs, SEO, media regeneration rules, omits private GPS, and re-imports onto a fresh store.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/cms-export.ts', 'packages/domain/cms-export.test.mjs', 'vendor dump formats stay later', 'NONE', 'No customer GPS in the export.');
     continue;
   }
+  if (slice === 'RETURN-ROADMAP') {
+    row('FZ-REQ-CMS-SLICE-RETURN-ROADMAP', 'RETURN-ROADMAP stands up NEXT-SLICES-MAIN and resumes Lead security plus Portal selection without marking Lead or CMS security-accepted.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/NEXT-SLICES-MAIN.md', 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', '', 'NONE', 'CMS-ACCEPT and Lead security-acceptance stay open.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [
@@ -346,7 +350,7 @@ export function renderMarkdown() {
     '',
     'Status: CURRENT registry for the master-audit foundation.',
     'Machine source: `scripts/requirements/registry.mjs`.',
-    'This is not a second roadmap. Product execution stays in `docs/architecture/NEXT-SLICES-CMS.md`.',
+    'This is not a second roadmap. Product execution stays in `docs/architecture/NEXT-SLICES-MAIN.md` after RETURN-ROADMAP.',
     '',
     'Depth is the highest honest depth of that row. A blocked row is not a shell when the maximum possible depth is the same as the actual depth.',
     '',
