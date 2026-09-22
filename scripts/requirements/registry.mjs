@@ -89,14 +89,14 @@ row('FZ-REQ-SEARCH-001', 'FZ-SEARCH-1 remains the search architecture. No univer
 row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 training-crawler policy stays open.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'Owner policy', 'OWNER-DECISION', 'OPEN');
 row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeline stay the CMS decision. CMS-ACCEPT stays open.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', SLICES, 'scripts/cms-lab-gate.mjs', 'Apostrophe Admin UI and PostgreSQL lab not executed', 'REVIEW', 'CMS-ACCEPT OPEN');
 row('FZ-REQ-CMS-002', 'Published content stays a projection. Drafts stay private.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/content-publish.ts', 'packages/domain/content-publish.test.mjs', '', 'NONE', '');
-row('FZ-REQ-MEDIA-001', 'Private checksummed masters and public derivatives without GPS stay the media contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/derivatives.mjs', 'packages/media/derivatives.test.mjs', '', 'NONE', 'Gallery UI remains the next ordinary slice.');
+row('FZ-REQ-MEDIA-001', 'Private checksummed masters and public derivatives without GPS stay the media contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/derivatives.mjs', 'packages/media/derivatives.test.mjs', '', 'NONE', 'The public gallery route exists and stays empty until a published collection.');
 row('FZ-REQ-ARCH-001', 'Gate A stays Hono, PostgreSQL, Kysely, outbox, Better Auth, local files, later Garage, OpenObserve, SOPS+age, restic, pgBackRest, Cloudflare Tunnel, Compose later, no overlay.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, '', 'NONE', 'Production hosting and object storage remain undecided.');
 row('FZ-REQ-ARCH-002', 'No graph database, Prisma, Drizzle or Kafka is introduced by this foundation.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, 'package.json', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 row('FZ-REQ-API-001', 'Core API remains the business authority.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', '');
 row('FZ-REQ-DATA-001', 'PostgreSQL and Kysely remain persistence. New unused tables were not added.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/api/src/db.ts', 'apps/api/src/postgres.integration.test.mjs', 'A shared fabric table waits for a product consumer', 'NONE', 'Domain contract is in memory, matching the content-publish precedent.');
 row('FZ-REQ-SEC-001', 'The lead vertical is implemented and is not security-accepted.', 'BLOCKED_BY_DEPENDENCY', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md', 'packages/domain/src/lead.ts', 'packages/domain/lead.test.mjs', 'ZAP, Dependency-Check, offsite backup, production ingress', 'REVIEW', 'Do not mark security-accepted.');
 row('FZ-REQ-PRIV-001', 'No live customer tracking, session replay or analytics ingestion is activated.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', GROWTH, PLAN, TEST, '', 'NONE', '');
-row('FZ-REQ-WWW-001', 'WWW reads a published projection and must not invent business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', '', 'NONE', 'Gallery and offer pages are later slices. Font files are not shipped.');
+row('FZ-REQ-WWW-001', 'WWW reads a published projection and must not invent business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', '', 'NONE', 'The gallery route is empty until a published collection. Offer pages and font files are later.');
 row('FZ-REQ-PORTAL-001', 'Portal customer isolation is enforced in the domain contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, CODE, TEST, 'apps/portal is a boundary note', 'NONE', 'No portal UI.');
 row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.');
 row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'No mobile client', 'NONE', '');
@@ -150,7 +150,11 @@ for (const slice of OPEN_SLICES) {
     continue;
   }
   if (slice === 'MEDIA-COLLECTIONS') {
-    row('FZ-REQ-CMS-SLICE-MEDIA-COLLECTIONS', 'Collections reorder, set a hero, store ALT and focal data, and reuse one master.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/collections.mjs', 'packages/media/collections.test.mjs', '', 'NONE', 'Gallery UI is the next slice and needs a web app.');
+    row('FZ-REQ-CMS-SLICE-MEDIA-COLLECTIONS', 'Collections reorder, set a hero, store ALT and focal data, and reuse one master.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/collections.mjs', 'packages/media/collections.test.mjs', '', 'NONE', 'Gallery UI is the public carousel.');
+    continue;
+  }
+  if (slice === 'GALLERY-WWW') {
+    row('FZ-REQ-CMS-SLICE-GALLERY-WWW', 'The public gallery uses derivative thumbs and a Polish keyboard lightbox. It does not invent published photos.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/gallery.ts', 'apps/web/app/gallery.test.mjs', '', 'NONE', 'The live route stays empty until a published collection exists.');
     continue;
   }
   if (slice === 'SEARCH-ATTRIBUTION') {

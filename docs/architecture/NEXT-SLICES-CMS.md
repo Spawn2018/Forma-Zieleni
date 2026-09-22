@@ -141,10 +141,12 @@ Next: GALLERY-WWW.
 
 Dependencies: MEDIA-COLLECTIONS, WWW-APP.
 Gate: REVIEW + visual/UX.
+Status: COMPLETE for the carousel and lightbox. `yet-another-react-lightbox@3.32.2` (MIT) is pinned. `/galeria` stays empty until a published collection exists.
 Autonomous: yes.
 Entry: MEDIA-COLLECTIONS recorded.
 Accept: React Router carousel + lightbox (keyboard, Escape, backdrop, focus trap/restore, reduced motion, derivatives not masters). Prefer MIT `yet-another-react-lightbox` unless a later review rejects it.
-Tests: keyboard/focus contract; no original on thumbs.
+Tests: `apps/web/app/gallery.test.mjs`. Thumbs are `w400.webp`. Lightbox slides are `w1600.webp`. Master paths are rejected.
+Security: asset ids are opaque; captions stay text; no user-supplied URL.
 Next: BEFORE-AFTER.
 
 ### BEFORE-AFTER

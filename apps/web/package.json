@@ -6,15 +6,16 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "typecheck": "react-router typegen && tsc -p tsconfig.json --noEmit",
-    "lint": "node --check app/published-home.test.mjs && node --check app/shell.test.mjs",
-    "test": "node --test app/published-home.test.mjs app/shell.test.mjs"
+    "lint": "node --check app/published-home.test.mjs && node --check app/shell.test.mjs && node --check app/gallery.test.mjs",
+    "test": "node --test app/published-home.test.mjs app/shell.test.mjs app/gallery.test.mjs"
   },
   "dependencies": {
     "@forma-zieleni/api-client": "workspace:*",
     "@react-router/node": "^8.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-router": "^8.4.0"
+    "react-router": "^8.4.0",
+    "yet-another-react-lightbox": "3.32.2"
   },
   "devDependencies": {
     "@react-router/dev": "^8.4.0",
