@@ -1,0 +1,28 @@
+{
+  "slice": "LEAD-ZAP-BASELINE",
+  "recordedAt": "2026-09-22T17:18:04.692Z",
+  "result": "DEFERRED",
+  "realScanPerformed": false,
+  "readiness": {
+    "state": "ARMED_WAITING_FOR_TARGET",
+    "reason": "no_lab_target_url",
+    "command": "node scripts/security/zap-readiness.mjs",
+    "hasPlan": true,
+    "automation": "tooling/security/zap/automation.yaml",
+    "openapi": "contracts/openapi.json"
+  },
+  "machine": {
+    "javaOnPath": false,
+    "zapBatOnPath": false,
+    "zapCliOnPath": false,
+    "ZAP_BIN": null,
+    "FZ_ZAP_TARGET_URL": null
+  },
+  "forbidden": [
+    "CT8",
+    "live customer hosts",
+    "Cloudflare production ingress",
+    "fabricating PASS without a scan"
+  ],
+  "notes": "Accept criteria allow DEFERRED with readiness evidence when Java or ZAP is missing. This record is not Lead security acceptance."
+}

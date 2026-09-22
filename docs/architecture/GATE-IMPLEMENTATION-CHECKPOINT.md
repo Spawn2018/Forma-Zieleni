@@ -93,9 +93,10 @@ CMS / public content is DECIDED (FZ-CMS-1 option B) and not
 CMS-ACCEPT. The CMS/Search graph in
 [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) is acceptance history after
 `RETURN-ROADMAP`. Ordinary READY work continues on
-[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md): `LEAD-SEC-SESSION`,
-`LEAD-OUTBOX-SUPERVISOR`, `PORTAL-APP`, and `CRM-OPPORTUNITY-CONTRACT`
-are COMPLETE. Next READY is `LEAD-ZAP-BASELINE`. The isolated lab in
+[`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md): Lead security slices
+through `LEAD-ZAP-BASELINE` are COMPLETE (`LEAD-ZAP-BASELINE` as
+DEFERRED readiness evidence, not a scan PASS). `LEAD-SEC-ACCEPT`
+remains report-only. The isolated lab in
 `labs/fz-cms-1`
 remains evidence, not acceptance. Search Intelligence architecture is
 [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler production policy

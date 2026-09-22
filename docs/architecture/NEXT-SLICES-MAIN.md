@@ -71,7 +71,11 @@ Next: LEAD-ZAP-BASELINE.
 
 Dependencies: LEAD-OUTBOX-SUPERVISOR.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE as DEFERRED with readiness evidence. Java, ZAP
+launcher, and `FZ_ZAP_TARGET_URL` were absent on 2026-09-22.
+`node scripts/security/zap-readiness.mjs` returned
+`ARMED_WAITING_FOR_TARGET`. No scan was run and no PASS was claimed.
+Evidence: `docs/security/ZAP-LEAD-BASELINE-DEFERRED-2026-09-22.json`.
 Autonomous: yes.
 Accept: OWASP ZAP Automation Framework passive/baseline against a
 local synthetic Lead API on loopback, using

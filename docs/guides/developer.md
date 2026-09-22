@@ -50,9 +50,8 @@ The context window size is not a reason to read every document.
 
 ## Next product slice
 
-`LEAD-SEC-SESSION` and `LEAD-OUTBOX-SUPERVISOR` are COMPLETE on
-`docs/architecture/NEXT-SLICES-MAIN.md`. Next READY is
-`LEAD-ZAP-BASELINE` (DEFERRED with readiness evidence is allowed when
-Java/ZAP are missing). Lead security acceptance stays open.
-The CMS/Search graph stays acceptance history. Do not start a second
-roadmap.
+`LEAD-ZAP-BASELINE` is COMPLETE as DEFERRED with readiness evidence on
+`docs/architecture/NEXT-SLICES-MAIN.md`. `LEAD-SEC-ACCEPT` is
+report-only and is not ordinary READY implementation work. Lead
+security acceptance stays open. The CMS/Search graph stays acceptance
+history. Do not start a second roadmap.

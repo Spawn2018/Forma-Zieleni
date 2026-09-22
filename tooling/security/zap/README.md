@@ -11,6 +11,9 @@ node scripts/security/zap-readiness.mjs
 ```
 
 Current default without a lab listen URL: `ARMED_WAITING_FOR_TARGET`.
+`LEAD-ZAP-BASELINE` recorded that state as DEFERRED on 2026-09-22 in
+[`../../docs/security/ZAP-LEAD-BASELINE-DEFERRED-2026-09-22.json`](../../docs/security/ZAP-LEAD-BASELINE-DEFERRED-2026-09-22.json).
+That is not a PASS.
 
 Activation requires all of:
 
