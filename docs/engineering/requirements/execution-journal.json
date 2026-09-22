@@ -1,11 +1,11 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "tooling-activation",
+  "currentPhase": "tooling-closure",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
+  "publishedHead": "444e98aa0c1135d3abafa4e34720ab17b00ddd2b",
   "postPushSafety": "PASS",
-  "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record.",
+  "codeRabbit": "CLI checkpoint review 2026-09-22T15:12:25Z on 0414697: CODERABBIT_FINDINGS (5). Fixed: dry-run order, diff content privacy scan, complete-event PASS gate. Rejected with reason: full git hash-object -w per file (object-store churn; LF-normalize matches text=auto). State=CODERABBIT_FINDINGS_FIXED (+ one REJECTED_WITH_REASON). Default GitHub review access still Spawn2018/Spawn2018. Period reviews were 11 before this review; hourly budget remaining after local quota record. Independent CI for 444e98a: PASS (run 35747728773 Verify+Windows supervisor).",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -19,12 +19,13 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "RETURN-ROADMAP is the next READY product slice",
-    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until ZAP/Dependency-Check/live credentials/Cloudflare policy exist",
-    "CodeRabbit GitHub App repo visibility for Forma-Zieleni needs Owner dashboard selection",
-    "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
+    "RETURN-ROADMAP is the next READY product slice (not executed in tooling closure)",
+    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
+    "ZAP ARMED_WAITING_FOR_TARGET (lab listen + runtime)",
+    "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
+    "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "After this activation checkpoint push, next product READY is RETURN-ROADMAP. Do not treat CMS-ACCEPT/SEARCH-ACCEPT as accepted. FZ-REQ-MOBILE-001 remains BLOCKED_BY_DEPENDENCY.",
+  "nextSafeAction": "Tooling activation closed after this closure slice. Next product READY remains RETURN-ROADMAP. Do not execute it in the tooling closure.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",
@@ -52,11 +53,9 @@
     "apps/web/app/before-after.ts",
     "apps/web/app/before-after-view.tsx",
     "apps/web/app/before-after.test.mjs",
-    "apps/web/app/gallery.ts",
     "apps/web/app/gallery-view.tsx",
     "apps/web/app/gallery.test.mjs",
     "apps/web/app/routes/home.tsx",
-    "apps/web/app/published-home.ts",
     "apps/web/app/shell.test.mjs",
     "apps/web/app/published-home.test.mjs",
     "packages/domain/ecosystem.test.mjs",
@@ -97,7 +96,11 @@
     "docs/engineering/requirements/FZ-DOC-INVENTORY.json",
     "docs/engineering/ACTIVATION-AUDIT-2026-09-22.json",
     "scripts/security/coderabbit-checkpoint.mjs",
-    "scripts/security/grok-callable.mjs"
+    "scripts/security/grok-callable.mjs",
+    "scripts/fz-cis/ingest.mjs",
+    "scripts/security/zap-readiness.mjs",
+    "scripts/security/dependency-check-policy.mjs",
+    "https://github.com/Spawn2018/Forma-Zieleni/actions/runs/35747728773"
   ],
   "contextRecoveryHints": [
     "Read START-HERE-CURSOR.md, then the recovery list in docs/engineering/FZ-CONTEXT-MAP.json. Do not load the whole tree.",

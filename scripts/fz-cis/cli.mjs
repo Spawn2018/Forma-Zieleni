@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { classifyFreshness, validateRecord } from './policy.mjs';
 import { addRecord, changeStatus, reportBlockers, reportDebt, reportDora } from './store.mjs';
+import { ingestOutcome, ingestToolingEvent } from './ingest.mjs';
 
 function readJsonArg() {
   const flag = process.argv.indexOf('--json');
@@ -25,6 +26,13 @@ try {
     if (!result.ok) process.exitCode = 1;
   } else if (command === 'record') {
     console.log(JSON.stringify(addRecord(readJsonArg())));
+  } else if (command === 'ingest') {
+    const payload = readJsonArg();
+    const result = payload.state
+      ? ingestToolingEvent(payload, { dryRun: process.argv.includes('--dry-run') })
+      : ingestOutcome(payload, { dryRun: process.argv.includes('--dry-run') });
+    console.log(JSON.stringify(result));
+    if (!result.ingested && result.reason !== 'noise_skip') process.exitCode = 1;
   } else if (command === 'transition') {
     const extra = arg('--extra') ? JSON.parse(arg('--extra')) : {};
     console.log(JSON.stringify(changeStatus(arg('--id'), arg('--status'), extra)));
@@ -37,7 +45,7 @@ try {
   } else if (command === 'freshness') {
     console.log(JSON.stringify(classifyFreshness(arg('--topic'))));
   } else {
-    console.error('usage: validate|record|transition|debt|blockers|dora|freshness');
+    console.error('usage: validate|record|ingest|transition|debt|blockers|dora|freshness');
     process.exitCode = 1;
   }
 } catch (err) {

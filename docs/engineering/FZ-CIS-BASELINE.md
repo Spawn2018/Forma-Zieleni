@@ -27,7 +27,7 @@ NOT MEASURABLE. See [`DORA-MEASUREMENT.md`](./DORA-MEASUREMENT.md).
 | Version control | OPERATIONAL | MEASURED (git history exists) |
 | Trunk-based / direct main | PARTIAL | INFERRED (local `main`; origin was 21 behind the workstation at baseline, so integration is not continuous yet) |
 | Small batches | PARTIAL | INFERRED (slice graph) |
-| Continuous integration | FOUNDATION | INFERRED (local `pnpm` gates; no cloud CI in this slice) |
+| Continuous integration | OPERATIONAL | MEASURED (GitHub Actions `CI` on `main`; run 35747728773 green for 444e98a) |
 | Continuous delivery | NOT STARTED | NOT APPLICABLE YET |
 | Test automation | PARTIAL | MEASURED for the suites that run; not the whole product |
 | Test data management | FOUNDATION | INFERRED (synthetic fixtures; no production data) |
