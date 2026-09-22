@@ -86,6 +86,14 @@ test('malformed noise ignored; skipped review is not PASS', () => {
   assert.equal(skipped.complete.status, 'review_skipped');
 });
 
+test('secret-like finding text is redacted before structured persist', () => {
+  const parsed = parseAgentReview([
+    '{"type":"finding","severity":"minor","fileName":"a.mjs","codegenInstructions":"Do not store secret=supersecretvalue99 in logs."}',
+    '{"type":"complete","status":"review_completed","findings":1}',
+  ].join('\n'));
+  assert.equal(parsed.findings[0].summary, '[redacted]');
+});
+
 test('lifecycle: findings → accept → repair → re-review required → clean PASS_AFTER_REPAIR', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'fz-cr-state-'));
   const file = path.join(dir, 'coderabbit-review.json');

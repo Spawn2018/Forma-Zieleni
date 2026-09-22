@@ -19,6 +19,9 @@ import {
 import { classifyShell } from '../fz-noc/policy.mjs';
 import { classifyObservedPrompt } from '../fz-noc/permissions.mjs';
 
+/** Isolate push-main unit tests from an ephemeral live CodeRabbit receipt. */
+const clearReviewDebt = () => ({ ok: true, reason: 'clear', state: 'EMPTY' });
+
 function okGit({
   branch = 'main',
   head = 'aaa111',
@@ -102,6 +105,7 @@ test('repo:check failure refuses the push wrapper', () => {
     git: okGit({ head: 'ccc333', origin: 'bbb222' }),
     run: runMap(map),
     runGate: (opts) => runPrePushGate({ ...opts, reportBlockers: () => [] }),
+    reviewDebtForPush: clearReviewDebt,
     push: (argv) => {
       pushes.push(argv);
       return { status: 0, stdout: '', stderr: '' };
@@ -138,6 +142,7 @@ test('HEAD change between verification and push refuses push', () => {
         dirtyPaths: ['.cursor/settings.json'],
       },
     }),
+    reviewDebtForPush: clearReviewDebt,
     push: (argv) => {
       pushes.push(argv);
       return { status: 0, stdout: '', stderr: '' };
@@ -153,6 +158,7 @@ test('wrong branch refuses the safe-main wrapper', () => {
   const result = runPushMain({
     git: okGit({ branch: 'feature', head: 'ccc333', origin: 'bbb222' }),
     runGate: () => ({ ok: true }),
+    reviewDebtForPush: clearReviewDebt,
     push: () => ({ status: 0, stdout: '', stderr: '' }),
     skipCiWait: true,
   });
@@ -178,6 +184,7 @@ test('push-main dry-run plans only git push origin main and accepts no argv', ()
     git: okGit({ head: 'ccc333', origin: 'bbb222' }),
     run: runMap(map),
     runGate: (opts) => runPrePushGate({ ...opts, reportBlockers: () => [] }),
+    reviewDebtForPush: clearReviewDebt,
     push: (argv) => {
       pushes.push(argv);
       return { status: 0, stdout: '', stderr: '' };
@@ -188,7 +195,7 @@ test('push-main dry-run plans only git push origin main and accepts no argv', ()
   assert.equal(dry.pushed, false);
   assert.deepEqual(dry.pushArgv, SAFE_PUSH_ARGV);
   assert.deepEqual(pushes, []);
-  const refused = runPushMain({ argv: ['--force'] });
+  const refused = runPushMain({ argv: ['--force'], reviewDebtForPush: clearReviewDebt });
   assert.equal(refused.ok, false);
   assert.equal(refused.reason, 'argv_refused');
 });
