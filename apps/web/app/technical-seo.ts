@@ -1,3 +1,5 @@
+import { jsonLdScript, webPageJsonLd } from './structured-data.ts';
+
 const TRACKING = /^(?:utm_|fbclid$|gclid$|gbraid$|wbraid$)/;
 const KNOWN_PATHS = new Set(['/', '/galeria', '/porownanie', '/robots.txt']);
 
@@ -12,7 +14,8 @@ export type HeadTag =
   | { title: string }
   | { name: string; content: string }
   | { property: string; content: string }
-  | { tagName: 'link'; rel: 'canonical'; href: string };
+  | { tagName: 'link'; rel: 'canonical'; href: string }
+  | { 'script:ld+json': Record<string, unknown> };
 
 export function seoEnv(value: string | undefined): SeoEnv {
   return value === 'production' ? 'production' : 'non-production';
@@ -74,7 +77,15 @@ export function publicHead(input: {
     { property: 'og:description', content: description },
   ];
   const href = canonicalHref(input.origin, input.path);
-  if (href && indexable) tags.push({ tagName: 'link', rel: 'canonical', href });
+  const linked = href && indexable ? href : undefined;
+  if (linked) tags.push({ tagName: 'link', rel: 'canonical', href: linked });
+  tags.push({
+    'script:ld+json': webPageJsonLd({
+      name: title,
+      description,
+      ...(linked ? { url: linked } : {}),
+    }),
+  });
   return tags;
 }
 
@@ -82,6 +93,7 @@ export function renderHead(tags: readonly HeadTag[]): string {
   return tags
     .map((tag) => {
       if ('title' in tag) return `<title>${escapeText(tag.title)}</title>`;
+      if ('script:ld+json' in tag) return jsonLdScript(tag['script:ld+json']);
       if ('property' in tag) return `<meta property="${escapeText(tag.property)}" content="${escapeText(tag.content)}" />`;
       if ('tagName' in tag) return `<link rel="canonical" href="${escapeText(tag.href)}" />`;
       return `<meta name="${escapeText(tag.name)}" content="${escapeText(tag.content)}" />`;

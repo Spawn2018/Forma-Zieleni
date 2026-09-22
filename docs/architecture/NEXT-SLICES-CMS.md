@@ -275,9 +275,11 @@ Next: SEARCH-STRUCTURED-DATA.
 
 Dependencies: SEARCH-WWW-TECHNICAL.
 Gate: REVIEW.
+Status: COMPLETE for a WebPage JSON-LD document built from the visible title and description. Unverified ratings, prices, awards, and addresses are omitted.
 Autonomous: yes.
 Accept: JSON-LD only for visible verified facts. No ratings, prices, awards, or addresses unless verified.
-Tests: syntax and required mapping; omitted unverified fields.
+Tests: `apps/web/app/structured-data.test.mjs`. The script parses. Forbidden fields are absent.
+Security: a non-production page does not receive a canonical URL inside the JSON-LD.
 Next: SEARCH-SITEMAP-ROBOTS.
 
 ### SEARCH-SITEMAP-ROBOTS
