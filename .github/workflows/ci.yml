@@ -42,10 +42,13 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile --store-dir "${{ github.workspace }}/.pnpm-store"
 
-      - name: Install CMS lab dependencies
-        run: |
-          pnpm install --frozen-lockfile --dir labs/fz-cms-1/media
-          pnpm install --frozen-lockfile --dir labs/fz-cms-1/www-proto
+      - name: Install CMS lab media
+        working-directory: labs/fz-cms-1/media
+        run: pnpm install --frozen-lockfile --ignore-workspace
+
+      - name: Install CMS lab prototype
+        working-directory: labs/fz-cms-1/www-proto
+        run: pnpm install --frozen-lockfile --ignore-workspace
 
       - name: Documentation check
         run: pnpm docs:check

@@ -15,6 +15,7 @@ test('CI workflow verifies main and does not deploy', () => {
   assert.match(workflow, /node-version: 24/);
   assert.match(workflow, /pnpm@10\.33\.2/);
   assert.match(workflow, /--frozen-lockfile/);
+  assert.match(workflow, /--ignore-workspace/);
   assert.match(workflow, /fetch-depth: 0/);
   for (const command of ['pnpm docs:check', 'pnpm typecheck', 'pnpm lint', 'pnpm test', 'pnpm repo:check', 'pnpm readme:check', 'pnpm audit --audit-level=moderate']) {
     assert.equal(workflow.includes(command), true, command);
