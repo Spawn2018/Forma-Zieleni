@@ -209,10 +209,12 @@ Next: CMS-HARDEN and CMS-PERF.
 
 Dependencies: CMS-WWW.
 Gate: REVIEW.
+Status: COMPLETE for local XSS, SVG, SSRF, upload, and log checks. ZAP is DEFERRED because Java is not installed. OWASP Dependency-Check is DEFERRED. `pnpm audit --audit-level=moderate` reported no known vulnerabilities on 2026-09-22.
 Autonomous: yes where tools exist.
 Entry: CMS-WWW recorded.
-Accept: XSS/SVG/SSRF/upload tests; ZAP localhost if Java exists else DEFERRED; SCA; log redaction.
-Tests: SVG denied or sanitized; unpublished token not in public HTML.
+Accept: `packages/domain/src/cms-harden.ts` escapes public titles, refuses an unpublished token in that HTML, rejects private and link-local outbound URLs, and redacts secrets in logs. SVG uploads stay denied.
+Tests: `packages/domain/cms-harden.test.mjs` and `apps/web/app/cms-harden.test.mjs`. SVG is denied. The unpublished token is absent from public HTML.
+Security: ZAP and Dependency-Check are not PASS.
 Next: CMS-ACCEPT (after CMS-PERF/RESTORE/EXPORT).
 
 ### CMS-PERF
