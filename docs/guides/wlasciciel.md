@@ -34,7 +34,10 @@ Nie oceniaj ich po tym pliku jako gotowych.
 ## Następna bezpieczna praca produktowa
 
 Raport `LEAD-SEC-ACCEPT` jest złożony; Lead **nie** jest
-security-accepted. Na `NEXT-SLICES-MAIN.md` nie ma kolejnego READY
-AUTO/REVIEW do odświeżenia roadmapy albo odblokowania narzędzi
-(ZAP/Java, Dependency-Check, off-site backup). CMS-ACCEPT pozostaje
-otwarte. To nie jest prośba o wdrożenie.
+security-accepted (to nie blokuje globalnie produktu). Po naprawie
+fałszywego wyczerpania roadmapy na `NEXT-SLICES-MAIN.md` są READY
+AUTO/REVIEW: `CRM-CONTRACT-DOMAIN`, `ADMIN-APP`, `PORTAL-AUTH`. Brak
+slice'a dla wiążącego wymagania to wada materializacji, nie Owner
+roadmap refresh. ZAP i Dependency-Check nie blokują niezwiązanej pracy
+produktowej. CMS-ACCEPT pozostaje otwarte. To nie jest prośba o
+wdrożenie.

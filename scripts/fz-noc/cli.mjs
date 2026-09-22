@@ -85,6 +85,8 @@ if (command === 'deadline') {
     session.currentSlice = null;
     session.nextCandidates = [];
     session.selectionReason = picked.reason;
+    // Only latch exhaustion when selectReady authorizes it (no materialization gap).
+    session.exhausted = picked.exhaustionAllowed === true;
     writeSession(session);
     print(picked);
   } else {
@@ -101,6 +103,8 @@ if (command === 'deadline') {
     noted.session.nextCandidates = next.ready;
     noted.session.lastBeat = new Date().toISOString();
     noted.session.status = 'busy';
+    // Selecting READY work clears a prior false-exhaustion latch.
+    if (next.selected) noted.session.exhausted = false;
     writeSession(noted.session);
     print({
       selected: noted.session.currentSlice,
@@ -134,6 +138,8 @@ if (command === 'deadline') {
   const picked = selection(session);
   session.nextCandidates = picked.ready.filter((id) => id !== slice);
   session.selectionReason = picked.reason;
+  if (picked.selected) session.exhausted = false;
+  else session.exhausted = picked.exhaustionAllowed === true;
   writeSession(session);
   print({ lastCompletedSlice: slice, next: picked.selected, ready: session.nextCandidates });
 } else {

@@ -1,4 +1,4 @@
-import type { Lead, LeadStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
+import type { Lead, LeadStatus, Offer, OfferStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
 
 export type SortField = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt';
 
@@ -16,6 +16,13 @@ export type OpportunityListQuery = {
   cursor?: { at: string; id: string };
 };
 
+export type OfferListQuery = {
+  limit: number;
+  sort: SortField;
+  status?: OfferStatus;
+  cursor?: { at: string; id: string };
+};
+
 export type StoredReply = {
   requestHash: string;
   responseStatus: number;
@@ -24,19 +31,32 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created';
   leadId: string;
-  payload: { leadId: string; status: string; source?: string; opportunityId?: string };
+  payload: {
+    leadId: string;
+    status: string;
+    source?: string;
+    opportunityId?: string;
+    offerId?: string;
+  };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created';
   actorId: string | null;
   leadId: string;
   at: string;
-  metadata: { status: string; source?: string; result?: string; capacityHold?: boolean; opportunityId?: string };
+  metadata: {
+    status: string;
+    source?: string;
+    result?: string;
+    capacityHold?: boolean;
+    opportunityId?: string;
+    offerId?: string;
+  };
 };
 
 export interface LeadTx {
@@ -50,6 +70,10 @@ export interface LeadTx {
   findOpportunity(id: string): Promise<Opportunity | null>;
   findOpportunityByLead(leadId: string): Promise<Opportunity | null>;
   listOpportunities(query: OpportunityListQuery): Promise<Opportunity[]>;
+  insertOffer(offer: Offer): Promise<void>;
+  findOffer(id: string): Promise<Offer | null>;
+  findOfferByOpportunity(opportunityId: string): Promise<Offer | null>;
+  listOffers(query: OfferListQuery): Promise<Offer[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

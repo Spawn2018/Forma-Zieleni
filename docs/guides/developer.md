@@ -52,7 +52,11 @@ The context window size is not a reason to read every document.
 
 `LEAD-SEC-ACCEPT` report is filed
 (`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is still
-**not** security-accepted. No ordinary READY AUTO/REVIEW product slice
-remains on `docs/architecture/NEXT-SLICES-MAIN.md` until a roadmap
-refresh or Owner unblocks deferred security tooling. The CMS/Search
-graph stays acceptance history. Do not start a second roadmap.
+**not** security-accepted; that stays report-only and does not globally
+block product work. After false-exhaustion repair, READY AUTO/REVIEW
+product slices on `docs/architecture/NEXT-SLICES-MAIN.md` include
+`CRM-CONTRACT-DOMAIN`, `ADMIN-APP`, and `PORTAL-AUTH`. Missing binding
+slices are an internal materialization defect, not Owner roadmap
+refresh. ZAP and Dependency-Check do not block unrelated product work.
+The CMS/Search graph stays acceptance history. Do not start a second
+roadmap.

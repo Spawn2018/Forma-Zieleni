@@ -15,7 +15,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create'],
 };
 
 const portal = {
@@ -449,6 +449,70 @@ test('opportunity create rejects unqualified leads, duplicate leads and client s
   assert.equal(first.status, 201);
   const second = await app.request('/v1/opportunities', json({ leadId: qualified.id }, {
     'idempotency-key': 'opp-dup-2',
+    ...bearer(staff),
+  }));
+  assert.equal(second.status, 409);
+});
+
+test('anonymous and portal actors cannot create, list or get offers; staff can', async () => {
+  const { app } = appFor();
+  const lead = await captureAndQualify(app);
+  const opportunityCreated = await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'offer-opp-1',
+    ...bearer(staff),
+  }));
+  assert.equal(opportunityCreated.status, 201);
+  const opportunity = await opportunityCreated.json();
+  const createPath = '/v1/offers';
+  assert.equal((await app.request(createPath, json({ opportunityId: opportunity.id }))).status, 401);
+  assert.equal((await app.request(createPath, json({ opportunityId: opportunity.id }, bearer(portal)))).status, 403);
+  assert.equal((await app.request('/v1/offers', { headers: bearer(portal) })).status, 403);
+  const created = await app.request(createPath, json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'offer-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const offer = await created.json();
+  assert.equal(offer.status, 'draft');
+  assert.equal(offer.opportunityId, opportunity.id);
+  assert.equal(Object.hasOwn(offer, 'price'), false);
+  const listed = await app.request('/v1/offers', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  const page = await listed.json();
+  assert.equal(page.items.length, 1);
+  const got = await app.request(`/v1/offers/${offer.id}`, { headers: bearer(staff) });
+  assert.equal(got.status, 200);
+  assert.equal((await app.request(`/v1/offers/${offer.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/offers/missingoffer0000000', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/offers/missingoffer0000000', { headers: bearer(staff) })).status, 404);
+});
+
+test('offer create rejects missing opportunity, duplicate opportunity and client commercial fields', async () => {
+  const { app } = appFor();
+  const missing = await app.request('/v1/offers', json({ opportunityId: 'p9k2n4p6q8r0s2t4' }, {
+    'idempotency-key': 'offer-missing-1',
+    ...bearer(staff),
+  }));
+  assert.equal(missing.status, 404);
+  const lead = await captureAndQualify(app);
+  const opportunityCreated = await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'offer-opp-2',
+    ...bearer(staff),
+  }));
+  assert.equal(opportunityCreated.status, 201);
+  const opportunity = await opportunityCreated.json();
+  const withPrice = await app.request('/v1/offers', json({ opportunityId: opportunity.id, price: 1000 }, {
+    'idempotency-key': 'offer-price-1',
+    ...bearer(staff),
+  }));
+  assert.equal(withPrice.status, 400);
+  const first = await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'offer-dup-1',
+    ...bearer(staff),
+  }));
+  assert.equal(first.status, 201);
+  const second = await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'offer-dup-2',
     ...bearer(staff),
   }));
   assert.equal(second.status, 409);

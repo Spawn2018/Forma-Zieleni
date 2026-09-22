@@ -6,8 +6,9 @@ export const CLIENTS = ['web', 'portal', 'admin', 'mobile', 'sketchup', 'm2m'] a
 export type ClientId = (typeof CLIENTS)[number];
 export type LeadCapability = 'leads:read' | 'leads:qualify';
 export type OpportunityCapability = 'opportunities:read' | 'opportunities:create';
+export type OfferCapability = 'offers:read' | 'offers:create';
 export type GrowthCapability = 'growth:plan' | 'semantic:review';
-export type Capability = LeadCapability | OpportunityCapability | ContentCapability | GrowthCapability;
+export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -36,6 +37,7 @@ function isClient(value: unknown): value is ClientId {
 function isCapability(value: unknown): value is Capability {
   return value === 'leads:read' || value === 'leads:qualify'
     || value === 'opportunities:read' || value === 'opportunities:create'
+    || value === 'offers:read' || value === 'offers:create'
     || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 

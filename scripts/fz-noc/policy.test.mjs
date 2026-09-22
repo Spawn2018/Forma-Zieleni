@@ -7,6 +7,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   activeExecutionGraph,
+  bindingMaterializationGap,
   classifyMcp,
   classifyShell,
   decideFollowup,
@@ -87,9 +88,10 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'LEAD-SEC-SESSION');
-  assert.equal(picked.ready.includes('LEAD-SEC-SESSION'), true);
-  assert.equal(picked.ready.includes('PORTAL-APP'), true);
+  assert.equal(picked.selected, 'CRM-CONTRACT-DOMAIN');
+  assert.equal(picked.ready.includes('CRM-CONTRACT-DOMAIN'), true);
+  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.ready.includes('PORTAL-AUTH'), true);
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.exhaustionAllowed, false);
@@ -134,6 +136,62 @@ test('an omitted www app row is an internal gap and does not authorize exhaustio
   assert.equal(picked.exhaustionAllowed, false);
   const session = emptySession(nextWarsawDeadline(9, new Date('2026-09-21T19:17:00.000Z')));
   assert.equal(session.exhausted, false);
+});
+
+test('missing Offer after Opportunity is a materialization gap, not Owner roadmap refresh', () => {
+  const slices = [
+    {
+      id: 'CRM-OPPORTUNITY-CONTRACT',
+      status: 'COMPLETE',
+      gate: 'REVIEW',
+      dependsOn: [],
+      next: [],
+      autonomous: true,
+      reportOnly: false,
+      externalUnmet: false,
+    },
+    {
+      id: 'ADMIN-APP',
+      status: 'OPEN',
+      gate: 'REVIEW',
+      dependsOn: [],
+      next: [],
+      autonomous: true,
+      reportOnly: false,
+      externalUnmet: false,
+    },
+  ];
+  const gap = bindingMaterializationGap(slices);
+  assert.equal(gap.id, 'CRM-OFFER-CONTRACT');
+  const picked = selectReady(slices);
+  assert.equal(picked.selected, 'ADMIN-APP');
+  assert.equal(picked.exhaustionAllowed, false);
+  const exhausted = selectReady([
+    {
+      id: 'CRM-OPPORTUNITY-CONTRACT',
+      status: 'COMPLETE',
+      gate: 'REVIEW',
+      dependsOn: [],
+      next: [],
+      autonomous: true,
+      reportOnly: false,
+      externalUnmet: false,
+    },
+  ]);
+  assert.equal(exhausted.selected, null);
+  assert.equal(exhausted.internalGap.id, 'CRM-OFFER-CONTRACT');
+  assert.equal(exhausted.exhaustionAllowed, false);
+  assert.match(exhausted.reason, /Materialize CRM-OFFER-CONTRACT/);
+});
+
+test('main graph after Opportunity keeps product READY without ZAP or Lead acceptance', () => {
+  const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
+  const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
+  const picked = selectReady(activeExecutionGraph(cms, main));
+  assert.equal(picked.selected, 'CRM-CONTRACT-DOMAIN');
+  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
+  assert.equal(picked.exhaustionAllowed, false);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {

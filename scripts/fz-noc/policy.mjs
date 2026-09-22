@@ -186,6 +186,62 @@ export function internalPrerequisiteGap(slices) {
   return null;
 }
 
+/**
+ * Binding Canon/registry work that must exist as an executable slice once
+ * its predecessor is COMPLETE. Missing rows are materialization defects,
+ * not Owner roadmap refreshes and not exhaustion.
+ */
+export const BINDING_MATERIALIZATIONS = Object.freeze([
+  {
+    id: 'CRM-OFFER-CONTRACT',
+    whenComplete: ['CRM-OPPORTUNITY-CONTRACT'],
+    reason: 'PRODUCT-CANON requires Offer after Opportunity. Materialize CRM-OFFER-CONTRACT; do not treat a missing slice as Owner roadmap refresh.',
+  },
+  {
+    id: 'ADMIN-APP',
+    whenComplete: ['PORTAL-APP'],
+    reason: 'ADR-014 and FZ-REQ-ADMIN-001 require a real apps/admin React Router application once Portal exists. Materialize ADMIN-APP; do not treat omission as Owner roadmap refresh.',
+  },
+  {
+    id: 'CRM-CONTRACT-DOMAIN',
+    whenComplete: ['CRM-OFFER-CONTRACT'],
+    reason: 'PRODUCT-CANON and FZ-SIGN-1 require Contract domain after Offer without selecting a signing provider. Materialize CRM-CONTRACT-DOMAIN.',
+  },
+  {
+    id: 'PORTAL-AUTH',
+    whenComplete: ['PORTAL-APP'],
+    reason: 'MASTER-PLAN D requires portal client auth after the signed-out shell. Materialize PORTAL-AUTH.',
+  },
+  {
+    id: 'MOBILE-CLIENT-BOUNDARY',
+    whenComplete: ['CRM-CONTRACT-DOMAIN'],
+    reason: 'FZ-REQ-MOBILE-001 must not silently disappear. Materialize MOBILE-CLIENT-BOUNDARY before claiming exhaustion.',
+  },
+  {
+    id: 'SKETCHUP-ADAPTER-BOUNDARY',
+    whenComplete: ['CRM-CONTRACT-DOMAIN'],
+    reason: 'FZ-REQ-SKETCHUP-001 must not silently disappear. Materialize SKETCHUP-ADAPTER-BOUNDARY before claiming exhaustion.',
+  },
+  {
+    id: 'GARDENOS-RELATION-BOUNDARY',
+    whenComplete: ['CRM-CONTRACT-DOMAIN'],
+    reason: 'FZ-REQ-GARDENOS-001 must not silently disappear. Materialize GARDENOS-RELATION-BOUNDARY before claiming exhaustion.',
+  },
+]);
+
+export function bindingMaterializationGap(slices) {
+  const ids = new Set(slices.map((slice) => slice.id));
+  const complete = new Set(slices.filter((slice) => slice.status === 'COMPLETE').map((slice) => slice.id));
+  for (const rule of BINDING_MATERIALIZATIONS) {
+    if (ids.has(rule.id)) continue;
+    const predecessorsMet = (rule.whenComplete || []).every((id) => complete.has(id));
+    if (rule.always === true || predecessorsMet) {
+      return { id: rule.id, reason: rule.reason };
+    }
+  }
+  return null;
+}
+
 export function selectReady(slices, options = {}) {
   const blocked = new Set(options.blockedIds || []);
   const known = new Set(slices.map((slice) => slice.id));
@@ -224,8 +280,10 @@ export function selectReady(slices, options = {}) {
     reason = `${selected.id} is the highest-priority safe READY slice after the critical path`;
   }
   const internalGap = internalPrerequisiteGap(slices);
-  if (!selected && internalGap) {
-    reason = `${internalGap.reason} Do not mark the session exhausted for an omitted internal prerequisite.`;
+  const materializationGap = bindingMaterializationGap(slices);
+  const gap = internalGap || materializationGap;
+  if (!selected && gap) {
+    reason = `${gap.reason} Do not mark the session exhausted for an omitted internal materialization.`;
   }
   return {
     selected: selected ? selected.id : null,
@@ -234,8 +292,8 @@ export function selectReady(slices, options = {}) {
     withheld: slices
       .filter((slice) => slice.status !== 'COMPLETE' && BLOCKING_GATES.has(slice.gate))
       .map((slice) => ({ id: slice.id, gate: slice.gate })),
-    internalGap,
-    exhaustionAllowed: selected == null && internalGap == null,
+    internalGap: gap,
+    exhaustionAllowed: selected == null && gap == null,
   };
 }
 

@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Lead, Opportunity } from '@forma-zieleni/domain';
+import type { Lead, Offer, Opportunity } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -7,6 +7,7 @@ import type {
   LeadStore,
   LeadTx,
   ListQuery,
+  OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
   StoredReply,
@@ -54,6 +55,16 @@ function toOpportunity(row: Database['opportunity']): Opportunity {
   };
 }
 
+function toOffer(row: Database['offer']): Offer {
+  return {
+    id: row.id,
+    opportunityId: row.opportunity_id,
+    status: row.status as Offer['status'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
 function isPg(error: unknown): error is { code?: string; constraint?: string } {
   return Boolean(error && typeof error === 'object' && 'code' in error);
 }
@@ -74,6 +85,9 @@ export class PostgresLeadStore implements LeadStore {
         if (error instanceof ApiFailure) throw error;
         if (isPg(error) && error.code === '23505' && error.constraint === 'opportunity_lead_unique') {
           throw new ApiFailure(409, 'OPPORTUNITY_EXISTS', 'An opportunity already exists for this lead.');
+        }
+        if (isPg(error) && error.code === '23505' && error.constraint === 'offer_opportunity_unique') {
+          throw new ApiFailure(409, 'OFFER_EXISTS', 'An offer already exists for this opportunity.');
         }
         if (isPg(error)) throw new PersistenceFailure();
         throw error;
@@ -170,6 +184,42 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toOpportunity);
+  }
+
+  async insertOffer(offer: Offer): Promise<void> {
+    await this.trx.insertInto('offer').values({
+      id: offer.id,
+      opportunity_id: offer.opportunityId,
+      status: offer.status,
+      created_at: new Date(offer.createdAt),
+      updated_at: new Date(offer.updatedAt),
+    }).execute();
+  }
+
+  async findOffer(id: string): Promise<Offer | null> {
+    const row = await this.trx.selectFrom('offer').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toOffer(row) : null;
+  }
+
+  async findOfferByOpportunity(opportunityId: string): Promise<Offer | null> {
+    const row = await this.trx.selectFrom('offer').selectAll().where('opportunity_id', '=', opportunityId).executeTakeFirst();
+    return row ? toOffer(row) : null;
+  }
+
+  async listOffers(query: OfferListQuery): Promise<Offer[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('offer').selectAll();
+    if (query.status) request = request.where('status', '=', query.status);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toOffer);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

@@ -15,6 +15,7 @@ function isUnique(error: unknown): boolean {
 function isCapability(value: string): value is Capability {
   return value === 'leads:read' || value === 'leads:qualify'
     || value === 'opportunities:read' || value === 'opportunities:create'
+    || value === 'offers:read' || value === 'offers:create'
     || isContentCapability(value) || isGrowthCapability(value);
 }
 

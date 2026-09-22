@@ -6,3 +6,5 @@ export {
 export type { FieldError, LeadCaptureRequest } from './lead.ts';
 export { validateOpportunityCreateRequest } from './opportunity.ts';
 export type { OpportunityCreateRequest } from './opportunity.ts';
+export { validateOfferCreateRequest } from './offer.ts';
+export type { OfferCreateRequest } from './offer.ts';

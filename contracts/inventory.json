@@ -11,13 +11,17 @@
     "POST /opportunities",
     "GET /opportunities",
     "GET /opportunities/{opportunityId}",
+    "POST /offers",
+    "GET /offers",
+    "GET /offers/{offerId}",
     "GET /content/{contentId}",
     "POST /growth/plans"
   ],
   "requiredHeaders": {
     "POST /leads": ["Idempotency-Key"],
     "POST /leads/{leadId}/qualify": ["Idempotency-Key"],
-    "POST /opportunities": ["Idempotency-Key"]
+    "POST /opportunities": ["Idempotency-Key"],
+    "POST /offers": ["Idempotency-Key"]
   },
   "requiredLeadFields": [
     "id",
@@ -47,6 +51,19 @@
     "price",
     "stage",
     "probability",
+    "value"
+  ],
+  "requiredOfferFields": [
+    "id",
+    "opportunityId",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenOfferFields": [
+    "price",
+    "amountPln",
+    "terms",
     "value"
   ]
 }

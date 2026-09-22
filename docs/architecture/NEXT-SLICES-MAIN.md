@@ -141,19 +141,144 @@ Tests: `packages/domain/opportunity.test.mjs`,
 `apps/api/src/http.test.mjs` opportunity cases.
 Security: BOLA on opportunity ids; anonymous callers get 401; no
 client-supplied status machine; one Opportunity per Lead.
-Next: none until a later roadmap refresh.
+Next: CRM-OFFER-CONTRACT.
+
+### CRM-OFFER-CONTRACT
+
+Dependencies: CRM-OPPORTUNITY-CONTRACT.
+Gate: REVIEW.
+Status: COMPLETE for OpenAPI + domain Offer created only from an
+existing Opportunity, with staff create/list/get through Core API
+authorization. No Admin UI, signing provider, payment capture, or portal
+commercial invent.
+Autonomous: yes.
+Accept: OpenAPI + `packages/domain` Offer created only from an existing
+Opportunity. Staff create/list/get through Core API authorization.
+Opaque ids; BOLA; no client-supplied price machine that bypasses
+domain. No Admin UI, no signing provider, no payment capture, no portal
+invent of commercial facts.
+Tests: `packages/domain/offer.test.mjs`,
+`packages/validation/offer.test.mjs`, `packages/types/offer.test.mjs`,
+`contracts/openapi.test.mjs`, `apps/api/src/http.test.mjs` offer cases.
+Security: anonymous 401; portal without offer caps 403; BOLA on offer
+ids; marketing code cannot mutate commercial terms.
+Next: CRM-CONTRACT-DOMAIN.
+
+### CRM-CONTRACT-DOMAIN
+
+Dependencies: CRM-OFFER-CONTRACT.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: OpenAPI + domain Contract (and version) owned by Core API with
+explicit lifecycle transitions from an Offer path. Staff create/list/get
+only. No signing-provider SDK, no payment capture, no Admin ceremony UI.
+FZ-SIGN-1 provider stays UNDECIDED.
+Tests: domain and contract tests plus Core API authz.
+Security: BOLA on contract ids; anonymous 401; no client-supplied
+lifecycle overwrite.
+Next: none until a later product slice; payment stays OWNER-DECISION.
+
+### ADMIN-APP
+
+Dependencies: none. ADR-014 already requires `apps/admin` as React
+Router Framework Mode. Unblocks FZ-REQ-ADMIN-001.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a real `apps/admin` React Router Framework Mode application in
+the monorepo, wired into workspace test/typecheck/lint/build, with root
+layout, route module, and error boundary. Staff shell only; no invented
+CRM writes; no deploy, DNS, or Cloudflare mutation. Separate trust zone
+from WWW and Portal.
+Tests: `apps/admin` shell test and build.
+Security: noindex for non-production; loaders do not invent client
+project or offer facts; no anonymous CRM mutations.
+Next: none from this shell alone.
+
+### PORTAL-AUTH
+
+Dependencies: PORTAL-APP.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: client Better Auth identity for the portal trust zone; session
+cookie and origin rules; anonymous visitors still see the signed-out
+gate. Loaders still must not invent project, offer, or file facts. No
+payment or signing ceremony.
+Tests: portal session/auth HTTP or route tests.
+Security: cookies origin-checked; tokens absent from logs; BOLA stays in
+Core API for later projections.
+Next: PORTAL-OFFER-PROJECTION.
+
+### PORTAL-OFFER-PROJECTION
+
+Dependencies: CRM-OFFER-CONTRACT, PORTAL-AUTH.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: client-safe read projection of Offer (and/or Opportunity) the
+authenticated client is authorized to see. Authorization in Core API.
+No staff mutations from Portal.
+Tests: Core API projection authz tests; portal loader refuses invented
+facts.
+Security: BOLA; anonymous 401; other clients 403.
+Next: none until a later portal projection.
+
+### MOBILE-CLIENT-BOUNDARY
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: document and contract the mobile client boundary for
+FZ-REQ-MOBILE-001: Core API remains business truth; no separate mobile
+domain; typed client paths only. Do not ship Android/iOS apps in this
+slice.
+Tests: contract/path tests or documented inventory check.
+Security: no second authz path; no production credentials.
+Next: none until a later mobile implementation slice.
+
+### SKETCHUP-ADAPTER-BOUNDARY
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: document the SketchUp adapter boundary for FZ-REQ-SKETCHUP-001:
+stable project identifiers via Core API; SketchUp is not business truth.
+No plugin runtime install in this slice.
+Tests: documentation/contract check against Canon.
+Security: no local business ACL in the plugin.
+Next: none until a later plugin slice.
+
+### GARDENOS-RELATION-BOUNDARY
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: document Garden OS as a future client relation for
+FZ-REQ-GARDENOS-001, not a digital-twin runtime. No twin database or UI
+in this slice.
+Tests: documentation/registry check.
+Security: no invented live twin data.
+Next: none until a later Garden OS product slice.
 
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
 |---|---|---|
-| Dependency-Check SCA | DEFERRED | `pnpm audit` covers npm today; Java/NVD install is not justified solely to invent PASS |
+| Dependency-Check SCA | DEFERRED | `pnpm audit` covers npm today; Java/NVD install is not justified solely to invent PASS. Does **not** block Offer/Admin/Portal product slices. |
 | Off-site backup / restic-pgBackRest | later staging | Local dump/restore exists; off-site is not this graph’s first READY |
 | OpenObserve / Garage / Compose staging | later | Gate A horizons, not Lead acceptance |
 | Cloudflare Tunnel / DNS / private-origin | DANGEROUS | Owner approval required |
-| FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED |
+| FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED; does not block Contract domain without a SaaS adapter |
+| Payment provider | OWNER-DECISION | FZ-REQ-PAY-001; no transactions |
 | FZ-SEARCH-CRAWL-1 | OWNER-DECISION | OPEN |
-| CMS-ACCEPT / SEARCH-ACCEPT | report only | Stay on the CMS graph; not Lead security acceptance |
+| CMS-ACCEPT / SEARCH-ACCEPT | report only | Stay on the CMS graph; not a global MAIN product barrier |
+| Lead security acceptance | OPEN | Blocks only claims of Lead security-accepted; does **not** block Offer/Admin/Portal |
+| ZAP ARMED_WAITING_FOR_TARGET | DEFERRED | Truthful; does **not** block unrelated product slices |
 | MFA / operator provisioning UI | later | ASVS V6 later row |
 
 ## Continuous improvement

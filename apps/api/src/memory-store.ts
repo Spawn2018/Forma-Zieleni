@@ -1,9 +1,10 @@
-import type { Lead, LeadStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
+import type { Lead, LeadStatus, Offer, OfferStatus, Opportunity, OpportunityStatus } from '@forma-zieleni/domain';
 import type {
   AuditEvent,
   LeadStore,
   LeadTx,
   ListQuery,
+  OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
   StoredReply,
@@ -12,6 +13,7 @@ import type {
 type MemoryState = {
   leads: Lead[];
   opportunities: Opportunity[];
+  offers: Offer[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -29,6 +31,7 @@ export class MemoryLeadStore implements LeadStore {
   readonly state: MemoryState = {
     leads: [],
     opportunities: [],
+    offers: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -38,6 +41,7 @@ export class MemoryLeadStore implements LeadStore {
     const snapshot = clone({
       leads: this.state.leads,
       opportunities: this.state.opportunities,
+      offers: this.state.offers,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -47,6 +51,7 @@ export class MemoryLeadStore implements LeadStore {
     } catch (error) {
       this.state.leads = snapshot.leads;
       this.state.opportunities = snapshot.opportunities;
+      this.state.offers = snapshot.offers;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -131,6 +136,41 @@ class MemoryTx implements LeadTx {
           const at = stamp(opportunity, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && opportunity.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && opportunity.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertOffer(offer: Offer): Promise<void> {
+    if (this.state.offers.some(item => item.opportunityId === offer.opportunityId)) {
+      throw new Error('OFFER_EXISTS');
+    }
+    this.state.offers.push(clone(offer));
+  }
+
+  async findOffer(id: string): Promise<Offer | null> {
+    return clone(this.state.offers.find(item => item.id === id) ?? null);
+  }
+
+  async findOfferByOpportunity(opportunityId: string): Promise<Offer | null> {
+    return clone(this.state.offers.find(item => item.opportunityId === opportunityId) ?? null);
+  }
+
+  async listOffers(query: OfferListQuery): Promise<Offer[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.offers.filter(
+      offer => !query.status || offer.status === (query.status as OfferStatus),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(offer => {
+          const at = stamp(offer, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && offer.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && offer.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

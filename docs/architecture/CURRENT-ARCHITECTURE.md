@@ -11,7 +11,7 @@ ADR-014). Implementation and security acceptance are not complete.
 
 ## Applications
 
-- `apps/api` = Hono on Node 24. Core API remains canonical. Lead capture/qualification and staff Opportunity create/list/get are live in the current tree.
+- `apps/api` = Hono on Node 24. Core API remains canonical. Lead capture/qualification, staff Opportunity create/list/get, and staff Offer create/list/get are live in the current tree.
 - `apps/web` = React Router Framework Mode. The shell reads one published title from Core API `GET /v1/content/:id` and does not invent public copy.
 - `apps/portal` = React Router Framework Mode. Signed-out client gate only; does not invent project, offer, or file facts. Client auth and Core API projections are later slices.
 - `apps/admin` = React Router Framework Mode

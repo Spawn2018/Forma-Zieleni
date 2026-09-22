@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "main-graph-exhausted-pending-roadmap",
+  "currentPhase": "main-graph-product-resumed-after-false-exhaustion-repair",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "b049f732142a3b8314d715381131e0ac2af9dcf9",
   "postPushSafety": "PASS",
@@ -19,15 +19,14 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "Lead security-acceptance OPEN (ZAP/SCA/off-site/private-origin deferred)",
+    "Lead security-acceptance OPEN (report-only; does not globally block product)",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
-    "LEAD-SEC-SESSION may be session-blocked after repeated identical selects",
-    "ZAP ARMED_WAITING_FOR_TARGET (lab listen + runtime)",
-    "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm",
+    "ZAP ARMED_WAITING_FOR_TARGET (does not block unrelated product)",
+    "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "NEXT-SLICES-MAIN exhausted for READY AUTO/REVIEW. Owner: refresh product roadmap and/or install Java+ZAP with loopback synthetic target. Learning: no material product learning this idle cycle; Cursor allowlist docs corrected on b049f73. Leave .cursor/settings.json local. Do not mark Lead security-accepted.",
-  "learningCheck": "NO_MATERIAL_LEARNING for product; LOCAL ops doc correction for Cursor 3.21.16 allowlist gap already shipped.",
+  "nextSafeAction": "False exhaustion repaired: binding materialization gap + CRM-OFFER-CONTRACT COMPLETE. Next READY: CRM-CONTRACT-DOMAIN (also ADMIN-APP, PORTAL-AUTH). Do not treat missing slices as Owner roadmap refresh. Do not mark Lead security-accepted.",
+  "learningCheck": "MATERIAL: exhaustionAllowed must stay false when unfinished binding Canon requirements lack executable slices (bindingMaterializationGap). Owner roadmap refresh is not the correct classification for internal materialization defects.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "packages/domain/src/search-alerts.ts",

@@ -18,7 +18,7 @@ and ADR-014. Binding shape:
   is the later Linux staging model. No host was created. Production
   compute is still later.
 - FZ-A2 OPTION F, `API=Hono`. `apps/api` is the Hono lead vertical.
-  WWW, Portal and Admin are not built.
+  WWW shell exists; Portal shell exists; Admin executable slice is OPEN.
 - FZ-A3 OPTION E. PostgreSQL + Kysely. No ORM.
 - FZ-A4 OPTION A, `LATER=garage`. Local private files now. Garage is a
   staging direction, not final production storage.

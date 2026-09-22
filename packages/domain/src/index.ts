@@ -96,7 +96,13 @@ export {
   isGrowthCapability,
   GROWTH_CAPABILITIES,
 } from './growth.ts';
-export type { MarketingPlan, Offer, WorkItem } from './growth.ts';
+export type { MarketingPlan, Offer as MarketingOffer, WorkItem } from './growth.ts';
+export {
+  OFFER_STATUSES,
+  assertOpaqueOfferId,
+  createOffer,
+} from './offer.ts';
+export type { Offer, OfferStatus } from './offer.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

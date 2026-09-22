@@ -1,11 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, assertOpaqueOpportunityId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOpportunityCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
+import { createOfferFromOpportunity, listVisibleOffers, parseOfferListQuery, readOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
@@ -57,6 +58,14 @@ function pathOpportunityId(value: string): string {
     return assertOpaqueOpportunityId(decodeURIComponent(value));
   } catch {
     throw badRequest('OPPORTUNITY_ID_INVALID', 'Opportunity id is not valid.');
+  }
+}
+
+function pathOfferId(value: string): string {
+  try {
+    return assertOpaqueOfferId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('OFFER_ID_INVALID', 'Offer id is not valid.');
   }
 }
 
@@ -269,6 +278,37 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const opportunity = await readOpportunity(options.store, pathOpportunityId(c.req.param('opportunityId')));
     if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
     return c.json(opportunity);
+  });
+
+  app.post('/v1/offers', async c => {
+    const actor = await requireActor(c, options.authenticator, 'offers:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateOfferCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'OFFER_INVALID', 'Offer could not be accepted.', parsed.errors);
+    const offer = await createOfferFromOpportunity(options.store, parsed.value.opportunityId, actor, key, now());
+    return c.json(offer, 201);
+  });
+
+  app.get('/v1/offers', async c => {
+    const actor = await requireActor(c, options.authenticator, 'offers:read');
+    c.set('actorId', actor.actorId);
+    const query = parseOfferListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listVisibleOffers(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/offers/:offerId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'offers:read');
+    c.set('actorId', actor.actorId);
+    const offer = await readOffer(options.store, pathOfferId(c.req.param('offerId')));
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    return c.json(offer);
   });
 
   app.post('/v1/growth/plans', async c => {

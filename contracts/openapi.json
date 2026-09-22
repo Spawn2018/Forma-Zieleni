@@ -3,7 +3,7 @@
   "info": {
     "title": "Forma Zieleni Core API",
     "version": "0.1.0",
-    "description": "Current-tree Core API contract. Source of truth for visitor lead qualification and staff Opportunity creation from a qualified Lead. Legacy OpenAPI under legacy/ is reference only."
+    "description": "Current-tree Core API contract. Source of truth for visitor lead qualification, staff Opportunity creation from a qualified Lead, and staff Offer creation from an Opportunity. Legacy OpenAPI under legacy/ is reference only."
   },
   "servers": [
     {
@@ -321,6 +321,89 @@
           "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
+    },
+    "/offers": {
+      "post": {
+        "tags": ["Offers"],
+        "operationId": "createOffer",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Staff create an Offer only from an existing Opportunity. Status is assigned by the domain; callers must not supply price or a status machine.",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OfferCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Offer recorded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Offer" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      },
+      "get": {
+        "tags": ["Offers"],
+        "operationId": "listOffers",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/Sort" },
+          { "$ref": "#/components/parameters/OfferStatusFilter" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of offers visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OfferPage" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/offers/{offerId}": {
+      "get": {
+        "tags": ["Offers"],
+        "operationId": "getOffer",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/OfferId" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer visible to the authorized caller.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Offer" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
     }
   },
   "components": {
@@ -340,6 +423,12 @@
       },
       "OpportunityId": {
         "name": "opportunityId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
+      "OfferId": {
+        "name": "offerId",
         "in": "path",
         "required": true,
         "schema": { "$ref": "#/components/schemas/OpaqueId" }
@@ -368,6 +457,11 @@
         "name": "status",
         "in": "query",
         "schema": { "$ref": "#/components/schemas/OpportunityStatus" }
+      },
+      "OfferStatusFilter": {
+        "name": "status",
+        "in": "query",
+        "schema": { "$ref": "#/components/schemas/OfferStatus" }
       },
       "IdempotencyKey": {
         "name": "Idempotency-Key",
@@ -568,6 +662,51 @@
           "items": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/Opportunity" }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["limit", "nextCursor"],
+            "properties": {
+              "limit": { "type": "integer", "minimum": 1, "maximum": 100 },
+              "nextCursor": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "OfferStatus": {
+        "type": "string",
+        "enum": ["draft"],
+        "description": "Domain-owned Offer status. Callers cannot supply or advance the status machine on create."
+      },
+      "OfferCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["opportunityId"],
+        "properties": {
+          "opportunityId": { "$ref": "#/components/schemas/OpaqueId" }
+        }
+      },
+      "Offer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "opportunityId", "status", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "opportunityId": { "$ref": "#/components/schemas/OpaqueId" },
+          "status": { "$ref": "#/components/schemas/OfferStatus" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "OfferPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items", "meta"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Offer" }
           },
           "meta": {
             "type": "object",

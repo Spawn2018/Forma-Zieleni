@@ -7,3 +7,4 @@ export type {
   PublicLeadSource,
 } from './lead.ts';
 export type { OpportunityCreateBody, OpportunityRecord } from './opportunity.ts';
+export type { OfferCreateBody, OfferRecord } from './offer.ts';
