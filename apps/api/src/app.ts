@@ -7,7 +7,7 @@ import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
-import { createOfferFromOpportunity, listVisibleOffers, parseOfferListQuery, readOffer } from './offers.ts';
+import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
@@ -217,6 +217,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     });
   });
 
+  app.get('/v1/portal/offers', async c => {
+    const actor = await requireActor(c, options.authenticator, 'offers:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseOfferListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listPortalOffers(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/offers/:offerId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'offers:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalOffer(options.store, pathOfferId(c.req.param('offerId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    return c.json(projection);
+  });
+
   app.options('*', c => c.body(null, trustedOrigins.includes(c.req.header('origin') ?? '') ? 204 : 403));
 
   if (options.authHandler) {
@@ -306,7 +329,14 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const key = idempotencyKey(c.req.header('idempotency-key'));
     const parsed = validateOfferCreateRequest(await readJson(c.req.raw));
     if (!parsed.ok) throw new ApiFailure(400, 'OFFER_INVALID', 'Offer could not be accepted.', parsed.errors);
-    const offer = await createOfferFromOpportunity(options.store, parsed.value.opportunityId, actor, key, now());
+    const offer = await createOfferFromOpportunity(
+      options.store,
+      parsed.value.opportunityId,
+      actor,
+      key,
+      now(),
+      parsed.value.clientSubject ?? null,
+    );
     return c.json(offer, 201);
   });
 

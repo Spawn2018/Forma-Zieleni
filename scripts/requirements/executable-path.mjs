@@ -111,6 +111,7 @@ export function productCapabilityStatus(requirements = [], capability) {
   }
   const unfinished = rows.filter((row) => isUnfinishedBinding(row));
   const foundationDone = rows.some((row) => row.foundationOnly === true && row.status === 'DONE_AT_MAX_DEPTH');
+  const productRows = rows.filter((row) => row.foundationOnly !== true);
   if (unfinished.length > 0) {
     return {
       capability,
@@ -120,18 +121,18 @@ export function productCapabilityStatus(requirements = [], capability) {
       reason: foundationDone ? 'SHELL_OR_FOUNDATION_NOT_PRODUCT' : 'UNFINISHED',
     };
   }
-  if (rows.every((row) => row.foundationOnly === true)) {
+  if (productRows.length === 0) {
     return {
       capability,
       complete: false,
-      foundationComplete: true,
+      foundationComplete: foundationDone,
       unfinishedRequirementIds: [],
       reason: 'FOUNDATION_ONLY',
     };
   }
   return {
     capability,
-    complete: rows.every((row) => row.status === 'DONE_AT_MAX_DEPTH' && row.foundationOnly !== true),
+    complete: productRows.every((row) => row.status === 'DONE_AT_MAX_DEPTH'),
     foundationComplete: foundationDone,
     unfinishedRequirementIds: [],
     reason: 'COMPLETE',

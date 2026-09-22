@@ -28,6 +28,7 @@ export interface Database {
     id: string;
     opportunity_id: string;
     status: string;
+    client_subject: string | null;
     created_at: Date;
     updated_at: Date;
   };
@@ -460,6 +461,47 @@ DROP TABLE IF EXISTS contract;
   },
 };
 
+const PORTAL_OFFER_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const portalOfferMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE offer ADD COLUMN IF NOT EXISTS client_subject text;
+CREATE INDEX IF NOT EXISTS offer_client_subject ON offer (client_subject) WHERE client_subject IS NOT NULL;
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_OFFER_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability = 'offers:portal-read';
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${CONTRACT_CAPABILITY_SQL}));
+DROP INDEX IF EXISTS offer_client_subject;
+ALTER TABLE offer DROP COLUMN IF EXISTS client_subject;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -470,6 +512,7 @@ const provider: MigrationProvider = {
       '005_opportunity_contract': opportunityMigration,
       '006_offer_contract': offerMigration,
       '007_contract_domain': contractMigration,
+      '008_portal_offer_projection': portalOfferMigration,
     };
   },
 };

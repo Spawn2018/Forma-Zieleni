@@ -1,4 +1,4 @@
-import { createOffer, type Offer, type OfferStatus } from '@forma-zieleni/domain';
+import { createOffer, projectOfferForPortal, type Offer, type OfferStatus, type PortalOfferProjection } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
 import { newOpaqueId, newOfferId } from './ids.ts';
@@ -50,8 +50,9 @@ export async function createOfferFromOpportunity(
   actor: Actor,
   idempotencyKey: string,
   at: string,
+  clientSubject: string | null = null,
 ): Promise<Offer> {
-  const hash = requestHash({ scope: 'offer.create', opportunityId });
+  const hash = requestHash({ scope: 'offer.create', opportunityId, clientSubject });
   return store.transaction(async tx => {
     const replay = await replayOrReserve(tx, 'offer.create', idempotencyKey, hash);
     if (replay) return replay.responseBody as Offer;
@@ -61,10 +62,13 @@ export async function createOfferFromOpportunity(
     if (existing) throw new ApiFailure(409, 'OFFER_EXISTS', 'An offer already exists for this opportunity.');
     let offer: Offer;
     try {
-      offer = createOffer(newOfferId(), opportunity, at);
+      offer = createOffer(newOfferId(), opportunity, at, clientSubject);
     } catch (error) {
       if (error instanceof Error && error.message === 'OPPORTUNITY_NOT_OPEN') {
         throw new ApiFailure(409, 'OPPORTUNITY_NOT_OPEN', 'Offer requires an open opportunity.');
+      }
+      if (error instanceof Error && error.message === 'CLIENT_SUBJECT_INVALID') {
+        throw badRequest('CLIENT_SUBJECT_INVALID', 'Client subject is not valid.');
       }
       throw error;
     }
@@ -113,9 +117,41 @@ export async function listVisibleOffers(
 ): Promise<{ items: Offer[]; nextCursor: string | null }> {
   const rows = await store.transaction(tx => tx.listOffers({ ...query, limit: query.limit + 1 }));
   const page = rows.slice(0, query.limit);
-  const last = page.at(-1);
-  const nextCursor = rows.length > query.limit && last
-    ? encodeCursor(query.sort, query.sort.includes('updatedAt') ? last.updatedAt : last.createdAt, last.id)
-    : null;
-  return { items: page, nextCursor };
+  const next = rows.length > query.limit ? page[page.length - 1] : null;
+  return {
+    items: page,
+    nextCursor: next ? encodeCursor(query.sort, stamp(next, query.sort), next.id) : null,
+  };
+}
+
+export async function listPortalOffers(
+  store: LeadStore,
+  readerSubject: string,
+  query: OfferListQuery,
+): Promise<{ items: PortalOfferProjection[]; nextCursor: string | null }> {
+  const rows = await store.transaction(tx => tx.listOffers({ ...query, limit: 100 }));
+  const projected = rows
+    .map(offer => projectOfferForPortal(offer, readerSubject))
+    .filter((item): item is PortalOfferProjection => item !== null)
+    .slice(0, query.limit + 1);
+  const page = projected.slice(0, query.limit);
+  const next = projected.length > query.limit ? page[page.length - 1] : null;
+  return {
+    items: page,
+    nextCursor: next ? encodeCursor(query.sort, next.createdAt, next.id) : null,
+  };
+}
+
+export async function readPortalOffer(
+  store: LeadStore,
+  id: string,
+  readerSubject: string,
+): Promise<PortalOfferProjection | null> {
+  const offer = await readOffer(store, id);
+  if (!offer) return null;
+  return projectOfferForPortal(offer, readerSubject);
+}
+
+function stamp(row: { createdAt: string; updatedAt: string }, sort: OfferListQuery['sort']): string {
+  return sort === 'updatedAt' || sort === '-updatedAt' ? row.updatedAt : row.createdAt;
 }

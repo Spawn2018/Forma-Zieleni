@@ -101,8 +101,9 @@ export {
   OFFER_STATUSES,
   assertOpaqueOfferId,
   createOffer,
+  projectOfferForPortal,
 } from './offer.ts';
-export type { Offer, OfferStatus } from './offer.ts';
+export type { Offer, OfferStatus, PortalOfferProjection } from './offer.ts';
 export {
   CONTRACT_STATUSES,
   assertOpaqueContractId,

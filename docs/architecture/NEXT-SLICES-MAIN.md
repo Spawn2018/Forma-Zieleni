@@ -226,14 +226,18 @@ Next: PORTAL-OFFER-PROJECTION.
 
 Dependencies: CRM-OFFER-CONTRACT, PORTAL-AUTH.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for client-safe Offer projection through Core API
+`GET /v1/portal/offers` and `GET /v1/portal/offers/:id`, authorized by
+`offers:portal-read` and `clientSubject` BOLA. No staff mutation from
+Portal; no price/terms invent; empty list when unbound.
 Autonomous: yes.
 Accept: client-safe read projection of Offer (and/or Opportunity) the
 authenticated client is authorized to see. Authorization in Core API.
 No staff mutations from Portal.
-Tests: Core API projection authz tests; portal loader refuses invented
-facts.
-Security: BOLA; anonymous 401; other clients 403.
+Tests: `packages/domain/offer.test.mjs` projection cases,
+`apps/api/src/http.test.mjs` portal offer cases,
+`contracts/openapi.test.mjs`.
+Security: BOLA; anonymous 401; other clients 404; staff portal path 403.
 Next: none until a later portal projection.
 
 ### CRM-PROJECT-DOMAIN
@@ -249,7 +253,21 @@ activation, no signing SaaS, no Admin ceremony UI, no invented client
 facts.
 Tests: domain/OpenAPI/Core API project cases.
 Security: anonymous 401; portal without project caps 403; BOLA.
-Next: none until payment Owner decision or later project lifecycle.
+Next: PORTAL-PROJECT-PROJECTION.
+
+### PORTAL-PROJECT-PROJECTION
+
+Dependencies: CRM-PROJECT-DOMAIN, PORTAL-AUTH.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: client-safe read projection of Project the authenticated portal
+client is authorized to see. Authorization in Core API. No staff
+mutations from Portal. No invented project facts.
+Tests: Core API projection authz tests; portal loader refuses invented
+facts.
+Security: BOLA; anonymous 401; other clients 404.
+Next: none until a later portal projection.
 
 ### SITEINTEL-DATA-BOUNDARY
 

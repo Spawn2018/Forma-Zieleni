@@ -142,10 +142,15 @@ row('FZ-REQ-PORTAL-002', 'Portal client Better Auth identity, session cookie and
   executableSlice: 'PORTAL-AUTH',
   executableWhenComplete: ['PORTAL-APP'],
 });
-row('FZ-REQ-PORTAL-003', 'Client-safe Offer projection through Core API authorization for the authenticated portal client.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'PORTAL-AUTH and CRM-OFFER-CONTRACT', 'NONE', 'No staff mutation from Portal.', {
+row('FZ-REQ-PORTAL-003', 'Client-safe Offer projection through Core API authorization for the authenticated portal client.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/offer.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'No staff mutation from Portal. Price and terms stay off the projection.', {
   productCapability: 'PORTAL',
   executableSlice: 'PORTAL-OFFER-PROJECTION',
   executableWhenComplete: ['PORTAL-AUTH', 'CRM-OFFER-CONTRACT'],
+});
+row('FZ-REQ-PORTAL-004', 'Client-safe Project projection through Core API for the authenticated portal client.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'scripts/fz-noc/policy.test.mjs', 'CRM-PROJECT-DOMAIN', 'NONE', 'Offer projection does not complete Portal product capability.', {
+  productCapability: 'PORTAL',
+  executableSlice: 'PORTAL-PROJECT-PROJECTION',
+  executableWhenComplete: ['CRM-PROJECT-DOMAIN', 'PORTAL-AUTH'],
 });
 row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.', {
   productCapability: 'ADMIN',

@@ -8,12 +8,16 @@ const spec = JSON.parse(readFileSync(path.resolve(path.dirname(fileURLToPath(imp
 
 test('shared OfferRecord fields stay aligned with the OpenAPI Offer schema', () => {
   const offer = spec.components.schemas.Offer;
-  assert.deepEqual(offer.required, ['id', 'opportunityId', 'status', 'createdAt', 'updatedAt']);
+  assert.deepEqual(offer.required, ['id', 'opportunityId', 'status', 'clientSubject', 'createdAt', 'updatedAt']);
   assert.equal(offer.properties.status.$ref, '#/components/schemas/OfferStatus');
   assert.deepEqual(spec.components.schemas.OfferStatus.enum, ['draft']);
   assert.equal(Object.hasOwn(offer.properties, 'price'), false);
   assert.equal(Object.hasOwn(offer.properties, 'amountPln'), false);
+  assert.equal(Object.hasOwn(offer.properties, 'clientSubject'), true);
   assert.deepEqual(spec.components.schemas.OfferCreate.required, ['opportunityId']);
   assert.equal(Object.hasOwn(spec.components.schemas.OfferCreate.properties, 'status'), false);
   assert.equal(Object.hasOwn(spec.components.schemas.OfferCreate.properties, 'price'), false);
+  assert.equal(Object.hasOwn(spec.components.schemas.OfferCreate.properties, 'clientSubject'), true);
+  assert.ok(spec.paths['/portal/offers']);
+  assert.ok(spec.paths['/portal/offers/{offerId}']);
 });

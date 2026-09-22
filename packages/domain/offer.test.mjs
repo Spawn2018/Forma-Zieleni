@@ -30,9 +30,26 @@ test('offer is created only from an open opportunity and owns its status', () =>
   const offer = createOffer('f9k2n4p6q8r0s2t4', opportunity, '2026-09-22T12:15:00.000Z');
   assert.equal(offer.opportunityId, opportunity.id);
   assert.equal(offer.status, 'draft');
+  assert.equal(offer.clientSubject, null);
   assert.equal(Object.hasOwn(offer, 'price'), false);
   assert.equal(Object.hasOwn(offer, 'amountPln'), false);
   assert.equal(Object.hasOwn(offer, 'terms'), false);
+});
+
+test('portal projection is BOLA-isolated and omits commercial fields', async () => {
+  const { projectOfferForPortal, createOffer } = await import('./src/offer.ts');
+  const opportunity = openOpportunity();
+  const offer = createOffer('f9k2n4p6q8r0s2t4', opportunity, at, 'portal-ola');
+  const mine = projectOfferForPortal(offer, 'portal-ola');
+  assert.deepEqual(mine, {
+    id: offer.id,
+    opportunityId: opportunity.id,
+    status: 'draft',
+    createdAt: at,
+  });
+  assert.equal(Object.hasOwn(mine, 'price'), false);
+  assert.equal(projectOfferForPortal(offer, 'portal-other'), null);
+  assert.equal(projectOfferForPortal(createOffer('g9k2n4p6q8r0s2t5', opportunity, at), 'portal-ola'), null);
 });
 
 test('non-open opportunities cannot open an offer', () => {

@@ -846,6 +846,103 @@
           }
         }
       }
+    },
+    "/portal/offers": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "listPortalOffers",
+        "summary": "List client-safe Offer projections for the authenticated portal client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/OfferStatusFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal offer projections",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalOfferPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/portal/offers/{offerId}": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "getPortalOffer",
+        "summary": "Get one client-safe Offer projection for the authenticated portal client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "offerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OpaqueId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal offer projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalOfferProjection"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1397,6 +1494,12 @@
         "properties": {
           "opportunityId": {
             "$ref": "#/components/schemas/OpaqueId"
+          },
+          "clientSubject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Optional portal client subject authorized to read a client-safe projection"
           }
         }
       },
@@ -1407,6 +1510,7 @@
           "id",
           "opportunityId",
           "status",
+          "clientSubject",
           "createdAt",
           "updatedAt"
         ],
@@ -1427,6 +1531,13 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "clientSubject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 128
           }
         }
       },
@@ -1622,6 +1733,66 @@
               "sketchup",
               "m2m"
             ]
+          }
+        }
+      },
+      "PortalOfferProjection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "opportunityId",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "opportunityId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OfferStatus"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PortalOfferPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalOfferProjection"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
           }
         }
       }

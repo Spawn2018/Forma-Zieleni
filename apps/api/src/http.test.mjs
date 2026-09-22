@@ -23,7 +23,15 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: [],
+  capabilities: ['offers:portal-read'],
+};
+
+const portalOther = {
+  actorId: 'actor_portal_other',
+  issuer: 'test-issuer',
+  sub: 'portal-other',
+  clientId: 'portal',
+  capabilities: ['offers:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
@@ -598,4 +606,41 @@ test('contract create rejects missing offer, duplicate offer and client lifecycl
     ...bearer(staff),
   }));
   assert.equal(second.status, 409);
+});
+
+test('portal offer projection is read-only, empty without grant, and BOLA-isolated', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/portal/offers')).status, 401);
+  assert.equal((await app.request('/v1/portal/offers', { headers: bearer(staff) })).status, 403);
+  const empty = await app.request('/v1/portal/offers', { headers: bearer(portal) });
+  assert.equal(empty.status, 200);
+  assert.deepEqual((await empty.json()).items, []);
+
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'opp-port-off',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({
+    opportunityId: opportunity.id,
+    clientSubject: 'portal-ola',
+  }, {
+    'idempotency-key': 'off-port-1',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(offer.clientSubject, 'portal-ola');
+
+  const listed = await app.request('/v1/portal/offers', { headers: bearer(portal) });
+  assert.equal(listed.status, 200);
+  const body = await listed.json();
+  assert.equal(body.items.length, 1);
+  assert.equal(body.items[0].id, offer.id);
+  assert.equal(Object.hasOwn(body.items[0], 'price'), false);
+  assert.equal(Object.hasOwn(body.items[0], 'clientSubject'), false);
+
+  assert.equal((await app.request(`/v1/portal/offers/${offer.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/offers/${offer.id}`, { headers: bearer(portalOther) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/offers', { headers: bearer(portalOther) })).json();
+  assert.deepEqual(otherList.items, []);
+  assert.equal((await app.request(`/v1/offers/${offer.id}`, { headers: bearer(portal) })).status, 403);
 });

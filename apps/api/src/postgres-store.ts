@@ -61,6 +61,7 @@ function toOffer(row: Database['offer']): Offer {
     id: row.id,
     opportunityId: row.opportunity_id,
     status: row.status as Offer['status'],
+    clientSubject: row.client_subject ?? null,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -205,6 +206,7 @@ class PostgresTx implements LeadTx {
       id: offer.id,
       opportunity_id: offer.opportunityId,
       status: offer.status,
+      client_subject: offer.clientSubject,
       created_at: new Date(offer.createdAt),
       updated_at: new Date(offer.updatedAt),
     }).execute();
