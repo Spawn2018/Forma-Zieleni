@@ -33,7 +33,8 @@ Nie oceniaj ich po tym pliku jako gotowych.
 
 ## Następna bezpieczna praca produktowa
 
-`LEAD-SEC-SESSION` jest COMPLETE. Kolejny READY na
-`docs/architecture/NEXT-SLICES-MAIN.md` to `LEAD-OUTBOX-SUPERVISOR`.
+`LEAD-OUTBOX-SUPERVISOR` jest COMPLETE. Kolejny READY na
+`docs/architecture/NEXT-SLICES-MAIN.md` to `LEAD-ZAP-BASELINE`
+(przy braku Javy/ZAP wolno zapisać DEFERRED z dowodem gotowości).
 CMS-ACCEPT i akceptacja bezpieczeństwa Lead pozostają otwarte. To nie
 jest prośba o wdrożenie.

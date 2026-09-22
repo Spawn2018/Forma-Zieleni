@@ -53,13 +53,16 @@ Next: LEAD-OUTBOX-SUPERVISOR.
 
 Dependencies: LEAD-SEC-SESSION.
 Gate: AUTO.
-Status: OPEN.
+Status: COMPLETE for a local supervised outbox loop that restarts
+safely, claims with `FOR UPDATE SKIP LOCKED`, records retry/poison,
+and does not require a broker. Extends `dispatch-once`.
 Autonomous: yes.
 Accept: a local supervised outbox loop that restarts safely, claims
 with `FOR UPDATE SKIP LOCKED`, records retry/poison, and does not
 require a broker. Extends `dispatch-once`; does not invent a cloud
 queue.
-Tests: `apps/api` outbox supervisor tests.
+Tests: `apps/api/src/outbox-supervisor.test.mjs`; claim/retry/poison
+remain covered by `postgres.integration.test.mjs`.
 Security: payloads stay ids-only where the lead outbox already does;
 no PII in supervisor logs.
 Next: LEAD-ZAP-BASELINE.

@@ -19,7 +19,8 @@ Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/ar
 - Capabilities live in `actor_capability`. The stable `actor_id` is an opaque Core API id mapped from issuer + Better Auth user id, not from email.
 - `AUTH_MODE=test` is a separate HMAC signer. It starts only when `ALLOW_TEST_AUTH=1` and `NODE_ENV` is not `production`.
 - Lead, Opportunity, idempotency, outbox, and audit rows share one transaction.
-- `node src/dispatch-once.ts` claims pending outbox rows with `FOR UPDATE SKIP LOCKED`, delivers them to a local stdout sink, and records retry or poison. There is no broker and no long-running worker.
+- `node src/dispatch-once.ts` claims pending outbox rows with `FOR UPDATE SKIP LOCKED`, delivers them to a local stdout sink, and records retry or poison. There is no broker.
+- `node src/dispatch-supervisor.ts` loops the same claim/delivery path until SIGINT/SIGTERM. Idle sleep is `OUTBOX_IDLE_MS` (default 1000). Restarting the process is safe because leases expire and claims use `SKIP LOCKED`.
 - Structured JSON request logs. No contact fields, cookies, tokens, or raw bodies.
 - Public capture rate limit keys the direct TCP peer. `X-Forwarded-For` is used only when `TRUST_PROXY=1` and the peer is listed in `TRUSTED_PROXIES`, and then only the last hop. The limiter is in-process, bounded, and replaceable.
 
@@ -27,7 +28,7 @@ Binding shape: [`../../docs/architecture/CURRENT-ARCHITECTURE.md`](../../docs/ar
 
 - WWW, Portal, Admin, mobile, SketchUp, and the rest of CRM.
 - Social login, MFA, password recovery, organizations, and SSO.
-- A supervised outbox worker. Run `dispatch-once` when a local delivery pass is needed.
+- A cloud queue or brokered worker. Local `dispatch-supervisor` is the supervised loop for lab/dev.
 - OpenObserve, session replay, Cloudflare, Garage, signing, and payments.
 - Distributed rate limiting. Do not treat the process limiter as an edge control.
 - ZAP and OWASP Dependency-Check on this machine.

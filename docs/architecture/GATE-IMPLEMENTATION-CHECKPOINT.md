@@ -94,8 +94,8 @@ CMS-ACCEPT. The CMS/Search graph in
 [`NEXT-SLICES-CMS.md`](./NEXT-SLICES-CMS.md) is acceptance history after
 `RETURN-ROADMAP`. Ordinary READY work continues on
 [`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md): `LEAD-SEC-SESSION`,
-`PORTAL-APP`, and `CRM-OPPORTUNITY-CONTRACT` are COMPLETE. Next READY is
-`LEAD-OUTBOX-SUPERVISOR`. The isolated lab in
+`LEAD-OUTBOX-SUPERVISOR`, `PORTAL-APP`, and `CRM-OPPORTUNITY-CONTRACT`
+are COMPLETE. Next READY is `LEAD-ZAP-BASELINE`. The isolated lab in
 `labs/fz-cms-1`
 remains evidence, not acceptance. Search Intelligence architecture is
 [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md). Training-crawler production policy
