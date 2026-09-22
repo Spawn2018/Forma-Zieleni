@@ -342,6 +342,60 @@
       "occurrences": 1,
       "firstSeen": "2026-09-22T23:16:32.013Z",
       "lastSeen": "2026-09-22T23:19:14.529Z"
+    },
+    {
+      "patternKey": "cr-at-line-67-update-the-se-b22c4af8bd",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 67, Update the sentence extraction expression in the parsing logic to avoid splitting periods within dotted iden",
+      "evidence": [
+        "cr-occurrence:f731f3a30319:cc0b2ef078af:cr-at-line-67-update-the-se-b22c4af8bd",
+        "scripts/security/coderabbit-parse.mjs",
+        "severity:high",
+        "accepted:cr-at-line-67-update-the-se-b22c4af8bd",
+        "local-fix"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "cc0b2ef078afc210a2f9e5ad8892819fc171fcfa",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260922-4aab4b73",
+      "occurrences": 1,
+      "firstSeen": "2026-09-22T23:43:32.169Z",
+      "lastSeen": "2026-09-22T23:44:42.497Z"
+    },
+    {
+      "patternKey": "cr-update-the-finding-norma-782c995a46",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the finding normalization and field extraction around the structured payload so nested event",
+      "evidence": [
+        "cr-occurrence:f731f3a30319:cc0b2ef078af:cr-update-the-finding-norma-782c995a46",
+        "scripts/security/coderabbit-parse.mjs",
+        "severity:high",
+        "accepted:cr-update-the-finding-norma-782c995a46",
+        "local-fix"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "cc0b2ef078afc210a2f9e5ad8892819fc171fcfa",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260922-63050fe5",
+      "occurrences": 1,
+      "firstSeen": "2026-09-22T23:43:32.208Z",
+      "lastSeen": "2026-09-22T23:44:42.538Z"
     }
   ]
 }

@@ -95,6 +95,25 @@ test('secret-like finding text is redacted before structured persist', () => {
   assert.equal(parsed.findings[0].summary, '[redacted]');
 });
 
+test('issue class keeps dotted identifiers and nested finding fields', () => {
+  const a = fingerprintFinding({
+    fileName: 'scripts/security/coderabbit-parse.mjs',
+    codegenInstructions: 'state.findings must stay distinct from state.dispositions when hashing.',
+  });
+  const b = fingerprintFinding({
+    fileName: 'scripts/security/coderabbit-parse.mjs',
+    codegenInstructions: 'state.findings must stay distinct from state.paths when hashing.',
+  });
+  assert.notEqual(a, b);
+  const nested = parseAgentReview([
+    '{"type":"finding","finding":{"severity":"minor","fileName":"nested.mjs","summary":"Nested payload summary body here.","id":"n1"}}',
+    '{"type":"complete","status":"review_completed","findings":1}',
+  ].join('\n'));
+  assert.equal(nested.findings[0].fileName, 'nested.mjs');
+  assert.match(nested.findings[0].summary, /Nested payload/);
+  assert.equal(nested.findings[0].toolId, 'n1');
+});
+
 test('lifecycle: findings → accept → repair → re-review required → clean PASS_AFTER_REPAIR', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'fz-cr-state-'));
   const file = path.join(dir, 'coderabbit-review.json');

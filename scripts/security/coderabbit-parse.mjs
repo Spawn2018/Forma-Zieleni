@@ -64,7 +64,7 @@ export function extractIssueClass(text) {
     .replace(/In @[^\s]+/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
-  const sentence = cleaned.split(/[.?\n]/)[0] || cleaned;
+  const sentence = cleaned.split(/[?\n]|\.(?=\s|$)/)[0] || cleaned;
   return sanitizeText(sentence, 120);
 }
 
@@ -122,22 +122,43 @@ export function parseAgentReview(output) {
       continue;
     }
     if (event.type === 'finding' || event.finding || (event.severity && (event.fileName || event.file || event.path))) {
-      const fileName = normalizePath(event.fileName || event.file || event.path || event.finding?.fileName);
-      const codegenRaw = event.codegenInstructions || event.finding?.codegenInstructions || '';
+      const nested = event.finding && typeof event.finding === 'object' ? event.finding : {};
+      const fileName = normalizePath(
+        event.fileName || event.file || event.path || nested.fileName || nested.file || nested.path,
+      );
+      const codegenRaw = event.codegenInstructions || nested.codegenInstructions || '';
       const fromCodegen = extractIssueClass(codegenRaw);
-      const fromTitle = sanitizeText(event.title || event.message || event.summary || '', MAX_SUMMARY);
+      const fromTitle = sanitizeText(
+        event.title || event.message || event.summary || nested.title || nested.message || nested.summary || '',
+        MAX_SUMMARY,
+      );
       // Prefer codegen body; agent titles are often truncated fix prompts.
       const summary = sanitizeText(fromCodegen || fromTitle, MAX_SUMMARY);
-      const severity = normalizeSeverity(event.severity || event.finding?.severity);
-      const category = sanitizeText(event.category || event.rule || event.finding?.category || '', 80);
+      const severity = normalizeSeverity(event.severity || nested.severity);
+      const category = sanitizeText(
+        event.category || event.rule || nested.category || nested.rule || '',
+        80,
+      );
       const codegenInstructions = sanitizeText(codegenRaw, MAX_SUMMARY);
+      const line = Number.isFinite(event.line)
+        ? event.line
+        : Number.isFinite(event.startLine)
+          ? event.startLine
+          : Number.isFinite(nested.line)
+            ? nested.line
+            : Number.isFinite(nested.startLine)
+              ? nested.startLine
+              : null;
       const structured = {
         severity,
         category: category || null,
         fileName: fileName || null,
-        line: Number.isFinite(event.line) ? event.line : (Number.isFinite(event.startLine) ? event.startLine : null),
+        line,
         summary,
-        toolId: sanitizeText(event.id || event.findingId || '', 64) || null,
+        toolId: sanitizeText(
+          event.id || event.findingId || nested.id || nested.findingId || '',
+          64,
+        ) || null,
       };
       structured.fingerprint = fingerprintFinding({
         ...structured,
