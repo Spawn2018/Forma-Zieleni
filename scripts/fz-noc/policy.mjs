@@ -324,7 +324,8 @@ const EXTERNAL_REVIEW_CONTENT = [
   /-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----/,
   /AKIA[0-9A-Z]{16}/,
   /Bearer [A-Za-z0-9\-._~+/]{20,}/i,
-  /(?:api[_-]?key|secret|password|token)\s*[:=]\s*['"]?[^\s'"]{12,}/i,
+  // Word boundaries avoid false positives like `pathToken =` / `classToken =`.
+  /\b(?:api[_-]?key|secret|password|token)\b\s*[:=]\s*['"]?[^\s'"]{12,}/i,
   /\b(?:pesel|iban|customer[_-]?email)\b\s*[:=]/i,
 ];
 
@@ -339,9 +340,26 @@ export function coderabbitPrivacyBlocked(paths = []) {
   return [...new Set(blocked)];
 }
 
+/**
+ * Material sent externally is HEAD content. For unified diffs, only scan
+ * added lines so deleting a secret-shaped test fixture cannot block review.
+ */
+function contentScopeForPrivacyScan(diffText) {
+  const text = String(diffText || '');
+  if (!text) return '';
+  const looksUnified =
+    /^diff --git /m.test(text) || /^@@ /m.test(text) || /^\+\+\+ /m.test(text);
+  if (!looksUnified) return text;
+  return text
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('+') && !line.startsWith('+++'))
+    .map((line) => line.slice(1))
+    .join('\n');
+}
+
 /** Diff body that must not leave the machine for external AI review. */
 export function coderabbitDiffContentBlocked(diffText = '') {
-  const text = String(diffText || '');
+  const text = contentScopeForPrivacyScan(diffText);
   if (!text) return [];
   const hits = [];
   for (const re of EXTERNAL_REVIEW_CONTENT) {

@@ -251,6 +251,24 @@ test('CodeRabbit checkpoint states stay advisory and privacy-gated', () => {
   assert.deepEqual(coderabbitPrivacyBlocked(['apps/web/x.tsx', '.env']), ['.env']);
   assert.ok(coderabbitDiffContentBlocked('api_key=supersecretvalue99').length > 0);
   assert.equal(coderabbitDiffContentBlocked('ordinary feature flag').length, 0);
+  assert.equal(coderabbitDiffContentBlocked('const pathToken = slugPart(pathNorm, "path");').length, 0);
+  const deletedSecretFixture = [
+    'diff --git a/scripts/security/coderabbit-checkpoint.test.mjs b/scripts/security/coderabbit-checkpoint.test.mjs',
+    '--- a/scripts/security/coderabbit-checkpoint.test.mjs',
+    '+++ b/scripts/security/coderabbit-checkpoint.test.mjs',
+    '@@ -1,1 +1,1 @@',
+    `-      diffText: '${['pass', 'word = "hunter2hunter2"'].join('')}',`,
+    '+      diffText: \'ordinary feature flag\',',
+  ].join('\n');
+  assert.equal(coderabbitDiffContentBlocked(deletedSecretFixture).length, 0);
+  const addedSecretFixture = [
+    'diff --git a/x.mjs b/x.mjs',
+    '--- a/x.mjs',
+    '+++ b/x.mjs',
+    '@@ -1,0 +1,1 @@',
+    `+${['pass', 'word = "hunter2hunter2"'].join('')}`,
+  ].join('\n');
+  assert.ok(coderabbitDiffContentBlocked(addedSecretFixture).length > 0);
 });
 
 test('repeated identical attempts block a slice', () => {

@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 
 const MAX_FIELD = 400;
 const MAX_SUMMARY = 280;
-const SECRETISH = /-----BEGIN |AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9\-._~+/]{20,}|(?:api[_-]?key|password|token)\s*[:=]\s*\S+/i;
+const SECRETISH = /-----BEGIN |AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9\-._~+/]{20,}|\b(?:api[_-]?key|password|token)\b\s*[:=]\s*\S+/i;
 
 export const FINDING_DISPOSITIONS = Object.freeze([
   'ACCEPT',
