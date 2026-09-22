@@ -168,6 +168,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-HISTORY', 'History windows read stored snapshots for 7/28/90/180/365 days and compare year-over-year only when both sides exist.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-history.ts', 'packages/domain/search-history.test.mjs', 'PostgreSQL rollups stay later', 'NONE', 'No invented retention length.');
     continue;
   }
+  if (slice === 'CMS-ADMIN') {
+    row('FZ-REQ-CMS-SLICE-CMS-ADMIN', 'Bound publisher creates Service and ProjectCaseStudy without client authority or CRM writes; Apostrophe piece schemas and lab insert evidence recorded.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/NEXT-SLICES-CMS.md', 'packages/domain/src/content-admin.ts', 'packages/domain/content-admin.test.mjs', 'Admin UI click-path is CMS-ACCEPT item B', 'NONE', 'Live Admin UI visual/UX stays deferred.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

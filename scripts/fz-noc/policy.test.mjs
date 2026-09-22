@@ -75,8 +75,8 @@ test('work-stealing prefers another READY slice when the critical one is blocked
 test('the CMS graph reconstructs READY work without executing it', () => {
   const markdown = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const picked = selectReady(parseExecutionGraph(markdown));
-  assert.equal(picked.selected, 'CMS-ADMIN');
-  for (const id of ['CMS-ADMIN', 'CMS-RESTORE', 'CMS-EXPORT', 'SEARCH-AI-VISIBILITY']) {
+  assert.equal(picked.selected, 'CMS-RESTORE');
+  for (const id of ['CMS-RESTORE', 'CMS-EXPORT', 'SEARCH-AI-VISIBILITY']) {
     assert.equal(picked.ready.includes(id), true, id);
   }
   assert.equal(picked.ready.includes('GALLERY-WWW'), false);
@@ -86,6 +86,7 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(picked.ready.includes('SEARCH-CONNECTORS'), false);
   assert.equal(picked.ready.includes('SEARCH-SYNC'), false);
   assert.equal(picked.ready.includes('SEARCH-HISTORY'), false);
+  assert.equal(picked.ready.includes('CMS-ADMIN'), false);
   assert.equal(picked.ready.includes('CMS-ACCEPT'), false);
   assert.equal(picked.ready.includes('SEARCH-WWW-TECHNICAL'), false);
   const crawl = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md'), 'utf8');

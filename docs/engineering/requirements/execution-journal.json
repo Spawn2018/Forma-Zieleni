@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "search-history-recorded",
+  "currentPhase": "cms-admin-recorded",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate. Force-push, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -20,15 +20,21 @@
   ],
   "blockers": [
     "apps/admin and apps/portal are README boundaries, so approval UI is not built",
-    "Apostrophe Admin UI and PostgreSQL lab are not executed",
+    "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
+    "Apostrophe PostgreSQL lab is not the product runtime",
     "Lead vertical is not security-accepted",
     "No production deployment series, so DORA counts stay not measurable",
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "CMS-ADMIN is next among READY slices (real Apostrophe editor). Live OAuth stays DANGEROUS. GALLERY-WWW stays blocked.",
+  "nextSafeAction": "CMS-RESTORE is next among READY slices (local synthetic restore). Live OAuth stays DANGEROUS. GALLERY-WWW stays blocked.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
+    "packages/domain/content-admin.test.mjs",
+    "packages/domain/src/content-admin.ts",
+    "labs/fz-cms-1/admin/cms-admin.test.mjs",
+    "labs/fz-cms-1/evidence/apostrophe-exercise.json",
+    "labs/fz-cms-1/schemas/apostrophe-modules.mjs",
     "packages/domain/search-history.test.mjs",
     "packages/domain/src/search-history.ts",
     "packages/domain/search-sync.test.mjs",

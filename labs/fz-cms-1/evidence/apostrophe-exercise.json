@@ -1,5 +1,5 @@
 {
-  "researchDate": "2026-09-21",
+  "researchDate": "2026-09-22",
   "product": "apostrophe",
   "version": "4.32.2",
   "adapter": "sqlite",
@@ -7,13 +7,21 @@
   "kind": "WORKS THROUGH API/CODE ONLY",
   "adminUi": "NOT TESTED",
   "extraFrontend": "astro",
+  "cmsAdmin": {
+    "slice": "CMS-ADMIN",
+    "serviceAndStudyCreated": true,
+    "withoutSourceEdits": true,
+    "path": "apostrophe-piece-insert-publish",
+    "visualUxReview": "DEFERRED until Admin UI session",
+    "cmsAcceptItemB": "OPEN"
+  },
   "results": {
-    "serviceId": "hmtyqxa1peu0ufov4dohfwlo:en:published",
+    "serviceId": "spomptymqzq9v7sclfvn2ajy:en:published",
     "publishedTitle": "Projekt ogrodu — szkic",
     "laterDraftTitle": "Projekt ogrodu — szkic",
     "publicUnchanged": false,
-    "articleId": "d6m253njcw9tukupqj5djilf:en:published",
-    "studyId": "sqitl2z4cgbjxvy0kuvqzz5r:en:published",
+    "articleId": "mnzcwk7yizt254p0jn1x6ifv:en:published",
+    "studyId": "z4whkrcw88tkp4lhhmj8p4fp:en:published",
     "pageModulePresent": true
   }
 }

@@ -10,6 +10,19 @@ export {
 } from './content-auth.ts';
 export type { ContentCapability, ContentRole, ContentVisibility } from './content-auth.ts';
 export {
+  ADMIN_EDITORIAL_TYPES,
+  assertAdminRequestHasNoClientAuthority,
+  createEditorialDocument,
+  editorialHappyPath,
+  openContentAdminSession,
+} from './content-admin.ts';
+export type {
+  AdminCreateInput,
+  AdminCreateResult,
+  AdminEditorialType,
+  ContentAdminSession,
+} from './content-admin.ts';
+export {
   createContentStore,
   createDraft,
   editDraft,

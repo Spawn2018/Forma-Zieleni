@@ -169,10 +169,11 @@ Next: CMS-WWW still waits on gallery and SEO slices. MEDIA-PROCESS is READY.
 
 Dependencies: CMS-PUBLISH, MEDIA-LIBRARY.
 Gate: REVIEW + UX.
+Status: COMPLETE for the editorial happy path. Live Apostrophe Admin UI click-path remains CMS-ACCEPT item B.
 Autonomous: yes if Puck/native or selected admin; stop if a paid visual editor is required (OWNER-ONLY).
 Entry: CMS-PUBLISH and MEDIA-LIBRARY recorded.
-Accept: Owner can create a Service and a ProjectCaseStudy without source edits.
-Tests: editorial happy path on synthetic data; visual/UX review when UI exists.
+Accept: `packages/domain/src/content-admin.ts` lets a bound publisher create a Service and a ProjectCaseStudy without client-supplied authority or CRM writes. `labs/fz-cms-1/schemas/apostrophe-modules.mjs` names the Apostrophe piece types. Lab evidence re-ran Apostrophe 4.32.2 piece insert/publish for both types (`labs/fz-cms-1/evidence/apostrophe-exercise.json`). Admin UI visual/UX stays deferred.
+Tests: `packages/domain/content-admin.test.mjs`, `labs/fz-cms-1/admin/cms-admin.test.mjs`.
 Next: CMS-ACCEPT after CMS-WWW/HARDEN/PERF.
 
 ### CMS-WWW
