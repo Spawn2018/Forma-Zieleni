@@ -152,7 +152,7 @@ row('FZ-REQ-PORTAL-004', 'Client-safe Project projection through Core API for th
   executableSlice: 'PORTAL-PROJECT-PROJECTION',
   executableWhenComplete: ['CRM-PROJECT-DOMAIN', 'PORTAL-AUTH'],
 });
-row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'BLOCKED_BY_DEPENDENCY', 'CONTRACTED', 'CONTRACTED', CONNECTED, CODE, TEST, 'apps/admin is README only', 'NONE', 'Domain actions exist. No fake admin screen.', {
+row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real application.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Staff shell only. Domain approval actions and CRM write UI stay later.', {
   productCapability: 'ADMIN',
   executableSlice: 'ADMIN-APP',
   executableWhenComplete: ['PORTAL-APP'],

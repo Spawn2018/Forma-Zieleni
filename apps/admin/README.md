@@ -1,6 +1,6 @@
 # apps/admin
 
-Panel administratora i UI operacyjne (CRM / Revenue OS).
+Panel personelu Forma Zieleni (CRM / Revenue OS).
 
 ## Odpowiedzialność
 
@@ -10,6 +10,11 @@ Panel administratora i UI operacyjne (CRM / Revenue OS).
 
 ## Status
 
-Szkielet katalogu. ADR-014 wymaga React Router Framework Mode; executable
-slice `ADMIN-APP` is OPEN on `NEXT-SLICES-MAIN` and must materialize a real
-`apps/admin` application. Do not invent CRM writes ahead of that slice.
+Aplikacja React Router Framework Mode (SSR). Układ, trasa `/` i granica
+błędu są w `app/`. Sesja administracyjna klasyfikuje stany: wylogowany,
+nieuprawniony, zalogowany (pusty). Loader nie zmyśla leadów, ofert ani
+projektów. Osobna strefa zaufania od `apps/web` i `apps/portal`. Brak
+wdrożenia, DNS i Cloudflare. Meta `noindex` jest ustawione.
+
+Kolory są tokenami kanonu. Kroje Newsreader i Schibsted Grotesk są
+wskazane w CSS. Pliki fontów nie są dołączone.

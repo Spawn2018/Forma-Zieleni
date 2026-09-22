@@ -191,14 +191,18 @@ Safe pre-provider work may continue via CRM-PROJECT-DOMAIN.
 Dependencies: none. ADR-014 already requires `apps/admin` as React
 Router Framework Mode. Unblocks FZ-REQ-ADMIN-001.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for a real `apps/admin` React Router Framework Mode
+application with root layout, route `/`, error boundary, staff shell
+session classification, workspace test/typecheck/lint/build. No invented
+CRM writes; no deploy, DNS, or Cloudflare mutation. Separate trust zone
+from WWW and Portal.
 Autonomous: yes.
 Accept: a real `apps/admin` React Router Framework Mode application in
 the monorepo, wired into workspace test/typecheck/lint/build, with root
 layout, route module, and error boundary. Staff shell only; no invented
 CRM writes; no deploy, DNS, or Cloudflare mutation. Separate trust zone
 from WWW and Portal.
-Tests: `apps/admin` shell test and build.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/admin` build.
 Security: noindex for non-production; loaders do not invent client
 project or offer facts; no anonymous CRM mutations.
 Next: none from this shell alone.

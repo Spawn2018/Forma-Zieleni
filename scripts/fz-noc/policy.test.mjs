@@ -91,8 +91,8 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'ADMIN-APP');
-  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.selected, 'ATLAS-PROVENANCE-BOUNDARY');
+  assert.equal(picked.ready.includes('ADMIN-APP'), false);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
   assert.equal(picked.ready.includes('PORTAL-PROJECT-PROJECTION'), false);
   assert.equal(picked.ready.includes('CRM-PROJECT-DOMAIN'), false);
@@ -201,8 +201,8 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'ADMIN-APP');
-  assert.equal(picked.ready.includes('ADMIN-APP'), true);
+  assert.equal(picked.selected, 'ATLAS-PROVENANCE-BOUNDARY');
+  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);
 });
@@ -447,7 +447,7 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.match(main, /ZAP ARMED_WAITING_FOR_TARGET/);
   assert.match(main, /does \*\*not\*\* block unrelated product/);
   const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
-  assert.ok(picked.ready.includes('ADMIN-APP') || picked.ready.includes('MOBILE-CLIENT-BOUNDARY'));
+  assert.ok(picked.ready.includes('ATLAS-PROVENANCE-BOUNDARY') || picked.ready.includes('MOBILE-CLIENT-BOUNDARY'));
 });
 
 test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {
