@@ -375,8 +375,10 @@ Next: SEARCH-SECURITY.
 
 Dependencies: SEARCH-CONNECTORS, SEARCH-ATTRIBUTION.
 Gate: REVIEW.
+Status: COMPLETE for domain sanitizers. Live ZAP remains deferred.
 Autonomous: yes.
-Accept: redaction, XSS in imported labels, URL sanitize, preview leak test.
+Accept: `packages/domain/src/search-security.ts` redacts connector secrets in logs, rejects XSS-like imported labels, sanitizes http(s) URLs without userinfo, and keeps draft bodies out of public preview.
+Tests: `packages/domain/search-security.test.mjs`.
 Next: SEARCH-PERFORMANCE.
 
 ### SEARCH-PERFORMANCE

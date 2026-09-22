@@ -30,6 +30,8 @@
   "nextSafeAction": "SEARCH-SECURITY is next among READY slices. Live OAuth and Cloudflare mutation stay DANGEROUS.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
+    "packages/domain/search-security.test.mjs",
+    "packages/domain/src/search-security.ts",
     "packages/domain/search-recovery.test.mjs",
     "packages/domain/src/search-recovery.ts",
     "packages/domain/search-crawler-intelligence.test.mjs",

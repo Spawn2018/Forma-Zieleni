@@ -188,6 +188,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-RECOVERY', 'Synthetic search observations restore and list rows that cannot be re-synced when retention is unknown or past a known window.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-recovery.ts', 'packages/domain/search-recovery.test.mjs', 'PostgreSQL/restic stay later', 'NONE', 'Does not invent a retention length.');
     continue;
   }
+  if (slice === 'SEARCH-SECURITY') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-SECURITY', 'Imported search labels and URLs are sanitized, logs redact secrets, and public preview omits draft bodies.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-security.ts', 'packages/domain/search-security.test.mjs', 'ZAP stays deferred', 'NONE', 'No live connector credentials.');
+    continue;
+  }
   row(`FZ-REQ-CMS-SLICE-${slice}`, `${slice} remains in the CMS and Search graph and is not marked complete by this audit.`, 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', SLICES, SLICES, SLICES, 'slice not executed', 'REVIEW', 'Acceptance text is in NEXT-SLICES-CMS.md.');
 }
 const ACCEPTANCE = [

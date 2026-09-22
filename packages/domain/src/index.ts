@@ -191,6 +191,13 @@ export {
 } from './search-recovery.ts';
 export type { SearchRestoreBundle, UnresyncableRow } from './search-recovery.ts';
 export {
+  publicSearchPreview,
+  redactSearchSecurityLog,
+  sanitizeImportedLabel,
+  sanitizeSearchUrl,
+} from './search-security.ts';
+export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
+export {
   LEAD_SOURCES,
   PUBLIC_LEAD_SOURCES,
   LEAD_STATUSES,
