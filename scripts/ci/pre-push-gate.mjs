@@ -19,11 +19,9 @@ export const MANDATORY_CHECKS = Object.freeze([
   { id: 'diff-check', label: 'git diff --check', argv: ['git', 'diff', '--check'] },
 ]);
 
-function platformCommand(command) {
-  if (process.platform === 'win32' && (command === 'pnpm' || command === 'npm' || command === 'npx')) {
-    return `${command}.cmd`;
-  }
-  return command;
+function needsWindowsShell(command) {
+  return process.platform === 'win32'
+    && (command === 'pnpm' || command === 'npm' || command === 'npx');
 }
 
 function defaultGit(args, cwd = root) {
@@ -37,16 +35,17 @@ function defaultGit(args, cwd = root) {
 
 function defaultRun(argv, cwd = root) {
   const [command, ...args] = argv;
-  return spawnSync(platformCommand(command), args, {
+  // Fixed allowlisted argv only. Windows .cmd shims require shell for spawnSync.
+  return spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
     windowsHide: true,
-    shell: false,
+    shell: needsWindowsShell(command),
     maxBuffer: 16 * 1024 * 1024,
   });
 }
 
-export { platformCommand };
+export { needsWindowsShell };
 
 function trimOutput(text, limit = 800) {
   const value = String(text || '').replace(/\u0000/g, '').trim();
@@ -165,13 +164,15 @@ export function runPrePushGate(options = {}) {
   const results = [];
   for (const check of checks) {
     const spawned = run(check.argv, cwd);
-    const exitCode = spawned.status ?? 1;
+    const exitCode = spawned.status == null ? 1 : spawned.status;
     const entry = {
       id: check.id,
       label: check.label,
       exitCode,
       ok: exitCode === 0,
-      detail: exitCode === 0 ? '' : trimOutput(`${spawned.stderr || ''}\n${spawned.stdout || ''}`),
+      detail: exitCode === 0
+        ? ''
+        : trimOutput(`${spawned.error?.message || ''}\n${spawned.stderr || ''}\n${spawned.stdout || ''}`),
     };
     results.push(entry);
     if (!entry.ok) {

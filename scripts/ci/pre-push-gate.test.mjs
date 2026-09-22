@@ -6,7 +6,7 @@ import {
   assertAllowedDirty,
   captureRepoState,
   dirtyPaths,
-  platformCommand,
+  needsWindowsShell,
   runPrePushGate,
   statesMatch,
 } from './pre-push-gate.mjs';
@@ -53,10 +53,10 @@ test('mandatory checks match the Verify path plus git diff --check', () => {
   ]);
   assert.deepEqual(ALLOWED_DIRTY, ['.cursor/settings.json']);
   if (process.platform === 'win32') {
-    assert.equal(platformCommand('pnpm'), 'pnpm.cmd');
-    assert.equal(platformCommand('git'), 'git');
+    assert.equal(needsWindowsShell('pnpm'), true);
+    assert.equal(needsWindowsShell('git'), false);
   } else {
-    assert.equal(platformCommand('pnpm'), 'pnpm');
+    assert.equal(needsWindowsShell('pnpm'), false);
   }
 });
 
