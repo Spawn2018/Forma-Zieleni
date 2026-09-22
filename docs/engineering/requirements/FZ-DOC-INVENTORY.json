@@ -182,7 +182,31 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/GARDENOS-RELATION-BOUNDARY.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/GATE-IMPLEMENTATION-CHECKPOINT.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
+      "path": "docs/architecture/MOBILE-CLIENT-BOUNDARY.md",
       "docType": "DOCUMENT",
       "audience": "developer",
       "owner": "ENGINEERING",
@@ -294,6 +318,30 @@
       "docType": "DOCUMENT",
       "audience": "developer",
       "owner": "SECURITY",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
+      "path": "docs/architecture/SITEINTEL-DATA-BOUNDARY.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
+      "path": "docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
       "canonical": false,
       "currentState": "CURRENT",
       "freshnessClass": "SLOW-CHANGING",

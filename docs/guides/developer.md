@@ -55,7 +55,7 @@ The context window size is not a reason to read every document.
 **not** security-accepted; that stays report-only and does not globally
 block product work. After false-exhaustion repair, READY AUTO/REVIEW
 product slices on `docs/architecture/NEXT-SLICES-MAIN.md` include
-`ATLAS-PROVENANCE-BOUNDARY` and other boundary slices. Missing binding
+No safe READY AUTO/REVIEW slice remains on MAIN (Owner gates / report-only remain). Missing binding
 slices are an internal materialization defect, not Owner roadmap
 refresh. ZAP and Dependency-Check do not block unrelated product work.
 The CMS/Search graph stays acceptance history. Do not start a second

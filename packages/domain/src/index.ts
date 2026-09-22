@@ -103,6 +103,17 @@ export {
 } from './atlas-boundary.ts';
 export type { AtlasProvenanceBoundary } from './atlas-boundary.ts';
 export {
+  assertGardenOsNotTwin,
+  assertMobileUsesCoreApiOnly,
+  assertNoSiteIntelTwinDatabase,
+  assertSiteIntelligenceOrdering,
+  assertSketchUpNotBusinessTruth,
+  gardenOsRelationBoundary,
+  mobileClientBoundary,
+  siteIntelligenceOrdering,
+  sketchUpAdapterBoundary,
+} from './product-boundaries.ts';
+export {
   OFFER_STATUSES,
   assertOpaqueOfferId,
   createOffer,

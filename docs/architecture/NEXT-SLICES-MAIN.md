@@ -288,12 +288,15 @@ Next: none until a later portal projection.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for DATA → RULES → DOMAIN → AI ordering contract:
+`docs/architecture/SITEINTEL-DATA-BOUNDARY.md` plus domain ordering
+helpers/tests. No live third-party critical UX, no twin database.
 Autonomous: yes.
 Accept: document and contract Site Intelligence DATA → RULES → DOMAIN
 → AI ordering for FZ-REQ-SITEINTEL-001. No live third-party dependency
 in critical UX; no invented geospatial facts. No twin database.
-Tests: documentation/registry check against Canon ordering.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/SITEINTEL-DATA-BOUNDARY.md`.
 Security: no production third-party credentials.
 Next: none until a later Site Intelligence runtime slice.
 
@@ -319,13 +322,17 @@ Next: none until a later Atlas product slice.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for mobile client boundary:
+`docs/architecture/MOBILE-CLIENT-BOUNDARY.md` plus domain helpers/tests.
+Core API remains business truth; no separate mobile domain; apps not
+shipped in this slice.
 Autonomous: yes.
 Accept: document and contract the mobile client boundary for
 FZ-REQ-MOBILE-001: Core API remains business truth; no separate mobile
 domain; typed client paths only. Do not ship Android/iOS apps in this
 slice.
-Tests: contract/path tests or documented inventory check.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/MOBILE-CLIENT-BOUNDARY.md`.
 Security: no second authz path; no production credentials.
 Next: none until a later mobile implementation slice.
 
@@ -333,12 +340,16 @@ Next: none until a later mobile implementation slice.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for SketchUp adapter boundary:
+`docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md` plus domain
+helpers/tests. Core API owns identifiers; SketchUp is not business
+truth; no plugin runtime.
 Autonomous: yes.
 Accept: document the SketchUp adapter boundary for FZ-REQ-SKETCHUP-001:
 stable project identifiers via Core API; SketchUp is not business truth.
 No plugin runtime install in this slice.
-Tests: documentation/contract check against Canon.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md`.
 Security: no local business ACL in the plugin.
 Next: none until a later plugin slice.
 
@@ -346,12 +357,15 @@ Next: none until a later plugin slice.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Garden OS relation boundary:
+`docs/architecture/GARDENOS-RELATION-BOUNDARY.md` plus domain
+helpers/tests. Relation only; no twin runtime or twin database.
 Autonomous: yes.
 Accept: document Garden OS as a future client relation for
 FZ-REQ-GARDENOS-001, not a digital-twin runtime. No twin database or UI
 in this slice.
-Tests: documentation/registry check.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/GARDENOS-RELATION-BOUNDARY.md`.
 Security: no invented live twin data.
 Next: none until a later Garden OS product slice.
 

@@ -36,7 +36,7 @@ Nie oceniaj ich po tym pliku jako gotowych.
 Raport `LEAD-SEC-ACCEPT` jest złożony; Lead **nie** jest
 security-accepted (to nie blokuje globalnie produktu). Po naprawie
 fałszywego wyczerpania roadmapy na `NEXT-SLICES-MAIN.md` są READY
-AUTO/REVIEW: granice (`ATLAS-PROVENANCE-BOUNDARY` i dalej). Brak
+AUTO/REVIEW: brak bezpiecznego READY na MAIN (zostały bramki Owner / report-only). Brak
 slice'a dla wiążącego wymagania to wada materializacji, nie Owner
 roadmap refresh. ZAP i Dependency-Check nie blokują niezwiązanej pracy
 produktowej. CMS-ACCEPT pozostaje otwarte. To nie jest prośba o

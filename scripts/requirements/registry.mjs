@@ -157,12 +157,12 @@ row('FZ-REQ-ADMIN-001', 'Agnieszka approval UI waits until apps/admin is a real 
   executableSlice: 'ADMIN-APP',
   executableWhenComplete: ['PORTAL-APP'],
 });
-row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'No mobile client', 'NONE', 'Executable boundary precedes runtime apps.', {
+row('FZ-REQ-MOBILE-001', 'Android and iOS have no separate business truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/MOBILE-CLIENT-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Executable boundary precedes runtime apps.', {
   productCapability: 'MOBILE',
   executableSlice: 'MOBILE-CLIENT-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-SITEINTEL-001', 'Site Intelligence stays DATA, then RULES, then DOMAIN, then AI.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No site-intelligence runtime', 'NONE', 'Ordering is binding; runtime is later.', {
+row('FZ-REQ-SITEINTEL-001', 'Site Intelligence stays DATA, then RULES, then DOMAIN, then AI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SITEINTEL-DATA-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Ordering is binding; runtime is later.', {
   productCapability: 'SITEINTEL',
   executableSlice: 'SITEINTEL-DATA-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
@@ -172,12 +172,12 @@ row('FZ-REQ-ATLAS-002', 'Plant Atlas taxonomy and provenance stay source-of-trut
   executableSlice: 'ATLAS-PROVENANCE-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-GARDENOS-001', 'Garden OS is a future client relation after project delivery, not a disconnected microsystem.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CONNECTED, CODE, TEST, 'No Garden OS product', 'NONE', 'Relation boundary precedes twin runtime.', {
+row('FZ-REQ-GARDENOS-001', 'Garden OS is a future client relation after project delivery, not a disconnected microsystem.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/GARDENOS-RELATION-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Relation boundary precedes twin runtime.', {
   productCapability: 'GARDENOS',
   executableSlice: 'GARDENOS-RELATION-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-SKETCHUP-001', 'SketchUp is not the source of business truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CONNECTED, TEST, 'No SketchUp plugin', 'NONE', 'Adapter boundary precedes plugin runtime.', {
+row('FZ-REQ-SKETCHUP-001', 'SketchUp is not the source of business truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Adapter boundary precedes plugin runtime.', {
   productCapability: 'SKETCHUP',
   executableSlice: 'SKETCHUP-ADAPTER-BOUNDARY',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],

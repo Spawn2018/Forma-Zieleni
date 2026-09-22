@@ -91,14 +91,14 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'GARDENOS-RELATION-BOUNDARY');
+  assert.equal(picked.selected, null);
   assert.equal(picked.ready.includes('ADMIN-APP'), false);
-  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
+  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ATLAS-PROVENANCE-BOUNDARY'), false);
   assert.equal(picked.ready.includes('CRM-PROJECT-DOMAIN'), false);
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
-  assert.equal(picked.exhaustionAllowed, false);
+  assert.equal(picked.exhaustionAllowed, true);
   assert.equal(picked.internalGap, null);
 });
 
@@ -201,10 +201,10 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'GARDENOS-RELATION-BOUNDARY');
-  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), true);
+  assert.equal(picked.selected, null);
+  assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
-  assert.equal(picked.exhaustionAllowed, false);
+  assert.equal(picked.exhaustionAllowed, true);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {
@@ -413,7 +413,7 @@ test('D: Mobile binding stays materialized on the main graph', () => {
   assert.ok(main.some((slice) => slice.id === 'MOBILE-CLIENT-BOUNDARY'));
   const mobile = requirements().find((row) => row.id === 'FZ-REQ-MOBILE-001');
   assert.equal(mobile.executableSlice, 'MOBILE-CLIENT-BOUNDARY');
-  assert.equal(mobile.status, 'BLOCKED_BY_DEPENDENCY');
+  assert.equal(mobile.status, 'DONE_AT_MAX_DEPTH');
 });
 
 test('E: Garden OS and SketchUp keep executable future chains', () => {
@@ -447,7 +447,8 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.match(main, /ZAP ARMED_WAITING_FOR_TARGET/);
   assert.match(main, /does \*\*not\*\* block unrelated product/);
   const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
-  assert.ok(picked.ready.includes('GARDENOS-RELATION-BOUNDARY') || picked.ready.includes('MOBILE-CLIENT-BOUNDARY'));
+  assert.equal(picked.ready.length, 0);
+  assert.equal(picked.exhaustionAllowed, true);
 });
 
 test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {
