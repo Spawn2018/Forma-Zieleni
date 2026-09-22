@@ -161,6 +161,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-BEFORE-AFTER', 'A before/after pair shares one crop mode and one frame, and the control is keyboard and pointer.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/before-after.ts', 'apps/web/app/before-after.test.mjs', '', 'NONE', 'The live route stays empty until a published pair exists.');
     continue;
   }
+  if (slice === 'SEARCH-WWW-TECHNICAL') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-WWW-TECHNICAL', 'The public head is server-rendered. Non-production robots disallow indexing. Production robots is not Disallow all.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', '', 'NONE', 'Sitemap and crawler groups stay in the next slice.');
+    continue;
+  }
   if (slice === 'SEARCH-ATTRIBUTION') {
     row('FZ-REQ-CMS-SLICE-SEARCH-ATTRIBUTION', 'Referral sanitize keeps an unknown referrer unknown and labels only an allowlisted AI host.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/attribution.ts', 'packages/domain/attribution.test.mjs', '', 'NONE', 'Not yet a column on the lead row.');
     continue;

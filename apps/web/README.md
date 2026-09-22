@@ -14,4 +14,4 @@ Aplikacja React Router Framework Mode (SSR). Układ, trasa `/` i granica błędu
 
 Kolory są tokenami kanonu. Kroje Newsreader i Schibsted Grotesk są wskazane w CSS. Pliki fontów nie są dołączone: kanon wymaga sprawdzenia licencji, polskich glifów i kosztu ładowania przed dostarczeniem plików, a zmierzonego podzbioru OFL jeszcze nie ma.
 
-Brak wdrożenia, DNS i Cloudflare. Galeria i strony oferty są kolejnymi slice'ami.
+Brak wdrożenia, DNS i Cloudflare. Poza `FZ_PUBLIC_ENV=production` strona wysyła `noindex` i `robots.txt` z `Disallow: /`. Produkcyjny plik nie używa `Disallow: /`. Sitemap i dane strukturalne są kolejnymi slice'ami.

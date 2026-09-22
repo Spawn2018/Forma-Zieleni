@@ -264,9 +264,11 @@ Next: SEARCH-CONTENT-CONTRACT inside CMS-DATA.
 
 Dependencies: CMS-DATA, WWW-APP.
 Gate: REVIEW.
+Status: COMPLETE for the SSR head, status codes, slash and query policy, and environment robots. Sitemap and crawler groups stay in the next slice.
 Autonomous: yes.
 Accept: SSR HTML, title, description, canonical, robots meta, status codes, 404, redirects, trailing-slash and query policies, no staging index leak.
-Tests: rendered head and a non-production disallow fixture.
+Tests: `apps/web/app/technical-seo.test.mjs`. Non-production robots is `Disallow: /`. Production robots is not.
+Security: redirects stay on a relative path. A missing public origin does not invent a canonical host.
 Next: SEARCH-STRUCTURED-DATA.
 
 ### SEARCH-STRUCTURED-DATA

@@ -1,15 +1,22 @@
 import type { Route } from './+types/compare';
 import { PublicCompare } from '../before-after-view.tsx';
 import type { PublicCompareModel } from '../before-after.ts';
+import { publicHead, seoEnv } from '../technical-seo.ts';
 
 export async function loader(): Promise<PublicCompareModel> {
   return { state: 'absent' };
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
-  const tags: Array<{ title: string } | { name: string; content: string }> = [{ title: 'Porównanie' }];
-  if (loaderData?.state !== 'published') tags.push({ name: 'robots', content: 'noindex' });
-  return tags;
+  const published = loaderData?.state === 'published';
+  return publicHead({
+    title: 'Porównanie',
+    description: published ? 'Porównanie' : 'Nie ma opublikowanego porównania.',
+    path: '/porownanie',
+    indexable: published,
+    env: seoEnv(process.env.FZ_PUBLIC_ENV),
+    origin: process.env.FZ_PUBLIC_ORIGIN,
+  });
 }
 
 export default function CompareRoute({ loaderData }: Route.ComponentProps) {

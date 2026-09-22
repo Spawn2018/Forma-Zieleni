@@ -1,8 +1,9 @@
 import type { Route } from './+types/home';
 import { readPublishedHome } from '../published-home.ts';
-import { homeShell, type PublicHome } from '../shell.ts';
+import { homeShell } from '../shell.ts';
+import { publicHead, seoEnv } from '../technical-seo.ts';
 
-export async function loader(): Promise<PublicHome> {
+export async function loader(): Promise<Awaited<ReturnType<typeof readPublishedHome>>> {
   return readPublishedHome({
     origin: process.env.FZ_API_ORIGIN,
     documentId: process.env.FZ_PUBLIC_HOME_ID,
@@ -11,10 +12,15 @@ export async function loader(): Promise<PublicHome> {
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
-  const title = loaderData?.state === 'published' ? loaderData.title : 'Forma Zieleni';
-  const tags: Array<{ title: string } | { name: string; content: string }> = [{ title }];
-  if (loaderData?.state !== 'published') tags.push({ name: 'robots', content: 'noindex' });
-  return tags;
+  const published = loaderData?.state === 'published';
+  return publicHead({
+    title: published ? loaderData.title : 'Forma Zieleni',
+    description: published ? loaderData.title : 'Opublikowana strona nie jest podłączona.',
+    path: '/',
+    indexable: published,
+    env: seoEnv(process.env.FZ_PUBLIC_ENV),
+    origin: process.env.FZ_PUBLIC_ORIGIN,
+  });
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
