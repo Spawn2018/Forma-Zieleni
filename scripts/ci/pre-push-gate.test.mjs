@@ -6,6 +6,7 @@ import {
   assertAllowedDirty,
   captureRepoState,
   dirtyPaths,
+  platformCommand,
   runPrePushGate,
   statesMatch,
 } from './pre-push-gate.mjs';
@@ -51,6 +52,12 @@ test('mandatory checks match the Verify path plus git diff --check', () => {
     'docs', 'typecheck', 'lint', 'test', 'repo', 'readme', 'audit', 'diff-check',
   ]);
   assert.deepEqual(ALLOWED_DIRTY, ['.cursor/settings.json']);
+  if (process.platform === 'win32') {
+    assert.equal(platformCommand('pnpm'), 'pnpm.cmd');
+    assert.equal(platformCommand('git'), 'git');
+  } else {
+    assert.equal(platformCommand('pnpm'), 'pnpm');
+  }
 });
 
 test('dirty path parsing keeps only the Owner-local settings exception', () => {

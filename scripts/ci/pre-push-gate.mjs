@@ -19,6 +19,13 @@ export const MANDATORY_CHECKS = Object.freeze([
   { id: 'diff-check', label: 'git diff --check', argv: ['git', 'diff', '--check'] },
 ]);
 
+function platformCommand(command) {
+  if (process.platform === 'win32' && (command === 'pnpm' || command === 'npm' || command === 'npx')) {
+    return `${command}.cmd`;
+  }
+  return command;
+}
+
 function defaultGit(args, cwd = root) {
   return spawnSync('git', args, {
     cwd,
@@ -30,7 +37,7 @@ function defaultGit(args, cwd = root) {
 
 function defaultRun(argv, cwd = root) {
   const [command, ...args] = argv;
-  return spawnSync(command, args, {
+  return spawnSync(platformCommand(command), args, {
     cwd,
     encoding: 'utf8',
     windowsHide: true,
@@ -38,6 +45,8 @@ function defaultRun(argv, cwd = root) {
     maxBuffer: 16 * 1024 * 1024,
   });
 }
+
+export { platformCommand };
 
 function trimOutput(text, limit = 800) {
   const value = String(text || '').replace(/\u0000/g, '').trim();

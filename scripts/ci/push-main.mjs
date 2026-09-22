@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   captureRepoState,
+  platformCommand,
   runPrePushGate,
   statesMatch,
 } from './pre-push-gate.mjs';
@@ -23,7 +24,7 @@ function defaultGit(args, cwd = root) {
 
 function defaultRun(argv, cwd = root) {
   const [command, ...args] = argv;
-  return spawnSync(command, args, {
+  return spawnSync(platformCommand(command), args, {
     cwd,
     encoding: 'utf8',
     windowsHide: true,
