@@ -403,8 +403,11 @@ Next: SEARCH-ALERTS.
 
 Dependencies: SEARCH-ADMIN.
 Gate: REVIEW.
+Status: COMPLETE for quiet rules. No production notification channel.
 Autonomous: yes. No production notification channel.
-Accept: thresholds exist; the suite does not page on a single-row blip.
+Accept: `packages/domain/src/search-alerts.ts` names the search signals and keeps `singleRowPages` false. A single row, a missing baseline, an unmeasurable citation change, and every other case stay unpaged. `pageSearchAlert` throws.
+Tests: `packages/domain/search-alerts.test.mjs`. One row does not page. Eight rows with a baseline still do not page.
+Security: no pager and no numeric paging threshold.
 Next: SEARCH-SECURITY.
 
 ### SEARCH-SECURITY

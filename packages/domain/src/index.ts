@@ -210,6 +210,7 @@ export {
 } from './search-content-intelligence.ts';
 export { presentAdminPanel, presentAiCitations, presentAttribution, presentSearchMetric } from './search-admin.ts';
 export { publicContentHtml, redactCmsLog, reviewOutboundUrl } from './cms-harden.ts';
+export { ALERT_RULES, evaluateSearchAlert, pageSearchAlert } from './search-alerts.ts';
 export type {
   AiDraftField,
   ContentRecommendation,
@@ -218,6 +219,7 @@ export type {
 } from './search-content-intelligence.ts';
 export type { AdminMetric, AdminPanelId, AdminPanelView, AttributionModel, EvidenceClass } from './search-admin.ts';
 export type { OutboundReview } from './cms-harden.ts';
+export type { SearchAlert, SearchAlertSignal } from './search-alerts.ts';
 export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
 export {
   FORBIDDEN_EXPORT_FIELDS,

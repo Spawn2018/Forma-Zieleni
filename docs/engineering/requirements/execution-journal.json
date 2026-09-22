@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "cms-perf",
+  "currentPhase": "search-alerts",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -19,14 +19,16 @@
     "production hosting UNDECIDED"
   ],
   "blockers": [
-    "SEARCH-ALERTS is the next READY slice",
-    "CMS-ACCEPT stays report-only until its checklist can be evidenced",
+    "No AUTO/REVIEW slice is READY",
+    "CMS-ACCEPT and SEARCH-ACCEPT stay report-only",
     "CMS-ACCEPT and SEARCH-ACCEPT stay report-only until their dependencies exist",
     "Apostrophe Admin UI click-path remains CMS-ACCEPT item B",
     "Live OAuth, Cloudflare mutation, spend, and production remain DANGEROUS/OWNER"
   ],
-  "nextSafeAction": "SEARCH-ALERTS is READY. Thresholds exist and a single-row blip does not page. No production notification channel. A safe fast-forward push to origin main is AUTO inside /noc after the pre-push gate.",
+  "nextSafeAction": "No AUTO/REVIEW slice is READY. CMS-ACCEPT and SEARCH-ACCEPT stay report-only. Do not mark them accepted while ZAP, Dependency-Check, live credentials, or Cloudflare policy remain deferred. RETURN-ROADMAP waits on CMS-ACCEPT.",
   "evidencePaths": [
+    "packages/domain/src/search-alerts.ts",
+    "packages/domain/search-alerts.test.mjs",
     "apps/web/app/gallery.ts",
     "apps/web/app/cms-perf.test.mjs",
     "packages/domain/src/cms-harden.ts",
