@@ -1,7 +1,7 @@
 {
   "directiveId": "FZ-MASTER-PROJECT-AUDIT-1",
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
-  "currentPhase": "search-recovery-recorded",
+  "currentPhase": "search-security-recorded",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate. Force-push, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "9a463940906a5e4aa0872b0b4bc20b06b4d487d5",
   "postPushSafety": "PASS",
@@ -27,7 +27,7 @@
     "Live OAuth, spend, tracking and publication stay unauthorized",
     "Storybook waits for a shared UI component used by a real screen"
   ],
-  "nextSafeAction": "SEARCH-SECURITY is next among READY slices. Live OAuth and Cloudflare mutation stay DANGEROUS.",
+  "nextSafeAction": "CMS-EXPORT is next among READY slices. SEARCH-PERFORMANCE waits on SEARCH-WWW-TECHNICAL.",
   "evidencePaths": [
     "packages/domain/ecosystem.test.mjs",
     "packages/domain/search-security.test.mjs",
