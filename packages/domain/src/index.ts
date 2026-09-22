@@ -201,6 +201,19 @@ export { notePerformance } from './search-performance.ts';
 export type { FieldCwv, LabMediaNote, PerformanceNotes } from './search-performance.ts';
 export { applyAuditRecommendation, auditTechnicalPages } from './search-tech-audit.ts';
 export type { TechIssue, TechIssueCode, TechnicalAudit } from './search-tech-audit.ts';
+export {
+  insertKeywordLink,
+  publishContentRecommendation,
+  recommendFromPublishedGraph,
+  recommendTitleAlignment,
+  suggestAiDraft,
+} from './search-content-intelligence.ts';
+export type {
+  AiDraftField,
+  ContentRecommendation,
+  PublishedContentKind,
+  PublishedContentNode,
+} from './search-content-intelligence.ts';
 export type { SanitizedSearchLabel, SanitizedSearchUrl, SearchPreviewPayload } from './search-security.ts';
 export {
   FORBIDDEN_EXPORT_FIELDS,

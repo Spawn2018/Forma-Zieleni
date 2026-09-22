@@ -225,6 +225,10 @@ for (const slice of OPEN_SLICES) {
     row('FZ-REQ-CMS-SLICE-SEARCH-TECH-AUDIT', 'Technical audit reports noindex, broken canonicals, missing alt text, and robots or sitemap problems. Recommendations do not publish.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-tech-audit.ts', 'packages/domain/search-tech-audit.test.mjs', '', 'NONE', 'The audit does not write content.');
     continue;
   }
+  if (slice === 'SEARCH-CONTENT-INTELLIGENCE') {
+    row('FZ-REQ-CMS-SLICE-SEARCH-CONTENT-INTELLIGENCE', 'Content recommendations cite a published graph or a measured query. AI drafts stay AI-SUGGESTED. ALT text cannot invent image contents. Nothing publishes.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-content-intelligence.ts', 'packages/domain/search-content-intelligence.test.mjs', '', 'NONE', 'No paid AI service and no automatic link insertion.');
+    continue;
+  }
   if (slice === 'SEARCH-SECURITY') {
     row('FZ-REQ-CMS-SLICE-SEARCH-SECURITY', 'Imported search labels and URLs are sanitized, logs redact secrets, and public preview omits draft bodies.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-security.ts', 'packages/domain/search-security.test.mjs', 'ZAP stays deferred', 'NONE', 'No live connector credentials.');
     continue;

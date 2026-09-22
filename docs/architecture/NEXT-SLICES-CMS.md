@@ -380,8 +380,10 @@ Next: SEARCH-CONTENT-INTELLIGENCE.
 
 Dependencies: SEARCH-TECH-AUDIT, internal link graph from published content.
 Gate: REVIEW.
+Status: COMPLETE for evidence-backed recommendations. AI drafts stay AI-SUGGESTED. Nothing is published.
 Autonomous: yes.
-Accept: evidence-backed recommendations; AI output marked AI-SUGGESTED; no auto-publish.
+Accept: `packages/domain/src/search-content-intelligence.ts` reports orphans, broken internal links, and weak connections among published Service, Article, and ProjectCaseStudy pages. A measured query quotes impressions and CTR and asks for a title review. AI drafts stay AI-SUGGESTED. ALT text must stay inside the supplied evidence. Applying a recommendation throws.
+Tests: `packages/domain/search-content-intelligence.test.mjs`.
 Next: SEARCH-ADMIN.
 
 ### SEARCH-ADMIN
