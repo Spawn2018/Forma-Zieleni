@@ -183,7 +183,9 @@ export function runCheckpointReview(options = {}) {
   }
   const diff = options.diffText != null
     ? { ok: true, text: options.diffText }
-    : changedDiff({ base, committed });
+    : options.paths
+      ? { ok: true, text: '' }
+      : changedDiff({ base, committed });
   if (!diff.ok) {
     return {
       state: 'CODERABBIT_FAILED',
