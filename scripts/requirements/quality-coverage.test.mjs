@@ -93,6 +93,18 @@ test('exact repeated source is a syntactic duplicate', () => {
     { path: 'b.ts', text: 'export function match(input) { return /clientportal/.test(input.name) && input.owner === "core-api" && input.state === "ready"; }' },
   ]);
   assert.equal(regex.length, 0);
+  const body = 'return input.clientId === input.ownerId && input.state === "ready" && input.scope === "client";';
+  const indented = syntacticDuplicates([
+    { path: 'a.ts', text: `export function sameRule(input) {\n  ${body}\n}\n` },
+    { path: 'b.ts', text: `export function sameRule(input) {\n${body}\n}\n` },
+  ]);
+  assert.equal(indented.length, 1);
+  const shared = 'portal ${input.owner} stays on the core-api garden record`;';
+  const template = syntacticDuplicates([
+    { path: 'a.ts', text: ['export function label(input) {', '  return `client', `  ${shared}`, '}'].join('\n') },
+    { path: 'b.ts', text: ['export function label(input) {', '  return `client', shared, '}'].join('\n') },
+  ]);
+  assert.equal(template.length, 0);
   const checked = checkQualityCoverage({
     clones: [['apps/admin/a.ts', 'apps/portal/a.ts']],
     imports: [],

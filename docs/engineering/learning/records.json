@@ -1020,6 +1020,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T17:14:52.770Z",
       "lastSeen": "2026-09-23T17:16:27.603Z"
+    },
+    {
+      "patternKey": "cr-update-the-normalization-549bf9a665",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the normalization used by checkQualityCoverage so trimming lines and removing blank lines does not alter whites",
+      "evidence": [
+        "cr-occurrence:754b66a:90e07c77132b:cr-update-the-normalization-549bf9a665",
+        "scripts/requirements/quality-coverage.mjs",
+        "severity:high",
+        "accepted:cr-update-the-normalization-549bf9a665"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "90e07c77132b654302493771129ed692790a1250",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-8c65de21",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T17:19:41.723Z",
+      "lastSeen": "2026-09-23T17:21:50.270Z"
     }
   ]
 }

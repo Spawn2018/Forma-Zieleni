@@ -351,11 +351,36 @@ export function dependencyCycles(edges = []) {
 }
 
 export function normalizeComparableSource(text) {
-  return String(text)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .join('\n');
+  const source = String(text);
+  let out = '';
+  let quote = null;
+  let atLineStart = true;
+  for (let i = 0; i < source.length; i += 1) {
+    const ch = source[i];
+    if (quote) {
+      out += ch;
+      atLineStart = ch === '\n';
+      if (ch === '\\') {
+        const next = source[i + 1];
+        if (next !== undefined) {
+          out += next;
+          i += 1;
+          atLineStart = next === '\n';
+        }
+      } else if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+      out += ch;
+      atLineStart = false;
+      continue;
+    }
+    if (atLineStart && (ch === ' ' || ch === '\t')) continue;
+    out += ch;
+    atLineStart = ch === '\n';
+  }
+  return out.trim();
 }
 
 export function syntacticDuplicates(files = []) {
