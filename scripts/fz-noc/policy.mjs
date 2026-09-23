@@ -254,9 +254,12 @@ export function selectReady(slices, options = {}) {
     reason = `${selected.id} is the highest-priority safe READY slice after the critical path`;
   }
   const requirementRows = options.requirements || loadRequirements();
-  const useLiveScope = options.requirements === undefined && options.scope === undefined;
-  const scope = useLiveScope ? loadProductScope() : (options.scope || []);
-  const models = useLiveScope ? loadParentModels() : (options.parentModels || []);
+  const scope = options.scope !== undefined
+    ? options.scope
+    : (options.requirements === undefined ? loadProductScope() : []);
+  const models = options.parentModels !== undefined
+    ? options.parentModels
+    : (options.requirements === undefined ? loadParentModels() : []);
   const gap = internalPrerequisiteGap(slices, requirementRows);
   const undeclared = missingExecutablePathDeclarations(requirementRows);
   const scopeGaps = scopeCoverageGaps(scope, requirementRows);

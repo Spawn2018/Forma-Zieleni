@@ -465,6 +465,18 @@ Accept: a plant identity record distinct from taxonomic-source proof.
 No invented cultivation claims.
 Tests: domain tests for plant identity.
 Security: sources stay citations, not product truth.
+Next: ATLAS-PUBLIC-SURFACE.
+
+### ATLAS-PUBLIC-SURFACE
+
+Dependencies: ATLAS-PLANT-IDENTITY.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a public surface lists approved plant identities and their
+taxonomic citations. It does not state cultivation advice as fact.
+Tests: projection tests with synthetic plant ids.
+Security: unpublished identities stay off the public response.
 Next: none.
 
 ### SKETCHUP-PROJECT-MAP

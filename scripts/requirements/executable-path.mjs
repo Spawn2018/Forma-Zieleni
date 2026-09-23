@@ -157,7 +157,7 @@ export function scopeCoverageGaps(scope = [], requirements = []) {
   const gaps = [];
   for (const item of scope) {
     if (!item || item.normative === false) continue;
-    if (item.coverageStatus && item.coverageStatus !== 'COVERED_BY_REQUIREMENT') continue;
+    if (item.coverageStatus === 'INFORMATIONAL' || item.coverageStatus === 'SUPERSEDED') continue;
     const linked = Array.isArray(item.requirementIds) ? item.requirementIds : [];
     if (linked.length === 0 || linked.some((id) => !ids.has(id))) gaps.push(item.id);
   }

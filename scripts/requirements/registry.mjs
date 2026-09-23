@@ -449,6 +449,13 @@ row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxon
   executableSlice: 'ATLAS-PLANT-IDENTITY',
   executableWhenComplete: ['ATLAS-PROVENANCE-BOUNDARY'],
 });
+row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity and cites taxonomy sources. It does not invent cultivation facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md', 'packages/domain/atlas-boundary.test.mjs', 'Atlas runtime slice', 'REVIEW', 'Identity is not the public Atlas surface.', {
+  productCapability: 'ATLAS',
+  depth: 'RUNTIME',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'ATLAS-PUBLIC-SURFACE',
+  executableWhenComplete: ['ATLAS-PLANT-IDENTITY'],
+});
 row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'SketchUp mapping slice', 'REVIEW', 'The adapter boundary is not the mapping runtime.', {
   productCapability: 'SKETCHUP',
   depth: 'INTEGRATION',
