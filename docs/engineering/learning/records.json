@@ -1073,6 +1073,58 @@
       "lastSeen": "2026-09-23T17:25:31.887Z",
       "rejectionReason": "A regex literal cannot contain a raw newline, and spaces inside a line are not collapsed. Leading indentation outside strings is the only whitespace the comparison ignores.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-object-passed-71fd9ba82f",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the object passed to debugLoopAccepted so `kind: 'fix'` comes after both repairDisposition spreads, preventing",
+      "evidence": [
+        "cr-occurrence:55d5c477f020:41db386991bf:cr-update-the-object-passed-71fd9ba82f",
+        "scripts/fz-noc/cli.mjs",
+        "severity:low",
+        "accepted:cr-update-the-object-passed-71fd9ba82f"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "41db386991bfba262ce46e97faf07162349e2532",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-c34c38b3",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T19:56:54.780Z",
+      "lastSeen": "2026-09-23T20:03:51.577Z"
+    },
+    {
+      "patternKey": "cr-when-an-accepted-ci-repa-e42803c9d0",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", When an accepted CI repair clears attempts in the flow using `clearCiRepairAttempts`, include `repairDisposition: null",
+      "evidence": [
+        "cr-occurrence:55d5c477f020:41db386991bf:cr-when-an-accepted-ci-repa-e42803c9d0",
+        "scripts/fz-noc/cli.mjs",
+        "severity:high",
+        "accepted:cr-when-an-accepted-ci-repa-e42803c9d0"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "41db386991bfba262ce46e97faf07162349e2532",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-cdfe2947",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T19:56:54.822Z",
+      "lastSeen": "2026-09-23T20:03:51.929Z"
     }
   ]
 }
