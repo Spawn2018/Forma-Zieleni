@@ -745,7 +745,7 @@ export function contractErrors(item, options = {}) {
     fail(errors, 'MOBILE_WORKFLOW_MISSING');
   }
   if (!['REQUIRED', 'ACCEPTED'].includes(item.responsiveReview)) fail(errors, 'RESPONSIVE_REVIEW_MISSING');
-  for (const need of ['keyboard', 'focus', 'contrast', 'labels', 'screen-reader']) {
+  for (const need of A11Y) {
     if (!(item.accessibility || []).includes(need)) fail(errors, 'ACCESSIBILITY_MISSING');
   }
   const surface = String(item.surface || '').toUpperCase();

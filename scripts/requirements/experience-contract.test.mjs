@@ -154,6 +154,15 @@ test('desktop coverage without a mobile workflow fails', () => {
   assert.equal(checked.errors.some((error) => error === 'PORTAL:MOBILE_WORKFLOW_MISSING'), true);
 });
 
+test('accessibility basics require every declared A11Y control', () => {
+  const catalog = clone();
+  catalog.find((item) => item.id === 'PORTAL').accessibility = [
+    'keyboard', 'focus', 'contrast', 'labels', 'screen-reader',
+  ];
+  const checked = checkExperienceContracts({ catalog });
+  assert.equal(checked.errors.some((error) => error === 'PORTAL:ACCESSIBILITY_MISSING'), true);
+});
+
 test('a later acceptance state implies visual review', () => {
   const catalog = clone();
   catalog.find((item) => item.id === 'WWW').acceptanceState = 'OPERATIONAL';
