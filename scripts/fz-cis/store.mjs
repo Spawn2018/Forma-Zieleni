@@ -3,7 +3,14 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { doraFromEvents, incorporate, learningDebt, pushBlockers, transition } from './policy.mjs';
+import { analyzeLearning } from './analysis.mjs';
+import {
+  applyEffectObservation,
+  applyEffectPlan,
+  evaluateEffect,
+  refreshEffectState,
+} from './effect.mjs';
+import { doraFromEvents, incorporate, learningDebt, pushBlockers, transition, validateRecord } from './policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const learningDir = path.resolve(root, 'docs', 'engineering', 'learning');
@@ -52,6 +59,26 @@ export function saveStore(store, file = storeFile()) {
   return { wroteCanon: false, file: resolved };
 }
 
+function refuseId(id) {
+  if (typeof id !== 'string' || id.includes('/') || id.includes('\\') || id.includes('..')) {
+    throw Object.assign(new Error('REFUSED_PATH'), { code: 'REFUSED_PATH' });
+  }
+}
+
+function findRecord(store, id) {
+  const current = store.records.find((record) => record.id === id);
+  if (!current) throw Object.assign(new Error('NOT_FOUND'), { code: 'NOT_FOUND' });
+  return current;
+}
+
+function writeRecord(store, updated, file) {
+  saveStore({
+    version: 1,
+    records: store.records.map((record) => (record.id === updated.id ? updated : record)),
+  }, file);
+  return { record: updated, wroteCanon: false };
+}
+
 export function addRecord(input, file = storeFile()) {
   const store = loadStore(file);
   const result = incorporate(store.records, { ...input, id: input.id || newId() });
@@ -65,19 +92,12 @@ export function addRecord(input, file = storeFile()) {
   return { ...result, wroteCanon: false };
 }
 
-export function changeStatus(id, next, extra = {}, file = storeFile()) {
-  if (typeof id !== 'string' || id.includes('/') || id.includes('\\') || id.includes('..')) {
-    throw Object.assign(new Error('REFUSED_PATH'), { code: 'REFUSED_PATH' });
-  }
+export function changeStatus(id, next, extra = {}, file = storeFile(), options = {}) {
+  refuseId(id);
   const store = loadStore(file);
-  const current = store.records.find((record) => record.id === id);
-  if (!current) throw Object.assign(new Error('NOT_FOUND'), { code: 'NOT_FOUND' });
-  const updated = transition(current, next, extra);
-  saveStore({
-    version: 1,
-    records: store.records.map((record) => (record.id === id ? updated : record)),
-  }, file);
-  return { record: updated, wroteCanon: false };
+  const current = findRecord(store, id);
+  const updated = transition(current, next, extra, options);
+  return writeRecord(store, updated, file);
 }
 
 /**
@@ -85,15 +105,29 @@ export function changeStatus(id, next, extra = {}, file = storeFile()) {
  * Does not change lifecycle status.
  */
 export function markLocallyVerified(id, extra = {}, file = storeFile()) {
-  if (typeof id !== 'string' || id.includes('/') || id.includes('\\') || id.includes('..')) {
-    throw Object.assign(new Error('REFUSED_PATH'), { code: 'REFUSED_PATH' });
-  }
+  refuseId(id);
   const store = loadStore(file);
-  const current = store.records.find((record) => record.id === id);
-  if (!current) throw Object.assign(new Error('NOT_FOUND'), { code: 'NOT_FOUND' });
+  const current = findRecord(store, id);
+  const appended = (extra.evidence || []).map(String);
+  const probe = validateRecord({
+    ...current,
+    evidence: appended.length > 0 ? appended : current.evidence,
+  }, 'stored');
+  if (!probe.ok && (probe.errors.includes('SECRET_REJECTED') || probe.errors.includes('PII_REJECTED')
+    || probe.errors.includes('FORBIDDEN_FIELD') || probe.errors.includes('VALUE_TOO_LONG'))) {
+    throw Object.assign(new Error(probe.errors[0]), { code: probe.errors[0], errors: probe.errors });
+  }
+  for (const item of appended) {
+    if (/-----BEGIN |AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9\-._~+/]{20,}|password\s*[:=]\s*\S+|api[_-]?key\s*[:=]\s*\S+/i.test(item)) {
+      throw Object.assign(new Error('SECRET_REJECTED'), { code: 'SECRET_REJECTED' });
+    }
+    if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(item)) {
+      throw Object.assign(new Error('PII_REJECTED'), { code: 'PII_REJECTED' });
+    }
+  }
   const evidence = [...new Set([
     ...(current.evidence || []),
-    ...((extra.evidence || []).map(String)),
+    ...appended,
   ])].slice(0, 20);
   const updated = {
     ...current,
@@ -101,11 +135,58 @@ export function markLocallyVerified(id, extra = {}, file = storeFile()) {
     evidence,
     lastSeen: new Date().toISOString(),
   };
-  saveStore({
-    version: 1,
-    records: store.records.map((record) => (record.id === id ? updated : record)),
-  }, file);
-  return { record: updated, wroteCanon: false };
+  return writeRecord(store, updated, file);
+}
+
+export function setEffectPlan(id, plan, extra = {}, file = storeFile()) {
+  refuseId(id);
+  const store = loadStore(file);
+  const current = findRecord(store, id);
+  let updated = applyEffectPlan(current, plan);
+  if (extra.controlRef) updated.controlRef = String(extra.controlRef);
+  if (extra.controlCommit) updated.controlCommit = String(extra.controlCommit);
+  updated = refreshEffectState(updated);
+  updated.lastSeen = new Date().toISOString();
+  return writeRecord(store, updated, file);
+}
+
+export function recordEffectObservation(id, observation, file = storeFile()) {
+  refuseId(id);
+  const store = loadStore(file);
+  const current = findRecord(store, id);
+  const result = applyEffectObservation(current, observation);
+  result.record.lastSeen = new Date().toISOString();
+  writeRecord(store, result.record, file);
+  return {
+    record: result.record,
+    added: result.added,
+    duplicate: result.duplicate,
+    evaluation: result.evaluation,
+    wroteCanon: false,
+  };
+}
+
+export function evaluateRecordEffect(id, file = storeFile()) {
+  refuseId(id);
+  const store = loadStore(file);
+  const current = findRecord(store, id);
+  const evaluation = evaluateEffect(current);
+  const refreshed = refreshEffectState(current);
+  if (refreshed.effectState !== current.effectState) {
+    writeRecord(store, refreshed, file);
+  }
+  return { record: refreshed, evaluation, wroteCanon: false };
+}
+
+export function reportCheck(file = storeFile(), options = {}) {
+  const store = loadStore(file);
+  const analysis = analyzeLearning(store.records, options);
+  return {
+    ...analysis,
+    storeVersion: store.version,
+    recordCount: store.records.length,
+    checkedAt: new Date().toISOString(),
+  };
 }
 
 export function reportDebt(file = storeFile()) {

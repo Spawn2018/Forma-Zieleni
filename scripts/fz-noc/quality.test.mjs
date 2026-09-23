@@ -12,6 +12,7 @@ test('CI_GREEN allows normal product selection path to run', () => {
     {
       repoState: { head: SHA, originMain: SHA, branch: 'main', ok: true },
       statusFor: () => ({ state: CI_STATES.CI_GREEN, run: { databaseId: 1, headSha: SHA } }),
+      skipLearningCheck: true,
     },
   );
   assert.equal(picked.qualityInterrupt, null);

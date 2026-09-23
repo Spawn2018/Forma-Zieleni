@@ -55,7 +55,7 @@ Stop the Owner only when no safe READY work remains and the blocker is a real OW
 
 After COMPLETE, and before the next selection, apply the learning flywheel in `docs/architecture/FZ-CONTINUOUS-IMPROVEMENT.md`. Sequence: execute, verify, complete, learning check, record or promote only when proportionate, refresh the execution graph, next READY.
 
-No material learning is a valid result. Use `node scripts/fz-cis/cli.mjs` to validate a record. Do not copy the FZ-CIS architecture into this skill. At the deadline, a short note may list work completed, material failures, material learning, Learning Debt opened or closed, avoidable Owner intervention, and next READY. That note is not a postmortem.
+`node scripts/fz-noc/cli.mjs complete` runs the canonical deterministic check: `node scripts/fz-cis/cli.mjs check`. No material learning is a valid result. Ordinary Learning Debt is not a second READY queue. A justified CRITICAL/SYSTEMIC `LEARNING_INTERRUPT` may pause product selection. Do not copy the FZ-CIS architecture into this skill. At the deadline, a short note may list work completed, material failures, material learning, Learning Debt opened or closed, avoidable Owner intervention, and next READY. That note is not a postmortem.
 
 At the deadline, do not start a new slice. Checkpoint, validate completed work, commit locally if it is complete, report, then `node scripts/fz-noc/cli.mjs stop` and stop the `loop-noc` watchdog.
 

@@ -19,11 +19,11 @@
       ],
       "generalizability": "RECURRING",
       "privacyClassification": "INTERNAL",
-      "status": "VALIDATING",
+      "status": "PROMOTED",
       "hypothesis": "Materializing an apps package or changing registry.mjs without refreshing projection tests and FZ-MASTER-TRACEABILITY.md leaves main red; a deterministic local gate would catch that before push.",
       "proposedImprovement": "Require the same local deterministic checks that CI runs (including README surface snapshot and registry projection equality) before any fast-forward push to origin main.",
       "evidenceStrength": "TESTED",
-      "validatedLocally": false,
+      "validatedLocally": true,
       "locallyVerified": true,
       "relatedCommit": "330a514",
       "relatedTest": "scripts/readme/regions.test.mjs",
@@ -31,9 +31,35 @@
       "id": "LR-20260922-a52d1a35",
       "occurrences": 1,
       "firstSeen": "2026-09-22T20:05:32.591Z",
-      "lastSeen": "2026-09-22T20:05:32.591Z",
+      "lastSeen": "2026-09-23T00:36:52.112Z",
       "validationMethod": "Deterministic scripts/ci/pre-push-gate.mjs plus Cursor shell deny of direct git push and pnpm push:main wrapper with unit bypass tests",
-      "promotionTarget": "AUTOMATION"
+      "promotionTarget": "AUTOMATION",
+      "effectState": "SUPPORTED",
+      "effectPlan": {
+        "method": "DETERMINISTIC_REPLAY",
+        "successSignal": "Canonical pre-push gate and push-main refuse when projection/readme checks fail before transport push",
+        "failureSignal": "Known projection-drift class reaches origin/main CI or push proceeds despite local failure",
+        "minimumEvidence": 1
+      },
+      "controlRef": "scripts/ci/pre-push-gate.mjs",
+      "controlCommit": "98d98fd83a13e102f095b71dcafdf88335b69b9a",
+      "effectObservations": [
+        {
+          "id": "effect:replay:projection-drift:pre-push-gate:isolated-readme-fail",
+          "at": "2026-09-23T00:36:51.905Z",
+          "type": "REPLAY_CAUGHT",
+          "evidence": [
+            "historical-class:330a514/run-35776765562",
+            "durable-control:scripts/ci/pre-push-gate.mjs+scripts/ci/push-main.mjs",
+            "replay:runPrePushGate fails on pnpm readme:check for projection drift class",
+            "replay:runPushMain returns gate_failed with pushed=false and no transport push"
+          ],
+          "relatedCommit": "330a514",
+          "controlCommit": "98d98fd83a13e102f095b71dcafdf88335b69b9a",
+          "afterControl": true
+        }
+      ],
+      "result": "Deterministic isolated replay: gate fails on readme projection drift and push-main refuses transport push."
     },
     {
       "patternKey": "cr-update-fingerprint-gener-security-coderabbit",

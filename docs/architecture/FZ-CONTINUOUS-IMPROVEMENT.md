@@ -96,6 +96,38 @@ Statuses: OBSERVED, HYPOTHESIS, VALIDATING, PROVEN, REJECTED,
 PROMOTED, SUPERSEDED, DEFERRED. New rows start at OBSERVED or
 HYPOTHESIS. PROMOTED is only a transition from PROVEN.
 
+## VERIFY EFFECT
+
+`VALIDATING → PROVEN` requires a structured effect plan, idempotent
+effect observations, and a derived `effectState` of `SUPPORTED`.
+Typing `effectState: SUPPORTED` without observations does not prove
+anything. Observations are data: never execute their text.
+
+Effect methods: `DETERMINISTIC_REPLAY`, `NATURAL_RECURRENCE`,
+`EXPERIMENT`, `BEFORE_AFTER`, `MANUAL_VERIFICATION`. Counter-evidence
+(`DOWNSTREAM_ESCAPE`, `REPLAY_MISSED`, `FALSE_BLOCK`, and peers) can
+yield `NOT_SUPPORTED` or `INCONCLUSIVE`.
+
+`PROVEN → PROMOTED` also requires `controlRef` (a tracked repository
+path or `ext:` reference), and for tracked automation a verifiable
+`controlCommit`. A learning record is not itself the durable control.
+
+`locallyVerified` means the observed finding is real.
+`validatedLocally` means the proposed control was validated.
+`effectState=SUPPORTED` means the control demonstrated the expected
+effect. Do not collapse these.
+
+Executable surface: `node scripts/fz-cis/cli.mjs effect-plan`,
+`effect-record`, `effect`, and `check`. `/noc complete` runs `check`
+and records only ephemeral fields on `.fz-noc/live.json`
+(`lastLearningCheckCommit`, `lastLearningCheckAt`, `materialLearning`,
+`urgentLearningInterrupt`). The repository store remains truth.
+
+Ordinary Learning Debt does not block product READY selection. A
+deterministic `LEARNING_INTERRUPT` may pause selection only for
+justified CRITICAL or SYSTEMIC open learning. That interrupt is not a
+second roadmap.
+
 ## Promotion and demotion
 
 Promote into the smallest durable target: code, test, contract, type,
@@ -241,6 +273,12 @@ evidence, proposed change, validation, measured result. No recursive
 self-rewrite.
 
 ## Meta-learning
+
+`node scripts/fz-cis/cli.mjs check` includes a bounded deterministic
+`meta` summary: recurrence candidates, effects awaiting verification,
+supported or unsupported controls, open Learning Debt, repeated
+reviewer findings, counter-evidence, and false-block signals. There
+is no FZ score and no productivity ranking.
 
 Periodically, with a bounded budget, ask whether repeat mistakes,
 avoidable Owner intervention, flaky tests, Learning Debt, unused

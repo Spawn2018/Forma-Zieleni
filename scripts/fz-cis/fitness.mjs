@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { evaluateEffect } from './effect.mjs';
 import { pushBlockers, validateRecord } from './policy.mjs';
 
 export const FITNESS = [
@@ -25,6 +26,22 @@ export const FITNESS = [
     reason: 'FZ-CIS learns around execution and must not replace it',
     mechanism: 'CURSOR-OS still names itself the sole binding definition',
     failure: 'A second loop can select or skip work',
+    owner: 'FZ orchestrator',
+  },
+  {
+    id: 'proven-requires-effect',
+    property: 'PROVEN records must carry a supported VERIFY EFFECT result',
+    reason: 'Agents must not declare PROVEN without effect evidence',
+    mechanism: 'Every tracked PROVEN/PROMOTED row evaluates to effectState SUPPORTED with a plan',
+    failure: 'A status forge can skip VERIFY EFFECT',
+    owner: 'FZ orchestrator',
+  },
+  {
+    id: 'promoted-requires-control',
+    property: 'PROMOTED records reference a real durable control',
+    reason: 'Promotion means standardization into an enforceable artifact',
+    mechanism: 'Every tracked PROMOTED row has controlRef (and controlCommit when tracked)',
+    failure: 'A learning row can claim promotion without a durable control',
     owner: 'FZ orchestrator',
   },
 ];
@@ -61,6 +78,18 @@ export function checkFitness(root, files) {
   for (const record of store.records) {
     const checked = validateRecord(record, 'stored');
     if (!checked.ok) errors.push(`learning-store-safe failed: ${record.id || 'record'} ${checked.errors.join(',')}`);
+    if (['PROVEN', 'PROMOTED'].includes(record.status)) {
+      const effect = evaluateEffect(record);
+      if (!record.effectPlan || effect.effectState !== 'SUPPORTED' || !effect.supported) {
+        errors.push(`proven-requires-effect failed: ${record.id}`);
+      }
+    }
+    if (record.status === 'PROMOTED') {
+      if (!record.controlRef) errors.push(`promoted-requires-control failed: ${record.id} missing controlRef`);
+      else if (!String(record.controlRef).startsWith('ext:') && !record.controlCommit) {
+        errors.push(`promoted-requires-control failed: ${record.id} missing controlCommit`);
+      }
+    }
   }
   for (const blocker of pushBlockers(store.records)) {
     if (!blocker.id) errors.push('learning-store-safe failed: critical blocker without id');

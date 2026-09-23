@@ -1,3 +1,17 @@
+import {
+  EFFECT_METHODS,
+  EFFECT_OBSERVATION_TYPES,
+  EFFECT_STATES,
+  assertEffectSupportedForProven,
+  evaluateEffect,
+  mergeEffectObservation,
+  refreshEffectState,
+  validateControlCommit,
+  validateControlRef,
+  validateEffectObservation,
+  validateEffectPlan,
+} from './effect.mjs';
+
 const STATUSES = ['OBSERVED', 'HYPOTHESIS', 'VALIDATING', 'PROVEN', 'REJECTED', 'PROMOTED', 'SUPERSEDED', 'DEFERRED'];
 const SOURCES = ['test', 'production', 'review', 'grok', 'coderabbit', 'owner', 'security', 'performance', 'ux', 'customer', 'search', 'incident', 'agent', 'manual-toil', 'experiment'];
 const EXTERNAL_SOURCES = new Set(['grok', 'coderabbit', 'customer', 'search']);
@@ -44,7 +58,7 @@ const TRANSITIONS = {
 const FORBIDDEN_KEYS = new Set([
   'secret', 'token', 'password', 'credential', 'credentials', 'customerEmail', 'rawPii',
   'privateKey', 'authorization', 'command', 'shell', 'eval', 'systemPrompt', 'toolCall',
-  'learnAwayOwnerGate', 'autoApprove',
+  'learnAwayOwnerGate', 'autoApprove', 'argv', 'spawn', 'exec',
 ]);
 const SECRET = /-----BEGIN |AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9\-._~+/]{20,}|password\s*[:=]\s*\S+|api[_-]?key\s*[:=]\s*\S+/i;
 const EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
@@ -52,12 +66,18 @@ const PATTERN_KEY = /^[a-z0-9]+(?:-[a-z0-9]+){1,8}$/;
 const ID_RE = /^LR-\d{8}-[a-f0-9]{8}$/;
 const PROMOTABLE_STRENGTH = new Set(['TESTED', 'MEASURED', 'STRONG']);
 const CLASS_WIDE = new Set(['RECURRING', 'SYSTEMIC', 'CRITICAL']);
+const TRACKED_PROMOTION_TARGETS = new Set([
+  'CODE', 'TEST', 'CONTRACT', 'TYPE', 'SCHEMA', 'LINT', 'REPO_CHECK', 'SECURITY_CONTROL',
+  'RUNBOOK', 'ADR', 'CANON', 'SKILL', 'AGENT', 'HOOK', 'AUTOMATION', 'DESIGN_SYSTEM',
+  'CONTENT_RULE', 'PRODUCT_RULE',
+]);
 
 export {
-  CLASS_WIDE, DEMOTION_REASONS, DORA_EVENT_TYPES, EVIDENCE_STRENGTH, EVENT_TYPES,
-  EXPERIMENT_DECISIONS, EXPERIMENT_STATUSES, EXTERNAL_SOURCES, FRESHNESS, GATES,
-  GENERALIZABILITY, HORIZONS, PATTERN_KEY, PRIVACY, PROMOTION_TARGETS, SEVERITIES,
-  SIGNAL_TYPES, SOURCES, STATUSES, TRANSITIONS,
+  CLASS_WIDE, DEMOTION_REASONS, DORA_EVENT_TYPES, EFFECT_METHODS, EFFECT_OBSERVATION_TYPES,
+  EFFECT_STATES, EVIDENCE_STRENGTH, EVENT_TYPES, EXPERIMENT_DECISIONS, EXPERIMENT_STATUSES,
+  EXTERNAL_SOURCES, FRESHNESS, GATES, GENERALIZABILITY, HORIZONS, PATTERN_KEY, PRIVACY,
+  PROMOTABLE_STRENGTH, PROMOTION_TARGETS, SEVERITIES, SIGNAL_TYPES, SOURCES, STATUSES,
+  TRACKED_PROMOTION_TARGETS, TRANSITIONS,
 };
 
 function fail(errors, code) {
@@ -117,6 +137,31 @@ export function validateRecord(input, mode = 'create') {
   if (/auto-?approv|automat\w*\s+approv|approve\s+(this|it|dangerous|owner)|learn away|downgrad\w*\s+(the\s+)?(gate|owner)/i.test(proposal)) {
     fail(errors, 'GATE_EROSION');
   }
+  if (input.effectPlan != null) {
+    const plan = validateEffectPlan(input.effectPlan);
+    if (!plan.ok) for (const code of plan.errors) fail(errors, code);
+  }
+  if (input.effectObservations != null) {
+    if (!Array.isArray(input.effectObservations)) fail(errors, 'BAD_EFFECT_OBSERVATIONS');
+    else {
+      if (input.effectObservations.length > 40) fail(errors, 'OBSERVATION_CAP');
+      for (const obs of input.effectObservations) {
+        const checkedObs = validateEffectObservation(obs);
+        if (!checkedObs.ok) for (const code of checkedObs.errors) fail(errors, code);
+      }
+    }
+  }
+  if (input.effectState != null && !EFFECT_STATES.includes(input.effectState)) {
+    fail(errors, 'BAD_EFFECT_STATE');
+  }
+  if (input.controlRef != null) {
+    const ref = validateControlRef(input.controlRef, { requireTracked: false });
+    if (!ref.ok) for (const code of ref.errors) fail(errors, code);
+  }
+  if (input.controlCommit != null && (typeof input.controlCommit !== 'string'
+    || !/^[0-9a-f]{7,40}$/i.test(input.controlCommit))) {
+    fail(errors, 'BAD_CONTROL_COMMIT');
+  }
   if (status === 'PROMOTED') {
     if (input.validatedLocally !== true) fail(errors, 'RAW_SIGNAL_CANNOT_PROMOTE');
     if (EXTERNAL_SOURCES.has(input.source) && input.locallyVerified !== true) fail(errors, 'EXTERNAL_NON_AUTHORITATIVE');
@@ -168,7 +213,7 @@ function error(code) {
   return err;
 }
 
-export function transition(record, next, extra = {}) {
+export function transition(record, next, extra = {}, options = {}) {
   const checked = validateRecord(record, 'stored');
   if (!checked.ok) throw error(checked.errors[0] || 'INVALID_RECORD');
   const allowed = TRANSITIONS[record.status] || [];
@@ -177,24 +222,91 @@ export function transition(record, next, extra = {}) {
     throw error('MISSING_REJECTION');
   }
   if (next === 'SUPERSEDED' && !DEMOTION_REASONS.includes(extra.demotionReason)) throw error('MISSING_DEMOTION_REASON');
-  const updated = {
+
+  // effectState cannot be forged via transition extras; always re-derive.
+  // effectObservations must merge idempotently — never append duplicate ids wholesale.
+  const { effectState: _forgedState, effectObservations: extraObs, ...safeExtra } = extra;
+  void _forgedState;
+  let mergedObs = record.effectObservations;
+  if (Array.isArray(extraObs)) {
+    mergedObs = Array.isArray(record.effectObservations) ? [...record.effectObservations] : [];
+    for (const obs of extraObs) {
+      const merged = mergeEffectObservation(mergedObs, obs);
+      if (!merged.ok) throw error(merged.errors[0] || 'BAD_OBSERVATION');
+      mergedObs = merged.observations;
+    }
+  }
+
+  let updated = {
     ...record,
-    ...extra,
+    ...safeExtra,
+    ...(extraObs ? { effectObservations: mergedObs } : {}),
     status: next,
-    validatedLocally: next === 'PROMOTED' ? true : record.validatedLocally === true,
+    validatedLocally: next === 'PROMOTED' ? true : (safeExtra.validatedLocally === true || record.validatedLocally === true),
   };
+  updated = refreshEffectState(updated);
+
+  if (next === 'PROVEN') {
+    if (EXTERNAL_SOURCES.has(record.source) && updated.locallyVerified !== true) {
+      throw error('EXTERNAL_NON_AUTHORITATIVE');
+    }
+    if (CLASS_WIDE.has(record.generalizability)
+      && !PROMOTABLE_STRENGTH.has(updated.evidenceStrength || record.evidenceStrength)) {
+      throw error('INSUFFICIENT_EVIDENCE');
+    }
+    // Anecdotal LOCAL/ONE-OFF cannot become class-wide proof.
+    if ((updated.evidenceStrength || record.evidenceStrength) === 'ANECDOTAL'
+      && CLASS_WIDE.has(record.generalizability)) {
+      throw error('INSUFFICIENT_EVIDENCE');
+    }
+    assertEffectSupportedForProven(updated);
+    if (updated.validatedLocally !== true) throw error('MISSING_LOCAL_VALIDATION');
+    if (record.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
+  }
+
   if (next === 'PROMOTED') {
-    if (record.validatedLocally !== true && extra.validatedLocally !== true) throw error('RAW_SIGNAL_CANNOT_PROMOTE');
+    if (record.validatedLocally !== true && safeExtra.validatedLocally !== true) {
+      throw error('RAW_SIGNAL_CANNOT_PROMOTE');
+    }
     updated.validatedLocally = true;
-    if (EXTERNAL_SOURCES.has(record.source) && updated.locallyVerified !== true) throw error('EXTERNAL_NON_AUTHORITATIVE');
-    if (CLASS_WIDE.has(record.generalizability) && !PROMOTABLE_STRENGTH.has(updated.evidenceStrength || record.evidenceStrength)) {
+    if (EXTERNAL_SOURCES.has(record.source) && updated.locallyVerified !== true) {
+      throw error('EXTERNAL_NON_AUTHORITATIVE');
+    }
+    if (CLASS_WIDE.has(record.generalizability)
+      && !PROMOTABLE_STRENGTH.has(updated.evidenceStrength || record.evidenceStrength)) {
       throw error('INSUFFICIENT_EVIDENCE');
     }
     if (!PROMOTION_TARGETS.includes(updated.promotionTarget)) throw error('MISSING_TARGET');
     if (record.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
+
+    assertEffectSupportedForProven(updated);
+    if (typeof updated.controlRef !== 'string' || !updated.controlRef.trim()) {
+      throw error('MISSING_CONTROL_REF');
+    }
+    const requireTracked = TRACKED_PROMOTION_TARGETS.has(updated.promotionTarget)
+      && !String(updated.controlRef).startsWith('ext:');
+    const ref = validateControlRef(updated.controlRef, {
+      requireTracked,
+      root: options.root,
+      gitLsFiles: options.gitLsFiles,
+    });
+    if (!ref.ok) throw error(ref.errors[0] || 'BAD_CONTROL_REF');
+    if (updated.controlCommit) {
+      const commit = validateControlCommit(updated.controlCommit, {
+        root: options.root,
+        gitCatFile: options.gitCatFile,
+      });
+      if (!commit.ok) throw error(commit.errors[0] || 'BAD_CONTROL_COMMIT');
+    } else if (requireTracked) {
+      throw error('MISSING_CONTROL_COMMIT');
+    }
     const again = validateRecord(updated, 'stored');
     if (!again.ok) throw error(again.errors[0]);
   }
+
+  // Keep derived effectState authoritative on the stored row.
+  const derived = evaluateEffect(updated);
+  updated.effectState = derived.effectState;
   return updated;
 }
 

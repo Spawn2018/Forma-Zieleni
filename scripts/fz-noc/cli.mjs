@@ -20,10 +20,27 @@ import {
   statusForSha,
 } from '../ci/post-push-ci.mjs';
 import { captureRepoState } from '../ci/pre-push-gate.mjs';
+import { learningInterruptFromCheck } from '../fz-cis/analysis.mjs';
+import { reportCheck } from '../fz-cis/store.mjs';
 
 function fail(message) {
   console.error(message);
   process.exit(1);
+}
+
+/**
+ * Canonical FZ-CIS learning check after COMPLETE (and reusable by selection).
+ * Deterministic. Does not copy learning records into live.json.
+ */
+export function runLearningCheck(options = {}) {
+  const check = (options.reportCheck || reportCheck)(options.storeFile, options.analysisOptions || {});
+  const learningInterrupt = learningInterruptFromCheck(check);
+  return {
+    check,
+    learningInterrupt,
+    materialLearning: check.material === true,
+    urgentLearningInterrupt: learningInterrupt != null,
+  };
 }
 
 function graph() {
@@ -40,6 +57,8 @@ function productSelection(session) {
 
 /**
  * Quality interrupt wins over product READY selection.
+ * After CI is green, a justified LEARNING_INTERRUPT may pause product selection.
+ * Ordinary Learning Debt does not.
  * Injected deps keep unit tests network-free.
  */
 export function selectionWithQuality(session, options = {}) {
@@ -59,6 +78,8 @@ export function selectionWithQuality(session, options = {}) {
       reason: interrupt.reason,
       exhaustionAllowed: false,
       qualityInterrupt: interrupt.qualityInterrupt,
+      learningInterrupt: null,
+      learningCheck: null,
       repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
       sessionPatch: null,
     };
@@ -67,10 +88,34 @@ export function selectionWithQuality(session, options = {}) {
   const cleared = interrupt.reason === 'ci_green'
     ? clearCiRepairAttempts(session || { attempts: {} })
     : session;
+
+  const learning = options.skipLearningCheck === true
+    ? { check: null, learningInterrupt: null, materialLearning: false, urgentLearningInterrupt: false }
+    : (options.learning || runLearningCheck(options));
+
+  if (learning.learningInterrupt) {
+    return {
+      selected: null,
+      ready: [],
+      withheld: [],
+      reason: 'learning_interrupt',
+      exhaustionAllowed: false,
+      qualityInterrupt: null,
+      learningInterrupt: learning.learningInterrupt,
+      learningCheck: learning.check,
+      materialLearning: learning.materialLearning,
+      repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
+      sessionPatch: interrupt.reason === 'ci_green' ? { attempts: cleared.attempts } : null,
+    };
+  }
+
   const picked = productSelection(cleared);
   return {
     ...picked,
     qualityInterrupt: null,
+    learningInterrupt: null,
+    learningCheck: learning.check,
+    materialLearning: learning.materialLearning,
     repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
     sessionPatch: interrupt.reason === 'ci_green' ? { attempts: cleared.attempts } : null,
   };
@@ -275,11 +320,24 @@ if (command === 'deadline') {
     session.status = 'idle';
     session.lastBeat = new Date().toISOString();
     session.silentFollowups = 0;
-    const picked = selection(session);
+
+    // COMPLETE → FZ-CIS learning check → next selection (Canon flywheel).
+    const learning = runLearningCheck();
+    session.lastLearningCheckCommit = ciGate.sha || commit;
+    session.lastLearningCheckAt = learning.check.checkedAt;
+    session.materialLearning = learning.materialLearning;
+    session.urgentLearningInterrupt = learning.urgentLearningInterrupt;
+
+    const picked = selection(session, { learning });
     session.nextCandidates = (picked.ready || []).filter((id) => id !== slice);
     session.selectionReason = picked.reason;
-    if (picked.selected) session.exhausted = false;
-    else session.exhausted = picked.exhaustionAllowed === true;
+    if (picked.learningInterrupt) {
+      session.exhausted = false;
+    } else if (picked.selected) {
+      session.exhausted = false;
+    } else {
+      session.exhausted = picked.exhaustionAllowed === true;
+    }
     writeSession(session);
     print({
       completed: true,
@@ -288,6 +346,19 @@ if (command === 'deadline') {
       ready: session.nextCandidates,
       ciState: CI_STATES.CI_GREEN,
       qualityInterrupt: picked.qualityInterrupt || null,
+      learningInterrupt: picked.learningInterrupt || null,
+      learningCheck: {
+        material: learning.materialLearning,
+        urgent: learning.urgentLearningInterrupt,
+        recurrenceCandidates: learning.check.recurrenceCandidates?.length || 0,
+        effectDue: learning.check.effectDue?.length || 0,
+        provenReady: learning.check.provenReady?.length || 0,
+        promotionReady: learning.check.promotionReady?.length || 0,
+        demotionReview: learning.check.demotionReview?.length || 0,
+        learningDebt: learning.check.learningDebt?.length || 0,
+        checkedAt: learning.check.checkedAt,
+        commit: session.lastLearningCheckCommit,
+      },
     });
   }
 } else {

@@ -32,6 +32,68 @@
     "occurrences": { "type": "integer", "minimum": 1 },
     "validatedLocally": { "type": "boolean" },
     "locallyVerified": { "type": "boolean" },
+    "controlRef": {
+      "type": "string",
+      "pattern": "^(?:[a-zA-Z0-9._-]+(?:/[a-zA-Z0-9._-]+)+|ext:[a-z0-9][a-z0-9._-]{2,80})$"
+    },
+    "controlCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "effectPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "successSignal", "failureSignal"],
+      "properties": {
+        "method": {
+          "enum": [
+            "DETERMINISTIC_REPLAY",
+            "NATURAL_RECURRENCE",
+            "EXPERIMENT",
+            "BEFORE_AFTER",
+            "MANUAL_VERIFICATION"
+          ]
+        },
+        "successSignal": { "type": "string", "minLength": 8 },
+        "failureSignal": { "type": "string", "minLength": 8 },
+        "minimumEvidence": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "effectObservations": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "at", "type", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^effect:[a-z0-9][a-z0-9:._-]{3,180}$" },
+          "at": { "type": "string" },
+          "type": {
+            "enum": [
+              "CONTROL_CAUGHT",
+              "CONTROL_MISSED",
+              "DOWNSTREAM_ESCAPE",
+              "FALSE_BLOCK",
+              "REPLAY_CAUGHT",
+              "REPLAY_MISSED",
+              "EXPERIMENT_SUPPORTED",
+              "EXPERIMENT_REJECTED",
+              "INCONCLUSIVE"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": { "type": "string", "minLength": 3 }
+          },
+          "relatedCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+          "controlCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+          "afterControl": { "type": "boolean" }
+        }
+      }
+    },
+    "effectState": {
+      "enum": ["UNPLANNED", "PLANNED", "OBSERVING", "SUPPORTED", "NOT_SUPPORTED", "INCONCLUSIVE"]
+    },
     "causality": { "const": "OBSERVED_ASSOCIATION" },
     "firstSeen": { "type": "string" },
     "lastSeen": { "type": "string" },

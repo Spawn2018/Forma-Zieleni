@@ -43,14 +43,43 @@ function base(overrides = {}) {
   };
 }
 
+function supportedEffect(extra = {}) {
+  return {
+    controlRef: 'scripts/ci/pre-push-gate.mjs',
+    controlCommit: '98d98fd',
+    effectPlan: {
+      method: 'DETERMINISTIC_REPLAY',
+      successSignal: 'Canonical gate refuses push when the known failure class is reproduced',
+      failureSignal: 'Known failure escapes the gate or push proceeds',
+      minimumEvidence: 1,
+    },
+    effectObservations: [{
+      id: 'effect:replay:policy-test-fixture',
+      at: '2026-09-23T00:00:00.000Z',
+      type: 'REPLAY_CAUGHT',
+      evidence: ['isolated push-main refused after mandatory check failure'],
+      afterControl: true,
+      controlCommit: '98d98fd',
+    }],
+    validatedLocally: true,
+    ...extra,
+  };
+}
+
 function prove(record, extra = {}) {
   let next = transition(record, 'HYPOTHESIS', { hypothesis: 'The encoder copies the master marker.' });
   next = transition(next, 'VALIDATING', { validationMethod: 'targeted regression test' });
-  next = transition(next, 'PROVEN', { evidenceStrength: 'TESTED', result: 'The test fails before the fix.' });
+  next = transition(next, 'PROVEN', {
+    evidenceStrength: 'TESTED',
+    result: 'The deterministic replay caught the failure class.',
+    ...supportedEffect(),
+    ...(extra.locallyVerified === true ? { locallyVerified: true } : {}),
+  });
   return transition(next, 'PROMOTED', {
     validatedLocally: true,
     promotionTarget: 'TEST',
     evidenceStrength: 'TESTED',
+    ...supportedEffect({ promotionTarget: 'TEST' }),
     ...extra,
   });
 }

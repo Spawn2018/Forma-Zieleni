@@ -1,7 +1,17 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { classifyFreshness, validateRecord } from './policy.mjs';
-import { addRecord, changeStatus, reportBlockers, reportDebt, reportDora } from './store.mjs';
+import {
+  addRecord,
+  changeStatus,
+  evaluateRecordEffect,
+  recordEffectObservation,
+  reportBlockers,
+  reportCheck,
+  reportDebt,
+  reportDora,
+  setEffectPlan,
+} from './store.mjs';
 import { ingestOutcome, ingestToolingEvent } from './ingest.mjs';
 
 function readJsonArg() {
@@ -36,6 +46,19 @@ try {
   } else if (command === 'transition') {
     const extra = arg('--extra') ? JSON.parse(arg('--extra')) : {};
     console.log(JSON.stringify(changeStatus(arg('--id'), arg('--status'), extra)));
+  } else if (command === 'effect-plan') {
+    const plan = arg('--json') ? readJsonArg() : JSON.parse(arg('--plan') || '{}');
+    const extra = {};
+    if (arg('--control-ref')) extra.controlRef = arg('--control-ref');
+    if (arg('--control-commit')) extra.controlCommit = arg('--control-commit');
+    console.log(JSON.stringify(setEffectPlan(arg('--id'), plan.effectPlan || plan, extra)));
+  } else if (command === 'effect-record') {
+    const observation = arg('--json') ? readJsonArg() : JSON.parse(arg('--observation') || '{}');
+    console.log(JSON.stringify(recordEffectObservation(arg('--id'), observation.observation || observation)));
+  } else if (command === 'effect') {
+    console.log(JSON.stringify(evaluateRecordEffect(arg('--id'))));
+  } else if (command === 'check') {
+    console.log(JSON.stringify(reportCheck(), null, 2));
   } else if (command === 'debt') {
     console.log(JSON.stringify(reportDebt()));
   } else if (command === 'blockers') {
@@ -45,7 +68,7 @@ try {
   } else if (command === 'freshness') {
     console.log(JSON.stringify(classifyFreshness(arg('--topic'))));
   } else {
-    console.error('usage: validate|record|ingest|transition|debt|blockers|dora|freshness');
+    console.error('usage: validate|record|ingest|transition|effect-plan|effect-record|effect|check|debt|blockers|dora|freshness');
     process.exitCode = 1;
   }
 } catch (err) {
