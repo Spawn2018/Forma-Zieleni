@@ -351,11 +351,11 @@ export function dependencyCycles(edges = []) {
 }
 
 export function normalizeComparableSource(text) {
-  const parts = String(text).split(/('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`)/g);
-  return parts.map((part, index) => {
-    if (index % 2 === 1) return part;
-    return part.replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n');
-  }).join('').trim();
+  return String(text)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join('\n');
 }
 
 export function syntacticDuplicates(files = []) {
@@ -379,7 +379,7 @@ export function scanSyntacticDuplicates(scanRoot = root) {
   const files = [];
   for (const dir of ['apps', 'packages']) {
     for (const file of walkSources(path.join(scanRoot, dir))) {
-      if (/\.test\./.test(file)) continue;
+      if (/\.(test|spec)\./.test(file)) continue;
       const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
       if (ignoredSyntacticPath(relative)) continue;
       files.push({ path: relative, text: readFileSync(file, 'utf8') });

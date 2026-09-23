@@ -88,6 +88,11 @@ test('exact repeated source is a syntactic duplicate', () => {
     { path: 'b.ts', text: 'export function label(input) { return input.name === "clientportal" && input.owner === "core-api" && input.state === "ready"; }' },
   ]);
   assert.equal(spaced.length, 0);
+  const regex = syntacticDuplicates([
+    { path: 'a.ts', text: 'export function match(input) { return /client portal/.test(input.name) && input.owner === "core-api" && input.state === "ready"; }' },
+    { path: 'b.ts', text: 'export function match(input) { return /clientportal/.test(input.name) && input.owner === "core-api" && input.state === "ready"; }' },
+  ]);
+  assert.equal(regex.length, 0);
   const checked = checkQualityCoverage({
     clones: [['apps/admin/a.ts', 'apps/portal/a.ts']],
     imports: [],
