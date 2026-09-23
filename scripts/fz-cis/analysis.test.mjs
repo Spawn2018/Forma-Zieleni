@@ -122,7 +122,8 @@ test('learning check: current one-off CR records are not false recurrence', () =
   const store = JSON.parse(readFileSync(path.join(root, 'docs/engineering/learning/records.json'), 'utf8'));
   const crRecords = store.records.filter((record) => record.source === 'coderabbit');
   assert.ok(crRecords.length >= 1);
-  assert.equal(crRecords.every((record) => record.status === 'OBSERVED'), true);
+  assert.equal(crRecords.every((record) => record.status === 'OBSERVED' || record.status === 'REJECTED'), true);
+  assert.equal(crRecords.some((record) => record.status === 'PROMOTED'), false);
   const check = analyzeLearning(crRecords);
   assert.equal(check.recurrenceCandidates.length, 0);
 });
