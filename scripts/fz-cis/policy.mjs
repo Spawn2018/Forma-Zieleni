@@ -226,8 +226,19 @@ export function transition(record, next, extra = {}, options = {}) {
 
   // effectState cannot be forged via transition extras; always re-derive.
   // effectObservations must merge idempotently — never append duplicate ids wholesale.
-  const { effectState: _forgedState, effectObservations: extraObs, ...safeExtra } = extra;
+  // Identity fields stay bound to the stored record (cannot be rewritten mid-transition).
+  const {
+    effectState: _forgedState,
+    effectObservations: extraObs,
+    source: _sourceForge,
+    generalizability: _genForge,
+    ownerGate: _gateForge,
+    ...safeExtra
+  } = extra;
   void _forgedState;
+  void _sourceForge;
+  void _genForge;
+  void _gateForge;
   if (extraObs != null && !Array.isArray(extraObs)) throw error('BAD_EFFECT_OBSERVATIONS');
   let mergedObs = record.effectObservations;
   if (Array.isArray(extraObs)) {
@@ -243,27 +254,30 @@ export function transition(record, next, extra = {}, options = {}) {
     ...record,
     ...safeExtra,
     ...(extraObs ? { effectObservations: mergedObs } : {}),
+    source: record.source,
+    generalizability: record.generalizability,
+    ...(record.ownerGate != null ? { ownerGate: record.ownerGate } : {}),
     status: next,
     validatedLocally: next === 'PROMOTED' ? true : (safeExtra.validatedLocally === true || record.validatedLocally === true),
   };
   updated = refreshEffectState(updated);
 
   if (next === 'PROVEN') {
-    if (EXTERNAL_SOURCES.has(record.source) && updated.locallyVerified !== true) {
+    if (EXTERNAL_SOURCES.has(updated.source) && updated.locallyVerified !== true) {
       throw error('EXTERNAL_NON_AUTHORITATIVE');
     }
-    if (CLASS_WIDE.has(record.generalizability)
+    if (CLASS_WIDE.has(updated.generalizability)
       && !PROMOTABLE_STRENGTH.has(updated.evidenceStrength || record.evidenceStrength)) {
       throw error('INSUFFICIENT_EVIDENCE');
     }
     // Anecdotal LOCAL/ONE-OFF cannot become class-wide proof.
     if ((updated.evidenceStrength || record.evidenceStrength) === 'ANECDOTAL'
-      && CLASS_WIDE.has(record.generalizability)) {
+      && CLASS_WIDE.has(updated.generalizability)) {
       throw error('INSUFFICIENT_EVIDENCE');
     }
     assertEffectSupportedForProven(updated);
     if (updated.validatedLocally !== true) throw error('MISSING_LOCAL_VALIDATION');
-    if (record.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
+    if (updated.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
   }
 
   if (next === 'PROMOTED') {
@@ -271,15 +285,15 @@ export function transition(record, next, extra = {}, options = {}) {
       throw error('RAW_SIGNAL_CANNOT_PROMOTE');
     }
     updated.validatedLocally = true;
-    if (EXTERNAL_SOURCES.has(record.source) && updated.locallyVerified !== true) {
+    if (EXTERNAL_SOURCES.has(updated.source) && updated.locallyVerified !== true) {
       throw error('EXTERNAL_NON_AUTHORITATIVE');
     }
-    if (CLASS_WIDE.has(record.generalizability)
+    if (CLASS_WIDE.has(updated.generalizability)
       && !PROMOTABLE_STRENGTH.has(updated.evidenceStrength || record.evidenceStrength)) {
       throw error('INSUFFICIENT_EVIDENCE');
     }
     if (!PROMOTION_TARGETS.includes(updated.promotionTarget)) throw error('MISSING_TARGET');
-    if (record.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
+    if (updated.ownerGate && updated.gateDisposition !== 'PRESERVED') throw error('GATE_EROSION');
 
     assertEffectSupportedForProven(updated);
     if (typeof updated.controlRef !== 'string' || !updated.controlRef.trim()) {

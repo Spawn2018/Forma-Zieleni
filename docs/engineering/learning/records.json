@@ -578,6 +578,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T01:12:09.535Z",
       "lastSeen": "2026-09-23T01:12:47.897Z"
+    },
+    {
+      "patternKey": "cr-update-the-transition-va-a9ebadd331",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the transition validation around EXTERNAL_SOURCES and CLASS_WIDE to inspect the final values from updated.sourc",
+      "evidence": [
+        "cr-occurrence:495f9fc0aeea:496ee058e02a:cr-update-the-transition-va-a9ebadd331",
+        "scripts/fz-cis/policy.mjs",
+        "severity:high",
+        "accepted:cr-update-the-transition-va-a9ebadd331"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "496ee058e02a1a3b69d40460bacdb1a832e17b34",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-be00d976",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T02:08:25.551Z",
+      "lastSeen": "2026-09-23T02:09:25.147Z"
     }
   ]
 }
