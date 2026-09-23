@@ -350,6 +350,36 @@ export function dependencyCycles(edges = []) {
   return [...new Set(cycles)];
 }
 
+export function syntacticDuplicates(files = []) {
+  const groups = new Map();
+  for (const file of files) {
+    const text = String(file.text || '').replace(/\s+/g, ' ').trim();
+    if (text.length < 120) continue;
+    if (!groups.has(text)) groups.set(text, []);
+    groups.get(text).push(file.path);
+  }
+  return [...groups.values()].filter((group) => group.length > 1);
+}
+
+function ignoredSyntacticPath(relative) {
+  return relative.includes('/.react-router/')
+    || relative.endsWith('/vite.config.ts')
+    || relative.endsWith('/app/routes.ts');
+}
+
+export function scanSyntacticDuplicates(scanRoot = root) {
+  const files = [];
+  for (const dir of ['apps', 'packages']) {
+    for (const file of walkSources(path.join(scanRoot, dir))) {
+      if (/\.test\./.test(file)) continue;
+      const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
+      if (ignoredSyntacticPath(relative)) continue;
+      files.push({ path: relative, text: readFileSync(file, 'utf8') });
+    }
+  }
+  return syntacticDuplicates(files);
+}
+
 export function semanticDuplication(rules = BUSINESS_RULES) {
   const owners = new Map();
   const duplicates = [];
@@ -565,7 +595,9 @@ export function checkQualityCoverage(options = {}) {
     if (item.claimsUiE2e === true && item.transport === 'api') errors.push(`API_CALL_IS_NOT_UI_E2E:${item.id}`);
   }
   const duplicates = semanticDuplication(rules);
+  const clones = options.clones === undefined ? scanSyntacticDuplicates(options.root || root) : options.clones;
   for (const id of duplicates) errors.push(`SEMANTIC_DUPLICATION:${id}`);
+  for (const group of clones) errors.push(`SYNTACTIC_DUPLICATION:${group.join('|')}`);
   for (const cycle of dependencyCycles(edges)) errors.push(`DEPENDENCY_CYCLE:${cycle}`);
   for (const violation of imports) errors.push(`FORBIDDEN_IMPORT:${violation}`);
   for (const item of deadCodeFindings(dead)) errors.push(`DEAD_CODE:${item.id}`);
@@ -594,6 +626,7 @@ export function checkQualityCoverage(options = {}) {
       runtimeReadyJourneys: runtimeReady.length,
       runtimeReadyMissingE2e: missingE2e.length,
       semanticDuplication: duplicates.length,
+      syntacticDuplication: clones.length,
       forbiddenImports: imports.length,
       deadCode: deadCodeFindings(dead).length,
       debt: debt.length,

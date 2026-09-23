@@ -26,6 +26,7 @@ import {
   securityFixDurable,
   selectQualityChecks,
   semanticDuplication,
+  syntacticDuplicates,
   visualBaselineUpdate,
 } from './quality-coverage.mjs';
 
@@ -73,6 +74,22 @@ test('client A cannot access client B', () => {
   const decision = clientAccessAllowed({ clientId: 'A' }, { clientId: 'B' });
   assert.equal(decision.ok, false);
   assert.equal(decision.reason, 'BOLA');
+});
+
+test('exact repeated source is a syntactic duplicate', () => {
+  const clones = syntacticDuplicates([
+    { path: 'apps/admin/a.ts', text: 'export function sameRule(input) { return input.clientId === input.ownerId && input.state === "ready" && input.scope === "client" && input.source === "core-api"; }' },
+    { path: 'apps/portal/a.ts', text: 'export function sameRule(input) { return input.clientId === input.ownerId && input.state === "ready" && input.scope === "client" && input.source === "core-api"; }' },
+    { path: 'packages/domain/src/other.ts', text: 'export function different(input) { return input.kind; }' },
+  ]);
+  assert.equal(clones.length, 1);
+  const checked = checkQualityCoverage({
+    clones: [['apps/admin/a.ts', 'apps/portal/a.ts']],
+    imports: [],
+    debug: [],
+    edges: [],
+  });
+  assert.equal(checked.errors.some((error) => error.startsWith('SYNTACTIC_DUPLICATION:')), true);
 });
 
 test('the same business rule with two owners is semantic duplication', () => {
