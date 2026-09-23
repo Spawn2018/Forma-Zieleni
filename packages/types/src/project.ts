@@ -1,7 +1,7 @@
 export type ProjectRecord = {
   id: string;
   contractId: string;
-  status: 'planned';
+  status: 'planned' | 'delivered';
   clientSubject: string | null;
   createdAt: string;
   updatedAt: string;

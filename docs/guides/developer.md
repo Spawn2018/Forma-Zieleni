@@ -55,9 +55,8 @@ The context window size is not a reason to read every document.
 **not** security-accepted; that stays report-only and does not globally
 block product work. After false-exhaustion repair, READY AUTO/REVIEW
 product slices on `docs/architecture/NEXT-SLICES-MAIN.md` include
-`GARDENOS-DOMAIN` as the current critical next, and other OPEN slices
-such as `ADMIN-CRM-LEAD`, `PAY-DOMAIN-NEUTRAL`, and
-`MOBILE-ANDROID-FOUNDATION`. Owner gates do not erase that work. Missing binding
+OPEN READY work such as `ATLAS-PLANT-IDENTITY`, `ADMIN-CRM-LEAD`,
+`PAY-DOMAIN-NEUTRAL`, and `MOBILE-ANDROID-FOUNDATION`. Owner gates do not erase that work. Missing binding
 slices are an internal materialization defect, not Owner roadmap
 refresh. ZAP and Dependency-Check do not block unrelated product work.
 The CMS/Search graph stays acceptance history. Do not start a second

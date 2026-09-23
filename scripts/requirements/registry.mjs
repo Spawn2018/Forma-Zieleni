@@ -428,10 +428,9 @@ row('FZ-REQ-MOBILE-003', 'iOS is a Core API client with its own app foundation, 
   executableSlice: 'MOBILE-IOS-FOUNDATION',
   executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
 });
-row('FZ-REQ-GARDENOS-002', 'Garden OS domain state links a delivered project to a garden record owned by Core API.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/GARDENOS-RELATION-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Garden OS domain slice', 'REVIEW', 'The relation boundary is not the garden runtime.', {
+row('FZ-REQ-GARDENOS-002', 'Garden OS domain state links a delivered project to a garden record owned by Core API.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/garden.ts', 'packages/domain/garden.test.mjs', '', 'NONE', 'Domain garden record only. Twin runtime, HTTP garden routes, and UI stay later.', {
   productCapability: 'GARDENOS',
   depth: 'DOMAIN',
-  blockerClass: 'INTERNAL',
   executableSlice: 'GARDENOS-DOMAIN',
   executableWhenComplete: ['GARDENOS-RELATION-BOUNDARY'],
 });

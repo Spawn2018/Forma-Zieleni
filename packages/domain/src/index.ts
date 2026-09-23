@@ -130,9 +130,17 @@ export {
   PROJECT_STATUSES,
   assertOpaqueProjectId,
   createProject,
+  deliverProject,
   projectProjectForPortal,
 } from './project.ts';
 export type { Project, ProjectStatus, PortalProjectProjection } from './project.ts';
+export {
+  assertGardenHasNoLiveInvent,
+  assertOpaqueGardenId,
+  createGarden,
+  projectGardenForPortal,
+} from './garden.ts';
+export type { Garden, PortalGardenProjection } from './garden.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

@@ -607,6 +607,21 @@ ALTER TABLE project DROP COLUMN IF EXISTS client_subject;
   },
 };
 
+const projectDeliveredMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE project DROP CONSTRAINT IF EXISTS project_status_known;
+ALTER TABLE project ADD CONSTRAINT project_status_known CHECK (status IN ('planned', 'delivered'));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+ALTER TABLE project DROP CONSTRAINT IF EXISTS project_status_known;
+ALTER TABLE project ADD CONSTRAINT project_status_known CHECK (status IN ('planned'));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -620,6 +635,7 @@ const provider: MigrationProvider = {
       '008_portal_offer_projection': portalOfferMigration,
       '009_project_domain': projectMigration,
       '010_portal_project_projection': portalProjectMigration,
+      '011_project_delivered_status': projectDeliveredMigration,
     };
   },
 };

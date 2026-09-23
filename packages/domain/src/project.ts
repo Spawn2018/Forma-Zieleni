@@ -1,12 +1,13 @@
 import { assertOpaqueContractId, type Contract } from './contract.ts';
 
-export const PROJECT_STATUSES = ['planned'] as const;
+export const PROJECT_STATUSES = ['planned', 'delivered'] as const;
 
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
 /**
  * Commercial Project owned by Core API after Contract.
  * Payment provider and live activation stay Owner-gated outside this foundation.
+ * `delivered` unlocks Garden OS linkage; it is not a twin runtime.
  */
 export type Project = {
   id: string;
@@ -55,6 +56,16 @@ export function createProject(
     status: 'planned',
     clientSubject,
     createdAt: at,
+    updatedAt: at,
+  };
+}
+
+/** Marks a planned project delivered so a Garden OS record may link to it. */
+export function deliverProject(project: Project, at: string): Project {
+  if (project.status !== 'planned') throw new Error('PROJECT_NOT_DELIVERABLE');
+  return {
+    ...project,
+    status: 'delivered',
     updatedAt: at,
   };
 }

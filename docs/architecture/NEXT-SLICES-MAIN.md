@@ -435,11 +435,16 @@ Next: none.
 
 Dependencies: GARDENOS-RELATION-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Core API domain Garden linked only to a
+`delivered` Project, with clientSubject BOLA and no twin/live invent.
+`deliverProject()` unlocks linkage. No twin database, no HTTP garden
+routes, no Garden OS UI.
 Autonomous: yes.
 Accept: a Core API garden record linked to a delivered project. No twin
 database and no invented live garden.
-Tests: domain tests for the garden record.
+Tests: `packages/domain/garden.test.mjs`,
+`packages/domain/project.test.mjs` delivery cases,
+`docs/architecture/GARDENOS-DOMAIN.md`.
 Security: client isolation matches the project owner.
 Next: none.
 

@@ -4,7 +4,7 @@ import { createLead, qualifyLead } from './src/lead.ts';
 import { createOpportunity } from './src/opportunity.ts';
 import { createOffer } from './src/offer.ts';
 import { createContract } from './src/contract.ts';
-import { assertOpaqueProjectId, createProject, projectProjectForPortal } from './src/project.ts';
+import { assertOpaqueProjectId, createProject, deliverProject, projectProjectForPortal } from './src/project.ts';
 
 const at = '2026-09-22T12:00:00.000Z';
 const capture = {
@@ -59,4 +59,14 @@ test('portal projection is BOLA-isolated and omits commercial fields', () => {
   assert.equal(Object.hasOwn(mine, 'payment'), false);
   assert.equal(projectProjectForPortal(project, 'portal-other'), null);
   assert.equal(projectProjectForPortal(createProject('j8k2n4p6q8r0s2t4', contract, at), 'portal-ola'), null);
+});
+
+test('planned project becomes delivered without inventing payment state', () => {
+  const contract = draftContract();
+  const planned = createProject('j9k2n4p6q8r0s2t4', contract, '2026-09-22T12:25:00.000Z');
+  const delivered = deliverProject(planned, '2026-09-22T13:00:00.000Z');
+  assert.equal(delivered.status, 'delivered');
+  assert.equal(delivered.updatedAt, '2026-09-22T13:00:00.000Z');
+  assert.equal(Object.hasOwn(delivered, 'payment'), false);
+  assert.throws(() => deliverProject(delivered, at), /PROJECT_NOT_DELIVERABLE/);
 });

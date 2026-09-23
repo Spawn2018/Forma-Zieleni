@@ -6,7 +6,7 @@ import { decodeCursor, encodeCursor, requestHash } from './leads.ts';
 import type { LeadStore, ProjectListQuery, SortField, StoredReply } from './store.ts';
 
 const SORTS = new Set<SortField>(['createdAt', '-createdAt', 'updatedAt', '-updatedAt']);
-const STATUSES = new Set<ProjectStatus>(['planned']);
+const STATUSES = new Set<ProjectStatus>(['planned', 'delivered']);
 
 export function parseProjectListQuery(input: {
   limit?: string;
