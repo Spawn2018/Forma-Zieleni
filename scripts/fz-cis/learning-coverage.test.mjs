@@ -71,6 +71,57 @@ test('promotion without supported effect is blocked', () => {
   );
 });
 
+test('AI-only support does not hide counter-evidence', () => {
+  const evaluated = evaluateEffect({
+    effectPlan: {
+      method: 'DETERMINISTIC_REPLAY',
+      successSignal: 'A local replay catches the class',
+      failureSignal: 'The class still escapes',
+    },
+    effectObservations: [
+      {
+        id: 'effect:replay:ai-only',
+        at: '2026-09-23T00:00:00.000Z',
+        type: 'REPLAY_CAUGHT',
+        evidence: ['a second model agreed with the first'],
+        evidenceClass: 'AI_AGREEMENT',
+      },
+      {
+        id: 'effect:miss:human-counter',
+        at: '2026-09-23T02:00:00.000Z',
+        type: 'CONTROL_MISSED',
+        evidence: ['the control missed the class'],
+        evidenceClass: 'HUMAN_VERIFIED',
+      },
+    ],
+  });
+  assert.equal(evaluated.supported, false);
+  assert.equal(evaluated.reason, 'COUNTER_DOMINATES');
+});
+
+test('transition cannot retarget provenance, claim, or tenant', () => {
+  const created = incorporate([], base({
+    id: 'LR-20260923-a1000008',
+    provenanceEnvironment: 'TEST',
+    learningClaim: 'ENGINEERING',
+    learningScope: 'PROJECT',
+    tenantId: 'tenant-a',
+  })).record;
+  const next = transition(created, 'HYPOTHESIS', {
+    hypothesis: 'The marker can be copied again.',
+    provenanceEnvironment: 'PRODUCTION',
+    learningClaim: 'PRODUCTION',
+    tenantId: 'tenant-a',
+  });
+  assert.equal(next.provenanceEnvironment, 'TEST');
+  assert.equal(next.learningClaim, 'ENGINEERING');
+  assert.equal(next.tenantId, 'tenant-a');
+  assert.throws(
+    () => transition(created, 'HYPOTHESIS', { hypothesis: 'Move the row to another customer.', tenantId: 'tenant-b' }),
+    /CROSS_TENANT_LEAK/,
+  );
+});
+
 test('promotion without a durable control is blocked', () => {
   const proven = {
     ...base({ id: 'LR-20260923-a1000002', status: 'PROVEN', validatedLocally: true, evidenceStrength: 'TESTED' }),
@@ -185,6 +236,8 @@ test('a project-scoped human correction cannot become global', () => {
   });
   assert.equal(kept.ok, true);
   assert.equal(kept.outcome.learningScope, 'GARDEN');
+  assert.equal(kept.outcome.source, 'customer');
+  assert.equal(kept.outcome.locallyVerified, false);
   assert.equal(kept.wroteCanon, false);
 });
 

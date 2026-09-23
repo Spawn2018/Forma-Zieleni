@@ -381,7 +381,7 @@ export function evaluateEffect(record) {
     };
   }
 
-  if (supporting.length === 0 && aiOnlySupport.length > 0 && escape.length === 0) {
+  if (supporting.length === 0 && aiOnlySupport.length > 0 && counter.length === 0) {
     return {
       effectState: 'INCONCLUSIVE',
       supported: false,

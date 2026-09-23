@@ -1038,7 +1038,7 @@ export function humanCorrectionToSignal(input = {}) {
     evidence: input.evidence || [`role:${input.role}`, `action:${input.action}`, `entity:${input.entity}`],
     learningScope,
     evidenceScope: input.scope || learningScope,
-    source: input.role === 'OWNER' ? 'owner' : 'review',
+    source: input.role === 'OWNER' ? 'owner' : input.role === 'CLIENT' ? 'customer' : 'review',
     signalType: 'review-finding',
     generalizability: 'LOCAL',
     provenanceEnvironment: 'INTERNAL',

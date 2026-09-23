@@ -267,8 +267,14 @@ export function transition(record, next, extra = {}, options = {}) {
     independentScopeIds: _scopeIds,
     humanApproval: _humanApproval,
     productionLearning: _productionLearning,
+    provenanceEnvironment: _provenanceForge,
+    learningClaim: _claimForge,
+    tenantId: _tenantForge,
     ...safeExtra
   } = extra;
+  void _provenanceForge;
+  void _claimForge;
+  void _tenantForge;
   void _forgedState;
   void _sourceForge;
   void _genForge;
