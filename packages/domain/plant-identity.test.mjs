@@ -101,4 +101,8 @@ test('public projection lists only approved identities with taxonomic citations'
   const listed = listPublicPlants([draft, approved]);
   assert.equal(listed.length, 1);
   assert.equal(listed[0].id, approved.id);
+  assert.equal(
+    projectPlantForPublic({ ...approved, citations: [] }),
+    null,
+  );
 });

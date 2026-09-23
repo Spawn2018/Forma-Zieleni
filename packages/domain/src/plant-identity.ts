@@ -106,6 +106,7 @@ export type PublicPlantProjection = {
 
 export function projectPlantForPublic(plant: PlantIdentity): PublicPlantProjection | null {
   if (plant.status !== 'approved') return null;
+  if (!plant.citations.length) return null;
   assertAtlasDoesNotAuthorizeAdvice(plant.scientificName);
   assertPlantIdentityHasNoCultivationClaim({
     careGuide: Object.hasOwn(plant, 'careGuide'),
@@ -118,11 +119,18 @@ export function projectPlantForPublic(plant: PlantIdentity): PublicPlantProjecti
   for (const citation of plant.citations) {
     const source = authorities.get(citation.sourceId);
     if (!source) throw new Error('ATLAS_CITATION_UNKNOWN');
+    let accession = citation.accession;
+    if (accession !== null) {
+      const trimmed = accession.trim();
+      if (!trimmed || trimmed.length > 128) throw new Error('ATLAS_ACCESSION_INVALID');
+      assertAtlasDoesNotAuthorizeAdvice(trimmed);
+      accession = trimmed;
+    }
     citations.push({
       sourceId: source.id,
       url: source.url,
       note: source.note,
-      accession: citation.accession,
+      accession,
     });
   }
   return {
