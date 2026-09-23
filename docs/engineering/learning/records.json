@@ -812,6 +812,58 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T12:33:10.780Z",
       "lastSeen": "2026-09-23T12:35:54.574Z"
+    },
+    {
+      "patternKey": "cr-update-the-acceptance-st-6aca86f6f3",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the acceptance-state validation in the experience-contract checks to derive implied acceptance from the order o",
+      "evidence": [
+        "cr-occurrence:918e0fdaedc6:95a203693c0b:cr-update-the-acceptance-st-6aca86f6f3",
+        "scripts/requirements/experience-contract.mjs",
+        "severity:low",
+        "accepted:cr-update-the-acceptance-st-6aca86f6f3"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "95a203693c0bf4c0150c54d72b825f2f1c28a3be",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-b6104dd0",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T13:40:31.930Z",
+      "lastSeen": "2026-09-23T13:42:21.612Z"
+    },
+    {
+      "patternKey": "cr-update-the-orphan-screen-a2f559eb05",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the ORPHAN_SCREEN validation for screens so it checks screen.workflowId against an independent set of valid wor",
+      "evidence": [
+        "cr-occurrence:918e0fdaedc6:95a203693c0b:cr-update-the-orphan-screen-a2f559eb05",
+        "scripts/requirements/experience-contract.mjs",
+        "severity:low",
+        "accepted:cr-update-the-orphan-screen-a2f559eb05"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "95a203693c0bf4c0150c54d72b825f2f1c28a3be",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-9837a11d",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T13:40:31.966Z",
+      "lastSeen": "2026-09-23T13:42:21.864Z"
     }
   ]
 }
