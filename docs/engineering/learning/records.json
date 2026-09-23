@@ -734,6 +734,84 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T11:25:05.622Z",
       "lastSeen": "2026-09-23T11:26:53.205Z"
+    },
+    {
+      "patternKey": "cr-at-line-1041-update-the-ea00735f14",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 1041, Update the source mapping in humanCorrectionToSignal so CLIENT corrections use the existing external custo",
+      "evidence": [
+        "cr-occurrence:86c90468f37b:34fc3b6aa064:cr-at-line-1041-update-the-ea00735f14",
+        "scripts/fz-cis/learning-coverage.mjs",
+        "severity:high",
+        "accepted:cr-at-line-1041-update-the-ea00735f14"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "34fc3b6aa0648bb00ed719fcb51e6218b76e1653",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-87f60055",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T12:33:10.733Z",
+      "lastSeen": "2026-09-23T12:35:54.208Z"
+    },
+    {
+      "patternKey": "cr-update-the-ai-circular-e-821c20ecf7",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the AI_CIRCULAR_EVIDENCE condition so it only applies when there is no counter-evidence: in the branch using su",
+      "evidence": [
+        "cr-occurrence:86c90468f37b:34fc3b6aa064:cr-update-the-ai-circular-e-821c20ecf7",
+        "scripts/fz-cis/effect.mjs",
+        "severity:high",
+        "accepted:cr-update-the-ai-circular-e-821c20ecf7"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "34fc3b6aa0648bb00ed719fcb51e6218b76e1653",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-7cabe3da",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T12:33:10.753Z",
+      "lastSeen": "2026-09-23T12:35:54.414Z"
+    },
+    {
+      "patternKey": "cr-update-transition-so-pro-5d07aed3cf",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update transition so provenanceEnvironment, learningClaim, and tenantId cannot be changed through safeExtra, preservin",
+      "evidence": [
+        "cr-occurrence:86c90468f37b:34fc3b6aa064:cr-update-transition-so-pro-5d07aed3cf",
+        "scripts/fz-cis/policy.mjs",
+        "severity:high",
+        "accepted:cr-update-transition-so-pro-5d07aed3cf"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "34fc3b6aa0648bb00ed719fcb51e6218b76e1653",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-0f809186",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T12:33:10.780Z",
+      "lastSeen": "2026-09-23T12:35:54.574Z"
     }
   ]
 }
