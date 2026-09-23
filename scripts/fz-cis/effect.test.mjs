@@ -155,6 +155,8 @@ test('observation after control activation is distinguished from pre-control evi
   assert.equal(evaluateEffect(record).supported, true);
 });
 
+const secretish = ['api', '_key', ' = ', 'abcdefghijklmnop'].join('');
+
 test('malformed and secret effect evidence is rejected', () => {
   assert.equal(validateEffectPlan({ method: 'DETERMINISTIC_REPLAY', successSignal: 'ok' }).ok, false);
   assert.equal(validateEffectPlan({
@@ -172,7 +174,7 @@ test('malformed and secret effect evidence is rejected', () => {
   }).errors.includes('BAD_OBSERVATION_ID'), true);
   assert.equal(validateEffectObservation({
     ...caught(),
-    evidence: ['api_key = abcdefghijklmnop'],
+    evidence: [secretish],
   }).errors.includes('SECRET_REJECTED'), true);
 });
 
@@ -222,7 +224,7 @@ test('markLocallyVerified rejects secret-bearing evidence', () => {
   // Covered via store path in policy store tests when available; unit-level scan mirror:
   assert.equal(validateEffectObservation({
     ...caught(),
-    evidence: ['api_key = abcdefghijklmnop'],
+    evidence: [secretish],
   }).errors.includes('SECRET_REJECTED'), true);
 });
 
