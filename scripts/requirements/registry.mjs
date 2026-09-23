@@ -441,10 +441,9 @@ row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observat
   executableSlice: 'SITEINTEL-RULES',
   executableWhenComplete: ['SITEINTEL-DATA-BOUNDARY'],
 });
-row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxonomic-source proof and from cultivation claims.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md', 'packages/domain/atlas-boundary.test.mjs', 'Atlas identity slice', 'REVIEW', 'Provenance is not the Atlas product UI.', {
+row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxonomic-source proof and from cultivation claims.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/plant-identity.ts', 'packages/domain/plant-identity.test.mjs', '', 'NONE', 'Domain identity only. Public Atlas surface stays a later slice.', {
   productCapability: 'ATLAS',
   depth: 'DOMAIN',
-  blockerClass: 'INTERNAL',
   executableSlice: 'ATLAS-PLANT-IDENTITY',
   executableWhenComplete: ['ATLAS-PROVENANCE-BOUNDARY'],
 });

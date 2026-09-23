@@ -141,6 +141,14 @@ export {
   projectGardenForPortal,
 } from './garden.ts';
 export type { Garden, PortalGardenProjection } from './garden.ts';
+export {
+  PLANT_IDENTITY_STATUSES,
+  approvePlantIdentity,
+  assertOpaquePlantId,
+  assertPlantIdentityHasNoCultivationClaim,
+  createPlantIdentity,
+} from './plant-identity.ts';
+export type { PlantIdentity, PlantIdentityStatus, TaxonomicCitation } from './plant-identity.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

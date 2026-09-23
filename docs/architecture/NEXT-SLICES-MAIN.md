@@ -464,11 +464,14 @@ Next: none.
 
 Dependencies: ATLAS-PROVENANCE-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Core API domain PlantIdentity with taxonomic
+citations (not horticultural proof), draft→approved, and no cultivation
+claims. No public Atlas UI.
 Autonomous: yes.
 Accept: a plant identity record distinct from taxonomic-source proof.
 No invented cultivation claims.
-Tests: domain tests for plant identity.
+Tests: `packages/domain/plant-identity.test.mjs`,
+`docs/architecture/ATLAS-PLANT-IDENTITY.md`.
 Security: sources stay citations, not product truth.
 Next: ATLAS-PUBLIC-SURFACE.
 
