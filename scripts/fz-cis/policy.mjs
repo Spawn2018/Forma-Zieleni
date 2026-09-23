@@ -8,6 +8,7 @@ import {
   refreshEffectState,
   validateControlCommit,
   validateControlRef,
+  validateControlRefShape,
   validateEffectObservation,
   validateEffectPlan,
 } from './effect.mjs';
@@ -155,7 +156,7 @@ export function validateRecord(input, mode = 'create') {
     fail(errors, 'BAD_EFFECT_STATE');
   }
   if (input.controlRef != null) {
-    const ref = validateControlRef(input.controlRef, { requireTracked: false });
+    const ref = validateControlRefShape(input.controlRef);
     if (!ref.ok) for (const code of ref.errors) fail(errors, code);
   }
   if (input.controlCommit != null && (typeof input.controlCommit !== 'string'

@@ -162,8 +162,9 @@ export function validateEffectObservation(obs) {
   if (!Array.isArray(obs.evidence) || obs.evidence.length === 0
     || obs.evidence.some((item) => typeof item !== 'string' || item.trim().length < 3)) {
     fail(errors, 'BAD_EFFECT_EVIDENCE');
+  } else if (obs.evidence.length > MAX_EVIDENCE) {
+    fail(errors, 'EVIDENCE_CAP');
   }
-  if (obs.evidence.length > MAX_EVIDENCE) fail(errors, 'EVIDENCE_CAP');
   if (obs.relatedCommit != null && !COMMIT_RE.test(String(obs.relatedCommit))) {
     fail(errors, 'BAD_RELATED_COMMIT');
   }
@@ -177,7 +178,7 @@ export function validateEffectObservation(obs) {
   return { ok: errors.length === 0, errors: [...new Set(errors)] };
 }
 
-export function validateControlRef(controlRef, options = {}) {
+export function validateControlRefShape(controlRef) {
   const errors = [];
   if (typeof controlRef !== 'string' || !CONTROL_REF.test(controlRef)) {
     return { ok: false, errors: ['BAD_CONTROL_REF'] };
@@ -188,6 +189,18 @@ export function validateControlRef(controlRef, options = {}) {
   if (controlRef.startsWith('ext:')) {
     return { ok: true, errors: [], kind: 'external', resolved: controlRef };
   }
+  // Shape-only: no filesystem probe (avoids existence oracle during ordinary validate).
+  const normalized = controlRef.replace(/\\/g, '/');
+  if (normalized.split('/').some((part) => part === '..' || part === '')) {
+    return { ok: false, errors: ['CONTROL_PATH_TRAVERSAL'] };
+  }
+  return { ok: true, errors: [], kind: 'path', resolved: normalized };
+}
+
+export function validateControlRef(controlRef, options = {}) {
+  const shape = validateControlRefShape(controlRef);
+  if (!shape.ok) return shape;
+  if (controlRef.startsWith('ext:')) return shape;
   const cwd = options.root || root;
   const resolved = path.resolve(cwd, controlRef);
   const rel = path.relative(cwd, resolved);

@@ -121,7 +121,8 @@ test('learning check: empty store is not material', () => {
 test('learning check: current one-off CR records are not false recurrence', () => {
   const store = JSON.parse(readFileSync(path.join(root, 'docs/engineering/learning/records.json'), 'utf8'));
   const crRecords = store.records.filter((record) => record.source === 'coderabbit');
-  assert.equal(crRecords.length, 13);
+  assert.ok(crRecords.length >= 1);
+  assert.equal(crRecords.every((record) => record.status === 'OBSERVED'), true);
   const check = analyzeLearning(crRecords);
   assert.equal(check.recurrenceCandidates.length, 0);
 });

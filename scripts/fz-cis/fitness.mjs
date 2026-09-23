@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { evaluateEffect } from './effect.mjs';
-import { pushBlockers, validateRecord } from './policy.mjs';
+import { pushBlockers, TRACKED_PROMOTION_TARGETS, validateRecord } from './policy.mjs';
 
 export const FITNESS = [
   {
@@ -86,7 +86,11 @@ export function checkFitness(root, files) {
     }
     if (record.status === 'PROMOTED') {
       if (!record.controlRef) errors.push(`promoted-requires-control failed: ${record.id} missing controlRef`);
-      else if (!String(record.controlRef).startsWith('ext:') && !record.controlCommit) {
+      else if (
+        TRACKED_PROMOTION_TARGETS.has(record.promotionTarget)
+        && !String(record.controlRef).startsWith('ext:')
+        && !record.controlCommit
+      ) {
         errors.push(`promoted-requires-control failed: ${record.id} missing controlCommit`);
       }
     }

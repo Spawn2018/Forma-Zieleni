@@ -72,6 +72,13 @@ function findRecord(store, id) {
 }
 
 function writeRecord(store, updated, file) {
+  const checked = validateRecord(updated, 'stored');
+  if (!checked.ok) {
+    throw Object.assign(new Error(checked.errors[0] || 'INVALID_RECORD'), {
+      code: checked.errors[0] || 'INVALID_RECORD',
+      errors: checked.errors,
+    });
+  }
   saveStore({
     version: 1,
     records: store.records.map((record) => (record.id === updated.id ? updated : record)),
