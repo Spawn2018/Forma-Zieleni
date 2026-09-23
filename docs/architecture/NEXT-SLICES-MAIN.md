@@ -398,13 +398,16 @@ Next: none.
 
 Dependencies: ADMIN-APP.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for staff list and qualify of leads in apps/admin
+through Core API `GET /v1/leads` and `POST /v1/leads/:id/qualify`.
+Empty, error, and forbidden states are real. No second lead store.
 Autonomous: yes.
 Accept: staff list and qualify leads in apps/admin through Core API.
 Empty, error, and unauthorized states are real. No second lead store
 and no invented customers.
-Tests: admin shell tests plus an API-backed lead workflow test.
-Security: staff session only; client tokens cannot qualify.
+Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed qualify
+workflow with synthetic fetch).
+Security: staff session only; client tokens cannot qualify (Core API).
 Next: none.
 
 ### MOBILE-ANDROID-FOUNDATION

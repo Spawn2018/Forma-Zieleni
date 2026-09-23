@@ -407,10 +407,9 @@ row('FZ-REQ-PORTAL-005', 'An authenticated client can see their own project file
   executableSlice: 'PORTAL-FILE-PROJECTION',
   executableWhenComplete: ['PORTAL-PROJECT-PROJECTION'],
 });
-row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through the existing Core API. No second lead store.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'admin lead workflow slice', 'REVIEW', 'The admin shell is not the CRM lead workflow.', {
+row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through the existing Core API. No second lead store.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI reads and qualifies via Core API only.', {
   productCapability: 'ADMIN',
   depth: 'WORKFLOW',
-  blockerClass: 'INTERNAL',
   executableSlice: 'ADMIN-CRM-LEAD',
   executableWhenComplete: ['ADMIN-APP'],
 });
