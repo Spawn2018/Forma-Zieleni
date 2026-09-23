@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { evaluateEffect } from './effect.mjs';
+import { checkLearningCoverage } from './learning-coverage.mjs';
 import { pushBlockers, TRACKED_PROMOTION_TARGETS, validateRecord } from './policy.mjs';
 
 export const FITNESS = [
@@ -42,6 +43,14 @@ export const FITNESS = [
     reason: 'Promotion means standardization into an enforceable artifact',
     mechanism: 'Every tracked PROMOTED row has controlRef (and controlCommit when tracked)',
     failure: 'A learning row can claim promotion without a durable control',
+    owner: 'FZ orchestrator',
+  },
+  {
+    id: 'learning-coverage-closed',
+    property: 'Every binding capability has one FZ-CIS learning classification',
+    reason: 'A capability without a learning class is an unknown, and a second learning store would split evidence',
+    mechanism: 'Product scope and the required matrix resolve through checkLearningCoverage',
+    failure: 'A binding capability is unclassified, operational without a repository signal, or missing effect and counter-evidence',
     owner: 'FZ orchestrator',
   },
 ];
@@ -94,6 +103,10 @@ export function checkFitness(root, files) {
         errors.push(`promoted-requires-control failed: ${record.id} missing controlCommit`);
       }
     }
+  }
+  const coverage = checkLearningCoverage();
+  if (!coverage.ok) {
+    errors.push(`learning-coverage-closed failed: ${coverage.errors.slice(0, 8).join('; ')}`);
   }
   for (const blocker of pushBlockers(store.records)) {
     if (!blocker.id) errors.push('learning-store-safe failed: critical blocker without id');

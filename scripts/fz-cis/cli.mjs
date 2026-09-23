@@ -13,6 +13,7 @@ import {
   setEffectPlan,
 } from './store.mjs';
 import { ingestOutcome, ingestToolingEvent } from './ingest.mjs';
+import { learningCoverageReport } from './learning-coverage.mjs';
 
 function readJsonArg() {
   const flag = process.argv.indexOf('--json');
@@ -58,7 +59,12 @@ try {
   } else if (command === 'effect') {
     console.log(JSON.stringify(evaluateRecordEffect(arg('--id'))));
   } else if (command === 'check') {
-    console.log(JSON.stringify(reportCheck(), null, 2));
+    const coverage = learningCoverageReport();
+    console.log(JSON.stringify({ ...reportCheck(), coverage: coverage.summary }, null, 2));
+  } else if (command === 'coverage') {
+    const report = learningCoverageReport();
+    console.log(JSON.stringify(report, null, 2));
+    if (!report.ok) process.exitCode = 1;
   } else if (command === 'debt') {
     console.log(JSON.stringify(reportDebt()));
   } else if (command === 'blockers') {
@@ -68,7 +74,7 @@ try {
   } else if (command === 'freshness') {
     console.log(JSON.stringify(classifyFreshness(arg('--topic'))));
   } else {
-    console.error('usage: validate|record|ingest|transition|effect-plan|effect-record|effect|check|debt|blockers|dora|freshness');
+    console.error('usage: validate|record|ingest|transition|effect-plan|effect-record|effect|check|coverage|debt|blockers|dora|freshness');
     process.exitCode = 1;
   }
 } catch (err) {

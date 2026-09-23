@@ -1,5 +1,6 @@
 import { addRecord } from './store.mjs';
-import { validateRecord } from './policy.mjs';
+import { EXTERNAL_SOURCES, SIGNAL_TYPES, SOURCES, validateRecord } from './policy.mjs';
+import { syntheticProductionRejected } from './learning-governance.mjs';
 
 /** Outcomes that may enter FZ-CIS. Routine PASS is never ingested. */
 export const INGEST_KINDS = Object.freeze([
@@ -13,6 +14,7 @@ export const INGEST_KINDS = Object.freeze([
   'security_finding',
   'near_miss',
   'repeated_failure',
+  'domain_signal',
 ]);
 
 const KIND_MAP = {
@@ -26,6 +28,7 @@ const KIND_MAP = {
   security_finding: { source: 'security', signalType: 'failure', severity: 'high' },
   near_miss: { source: 'agent', signalType: 'near-miss', severity: 'medium' },
   repeated_failure: { source: 'test', signalType: 'failure', severity: 'high' },
+  domain_signal: { source: 'agent', signalType: 'failure', severity: 'medium' },
 };
 
 function slug(value, fallback = 'signal') {
@@ -71,6 +74,8 @@ export function shouldIngest(outcome = {}) {
   if (!Array.isArray(outcome.evidence) || outcome.evidence.length === 0) {
     return { ok: false, reason: 'missing_evidence' };
   }
+  if (syntheticProductionRejected(outcome)) return { ok: false, reason: 'synthetic_production_rejected' };
+  if (outcome.productionTelemetry === true) return { ok: false, reason: 'production_telemetry_gated' };
   return { ok: true, reason: 'ingest' };
 }
 
@@ -82,7 +87,10 @@ export function toLearningInput(outcome = {}) {
   const gate = shouldIngest(outcome);
   if (!gate.ok) return { ok: false, reason: gate.reason, record: null };
   const mapped = KIND_MAP[outcome.kind];
-  const external = mapped.source === 'coderabbit' || mapped.source === 'grok';
+  const source = outcome.kind === 'domain_signal' && SOURCES.includes(outcome.source)
+    ? outcome.source
+    : mapped.source;
+  const external = EXTERNAL_SOURCES.has(source);
   const patternKey = outcome.patternKey
     ? normalizePatternKey(outcome.patternKey, [outcome.kind, outcome.observation?.slice(0, 40)])
     : fingerprint([
@@ -95,9 +103,11 @@ export function toLearningInput(outcome = {}) {
     ]);
   const record = {
     patternKey,
-    source: mapped.source,
+    source,
     scope: String(outcome.scope || 'engineering').slice(0, 120),
-    signalType: mapped.signalType,
+    signalType: outcome.kind === 'domain_signal' && SIGNAL_TYPES.includes(outcome.signalType)
+      ? outcome.signalType
+      : mapped.signalType,
     severity: outcome.severity || mapped.severity,
     observation: outcome.observation.trim(),
     evidence: outcome.evidence.map(String).slice(0, 20),
@@ -112,6 +122,10 @@ export function toLearningInput(outcome = {}) {
     relatedTest: outcome.relatedTest,
     horizon: outcome.horizon || 'FOUNDATION_NOW',
   };
+  if (outcome.learningScope) record.learningScope = outcome.learningScope;
+  if (outcome.provenanceEnvironment) record.provenanceEnvironment = outcome.provenanceEnvironment;
+  if (outcome.learningClaim) record.learningClaim = outcome.learningClaim;
+  if (outcome.tenantId) record.tenantId = outcome.tenantId;
   if (outcome.proposedImprovement) record.proposedImprovement = String(outcome.proposedImprovement).slice(0, 2000);
   const checked = validateRecord(record, 'create');
   if (!checked.ok) return { ok: false, reason: checked.errors.join(','), record: null };

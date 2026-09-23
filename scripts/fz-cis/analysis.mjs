@@ -72,6 +72,7 @@ function entry(record, extra = {}) {
 function isUrgent(record) {
   if (!record) return false;
   if (['REJECTED', 'SUPERSEDED', 'PROMOTED', 'PROVEN'].includes(record.status)) return false;
+  if (record.source === 'ux' && record.severity !== 'critical') return false;
   if (record.generalizability === 'CRITICAL') return true;
   if (record.generalizability === 'SYSTEMIC'
     && ['high', 'critical'].includes(record.severity)

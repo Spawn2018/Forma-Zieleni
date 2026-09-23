@@ -7,7 +7,8 @@ records. Raw rows do not change architecture, Owner gates, or product
 policy. Promotion is a status on a record plus a separate change to
 the smallest durable control. This file is not that change.
 
-Commands: `node scripts/fz-cis/cli.mjs`. Contracts:
+Commands: `node scripts/fz-cis/cli.mjs`. `coverage` reports the
+learning classification of every binding capability. Contracts:
 `contracts/learning-record.schema.json`.
 
 VERIFY EFFECT commands: `effect-plan`, `effect-record`, `effect`, and

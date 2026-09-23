@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { evidenceSupportsEffect, EVIDENCE_CLASSES } from './learning-governance.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -174,6 +175,9 @@ export function validateEffectObservation(obs) {
   if (obs.afterControl != null && typeof obs.afterControl !== 'boolean') {
     fail(errors, 'BAD_AFTER_CONTROL');
   }
+  if (obs.evidenceClass != null && !EVIDENCE_CLASSES.includes(obs.evidenceClass)) {
+    fail(errors, 'BAD_EVIDENCE_CLASS');
+  }
   if (obs.command != null || obs.shell != null || obs.argv != null) fail(errors, 'FORBIDDEN_EXECUTABLE');
   return { ok: errors.length === 0, errors: [...new Set(errors)] };
 }
@@ -273,6 +277,7 @@ export function mergeEffectObservation(existing, observation) {
   if (observation.relatedCommit) normalized.relatedCommit = String(observation.relatedCommit);
   if (observation.controlCommit) normalized.controlCommit = String(observation.controlCommit);
   if (typeof observation.afterControl === 'boolean') normalized.afterControl = observation.afterControl;
+  if (observation.evidenceClass) normalized.evidenceClass = observation.evidenceClass;
   list.push(normalized);
   return { ok: true, errors: [], observations: list, added: true, duplicate: false };
 }
@@ -341,7 +346,13 @@ export function evaluateEffect(record) {
   }
 
   const relevant = afterControlFilter(deduped, record.controlCommit);
-  const supporting = relevant.filter((obs) => SUPPORTING.has(obs.type));
+  const typedSupport = relevant.filter((obs) => SUPPORTING.has(obs.type));
+  const supporting = typedSupport.filter((obs) => {
+    if (!evidenceSupportsEffect(obs)) return false;
+    if (plan.method === 'MANUAL_VERIFICATION' && obs.evidenceClass !== 'HUMAN_VERIFIED') return false;
+    return true;
+  });
+  const aiOnlySupport = typedSupport.filter((obs) => !evidenceSupportsEffect(obs));
   const counter = relevant.filter((obs) => COUNTER.has(obs.type));
   const escape = relevant.filter((obs) => obs.type === 'DOWNSTREAM_ESCAPE');
   const falseBlock = relevant.filter((obs) => obs.type === 'FALSE_BLOCK');
@@ -367,6 +378,16 @@ export function evaluateEffect(record) {
       supportingCount: supporting.length,
       counterCount: counter.length,
       reason: 'FALSE_BLOCK_PATTERN',
+    };
+  }
+
+  if (supporting.length === 0 && aiOnlySupport.length > 0 && escape.length === 0) {
+    return {
+      effectState: 'INCONCLUSIVE',
+      supported: false,
+      supportingCount: 0,
+      counterCount: counter.length,
+      reason: 'AI_CIRCULAR_EVIDENCE',
     };
   }
 

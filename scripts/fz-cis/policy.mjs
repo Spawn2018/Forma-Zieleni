@@ -12,6 +12,16 @@ import {
   validateEffectObservation,
   validateEffectPlan,
 } from './effect.mjs';
+import {
+  assertNoCrossTenant,
+  assertScopePromotion,
+  EVIDENCE_CLASSES,
+  LEARNING_CLAIMS,
+  LEARNING_SCOPES,
+  PROVENANCE_ENVIRONMENTS,
+  TENANT_BOUND_SCOPES,
+  syntheticProductionRejected,
+} from './learning-governance.mjs';
 
 const STATUSES = ['OBSERVED', 'HYPOTHESIS', 'VALIDATING', 'PROVEN', 'REJECTED', 'PROMOTED', 'SUPERSEDED', 'DEFERRED'];
 const SOURCES = ['test', 'production', 'review', 'grok', 'coderabbit', 'owner', 'security', 'performance', 'ux', 'customer', 'search', 'incident', 'agent', 'manual-toil', 'experiment'];
@@ -61,6 +71,10 @@ const FORBIDDEN_KEYS = new Set([
   'privateKey', 'authorization', 'command', 'shell', 'eval', 'systemPrompt', 'toolCall',
   'learnAwayOwnerGate', 'autoApprove', 'argv', 'spawn', 'exec',
 ]);
+const MUTATION_KEYS = new Set([
+  'canonRewrite', 'trainModel', 'silentMutation', 'autoPublish', 'authorizeSpend', 'liveTransaction',
+  'overwriteHumanLock', 'pluginOwnsBusinessTruth', 'behaviorImpliesBotanicalTruth', 'universalScore',
+]);
 const SECRET = /-----BEGIN |AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9\-._~+/]{20,}|password\s*[:=]\s*\S+|api[_-]?key\s*[:=]\s*\S+/i;
 const EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
 const PATTERN_KEY = /^[a-z0-9]+(?:-[a-z0-9]+){1,8}$/;
@@ -102,6 +116,7 @@ function scanValue(value, errors, seen = new Set()) {
   }
   for (const [key, child] of Object.entries(value)) {
     if (FORBIDDEN_KEYS.has(key)) fail(errors, 'FORBIDDEN_FIELD');
+    if (MUTATION_KEYS.has(key) && child === true) fail(errors, 'AUTONOMOUS_MUTATION_FORBIDDEN');
     scanValue(child, errors, seen);
   }
 }
@@ -130,6 +145,17 @@ export function validateRecord(input, mode = 'create') {
   if (input.evidenceStrength != null && !EVIDENCE_STRENGTH.includes(input.evidenceStrength)) fail(errors, 'BAD_STRENGTH');
   if (input.promotionTarget != null && !PROMOTION_TARGETS.includes(input.promotionTarget)) fail(errors, 'BAD_TARGET');
   if (input.horizon != null && !HORIZONS.includes(input.horizon)) fail(errors, 'BAD_HORIZON');
+  if (input.learningScope != null && !LEARNING_SCOPES.includes(input.learningScope)) fail(errors, 'BAD_LEARNING_SCOPE');
+  if (input.provenanceEnvironment != null && !PROVENANCE_ENVIRONMENTS.includes(input.provenanceEnvironment)) {
+    fail(errors, 'BAD_PROVENANCE');
+  }
+  if (input.learningClaim != null && !LEARNING_CLAIMS.includes(input.learningClaim)) fail(errors, 'BAD_LEARNING_CLAIM');
+  if (input.tenantId != null && (typeof input.tenantId !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(input.tenantId))) {
+    fail(errors, 'BAD_TENANT');
+  }
+  if (TENANT_BOUND_SCOPES.includes(input.learningScope) && !input.tenantId) fail(errors, 'MISSING_TENANT');
+  if (syntheticProductionRejected(input)) fail(errors, 'SYNTHETIC_PRODUCTION_REJECTED');
+  if (input.evidenceClass != null && !EVIDENCE_CLASSES.includes(input.evidenceClass)) fail(errors, 'BAD_EVIDENCE_CLASS');
   if (input.ownerGate != null) {
     if (!GATES.includes(input.ownerGate)) fail(errors, 'BAD_GATE');
     if (input.gateDisposition !== 'PRESERVED') fail(errors, 'GATE_EROSION');
@@ -227,12 +253,20 @@ export function transition(record, next, extra = {}, options = {}) {
   // effectState cannot be forged via transition extras; always re-derive.
   // effectObservations must merge idempotently — never append duplicate ids wholesale.
   // Identity fields stay bound to the stored record (cannot be rewritten mid-transition).
+  const scopeGate = assertScopePromotion(record, extra.learningScope, extra);
+  if (!scopeGate.ok) throw error(scopeGate.code);
+  const tenantGate = assertNoCrossTenant(record, extra.tenantId);
+  if (!tenantGate.ok) throw error(tenantGate.code);
+
   const {
     effectState: _forgedState,
     effectObservations: extraObs,
     source: _sourceForge,
     generalizability: _genForge,
     ownerGate: _gateForge,
+    independentScopeIds: _scopeIds,
+    humanApproval: _humanApproval,
+    productionLearning: _productionLearning,
     ...safeExtra
   } = extra;
   void _forgedState;
@@ -261,6 +295,10 @@ export function transition(record, next, extra = {}, options = {}) {
     validatedLocally: next === 'PROMOTED' ? true : (safeExtra.validatedLocally === true || record.validatedLocally === true),
   };
   updated = refreshEffectState(updated);
+
+  if (next === 'PROVEN' || next === 'PROMOTED') {
+    if (syntheticProductionRejected(updated)) throw error('SYNTHETIC_PRODUCTION_REJECTED');
+  }
 
   if (next === 'PROVEN') {
     if (EXTERNAL_SOURCES.has(updated.source) && updated.locallyVerified !== true) {

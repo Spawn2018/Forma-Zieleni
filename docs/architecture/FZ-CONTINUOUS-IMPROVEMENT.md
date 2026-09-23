@@ -118,7 +118,7 @@ path or `ext:` reference), and for tracked automation a verifiable
 effect. Do not collapse these.
 
 Executable surface: `node scripts/fz-cis/cli.mjs effect-plan`,
-`effect-record`, `effect`, and `check`. `/noc complete` runs `check`
+`effect-record`, `effect`, `check`, and `coverage`. `/noc complete` runs `check`
 and records only ephemeral fields on `.fz-noc/live.json`
 (`lastLearningCheckCommit`, `lastLearningCheckAt`, `materialLearning`,
 `urgentLearningInterrupt`). The repository store remains truth.
@@ -127,6 +127,24 @@ Ordinary Learning Debt does not block product READY selection. A
 deterministic `LEARNING_INTERRUPT` may pause selection only for
 justified CRITICAL or SYSTEMIC open learning. That interrupt is not a
 second roadmap.
+
+## Learning coverage
+
+`node scripts/fz-cis/cli.mjs coverage` is the machine-verifiable view of
+learning for every binding product capability and the required
+cross-cutting subjects. It is not a second store, a second READY graph,
+or a score. Domain records stay in their domain modules. Evidence,
+promotion, demotion, and effect stay in FZ-CIS.
+
+A loop is OPERATIONAL only when a repository signal already enters
+this path. Product behavior that has no runtime or no approved
+production measurement is IMPLEMENTED_NOT_OPERATIONAL,
+PRODUCTION_ONLY, or OWNER_GATED, with an activation condition.
+`NOT_YET_OBSERVABLE` is the result of asking that loop to ingest a
+production signal early. Synthetic and test provenance cannot create
+a production learning claim. A narrow human correction cannot become
+GLOBAL without independent scopes and human approval. AI agreement is
+not effect evidence.
 
 ## Promotion and demotion
 

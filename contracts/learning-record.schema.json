@@ -29,6 +29,18 @@
     "gateDisposition": { "const": "PRESERVED" },
     "privacyClassification": { "enum": ["PUBLIC", "INTERNAL"] },
     "horizon": { "enum": ["FOUNDATION_NOW", "WHEN_PRODUCT_EXISTS", "PRODUCTION_LATER", "BACKLOG"] },
+    "learningScope": {
+      "enum": [
+        "GLOBAL", "CAPABILITY", "COMPONENT", "TENANT", "PROJECT", "CLIENT", "USER", "SESSION",
+        "ENTITY", "CAMPAIGN", "CONTENT_ITEM", "PLANT", "SITE", "GARDEN"
+      ]
+    },
+    "provenanceEnvironment": { "enum": ["PRODUCTION", "INTERNAL", "SYNTHETIC", "TEST", "FIXTURE"] },
+    "learningClaim": { "enum": ["ENGINEERING", "PRODUCTION"] },
+    "tenantId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "evidenceClass": {
+      "enum": ["DETERMINISTIC", "HUMAN_VERIFIED", "EXPERIMENT", "RECURRENCE", "MEASUREMENT", "AI_OPINION", "AI_AGREEMENT"]
+    },
     "occurrences": { "type": "integer", "minimum": 1 },
     "validatedLocally": { "type": "boolean" },
     "locallyVerified": { "type": "boolean" },
@@ -87,7 +99,10 @@
           },
           "relatedCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
           "controlCommit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
-          "afterControl": { "type": "boolean" }
+          "afterControl": { "type": "boolean" },
+          "evidenceClass": {
+            "enum": ["DETERMINISTIC", "HUMAN_VERIFIED", "EXPERIMENT", "RECURRENCE", "MEASUREMENT", "AI_OPINION", "AI_AGREEMENT"]
+          }
         }
       }
     },
