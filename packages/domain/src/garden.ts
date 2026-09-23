@@ -43,6 +43,7 @@ export function assertGardenHasNoLiveInvent(claim: {
 
 export function createGarden(id: string, project: Project, at: string): Garden {
   if (project.status !== 'delivered') throw new Error('PROJECT_NOT_DELIVERED');
+  if (at < project.updatedAt) throw new Error('GARDEN_BEFORE_DELIVERY');
   assertGardenHasNoLiveInvent({});
   return {
     id: assertOpaqueGardenId(id),

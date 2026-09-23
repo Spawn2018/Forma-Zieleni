@@ -57,6 +57,14 @@ test('planned projects cannot open a garden record', () => {
   assert.throws(() => createGarden('g9k2n4p6q8r0s2t4', planned, at), /PROJECT_NOT_DELIVERED/);
 });
 
+test('garden cannot be created before project delivery time', () => {
+  const project = deliveredProject('portal-ola');
+  assert.throws(
+    () => createGarden('g9k2n4p6q8r0s2t4', project, '2026-09-23T20:29:00.000Z'),
+    /GARDEN_BEFORE_DELIVERY/,
+  );
+});
+
 test('portal garden projection is BOLA-isolated and omits live invent fields', () => {
   const garden = createGarden('g9k2n4p6q8r0s2t4', deliveredProject('portal-ola'), '2026-09-23T20:35:00.000Z');
   const mine = projectGardenForPortal(garden, 'portal-ola');
@@ -67,7 +75,10 @@ test('portal garden projection is BOLA-isolated and omits live invent fields', (
   assert.equal(Object.hasOwn(mine, 'liveGarden'), false);
   assert.equal(projectGardenForPortal(garden, 'portal-other'), null);
   assert.equal(
-    projectGardenForPortal(createGarden('g8k2n4p6q8r0s2t4', deliveredProject(), at), 'portal-ola'),
+    projectGardenForPortal(
+      createGarden('g8k2n4p6q8r0s2t4', deliveredProject(), '2026-09-23T20:40:00.000Z'),
+      'portal-ola',
+    ),
     null,
   );
 });

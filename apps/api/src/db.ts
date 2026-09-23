@@ -616,6 +616,13 @@ ALTER TABLE project ADD CONSTRAINT project_status_known CHECK (status IN ('plann
   },
   async down(db) {
     await sql.raw(`
+DO $project_delivered_down$
+BEGIN
+  IF EXISTS (SELECT 1 FROM project WHERE status = 'delivered') THEN
+    RAISE EXCEPTION 'PROJECT_DELIVERED_ROWS_BLOCK_DOWN';
+  END IF;
+END
+$project_delivered_down$;
 ALTER TABLE project DROP CONSTRAINT IF EXISTS project_status_known;
 ALTER TABLE project ADD CONSTRAINT project_status_known CHECK (status IN ('planned'));
     `).execute(db);
