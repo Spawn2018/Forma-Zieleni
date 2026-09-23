@@ -864,6 +864,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T13:40:31.966Z",
       "lastSeen": "2026-09-23T13:42:21.864Z"
+    },
+    {
+      "patternKey": "cr-at-line-751-update-the-o-d423478251",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 751, Update the offline requirement check for item.surface so lowercase mobile values are recognized, consistent",
+      "evidence": [
+        "cr-occurrence:5c8504fcb07c:2aeb98527376:cr-at-line-751-update-the-o-d423478251",
+        "scripts/requirements/experience-contract.mjs",
+        "severity:low",
+        "accepted:cr-at-line-751-update-the-o-d423478251"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "2aeb985273766dd3af52ff48a70283302c6af7f7",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-c4ed5bb3",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T13:53:08.293Z",
+      "lastSeen": "2026-09-23T13:54:15.551Z"
     }
   ]
 }
