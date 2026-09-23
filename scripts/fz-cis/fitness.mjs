@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { evaluateEffect } from './effect.mjs';
 import { checkLearningCoverage } from './learning-coverage.mjs';
+import { checkExperienceContracts } from '../requirements/experience-contract.mjs';
 import { pushBlockers, TRACKED_PROMOTION_TARGETS, validateRecord } from './policy.mjs';
 
 export const FITNESS = [
@@ -51,6 +52,14 @@ export const FITNESS = [
     reason: 'A capability without a learning class is an unknown, and a second learning store would split evidence',
     mechanism: 'Product scope and the required matrix resolve through checkLearningCoverage',
     failure: 'A binding capability is unclassified, operational without a repository signal, or missing effect and counter-evidence',
+    owner: 'FZ orchestrator',
+  },
+  {
+    id: 'experience-contract-closed',
+    property: 'User-facing capabilities have a purpose, workflow, and visual gate',
+    reason: 'A screen that only matches a mockup, or a workflow with no surface, is not complete',
+    mechanism: 'checkExperienceContracts against product scope and the approved reference paths',
+    failure: 'An orphan screen, missing downstream path, or unreviewed visual acceptance can pass',
     owner: 'FZ orchestrator',
   },
 ];
@@ -107,6 +116,10 @@ export function checkFitness(root, files) {
   const coverage = checkLearningCoverage();
   if (!coverage.ok) {
     errors.push(`learning-coverage-closed failed: ${coverage.errors.slice(0, 8).join('; ')}`);
+  }
+  const experience = checkExperienceContracts();
+  if (!experience.ok) {
+    errors.push(`experience-contract-closed failed: ${experience.errors.slice(0, 8).join('; ')}`);
   }
   for (const blocker of pushBlockers(store.records)) {
     if (!blocker.id) errors.push('learning-store-safe failed: critical blocker without id');

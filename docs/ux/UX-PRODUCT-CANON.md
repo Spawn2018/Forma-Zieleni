@@ -43,5 +43,16 @@ payment.
 - Loading, empty, error, partial and offline/degraded states are designed, not left to framework defaults.
 - Keyboard, focus, touch target and screen-reader behavior are part of acceptance criteria.
 
+## Experience contract
+
+Machine check: `node scripts/requirements/experience-contract.mjs`.
+It extends product scope and FZ-CIS. It is not a second roadmap.
+A user-facing capability needs a business purpose, a workflow, a
+canonical source, downstream effects, and a visual reference or an
+explicit missing-reference review. Looking like the mockup does not
+complete a workflow. A correct command does not complete visual
+acceptance. Browser screenshot evidence stays waiting until a reviewed
+runtime exists. Replay stays off.
+
 ## No invented UX
 A new major screen, role, lifecycle stage, navigation model or material business workflow is a DECISION unless already implied by current domain requirements. Small supporting states required to make an approved flow usable are allowed with REVIEW.
