@@ -741,6 +741,16 @@ export function contractErrors(item, options = {}) {
   for (const state of REQUIRED_STATES) {
     if (!(item.states || []).includes(state)) fail(errors, `MISSING_STATE_${state}`);
   }
+  if (!(item.responsive || []).includes('desktop') || !(item.responsive || []).includes('mobile')) {
+    fail(errors, 'MOBILE_WORKFLOW_MISSING');
+  }
+  if (!['REQUIRED', 'ACCEPTED'].includes(item.responsiveReview)) fail(errors, 'RESPONSIVE_REVIEW_MISSING');
+  for (const need of ['keyboard', 'focus', 'contrast', 'labels', 'screen-reader']) {
+    if (!(item.accessibility || []).includes(need)) fail(errors, 'ACCESSIBILITY_MISSING');
+  }
+  if (['MOBILE', 'ANDROID', 'IOS'].includes(item.surface) && !(item.states || []).includes('offline')) {
+    fail(errors, 'MOBILE_OFFLINE_MISSING');
+  }
   if (item.visualSource === 'VISUAL_SOURCE_MISSING') {
     if (item.visualAcceptance === 'ACCEPTED') fail(errors, 'MISSING_REFERENCE_ACCEPTED');
     if (item.newDirectionReview !== 'REVIEW') fail(errors, 'MISSING_DIRECTION_REVIEW');

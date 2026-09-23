@@ -138,6 +138,13 @@ test('an unlinked screen is an orphan', () => {
   assert.equal(checked.errors.some((error) => error.startsWith('ORPHAN_SCREEN:')), true);
 });
 
+test('desktop coverage without a mobile workflow fails', () => {
+  const catalog = clone();
+  catalog.find((item) => item.id === 'PORTAL').responsive = ['desktop'];
+  const checked = checkExperienceContracts({ catalog });
+  assert.equal(checked.errors.some((error) => error === 'PORTAL:MOBILE_WORKFLOW_MISSING'), true);
+});
+
 test('a later acceptance state implies visual review', () => {
   const catalog = clone();
   catalog.find((item) => item.id === 'WWW').acceptanceState = 'OPERATIONAL';
