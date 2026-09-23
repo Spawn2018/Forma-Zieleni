@@ -57,6 +57,26 @@ test('a closed repair chain lets product selection continue', () => {
     },
   );
   assert.equal(picked.qualityInterrupt, null);
+  assert.equal(picked.sessionPatch.repairDisposition, null);
+  assert.equal(picked.sessionPatch.attempts['ci-repair|ci-ci-verify-test'], undefined);
+});
+
+test('a disposition cannot rename itself out of the repair chain', () => {
+  const picked = selectionWithQuality(
+    {
+      blocked: [],
+      completed: [],
+      attempts: { 'ci-repair|ci-ci-verify-test': 1 },
+      repairDisposition: { kind: 'note' },
+    },
+    {
+      repoState: { head: SHA, originMain: SHA, branch: 'main', ok: true },
+      statusFor: () => ({ state: CI_STATES.CI_GREEN, run: { databaseId: 4, headSha: SHA } }),
+      skipLearningCheck: true,
+    },
+  );
+  assert.equal(picked.selected, null);
+  assert.equal(picked.qualityInterrupt.type, 'REPAIR_WITHOUT_ROOT_CAUSE');
 });
 
 test('CI_FAILED current HEAD blocks READY product selection', () => {

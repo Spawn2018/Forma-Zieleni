@@ -90,9 +90,9 @@ export function selectionWithQuality(session, options = {}) {
   const repairPending = Object.keys(working.attempts || {}).some((key) => key.startsWith('ci-repair|'));
   if (interrupt.reason === 'ci_green' && repairPending) {
     const accepted = debugLoopAccepted({
-      kind: 'fix',
       ...(working.repairDisposition || {}),
       ...(options.repairDisposition || {}),
+      kind: 'fix',
     });
     if (!accepted.ok) {
       return {
@@ -130,7 +130,9 @@ export function selectionWithQuality(session, options = {}) {
       learningCheck: learning.check,
       materialLearning: learning.materialLearning,
       repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
-      sessionPatch: interrupt.reason === 'ci_green' ? { attempts: cleared.attempts } : null,
+      sessionPatch: interrupt.reason === 'ci_green'
+        ? { attempts: cleared.attempts, repairDisposition: null }
+        : null,
     };
   }
 
@@ -142,8 +144,20 @@ export function selectionWithQuality(session, options = {}) {
     learningCheck: learning.check,
     materialLearning: learning.materialLearning,
     repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
-    sessionPatch: interrupt.reason === 'ci_green' ? { attempts: cleared.attempts } : null,
+    sessionPatch: interrupt.reason === 'ci_green'
+      ? { attempts: cleared.attempts, repairDisposition: null }
+      : null,
   };
+}
+
+function applyQualityPatch(session, patch) {
+  if (!patch) return session;
+  const next = { ...session };
+  if (patch.attempts) next.attempts = patch.attempts;
+  if (Object.prototype.hasOwnProperty.call(patch, 'repairDisposition')) {
+    next.repairDisposition = patch.repairDisposition;
+  }
+  return next;
 }
 
 function selection(session, options = {}) {
@@ -272,14 +286,13 @@ if (command === 'deadline') {
     session.nextCandidates = [];
     session.selectionReason = picked.reason;
     session.exhausted = picked.exhaustionAllowed === true;
-    if (picked.sessionPatch?.attempts) session.attempts = picked.sessionPatch.attempts;
+    const patched = applyQualityPatch(session, picked.sessionPatch);
+    session.attempts = patched.attempts;
+    session.repairDisposition = patched.repairDisposition;
     writeSession(session);
     print(picked);
   } else {
-    let working = session;
-    if (picked.sessionPatch?.attempts) {
-      working = { ...session, attempts: picked.sessionPatch.attempts };
-    }
+    const working = applyQualityPatch(session, picked.sessionPatch);
     const noted = noteSelection(working, { slice: picked.selected, commit });
     const next = noted.repeated ? selection(noted.session) : picked;
     if (noted.repeated) {
