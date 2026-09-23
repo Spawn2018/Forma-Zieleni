@@ -27,7 +27,8 @@ export type PlantIdentity = {
 };
 
 const OPAQUE_ID = /^[a-z][a-z0-9]{15,63}$/;
-const SCIENTIFIC_NAME = /^[A-Z][a-z]+(?:\s+[a-z-]+){0,4}$/;
+/** Binomial or hybrid form (e.g. Taxus baccata, Mentha × piperita). */
+const SCIENTIFIC_NAME = /^[A-Z][a-z]+(?:\s+(?:×|x))?(?:\s+[a-z-]+){1,4}$/;
 
 export function assertOpaquePlantId(id: string): string {
   if (!OPAQUE_ID.test(id) || /^(?:plant|plt|id)\d+$/i.test(id)) {
@@ -36,10 +37,10 @@ export function assertOpaquePlantId(id: string): string {
   return id;
 }
 
-function assertCitation(citation: TaxonomicCitation): TaxonomicCitation {
+function assertCitation(citation: { sourceId: string; accession?: string | null }): TaxonomicCitation {
   const allowed = new Set(botanicalSourcePolicy().map(source => source.id));
   if (!allowed.has(citation.sourceId)) throw new Error('ATLAS_CITATION_UNKNOWN');
-  let accession = citation.accession;
+  let accession = citation.accession ?? null;
   if (accession !== null) {
     const trimmed = accession.trim();
     if (!trimmed || trimmed.length > 128) throw new Error('ATLAS_ACCESSION_INVALID');
@@ -52,10 +53,10 @@ function assertCitation(citation: TaxonomicCitation): TaxonomicCitation {
 export function createPlantIdentity(
   id: string,
   scientificName: string,
-  citations: readonly TaxonomicCitation[],
+  citations: readonly { sourceId: string; accession?: string | null }[],
   at: string,
 ): PlantIdentity {
-  const name = scientificName.trim();
+  const name = scientificName.trim().replace(/\s+/g, ' ');
   if (!name || name.length > 200 || !SCIENTIFIC_NAME.test(name)) {
     throw new Error('PLANT_NAME_INVALID');
   }
@@ -74,10 +75,17 @@ export function createPlantIdentity(
 
 export function approvePlantIdentity(plant: PlantIdentity, at: string): PlantIdentity {
   if (plant.status !== 'draft') throw new Error('PLANT_NOT_APPROVABLE');
-  if (!plant.citations.length) throw new Error('ATLAS_CITATION_REQUIRED');
+  assertPlantIdentityHasNoCultivationClaim({
+    careGuide: Object.hasOwn(plant, 'careGuide'),
+    hardinessGuarantee: Object.hasOwn(plant, 'hardinessGuarantee'),
+    wateringSchedule: Object.hasOwn(plant, 'wateringSchedule'),
+    cultivationProof: Object.hasOwn(plant, 'cultivationProof'),
+  });
+  const refreshed = createPlantIdentity(plant.id, plant.scientificName, plant.citations, plant.createdAt);
   return {
-    ...plant,
+    ...refreshed,
     status: 'approved',
+    createdAt: plant.createdAt,
     updatedAt: at,
   };
 }

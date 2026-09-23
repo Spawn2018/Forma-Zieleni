@@ -28,6 +28,17 @@ test('plant identity is distinct from taxonomic proof and starts draft', () => {
   assert.equal(Object.hasOwn(plant, 'cultivationProof'), false);
 });
 
+test('hybrid scientific names and omitted accession are accepted', () => {
+  const hybrid = createPlantIdentity(
+    'p9k2n4p6q8r0s2t4',
+    'Mentha × piperita',
+    [{ sourceId: 'world-flora-online' }],
+    at,
+  );
+  assert.equal(hybrid.scientificName, 'Mentha × piperita');
+  assert.equal(hybrid.citations[0].accession, null);
+});
+
 test('citations must name known taxonomic authorities and cannot carry advice', () => {
   assert.throws(
     () => createPlantIdentity('p9k2n4p6q8r0s2t4', 'Taxus baccata', [], at),
