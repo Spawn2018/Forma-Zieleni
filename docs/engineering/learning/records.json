@@ -1335,6 +1335,85 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T22:56:28.923Z",
       "lastSeen": "2026-09-23T22:57:12.697Z"
+    },
+    {
+      "patternKey": "cr-update-the-home-componen-a12c2fc5c5",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the Home component to render its route actionData alongside the form, so qualification failures returned with 4",
+      "evidence": [
+        "cr-occurrence:d6a6f883ddec:1d9ccc0e4af4:cr-update-the-home-componen-a12c2fc5c5",
+        "apps/admin/app/routes/home.tsx",
+        "severity:high",
+        "accepted:cr-update-the-home-componen-a12c2fc5c5"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "1d9ccc0e4af45413fab02ab4c0f9e0cfff626be8",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-7d2bfb6b",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T23:27:39.598Z",
+      "lastSeen": "2026-09-23T23:29:01.613Z"
+    },
+    {
+      "patternKey": "cr-at-line-88-update-fetcha-dec13d838b",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 88, Update fetchAdminLeads to preserve the Core API’s pagination state, pass it through AdminLeadList, and add a",
+      "evidence": [
+        "cr-occurrence:d6a6f883ddec:1d9ccc0e4af4:cr-at-line-88-update-fetcha-dec13d838b",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "1d9ccc0e4af45413fab02ab4c0f9e0cfff626be8",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-0a1d8540",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T23:27:39.643Z",
+      "lastSeen": "2026-09-23T23:27:39.643Z",
+      "rejectionReason": "ADMIN-CRM-LEAD Accept is staff list+qualify with real empty/error states. First-page limit=50 is enough; cursor pagination is not required by this slice.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-home-route-lo-5fc3b625b9",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the home route loader and action to read the session credential from each incoming request and pass it to the C",
+      "evidence": [
+        "cr-occurrence:d6a6f883ddec:1d9ccc0e4af4:cr-update-the-home-route-lo-5fc3b625b9",
+        "apps/admin/app/routes/home.tsx",
+        "severity:high",
+        "accepted:cr-update-the-home-route-lo-5fc3b625b9"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "1d9ccc0e4af45413fab02ab4c0f9e0cfff626be8",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-685ca92e",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T23:27:39.684Z",
+      "lastSeen": "2026-09-23T23:29:01.961Z"
     }
   ]
 }

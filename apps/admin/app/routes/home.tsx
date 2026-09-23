@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { createElement } from 'react';
 import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
@@ -13,16 +14,20 @@ function apiOrigin(): string | undefined {
   return typeof process !== 'undefined' ? process.env.FZ_API_ORIGIN || process.env.CORE_API_URL : undefined;
 }
 
-export async function loader(): Promise<AdminHome> {
-  // Session + leads come from Core API when configured. Without it the admin
-  // stays signed-out — never invents CRM writes or client facts.
+export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> {
+  // Session + leads come from Core API when configured. Forward the browser
+  // session cookie on the SSR hop — credentials alone do not. Never invents
+  // CRM writes or client facts.
   const base = apiOrigin();
   if (!base) return resolveAdminHome({});
+  const cookie = request.headers.get('cookie') ?? '';
   return resolveAdminHome({
     async probe() {
+      const headers: Record<string, string> = { accept: 'application/json' };
+      if (cookie) headers.cookie = cookie;
       const response = await fetch(new URL('/v1/portal/session', base), {
         credentials: 'include',
-        headers: { accept: 'application/json' },
+        headers,
       });
       if (response.status === 401) return null;
       if (!response.ok) return null;
@@ -31,7 +36,7 @@ export async function loader(): Promise<AdminHome> {
       return { clientId: body.clientId };
     },
     async loadLeads() {
-      return fetchAdminLeads({ base });
+      return fetchAdminLeads({ base, cookie });
     },
   });
 }
@@ -48,11 +53,13 @@ export async function action({ request }: Route.ActionArgs) {
     return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
   }
   const capacityHold = form.get('capacityHold') === 'true';
+  const cookie = request.headers.get('cookie') ?? '';
   const result = await qualifyAdminLead({
     base,
     leadId,
     capacityHold,
     idempotencyKey: randomUUID(),
+    cookie,
   });
   if (!result.ok) {
     return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
@@ -67,6 +74,20 @@ export function meta() {
   ];
 }
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-  return adminShell(loaderData);
+function qualifyFailureMessage(reason: 'forbidden' | 'error'): string {
+  if (reason === 'forbidden') return 'Nie masz uprawnień, aby kwalifikować leady.';
+  return 'Kwalifikacji nie udało się zapisać. Odśwież stronę i spróbuj ponownie.';
+}
+
+export default function Home({ loaderData, actionData }: Route.ComponentProps) {
+  const failure =
+    actionData && actionData.ok === false
+      ? createElement('p', { className: 'admin-action-error', role: 'alert' }, qualifyFailureMessage(actionData.reason))
+      : null;
+  return createElement(
+    'div',
+    { className: 'admin-home' },
+    failure,
+    adminShell(loaderData),
+  );
 }

@@ -186,7 +186,9 @@ test('the route module keeps an error boundary and wires Core API lead flow', ()
   assert.match(home, /resolveAdminHome/);
   assert.match(home, /fetchAdminLeads/);
   assert.match(home, /qualifyAdminLead/);
-  assert.match(home, /export async function action/);
+  assert.match(home, /request\.headers\.get\('cookie'\)/);
+  assert.match(home, /actionData/);
+  assert.match(home, /role: 'alert'/);
   assert.match(root, /export function ErrorBoundary/);
   assert.match(root, /adminErrorMessage/);
   assert.match(root, /noindex/);
