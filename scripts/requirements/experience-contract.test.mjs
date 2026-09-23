@@ -138,6 +138,15 @@ test('an unlinked screen is an orphan', () => {
   assert.equal(checked.errors.some((error) => error.startsWith('ORPHAN_SCREEN:')), true);
 });
 
+test('a lowercase mobile surface still requires an offline state', () => {
+  const catalog = clone();
+  const mobile = catalog.find((item) => item.id === 'MOBILE');
+  mobile.surface = 'mobile';
+  mobile.states = mobile.states.filter((state) => state !== 'offline');
+  const checked = checkExperienceContracts({ catalog });
+  assert.equal(checked.errors.some((error) => error === 'MOBILE:MOBILE_OFFLINE_MISSING'), true);
+});
+
 test('desktop coverage without a mobile workflow fails', () => {
   const catalog = clone();
   catalog.find((item) => item.id === 'PORTAL').responsive = ['desktop'];

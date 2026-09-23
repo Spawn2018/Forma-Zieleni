@@ -748,7 +748,8 @@ export function contractErrors(item, options = {}) {
   for (const need of ['keyboard', 'focus', 'contrast', 'labels', 'screen-reader']) {
     if (!(item.accessibility || []).includes(need)) fail(errors, 'ACCESSIBILITY_MISSING');
   }
-  if (['MOBILE', 'ANDROID', 'IOS'].includes(item.surface) && !(item.states || []).includes('offline')) {
+  const surface = String(item.surface || '').toUpperCase();
+  if (['MOBILE', 'ANDROID', 'IOS'].includes(surface) && !(item.states || []).includes('offline')) {
     fail(errors, 'MOBILE_OFFLINE_MISSING');
   }
   if (item.visualSource === 'VISUAL_SOURCE_MISSING') {
