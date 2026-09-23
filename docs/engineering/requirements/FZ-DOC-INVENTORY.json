@@ -98,6 +98,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/ATLAS-PUBLIC-SURFACE.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/CURRENT-ARCHITECTURE.md",
       "docType": "DOCUMENT",
       "audience": "developer",

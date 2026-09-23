@@ -447,10 +447,9 @@ row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxon
   executableSlice: 'ATLAS-PLANT-IDENTITY',
   executableWhenComplete: ['ATLAS-PROVENANCE-BOUNDARY'],
 });
-row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity and cites taxonomy sources. It does not invent cultivation facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md', 'packages/domain/atlas-boundary.test.mjs', 'Atlas runtime slice', 'REVIEW', 'Identity is not the public Atlas surface.', {
+row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity and cites taxonomy sources. It does not invent cultivation facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/plant-identity.ts', 'packages/domain/plant-identity.test.mjs', '', 'NONE', 'Domain projection only. Full WWW Atlas UI stays later.', {
   productCapability: 'ATLAS',
   depth: 'RUNTIME',
-  blockerClass: 'INTERNAL',
   executableSlice: 'ATLAS-PUBLIC-SURFACE',
   executableWhenComplete: ['ATLAS-PLANT-IDENTITY'],
 });

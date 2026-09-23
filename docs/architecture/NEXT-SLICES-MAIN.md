@@ -479,11 +479,14 @@ Next: ATLAS-PUBLIC-SURFACE.
 
 Dependencies: ATLAS-PLANT-IDENTITY.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for domain public projection of approved PlantIdentity
+with taxonomic citations only. Drafts stay off the response. No
+cultivation claims and no full WWW Atlas UI.
 Autonomous: yes.
 Accept: a public surface lists approved plant identities and their
 taxonomic citations. It does not state cultivation advice as fact.
-Tests: projection tests with synthetic plant ids.
+Tests: `packages/domain/plant-identity.test.mjs` public projection cases,
+`docs/architecture/ATLAS-PUBLIC-SURFACE.md`.
 Security: unpublished identities stay off the public response.
 Next: none.
 

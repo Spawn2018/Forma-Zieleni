@@ -90,6 +90,57 @@ export function approvePlantIdentity(plant: PlantIdentity, at: string): PlantIde
   };
 }
 
+export type PublicPlantCitation = {
+  sourceId: string;
+  url: string;
+  note: string;
+  accession: string | null;
+};
+
+/** Public-safe plant fields. Drafts stay off the response. No cultivation claims. */
+export type PublicPlantProjection = {
+  id: string;
+  scientificName: string;
+  citations: readonly PublicPlantCitation[];
+};
+
+export function projectPlantForPublic(plant: PlantIdentity): PublicPlantProjection | null {
+  if (plant.status !== 'approved') return null;
+  assertAtlasDoesNotAuthorizeAdvice(plant.scientificName);
+  assertPlantIdentityHasNoCultivationClaim({
+    careGuide: Object.hasOwn(plant, 'careGuide'),
+    hardinessGuarantee: Object.hasOwn(plant, 'hardinessGuarantee'),
+    wateringSchedule: Object.hasOwn(plant, 'wateringSchedule'),
+    cultivationProof: Object.hasOwn(plant, 'cultivationProof'),
+  });
+  const authorities = new Map(botanicalSourcePolicy().map(source => [source.id, source]));
+  const citations: PublicPlantCitation[] = [];
+  for (const citation of plant.citations) {
+    const source = authorities.get(citation.sourceId);
+    if (!source) throw new Error('ATLAS_CITATION_UNKNOWN');
+    citations.push({
+      sourceId: source.id,
+      url: source.url,
+      note: source.note,
+      accession: citation.accession,
+    });
+  }
+  return {
+    id: plant.id,
+    scientificName: plant.scientificName,
+    citations,
+  };
+}
+
+export function listPublicPlants(plants: readonly PlantIdentity[]): PublicPlantProjection[] {
+  const listed: PublicPlantProjection[] = [];
+  for (const plant of plants) {
+    const projection = projectPlantForPublic(plant);
+    if (projection) listed.push(projection);
+  }
+  return listed;
+}
+
 /** Cultivation / care claims must never be stored as plant product truth. */
 export function assertPlantIdentityHasNoCultivationClaim(claim: {
   careGuide?: boolean;

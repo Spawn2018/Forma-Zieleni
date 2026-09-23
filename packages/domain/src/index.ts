@@ -147,8 +147,16 @@ export {
   assertOpaquePlantId,
   assertPlantIdentityHasNoCultivationClaim,
   createPlantIdentity,
+  listPublicPlants,
+  projectPlantForPublic,
 } from './plant-identity.ts';
-export type { PlantIdentity, PlantIdentityStatus, TaxonomicCitation } from './plant-identity.ts';
+export type {
+  PlantIdentity,
+  PlantIdentityStatus,
+  PublicPlantCitation,
+  PublicPlantProjection,
+  TaxonomicCitation,
+} from './plant-identity.ts';
 export { sanitizeAttribution } from './attribution.ts';
 export type { AttributionTouch } from './attribution.ts';
 export { RETENTION_NOTE, SEARCH_ENTITIES, createSearchStore, rememberObservation } from './search-data.ts';

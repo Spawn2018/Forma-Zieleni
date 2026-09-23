@@ -5,6 +5,8 @@ import {
   assertOpaquePlantId,
   assertPlantIdentityHasNoCultivationClaim,
   createPlantIdentity,
+  listPublicPlants,
+  projectPlantForPublic,
 } from './src/plant-identity.ts';
 
 const at = '2026-09-23T22:00:00.000Z';
@@ -80,4 +82,23 @@ test('scientific names reject advice-shaped or empty values', () => {
     () => createPlantIdentity('p9k2n4p6q8r0s2t4', 'podlewaj cis', [citation], at),
     /PLANT_NAME_INVALID/,
   );
+});
+
+test('public projection lists only approved identities with taxonomic citations', () => {
+  const draft = createPlantIdentity('p9k2n4p6q8r0s2t4', 'Taxus baccata', [citation], at);
+  const approved = approvePlantIdentity(
+    createPlantIdentity('p8k2n4p6q8r0s2t4', 'Buxus sempervirens', [{ sourceId: 'world-flora-online', accession: null }], at),
+    '2026-09-23T22:10:00.000Z',
+  );
+  assert.equal(projectPlantForPublic(draft), null);
+  const publicPlant = projectPlantForPublic(approved);
+  assert.ok(publicPlant);
+  assert.equal(publicPlant.scientificName, 'Buxus sempervirens');
+  assert.equal(publicPlant.citations[0].sourceId, 'world-flora-online');
+  assert.match(publicPlant.citations[0].note.toLowerCase(), /not a care|not horticultural/);
+  assert.equal(Object.hasOwn(publicPlant, 'careGuide'), false);
+  assert.equal(Object.hasOwn(publicPlant, 'status'), false);
+  const listed = listPublicPlants([draft, approved]);
+  assert.equal(listed.length, 1);
+  assert.equal(listed[0].id, approved.id);
 });
