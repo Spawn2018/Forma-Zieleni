@@ -916,6 +916,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T14:10:05.344Z",
       "lastSeen": "2026-09-23T14:10:05.383Z"
+    },
+    {
+      "patternKey": "cr-at-line-500-update-the-i-bb94eaee91",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 500, Update the import-specifier scan in the architecture-import check to recognize side-effect imports, dynamic",
+      "evidence": [
+        "cr-occurrence:67a6423:c5e15b82c14b:cr-at-line-500-update-the-i-bb94eaee91",
+        "scripts/requirements/quality-coverage.mjs",
+        "severity:low",
+        "accepted:cr-at-line-500-update-the-i-bb94eaee91"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "c5e15b82c14b5631121ead4adabeb7214b3921bb",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-cb2810f5",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T15:57:55.370Z",
+      "lastSeen": "2026-09-23T15:59:15.489Z"
     }
   ]
 }

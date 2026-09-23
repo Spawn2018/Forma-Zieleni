@@ -15,6 +15,7 @@ import {
   flakyDisposition,
   forbiddenImport,
   globalLearningAllowed,
+  importSpecifiers,
   independentOccurrences,
   migrationReadiness,
   mutationSurvived,
@@ -94,6 +95,21 @@ test('proven unused code is detected and a future contract is protected', () => 
     edges: [],
   });
   assert.equal(checked.errors.includes('DEAD_CODE:old-flag'), true);
+});
+
+test('architecture import scan sees side-effect and dynamic specifiers', () => {
+  const specs = importSpecifiers([
+    "import '@forma-zieleni/domain';",
+    "const loaded = import('@forma-zieleni/api');",
+    "const sibling = require('@forma-zieleni/portal');",
+    "import helper from '@forma-zieleni/validation';",
+  ].join('\n'));
+  assert.deepEqual(specs, [
+    '@forma-zieleni/domain',
+    '@forma-zieleni/api',
+    '@forma-zieleni/portal',
+    '@forma-zieleni/validation',
+  ]);
 });
 
 test('a forbidden package cycle fails', () => {

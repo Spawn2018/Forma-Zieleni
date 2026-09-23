@@ -490,6 +490,13 @@ function walkSources(dir, out = []) {
   return out;
 }
 
+export function importSpecifiers(text) {
+  const specs = [];
+  const pattern = /(?:from|import|require)\s*\(?\s*['"]([^'"]+)['"]/g;
+  for (const match of String(text).matchAll(pattern)) specs.push(match[1]);
+  return specs;
+}
+
 export function scanArchitectureImports(scanRoot = root) {
   const roots = ['apps', 'packages/domain'].map((dir) => path.join(scanRoot, dir));
   const violations = [];
@@ -497,8 +504,8 @@ export function scanArchitectureImports(scanRoot = root) {
     for (const file of walkSources(dir)) {
       const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
       const text = readFileSync(file, 'utf8');
-      for (const match of text.matchAll(/from\s+['"]([^'"]+)['"]/g)) {
-        const reason = forbiddenImport(relative, match[1]);
+      for (const specifier of importSpecifiers(text)) {
+        const reason = forbiddenImport(relative, specifier);
         if (reason) violations.push(`${relative}:${reason}`);
       }
     }
