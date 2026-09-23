@@ -228,6 +228,7 @@ export function transition(record, next, extra = {}, options = {}) {
   // effectObservations must merge idempotently — never append duplicate ids wholesale.
   const { effectState: _forgedState, effectObservations: extraObs, ...safeExtra } = extra;
   void _forgedState;
+  if (extraObs != null && !Array.isArray(extraObs)) throw error('BAD_EFFECT_OBSERVATIONS');
   let mergedObs = record.effectObservations;
   if (Array.isArray(extraObs)) {
     mergedObs = Array.isArray(record.effectObservations) ? [...record.effectObservations] : [];
