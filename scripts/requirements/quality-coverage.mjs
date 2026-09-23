@@ -350,10 +350,18 @@ export function dependencyCycles(edges = []) {
   return [...new Set(cycles)];
 }
 
+export function normalizeComparableSource(text) {
+  const parts = String(text).split(/('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`)/g);
+  return parts.map((part, index) => {
+    if (index % 2 === 1) return part;
+    return part.replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n');
+  }).join('').trim();
+}
+
 export function syntacticDuplicates(files = []) {
   const groups = new Map();
   for (const file of files) {
-    const text = String(file.text || '').replace(/\s+/g, ' ').trim();
+    const text = normalizeComparableSource(file.text);
     if (text.length < 120) continue;
     if (!groups.has(text)) groups.set(text, []);
     groups.get(text).push(file.path);

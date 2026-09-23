@@ -942,6 +942,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T15:57:55.370Z",
       "lastSeen": "2026-09-23T15:59:15.489Z"
+    },
+    {
+      "patternKey": "cr-at-line-356-update-the-t-f78bbbd3b1",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 356, Update the text normalization used by syntacticDuplicates so whitespace inside string literals remains sign",
+      "evidence": [
+        "cr-occurrence:754b66a:3a1b2ba03966:cr-at-line-356-update-the-t-f78bbbd3b1",
+        "scripts/requirements/quality-coverage.mjs",
+        "severity:high",
+        "accepted:cr-at-line-356-update-the-t-f78bbbd3b1"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "3a1b2ba0396600c1cd3f75789400b6797d23b8d0",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-7197d6d5",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T16:17:28.820Z",
+      "lastSeen": "2026-09-23T16:18:41.529Z"
     }
   ]
 }
