@@ -367,7 +367,155 @@ in this slice.
 Tests: `packages/domain/product-boundaries.test.mjs`,
 `docs/architecture/GARDENOS-RELATION-BOUNDARY.md`.
 Security: no invented live twin data.
-Next: none until a later Garden OS product slice.
+Next: GARDENOS-DOMAIN.
+
+### PAY-DOMAIN-NEUTRAL
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN. Provider selection stays undecided.
+Autonomous: yes.
+Accept: a provider-neutral payment schedule and states on a contract,
+with synthetic amounts only. No provider, no charge, no webhook to a
+vendor.
+Tests: domain payment tests named by the slice when implemented.
+Security: no card data, no provider secrets.
+Next: SIGN-STATE-NEUTRAL.
+
+### SIGN-STATE-NEUTRAL
+
+Dependencies: CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN. FZ-SIGN-1 provider stays undecided.
+Autonomous: yes.
+Accept: contract version lock plus a provider-neutral signature request
+record. No QES claim and no vendor connection.
+Tests: contract tests extended by the slice when implemented.
+Security: signer references are ids, not documents from a vendor.
+Next: none.
+
+### ADMIN-CRM-LEAD
+
+Dependencies: ADMIN-APP.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff list and qualify leads in apps/admin through Core API.
+Empty, error, and unauthorized states are real. No second lead store
+and no invented customers.
+Tests: admin shell tests plus an API-backed lead workflow test.
+Security: staff session only; client tokens cannot qualify.
+Next: none.
+
+### MOBILE-ANDROID-FOUNDATION
+
+Dependencies: MOBILE-CLIENT-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN. Store signing and Play credentials stay out.
+Autonomous: yes.
+Accept: an Android client foundation that calls Core API and does not
+own commercial state.
+Tests: the foundation's contract tests. No store upload.
+Security: no production credentials in the tree.
+Next: none.
+
+### MOBILE-IOS-FOUNDATION
+
+Dependencies: MOBILE-CLIENT-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN. App Store credentials stay out.
+Autonomous: yes.
+Accept: an iOS client foundation that calls Core API and does not own
+commercial state.
+Tests: the foundation's contract tests. No store upload.
+Security: no production credentials in the tree.
+Next: none.
+
+### GARDENOS-DOMAIN
+
+Dependencies: GARDENOS-RELATION-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a Core API garden record linked to a delivered project. No twin
+database and no invented live garden.
+Tests: domain tests for the garden record.
+Security: client isolation matches the project owner.
+Next: none.
+
+### SITEINTEL-RULES
+
+Dependencies: SITEINTEL-DATA-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: rules over normalized site observations. AI cannot invent site
+facts ahead of those rules.
+Tests: domain tests for the rule step.
+Security: no third-party credentials.
+Next: none.
+
+### ATLAS-PLANT-IDENTITY
+
+Dependencies: ATLAS-PROVENANCE-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a plant identity record distinct from taxonomic-source proof.
+No invented cultivation claims.
+Tests: domain tests for plant identity.
+Security: sources stay citations, not product truth.
+Next: none.
+
+### SKETCHUP-PROJECT-MAP
+
+Dependencies: SKETCHUP-ADAPTER-BOUNDARY.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a mapping from a SketchUp model reference to a Core API project
+id. The plugin does not own price, contract, or customer truth.
+Tests: mapping contract tests with synthetic ids.
+Security: no local business ACL.
+Next: none.
+
+### PORTAL-FILE-PROJECTION
+
+Dependencies: PORTAL-PROJECT-PROJECTION.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: an authenticated client sees only their project files. Staff
+files and other clients' files stay hidden.
+Tests: HTTP authorization tests with synthetic file ids.
+Security: BOLA denied for another client's file.
+Next: none.
+
+### WWW-PORTFOLIO-PROJECTION
+
+Dependencies: CRM-PROJECT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: the public site can project a project only when it is marked
+for publication. Concept and illustrative projects stay distinct. No
+invented awards or prices.
+Tests: web projection tests with synthetic projects.
+Security: private project fields stay off the public response.
+Next: none.
+
+### PXI-SIGNAL-MODEL
+
+Dependencies: ADMIN-APP.
+Gate: REVIEW.
+Status: OPEN. Production telemetry stays off.
+Autonomous: yes.
+Accept: a versioned experience-signal contract that rejects email,
+phone, and message bodies, keeps replay off, and refuses a universal
+experience score.
+Tests: domain tests for the signal contract.
+Security: no customer PII and no replay payload.
+Next: none.
 
 ## Deferred and Owner-gated (visible, not READY)
 

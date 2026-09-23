@@ -151,3 +151,78 @@ export function exhaustionAllowedFor(requirements = [], slices = [], selected = 
   if (registryMaterializationGap(requirements, slices)) return false;
   return true;
 }
+
+export function scopeCoverageGaps(scope = [], requirements = []) {
+  const ids = new Set(requirements.map((row) => row.id));
+  const gaps = [];
+  for (const item of scope) {
+    if (!item || item.normative === false) continue;
+    if (item.coverageStatus && item.coverageStatus !== 'COVERED_BY_REQUIREMENT') continue;
+    const linked = Array.isArray(item.requirementIds) ? item.requirementIds : [];
+    if (linked.length === 0 || linked.some((id) => !ids.has(id))) gaps.push(item.id);
+  }
+  return gaps;
+}
+
+export function missingRequiredDepths(requirements = [], models = []) {
+  const missing = [];
+  for (const model of models) {
+    for (const depth of model.requiredDepths || []) {
+      const found = requirements.some((row) => row.productCapability === model.capability && row.depth === depth);
+      if (!found) missing.push(`${model.capability}:${depth}`);
+    }
+  }
+  return missing;
+}
+
+function depthRows(requirements, capability, depth) {
+  return requirements.filter((row) => row.productCapability === capability && row.depth === depth);
+}
+
+function depthSettled(rows) {
+  return rows.length > 0 && rows.every((row) => row.status === 'DONE_AT_MAX_DEPTH' || !isInternalImplementable(row) || row.safePreblockerWork === false);
+}
+
+export function parentProductReport(requirements = [], model) {
+  const missing = (model.requiredDepths || []).filter((depth) => depthRows(requirements, model.capability, depth).length === 0);
+  const open = [];
+  for (const depth of model.requiredDepths || []) {
+    const rows = depthRows(requirements, model.capability, depth);
+    if (rows.length === 0) continue;
+    if (!depthSettled(rows)) open.push(depth);
+  }
+  return {
+    capability: model.capability,
+    complete: missing.length === 0 && open.length === 0,
+    missingDepths: missing,
+    openDepths: open,
+  };
+}
+
+export function proseOnlyFutureDepths(requirements = [], models = []) {
+  const hits = [];
+  for (const model of models) {
+    const siblings = requirements.filter((row) => row.productCapability === model.capability);
+    const later = siblings.some((row) => /\blater\b/i.test(`${row.gap || ''} ${row.description || ''}`));
+    for (const depth of model.requiredDepths || []) {
+      if (depthRows(requirements, model.capability, depth).length === 0 && later) {
+        hits.push(`${model.capability}:${depth}`);
+      }
+    }
+  }
+  return hits;
+}
+
+export function currentBindingDepthExhausted(requirements = [], slices = []) {
+  if (missingExecutablePathDeclarations(requirements).length > 0) return false;
+  if (registryMaterializationGap(requirements, slices)) return false;
+  return !requirements.some((row) => isUnfinishedBinding(row) && isInternalImplementable(row) && row.safePreblockerWork !== false);
+}
+
+export function masterProductScopeExhausted(requirements = [], slices = [], scope = [], models = []) {
+  if (!currentBindingDepthExhausted(requirements, slices)) return false;
+  if (scopeCoverageGaps(scope, requirements).length > 0) return false;
+  if (missingRequiredDepths(requirements, models).length > 0) return false;
+  if (proseOnlyFutureDepths(requirements, models).length > 0) return false;
+  return models.every((model) => parentProductReport(requirements, model).complete);
+}

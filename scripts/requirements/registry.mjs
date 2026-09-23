@@ -32,6 +32,7 @@ function row(id, description, status, actual, max, architecture, implementation,
     executableWhenComplete: extras.executableWhenComplete || [],
     blockerClass: extras.blockerClass || '',
     productCapability: extras.productCapability || '',
+    depth: extras.depth || '',
     foundationOnly: extras.foundationOnly === true,
     safePreblockerWork: extras.safePreblockerWork !== false,
   });
@@ -388,6 +389,121 @@ for (const [letter, text] of ACCEPTANCE) {
   });
 }
 
+row('FZ-REQ-CRM-OPP-001', 'Opportunity is a first-class Core API object on the Lead to Offer path.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/opportunity.ts', 'packages/domain/opportunity.test.mjs', '', 'NONE', '', {
+  productCapability: 'OPPORTUNITY',
+  depth: 'DOMAIN',
+});
+row('FZ-REQ-WWW-002', 'The public site projects real or explicitly synthetic portfolio projects. It does not invent awards, prices, or client claims.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', 'portfolio projection slice', 'REVIEW', 'WWW foundation is not the sales portfolio.', {
+  productCapability: 'WWW',
+  depth: 'CLIENT_PROJECTION',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'WWW-PORTFOLIO-PROJECTION',
+  executableWhenComplete: ['CRM-PROJECT-DOMAIN'],
+});
+row('FZ-REQ-PORTAL-005', 'An authenticated client can see their own project files through Core API authorization. Staff files stay hidden.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain/src/project.ts', 'apps/api/src/http.test.mjs', 'portal file projection slice', 'REVIEW', 'Current offer and project projections are not the file portal.', {
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_PROJECTION',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'PORTAL-FILE-PROJECTION',
+  executableWhenComplete: ['PORTAL-PROJECT-PROJECTION'],
+});
+row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through the existing Core API. No second lead store.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'admin lead workflow slice', 'REVIEW', 'The admin shell is not the CRM lead workflow.', {
+  productCapability: 'ADMIN',
+  depth: 'WORKFLOW',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'ADMIN-CRM-LEAD',
+  executableWhenComplete: ['ADMIN-APP'],
+});
+row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/MOBILE-CLIENT-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Android foundation slice', 'REVIEW', 'The mobile boundary is not an Android runtime.', {
+  productCapability: 'MOBILE',
+  depth: 'ANDROID_RUNTIME',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'MOBILE-ANDROID-FOUNDATION',
+  executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
+});
+row('FZ-REQ-MOBILE-003', 'iOS is a Core API client with its own app foundation, not a second business backend.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/MOBILE-CLIENT-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'iOS foundation slice', 'REVIEW', 'The mobile boundary is not an iOS runtime.', {
+  productCapability: 'MOBILE',
+  depth: 'IOS_RUNTIME',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'MOBILE-IOS-FOUNDATION',
+  executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
+});
+row('FZ-REQ-GARDENOS-002', 'Garden OS domain state links a delivered project to a garden record owned by Core API.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/GARDENOS-RELATION-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Garden OS domain slice', 'REVIEW', 'The relation boundary is not the garden runtime.', {
+  productCapability: 'GARDENOS',
+  depth: 'DOMAIN',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'GARDENOS-DOMAIN',
+  executableWhenComplete: ['GARDENOS-RELATION-BOUNDARY'],
+});
+row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observations and do not let AI invent site facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/SITEINTEL-DATA-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Site Intelligence rules slice', 'REVIEW', 'The data-order boundary is not the rules runtime.', {
+  productCapability: 'SITEINTEL',
+  depth: 'RULES',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'SITEINTEL-RULES',
+  executableWhenComplete: ['SITEINTEL-DATA-BOUNDARY'],
+});
+row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxonomic-source proof and from cultivation claims.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/ATLAS-PROVENANCE-BOUNDARY.md', 'packages/domain/atlas-boundary.test.mjs', 'Atlas identity slice', 'REVIEW', 'Provenance is not the Atlas product UI.', {
+  productCapability: 'ATLAS',
+  depth: 'DOMAIN',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'ATLAS-PLANT-IDENTITY',
+  executableWhenComplete: ['ATLAS-PROVENANCE-BOUNDARY'],
+});
+row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'SketchUp mapping slice', 'REVIEW', 'The adapter boundary is not the mapping runtime.', {
+  productCapability: 'SKETCHUP',
+  depth: 'INTEGRATION',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'SKETCHUP-PROJECT-MAP',
+  executableWhenComplete: ['SKETCHUP-ADAPTER-BOUNDARY'],
+});
+row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and without moving money.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, 'packages/domain/contract.test.mjs', 'provider-neutral payment slice', 'REVIEW', 'Provider selection stays FZ-REQ-PAY-001.', {
+  productCapability: 'PAYMENT',
+  depth: 'DOMAIN',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'PAY-DOMAIN-NEUTRAL',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signature request exist without a signing vendor.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'packages/domain/src/contract.ts', 'packages/domain/contract.test.mjs', 'provider-neutral signing slice', 'REVIEW', 'Provider selection stays FZ-REQ-GOV-002. No QES claim.', {
+  productCapability: 'SIGNING',
+  depth: 'DOMAIN',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'SIGN-STATE-NEUTRAL',
+  executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
+});
+row('FZ-REQ-PXI-001', 'Experience signals are versioned, minimized, and replay-off. They do not become a universal experience score.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', GROWTH, PLAN, TEST, 'PXI signal slice', 'REVIEW', 'Production telemetry stays gated. The signal contract is safe now.', {
+  productCapability: 'PXI',
+  depth: 'CONTRACT',
+  blockerClass: 'INTERNAL',
+  executableSlice: 'PXI-SIGNAL-MODEL',
+  executableWhenComplete: ['ADMIN-APP'],
+});
+
+const KNOWN_DEPTH = {
+  'FZ-REQ-MOBILE-001': 'BOUNDARY',
+  'FZ-REQ-GARDENOS-001': 'BOUNDARY',
+  'FZ-REQ-SITEINTEL-001': 'BOUNDARY',
+  'FZ-REQ-ATLAS-001': 'FOUNDATION',
+  'FZ-REQ-ATLAS-002': 'BOUNDARY',
+  'FZ-REQ-SKETCHUP-001': 'BOUNDARY',
+  'FZ-REQ-ADMIN-001': 'FOUNDATION',
+  'FZ-REQ-PORTAL-001': 'FOUNDATION',
+  'FZ-REQ-PORTAL-002': 'RUNTIME',
+  'FZ-REQ-PORTAL-003': 'CLIENT_PROJECTION',
+  'FZ-REQ-PORTAL-004': 'CLIENT_PROJECTION',
+  'FZ-REQ-WWW-001': 'FOUNDATION',
+  'FZ-REQ-PAY-001': 'OWNER_DECISION',
+  'FZ-REQ-GOV-002': 'OWNER_DECISION',
+  'FZ-REQ-CRM-OFFER-001': 'DOMAIN',
+  'FZ-REQ-CRM-CONTRACT-001': 'DOMAIN',
+  'FZ-REQ-PROJECT-002': 'DOMAIN',
+  'FZ-REQ-SEC-001': 'ACCEPTANCE',
+};
+for (const item of rows) {
+  if (!item.depth && KNOWN_DEPTH[item.id]) item.depth = KNOWN_DEPTH[item.id];
+  if (item.id === 'FZ-REQ-GOV-002') item.productCapability = item.productCapability || 'SIGNING';
+  if (item.id === 'FZ-REQ-WWW-001') item.productCapability = item.productCapability || 'WWW';
+}
+
 const PREFIXES = [
   'FZ-REQ-GOV', 'FZ-REQ-AUTO', 'FZ-REQ-DORA', 'FZ-REQ-CIS', 'FZ-REQ-ARCH', 'FZ-REQ-SEC', 'FZ-REQ-PRIV',
   'FZ-REQ-WWW', 'FZ-REQ-PORTAL', 'FZ-REQ-ADMIN', 'FZ-REQ-MOBILE', 'FZ-REQ-API', 'FZ-REQ-DATA', 'FZ-REQ-CMS',
@@ -397,7 +513,7 @@ const PREFIXES = [
   'FZ-REQ-INTEGRATION', 'FZ-REQ-OPS', 'FZ-REQ-MKTEXEC', 'FZ-REQ-OFFERINTEL', 'FZ-REQ-OFFERLEARN',
   'FZ-REQ-PROJECTGROWTH', 'FZ-REQ-EXECINTEGRITY', 'FZ-REQ-CONTEXT', 'FZ-REQ-EVIDENCE', 'FZ-REQ-COMPLETION',
   'FZ-REQ-DOC', 'FZ-REQ-DOCOPS', 'FZ-REQ-DOCCTX', 'FZ-REQ-DOCQA', 'FZ-REQ-PLATFORM',
-  'FZ-REQ-COVERAGE', 'FZ-REQ-DOCINV', 'FZ-REQ-RECOVERY',
+  'FZ-REQ-COVERAGE', 'FZ-REQ-DOCINV', 'FZ-REQ-RECOVERY', 'FZ-REQ-PXI', 'FZ-REQ-SIGN',
 ];
 
 function rank(depth) {
@@ -464,13 +580,13 @@ export function renderMarkdown() {
     'Machine source: `scripts/requirements/registry.mjs`.',
     'This is not a second roadmap. Product execution stays in `docs/architecture/NEXT-SLICES-MAIN.md` after RETURN-ROADMAP.',
     '',
-    'Depth is the highest honest depth of that row. A blocked row is not a shell when the maximum possible depth is the same as the actual depth.',
+    'Actual/Max is evidence depth. Product depth is the binding product layer of that row. DONE_AT_MAX_DEPTH is not parent-product completion.',
     '',
-    '| ID | Status | Actual | Max | Requirement | Evidence | Gate | Gap |',
-    '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    '| ID | Status | Actual | Max | Product depth | Requirement | Evidence | Gate | Gap |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
   ];
   for (const item of rows) {
-    lines.push(`| ${item.id} | ${item.status} | ${item.actualDepth} | ${item.maxDepth} | ${item.description.replaceAll('|', '/')} | ${item.test} | ${item.gate} | ${item.gap.replaceAll('|', '/')} |`);
+    lines.push(`| ${item.id} | ${item.status} | ${item.actualDepth} | ${item.maxDepth} | ${item.depth || ''} | ${item.description.replaceAll('|', '/')} | ${item.test} | ${item.gate} | ${item.gap.replaceAll('|', '/')} |`);
   }
   lines.push('');
   return lines.join('\n');

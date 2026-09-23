@@ -1,8 +1,13 @@
 import {
+  currentBindingDepthExhausted,
+  masterProductScopeExhausted,
   missingExecutablePathDeclarations,
+  missingRequiredDepths,
   portalCapabilityIsProductComplete,
   registryMaterializationGap,
+  scopeCoverageGaps,
 } from '../requirements/executable-path.mjs';
+import { loadParentModels, loadProductScope } from '../requirements/product-scope.mjs';
 import { requirements as loadRequirements } from '../requirements/registry.mjs';
 
 const WARSAW = 'Europe/Warsaw';
@@ -249,13 +254,24 @@ export function selectReady(slices, options = {}) {
     reason = `${selected.id} is the highest-priority safe READY slice after the critical path`;
   }
   const requirementRows = options.requirements || loadRequirements();
+  const useLiveScope = options.requirements === undefined && options.scope === undefined;
+  const scope = useLiveScope ? loadProductScope() : (options.scope || []);
+  const models = useLiveScope ? loadParentModels() : (options.parentModels || []);
   const gap = internalPrerequisiteGap(slices, requirementRows);
   const undeclared = missingExecutablePathDeclarations(requirementRows);
+  const scopeGaps = scopeCoverageGaps(scope, requirementRows);
+  const depthGaps = missingRequiredDepths(requirementRows, models);
   if (!selected && gap) {
     reason = `${gap.reason} Do not mark the session exhausted for an omitted internal materialization.`;
   } else if (!selected && undeclared.length > 0) {
     reason = `Unfinished binding internal requirements lack executableSlice metadata (${undeclared.slice(0, 3).join(', ')}). That is a validation failure, not exhaustion.`;
+  } else if (!selected && scopeGaps.length > 0) {
+    reason = `Scope coverage gap ${scopeGaps[0]}. Approved product scope has no requirement.`;
+  } else if (!selected && depthGaps.length > 0) {
+    reason = `Missing binding depth ${depthGaps[0]}. A boundary or foundation is not the parent product.`;
   }
+  const currentDepthExhausted = currentBindingDepthExhausted(requirementRows, slices);
+  const masterExhausted = masterProductScopeExhausted(requirementRows, slices, scope, models);
   return {
     selected: selected ? selected.id : null,
     reason,
@@ -266,7 +282,12 @@ export function selectReady(slices, options = {}) {
     internalGap: gap || (undeclared.length > 0
       ? { id: undeclared[0], reason: reason }
       : null),
-    exhaustionAllowed: selected == null && gap == null && undeclared.length === 0,
+    scopeGaps,
+    depthGaps,
+    currentBindingDepthExhausted: currentDepthExhausted,
+    masterProductScopeExhausted: masterExhausted,
+    exhaustionAllowed: selected == null && gap == null && undeclared.length === 0
+      && scopeGaps.length === 0 && depthGaps.length === 0 && masterExhausted,
   };
 }
 
