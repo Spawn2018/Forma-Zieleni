@@ -634,6 +634,23 @@ export const EXPERIENCE_CONTRACTS = Object.freeze([
   }),
 ]);
 
+export const WORKFLOWS = Object.freeze([
+  { id: 'public-enquiry', surfaceRequired: true },
+  { id: 'client-visibility', surfaceRequired: true },
+  { id: 'staff-operations', surfaceRequired: true },
+  { id: 'commercial-path', surfaceRequired: true },
+  { id: 'delivery', surfaceRequired: true },
+  { id: 'field-task', surfaceRequired: true },
+  { id: 'site-review', surfaceRequired: true },
+  { id: 'plant-knowledge', surfaceRequired: true },
+  { id: 'model-sync', surfaceRequired: true },
+  { id: 'publication', surfaceRequired: true },
+  { id: 'growth-plan', surfaceRequired: true },
+  { id: 'experience-signals', surfaceRequired: false },
+  { id: 'connected-facts', surfaceRequired: false },
+  { id: 'hosting-decision', surfaceRequired: false },
+]);
+
 export const JOURNEYS = Object.freeze([
   {
     id: 'lead-to-project',
@@ -685,6 +702,10 @@ export function contractErrors(item, options = {}) {
   if (!item?.id) fail(errors, 'MISSING_ID');
   if (!ACCEPTANCE_STATES.includes(item.acceptanceState)) fail(errors, 'BAD_ACCEPTANCE');
   if (item.acceptanceState === 'DONE') fail(errors, 'COLLAPSED_DONE');
+  const acceptedAt = ACCEPTANCE_STATES.indexOf('VISUAL_ACCEPTED');
+  if (ACCEPTANCE_STATES.indexOf(item.acceptanceState) >= acceptedAt && !item.reviewRecord) {
+    fail(errors, 'MISSING_VISUAL_REVIEW');
+  }
   if (item.decorative === true || !item.businessPurpose || item.businessPurpose.trim().length < 12) {
     fail(errors, 'MISSING_BUSINESS_PURPOSE');
   }
@@ -761,13 +782,14 @@ export function checkExperienceContracts(options = {}) {
     }
   }
   const screens = catalog.filter((item) => item.screenId);
-  const workflows = new Set(catalog.map((item) => item.workflowId).filter(Boolean));
+  const workflows = new Set((options.workflows || WORKFLOWS).map((item) => item.id));
   for (const screen of screens) {
-    if (!screen.workflowId || !workflows.has(screen.workflowId)) fail(errors, `ORPHAN_SCREEN:${screen.screenId}`);
+    if (!workflows.has(screen.workflowId)) fail(errors, `ORPHAN_SCREEN:${screen.screenId}`);
   }
-  const surfaceWorkflows = catalog.filter((item) => item.surfaceRequired === true);
-  for (const item of surfaceWorkflows) {
-    if (!item.screenId) fail(errors, `ORPHAN_WORKFLOW:${item.workflowId}`);
+  for (const workflow of (options.workflows || WORKFLOWS)) {
+    if (workflow.surfaceRequired !== true) continue;
+    const covered = catalog.some((item) => item.workflowId === workflow.id && item.screenId);
+    if (!covered) fail(errors, `ORPHAN_WORKFLOW:${workflow.id}`);
   }
   return {
     ok: errors.length === 0,

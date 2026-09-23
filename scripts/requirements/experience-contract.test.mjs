@@ -36,10 +36,11 @@ test('a section without a business purpose fails', () => {
 
 test('a workflow that requires a surface and has none fails', () => {
   const catalog = clone();
-  const offer = catalog.find((item) => item.id === 'OFFER');
-  offer.screenId = null;
+  for (const item of catalog) {
+    if (item.workflowId === 'growth-plan') item.screenId = null;
+  }
   const checked = checkExperienceContracts({ catalog });
-  assert.equal(checked.errors.some((error) => error.includes('ORPHAN_WORKFLOW')), true);
+  assert.equal(checked.errors.some((error) => error.includes('ORPHAN_WORKFLOW:growth-plan')), true);
 });
 
 test('a UI action without a domain effect fails', () => {
@@ -132,7 +133,14 @@ test('a user-facing capability must keep its FZ-CIS learning path', () => {
 
 test('an unlinked screen is an orphan', () => {
   const catalog = clone();
-  catalog.find((item) => item.id === 'FILES').workflowId = '';
+  catalog.find((item) => item.id === 'FILES').workflowId = 'invented-flow';
   const checked = checkExperienceContracts({ catalog });
   assert.equal(checked.errors.some((error) => error.startsWith('ORPHAN_SCREEN:')), true);
+});
+
+test('a later acceptance state implies visual review', () => {
+  const catalog = clone();
+  catalog.find((item) => item.id === 'WWW').acceptanceState = 'OPERATIONAL';
+  const checked = checkExperienceContracts({ catalog });
+  assert.equal(checked.errors.some((error) => error === 'WWW:MISSING_VISUAL_REVIEW'), true);
 });
