@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { toLearningInput } from '../fz-cis/ingest.mjs';
 import { syntheticProductionRejected } from '../fz-cis/learning-governance.mjs';
 import { loadProductScope } from './product-scope.mjs';
+import { requirements } from './registry.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -268,11 +269,21 @@ function journey(id, capability, requirement, workflow, activation) {
 }
 
 export const BUSINESS_RULES = Object.freeze([
-  { id: 'offer-lifecycle', owner: 'packages/domain' },
-  { id: 'portal-visibility', owner: 'packages/domain' },
-  { id: 'lead-qualify', owner: 'packages/domain' },
-  { id: 'contract-lifecycle', owner: 'packages/domain' },
-  { id: 'project-activation', owner: 'packages/domain' },
+  { id: 'authz', owner: 'packages/domain', markers: ['decideDraftRead', 'canSee'] },
+  { id: 'offer-lifecycle', owner: 'packages/domain', markers: ['createOffer'] },
+  { id: 'portal-visibility', owner: 'packages/domain', markers: ['projectOfferForPortal'] },
+  { id: 'lead-qualify', owner: 'packages/domain', markers: ['qualifyLead'] },
+  { id: 'contract-lifecycle', owner: 'packages/domain', markers: ['createContract'] },
+  { id: 'project-activation', owner: 'packages/domain', markers: ['createProject'] },
+  { id: 'client-visibility', owner: 'packages/domain', markers: ['projectProjectForPortal'] },
+  { id: 'plant-identity', owner: 'packages/domain', markers: ['assertAtlasDoesNotAuthorizeAdvice'] },
+  { id: 'garden-os', owner: 'packages/domain', markers: ['assertGardenOsNotTwin'] },
+  { id: 'site-intelligence', owner: 'packages/domain', markers: ['assertSiteIntelligenceOrdering'] },
+  { id: 'connected-knowledge', owner: 'packages/domain', markers: ['fieldOwner', 'assertProjectionCannotOwn'] },
+]);
+
+const DEBUG_LOOP_FIELDS = Object.freeze([
+  'failure', 'reproducer', 'rootCause', 'blastRadius', 'fix', 'regression', 'effect', 'durableControl',
 ]);
 
 /** Material debt stays here, on the existing graph. Empty means none was proven in this closure. */
@@ -424,6 +435,28 @@ export function semanticDuplication(rules = BUSINESS_RULES) {
   return duplicates;
 }
 
+export function semanticOwnershipViolations(files = [], rules = BUSINESS_RULES) {
+  const violations = [];
+  for (const rule of rules) {
+    const owner = `${String(rule.owner || '').replace(/\\/g, '/').replace(/\/$/, '')}/`;
+    for (const marker of rule.markers || []) {
+      const pattern = new RegExp(`export\\s+(?:async\\s+)?function\\s+${marker}\\b`);
+      for (const file of files) {
+        const relative = String(file.path || '').replace(/\\/g, '/');
+        if (/\.(test|spec)\./.test(relative) || relative.startsWith(owner)) continue;
+        if (pattern.test(file.text || '')) violations.push(`${rule.id}:${relative}:${marker}`);
+      }
+    }
+  }
+  return violations;
+}
+
+export function isGeneratedOrDependencyPath(relative) {
+  return String(relative || '').replace(/\\/g, '/').split('/').some((part) => (
+    part === 'node_modules' || part === 'dist' || part === 'build' || part === '.react-router'
+  ));
+}
+
 export function deadCodeFindings(items = []) {
   return items.filter((item) => item.referenced === false && !item.protection);
 }
@@ -509,6 +542,69 @@ export function securityFixDurable(fix = {}) {
   return Boolean(fix.regressionControl);
 }
 
+export function cleanupPreservesBehavior(change = {}) {
+  if (change.kind !== 'cleanup') return { ok: true, reason: 'not-cleanup' };
+  if (change.characterized !== true) return { ok: false, reason: 'uncharacterized-cleanup' };
+  if (change.behaviorChanged === true && change.contractApproved !== true) {
+    return { ok: false, reason: 'behavior-changing-cleanup' };
+  }
+  return { ok: true, reason: 'characterized' };
+}
+
+export function debugLoopAccepted(record = {}) {
+  if (record.kind !== 'fix') return { ok: true, reason: 'not-a-fix' };
+  const missing = DEBUG_LOOP_FIELDS.filter((key) => !record[key]);
+  if (missing.length) return { ok: false, reason: `missing:${missing.join(',')}` };
+  return { ok: true, reason: 'closed' };
+}
+
+export function unusedDependencyFindings(packages = []) {
+  const findings = [];
+  for (const pkg of packages) {
+    const source = pkg.source || '';
+    for (const dep of pkg.dependencies || []) {
+      if (!source.includes(dep)) findings.push(`${pkg.name}:${dep}`);
+    }
+    for (const dep of pkg.devDependencies || []) {
+      if (dep === 'typescript' || dep.startsWith('@types/')) continue;
+      if (!source.includes(dep)) findings.push(`${pkg.name}:${dep}`);
+    }
+  }
+  return findings;
+}
+
+export function staleFeatureFlags(files = []) {
+  const defined = new Map();
+  const used = new Set();
+  for (const file of files) {
+    const relative = String(file.path || '').replace(/\\/g, '/');
+    if (/\.(test|spec)\./.test(relative)) continue;
+    for (const match of String(file.text || '').matchAll(/defineFeatureFlag\(\s*['"]([^'"]+)['"]/g)) {
+      if (!defined.has(match[1])) defined.set(match[1], relative);
+    }
+    for (const match of String(file.text || '').matchAll(/featureFlag\(\s*['"]([^'"]+)['"]/g)) used.add(match[1]);
+  }
+  return [...defined].filter(([name]) => !used.has(name)).map(([name, file]) => `${file}:${name}`);
+}
+
+export function queryHazards(text = '') {
+  const source = String(text);
+  const findings = [];
+  if (/for\s*\(\s*const\s+\w+\s+of\b[\s\S]{0,500}?selectFrom\(/.test(source)) findings.push('n-plus-one');
+  for (const match of source.matchAll(/async\s+(list[A-Za-z0-9]+)\s*\([^)]*\)\s*(?::\s*[^{]+)?\{/g)) {
+    const start = match.index + match[0].length;
+    let depth = 1;
+    let end = start;
+    for (; end < source.length && depth > 0; end += 1) {
+      if (source[end] === '{') depth += 1;
+      else if (source[end] === '}') depth -= 1;
+    }
+    const body = source.slice(start, end);
+    if (body.includes('selectFrom(') && !body.includes('.limit(')) findings.push(`unbounded:${match[1]}`);
+  }
+  return findings;
+}
+
 export function selectQualityChecks(change = {}) {
   const checks = ['unit', 'domain', 'architecture', 'security'];
   if (change.domainOnly === true) return checks;
@@ -539,7 +635,7 @@ function walkSources(dir, out = []) {
     return out;
   }
   for (const name of entries) {
-    if (name === 'node_modules' || name === 'dist' || name === 'build') continue;
+    if (isGeneratedOrDependencyPath(name)) continue;
     const full = path.join(dir, name);
     let info;
     try {
@@ -584,8 +680,130 @@ export function scanStrayDebug(scanRoot = root) {
       const text = readFileSync(file, 'utf8');
       const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
       if (/\bdebugger\b/.test(text)) findings.push(`${relative}:debugger`);
+      if (/\bconsole\.(debug|trace)\b/.test(text)) findings.push(`${relative}:debug`);
       if (/\b(TODO|FIXME)\b/.test(text)) findings.push(`${relative}:todo`);
     }
+  }
+  return findings;
+}
+
+function productSources(scanRoot) {
+  const files = [];
+  for (const dir of ['apps', 'packages']) {
+    for (const file of walkSources(path.join(scanRoot, dir))) {
+      const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
+      if (isGeneratedOrDependencyPath(relative)) continue;
+      files.push({ path: relative, text: readFileSync(file, 'utf8') });
+    }
+  }
+  return files;
+}
+
+function protectedProductPaths() {
+  const protectedPaths = new Set();
+  for (const item of requirements()) {
+    for (const value of [item.implementation, item.test, item.architecture]) {
+      if (typeof value === 'string' && value.includes('/')) protectedPaths.add(value.replace(/\\/g, '/'));
+    }
+  }
+  return protectedPaths;
+}
+
+function packageMeta(scanRoot, relative) {
+  const [group, name] = relative.split('/');
+  try {
+    return JSON.parse(readFileSync(path.join(scanRoot, group, name, 'package.json'), 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+function productEntry(relative, text, meta, protectedPaths) {
+  if (/\.(test|spec)\./.test(relative)) return true;
+  if (relative.includes('/routes/')) return true;
+  if (/\/(entry\.server\.tsx|root\.tsx|vite\.config\.ts|react-router\.config\.ts|routes\.ts)$/.test(relative)) return true;
+  if (/\/index\.(ts|mjs|js)$/.test(relative)) return true;
+  if (text.includes('quality-protect: future-binding')) return true;
+  if (protectedPaths.has(relative)) return true;
+  const scripts = JSON.stringify(meta.scripts || {});
+  if (scripts.includes(path.posix.basename(relative))) return true;
+  const exportsText = JSON.stringify(meta.exports || {});
+  const tail = relative.split('/').slice(2).join('/');
+  return Boolean(tail) && exportsText.includes(tail);
+}
+
+export function deadProductFiles(files = [], protectedPaths = new Set()) {
+  const imported = new Set();
+  const byPath = new Map(files.map((file) => [file.path, file.text || '']));
+  for (const file of files) {
+    const dir = path.posix.dirname(file.path);
+    for (const match of String(file.text || '').matchAll(/(?:from|import)\s*(?:\(\s*)?['"](\.[^'"]+)['"]/g)) {
+      const base = path.posix.normalize(path.posix.join(dir, match[1]));
+      for (const candidate of [base, `${base}.ts`, `${base}.tsx`, `${base}.mjs`, `${base}.js`, `${base}/index.ts`, `${base}/index.mjs`]) {
+        if (byPath.has(candidate)) imported.add(candidate);
+      }
+    }
+  }
+  return files.filter((file) => {
+    if (imported.has(file.path)) return false;
+    return !productEntry(file.path, file.text || '', file.meta || {}, protectedPaths);
+  }).map((file) => file.path);
+}
+
+export function scanSemanticOwnership(scanRoot = root) {
+  return semanticOwnershipViolations(productSources(scanRoot));
+}
+
+export function scanDeadProductFiles(scanRoot = root) {
+  const metaCache = new Map();
+  const files = productSources(scanRoot).map((file) => {
+    const key = file.path.split('/').slice(0, 2).join('/');
+    if (!metaCache.has(key)) metaCache.set(key, packageMeta(scanRoot, file.path));
+    return { ...file, meta: metaCache.get(key) };
+  });
+  return deadProductFiles(files, protectedProductPaths())
+    .filter((file) => !/\.(test|spec)\./.test(file));
+}
+
+export function scanUnusedDependencies(scanRoot = root) {
+  const packages = [];
+  for (const group of ['apps', 'packages']) {
+    let names = [];
+    try {
+      names = readdirSync(path.join(scanRoot, group));
+    } catch {
+      continue;
+    }
+    for (const name of names) {
+      const dir = path.join(scanRoot, group, name);
+      let pkg;
+      try {
+        pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));
+      } catch {
+        continue;
+      }
+      const source = walkSources(dir).map((file) => readFileSync(file, 'utf8')).join('\n');
+      packages.push({
+        name: pkg.name,
+        dependencies: Object.keys(pkg.dependencies || {}),
+        devDependencies: Object.keys(pkg.devDependencies || {}),
+        source: `${source}\n${JSON.stringify(pkg.scripts || {})}`,
+      });
+    }
+  }
+  return unusedDependencyFindings(packages);
+}
+
+export function scanStaleFeatureFlags(scanRoot = root) {
+  return staleFeatureFlags(productSources(scanRoot));
+}
+
+export function scanQueryHazards(scanRoot = root) {
+  const findings = [];
+  for (const file of walkSources(path.join(scanRoot, 'apps', 'api'))) {
+    const relative = path.relative(scanRoot, file).replace(/\\/g, '/');
+    if (/\.(test|spec)\./.test(relative) || isGeneratedOrDependencyPath(relative)) continue;
+    for (const hazard of queryHazards(readFileSync(file, 'utf8'))) findings.push(`${relative}:${hazard}`);
   }
   return findings;
 }
@@ -627,10 +845,26 @@ export function checkQualityCoverage(options = {}) {
     if (item.runtimeReady === true && item.e2e !== 'REQUIRED') errors.push(`RUNTIME_JOURNEY_WITHOUT_E2E:${item.id}`);
     if (item.claimsUiE2e === true && item.transport === 'api') errors.push(`API_CALL_IS_NOT_UI_E2E:${item.id}`);
   }
+  const scanRoot = options.root || root;
   const duplicates = semanticDuplication(rules);
-  const clones = options.clones === undefined ? scanSyntacticDuplicates(options.root || root) : options.clones;
+  const ownership = options.ownership === undefined ? scanSemanticOwnership(scanRoot) : options.ownership;
+  const clones = options.clones === undefined ? scanSyntacticDuplicates(scanRoot) : options.clones;
+  const deadFiles = options.deadFiles === undefined ? scanDeadProductFiles(scanRoot) : options.deadFiles;
+  const unusedDeps = options.unusedDependencies === undefined ? scanUnusedDependencies(scanRoot) : options.unusedDependencies;
+  const flags = options.featureFlags === undefined ? scanStaleFeatureFlags(scanRoot) : options.featureFlags;
+  const queries = options.queries === undefined ? scanQueryHazards(scanRoot) : options.queries;
   for (const id of duplicates) errors.push(`SEMANTIC_DUPLICATION:${id}`);
+  for (const item of ownership) errors.push(`SEMANTIC_OWNERSHIP:${item}`);
   for (const group of clones) errors.push(`SYNTACTIC_DUPLICATION:${group.join('|')}`);
+  for (const file of deadFiles) errors.push(`DEAD_FILE:${file}`);
+  for (const dep of unusedDeps) errors.push(`UNUSED_DEPENDENCY:${dep}`);
+  for (const flag of flags) errors.push(`STALE_FEATURE_FLAG:${flag}`);
+  for (const hazard of queries) errors.push(`QUERY_HAZARD:${hazard}`);
+  for (const cleanup of options.cleanups || []) {
+    const result = cleanupPreservesBehavior(cleanup);
+    if (!result.ok) errors.push(`BEHAVIOR_CHANGING_CLEANUP:${cleanup.id || result.reason}`);
+  }
+  if (options.repair && !debugLoopAccepted(options.repair).ok) errors.push('REPAIR_WITHOUT_ROOT_CAUSE');
   for (const cycle of dependencyCycles(edges)) errors.push(`DEPENDENCY_CYCLE:${cycle}`);
   for (const violation of imports) errors.push(`FORBIDDEN_IMPORT:${violation}`);
   for (const item of deadCodeFindings(dead)) errors.push(`DEAD_CODE:${item.id}`);
@@ -660,8 +894,13 @@ export function checkQualityCoverage(options = {}) {
       runtimeReadyMissingE2e: missingE2e.length,
       semanticDuplication: duplicates.length,
       syntacticDuplication: clones.length,
+      semanticOwnership: ownership.length,
       forbiddenImports: imports.length,
       deadCode: deadCodeFindings(dead).length,
+      deadFiles: deadFiles.length,
+      unusedDependencies: unusedDeps.length,
+      staleFeatureFlags: flags.length,
+      queryHazards: queries.length,
       debt: debt.length,
       secondStore: false,
       e2e: E2E_FOUNDATION.levels,

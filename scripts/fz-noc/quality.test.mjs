@@ -20,6 +20,45 @@ test('CI_GREEN allows normal product selection path to run', () => {
   assert.equal(picked.reason === 'ci_repair_required', false);
 });
 
+test('a green repair without a root-cause chain does not resume product selection', () => {
+  const picked = selectionWithQuality(
+    { blocked: [], completed: [], attempts: { 'ci-repair|ci-ci-verify-test': 1 } },
+    {
+      repoState: { head: SHA, originMain: SHA, branch: 'main', ok: true },
+      statusFor: () => ({ state: CI_STATES.CI_GREEN, run: { databaseId: 4, headSha: SHA } }),
+      skipLearningCheck: true,
+    },
+  );
+  assert.equal(picked.selected, null);
+  assert.equal(picked.qualityInterrupt.type, 'REPAIR_WITHOUT_ROOT_CAUSE');
+});
+
+test('a closed repair chain lets product selection continue', () => {
+  const picked = selectionWithQuality(
+    {
+      blocked: [],
+      completed: [],
+      attempts: { 'ci-repair|ci-ci-verify-test': 1 },
+      repairDisposition: {
+        failure: 'ci verify',
+        reproducer: 'pnpm test',
+        rootCause: 'missing limit',
+        blastRadius: 'list route',
+        fix: 'bounded query',
+        regression: 'query hazard test',
+        effect: 'list stays bounded',
+        durableControl: 'scanQueryHazards',
+      },
+    },
+    {
+      repoState: { head: SHA, originMain: SHA, branch: 'main', ok: true },
+      statusFor: () => ({ state: CI_STATES.CI_GREEN, run: { databaseId: 4, headSha: SHA } }),
+      skipLearningCheck: true,
+    },
+  );
+  assert.equal(picked.qualityInterrupt, null);
+});
+
 test('CI_FAILED current HEAD blocks READY product selection', () => {
   const picked = selectionWithQuality(
     { blocked: [], completed: [], attempts: {} },

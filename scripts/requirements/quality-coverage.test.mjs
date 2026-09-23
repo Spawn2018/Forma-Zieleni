@@ -8,9 +8,11 @@ import {
   E2E_FOUNDATION,
   QUALITY_CLASSES,
   checkQualityCoverage,
+  cleanupPreservesBehavior,
   clientAccessAllowed,
   completionAllowed,
   deadCodeFindings,
+  debugLoopAccepted,
   evidenceSufficient,
   flakyDisposition,
   forbiddenImport,
@@ -18,15 +20,20 @@ import {
   importSpecifiers,
   independentOccurrences,
   migrationReadiness,
+  isGeneratedOrDependencyPath,
   mutationSurvived,
   optimizationClaim,
+  queryHazards,
   providerTestPlan,
   qualityLearningInput,
   restoreReadiness,
   securityFixDurable,
   selectQualityChecks,
   semanticDuplication,
+  semanticOwnershipViolations,
+  staleFeatureFlags,
   syntacticDuplicates,
+  unusedDependencyFindings,
   visualBaselineUpdate,
 } from './quality-coverage.mjs';
 
@@ -237,6 +244,121 @@ test('a domain-only change does not drag in unrelated full E2E', () => {
 test('a security fix that only deletes the failing test is not durable', () => {
   assert.equal(securityFixDurable({ removedFailingTest: true }), false);
   assert.equal(securityFixDurable({ removedFailingTest: true, regressionControl: 'authz test' }), true);
+});
+
+test('a canonical rule exported outside its owner is semantic duplication', () => {
+  const files = [{ path: 'apps/admin/app/offer.ts', text: 'export function createOffer(input) { return input; }\n' }];
+  assert.deepEqual(semanticOwnershipViolations(files), ['offer-lifecycle:apps/admin/app/offer.ts:createOffer']);
+  const checked = checkQualityCoverage({
+    ownership: ['offer-lifecycle:apps/admin/app/offer.ts:createOffer'],
+    imports: [],
+    debug: [],
+    edges: [],
+    deadFiles: [],
+    unusedDependencies: [],
+    featureFlags: [],
+    queries: [],
+  });
+  assert.equal(checked.errors.includes('SEMANTIC_OWNERSHIP:offer-lifecycle:apps/admin/app/offer.ts:createOffer'), true);
+});
+
+test('dependency and generated directories stay out of product scans', () => {
+  assert.equal(isGeneratedOrDependencyPath('apps/web/node_modules/pkg/index.ts'), true);
+  assert.equal(isGeneratedOrDependencyPath('apps/web/.react-router/types/app/+types/home.ts'), true);
+  assert.equal(isGeneratedOrDependencyPath('packages/domain/src/offer.ts'), false);
+});
+
+test('an unused runtime dependency is visible and a future contract file is not dead', () => {
+  assert.deepEqual(unusedDependencyFindings([
+    { name: '@forma-zieleni/api', dependencies: ['left-pad'], devDependencies: ['typescript'], source: 'import { Hono } from "hono";' },
+  ]), ['@forma-zieleni/api:left-pad']);
+  const checked = checkQualityCoverage({
+    deadFiles: ['apps/admin/app/orphan.ts'],
+    unusedDependencies: ['@forma-zieleni/api:left-pad'],
+    imports: [],
+    debug: [],
+    edges: [],
+    ownership: [],
+    featureFlags: [],
+    queries: [],
+  });
+  assert.equal(checked.errors.includes('DEAD_FILE:apps/admin/app/orphan.ts'), true);
+  assert.equal(checked.errors.includes('UNUSED_DEPENDENCY:@forma-zieleni/api:left-pad'), true);
+});
+
+test('a defined feature flag with no reader is stale', () => {
+  const flags = staleFeatureFlags([
+    { path: 'apps/web/app/flags.ts', text: 'defineFeatureFlag("beta-portal");\n' },
+    { path: 'apps/web/app/home.ts', text: 'featureFlag("live-portal");\n' },
+  ]);
+  assert.deepEqual(flags, ['apps/web/app/flags.ts:beta-portal']);
+});
+
+test('a per-row query and an unlimited list are query hazards', () => {
+  const hazards = queryHazards([
+    'async listProjects(query) {',
+    '  const rows = await db.selectFrom("project").selectAll().execute();',
+    '}',
+    'for (const row of rows) { await db.selectFrom("audit").where("id", "=", row.id); }',
+  ].join('\n'));
+  assert.equal(hazards.includes('unbounded:listProjects'), true);
+  assert.equal(hazards.includes('n-plus-one'), true);
+});
+
+test('a behavior-changing cleanup without a contract change fails', () => {
+  assert.equal(cleanupPreservesBehavior({ kind: 'cleanup', characterized: true, behaviorChanged: true }).ok, false);
+  assert.equal(cleanupPreservesBehavior({ kind: 'cleanup', characterized: true, behaviorChanged: false }).ok, true);
+  const checked = checkQualityCoverage({
+    cleanups: [{ id: 'rename-offer', kind: 'cleanup', characterized: false }],
+    imports: [],
+    debug: [],
+    edges: [],
+    ownership: [],
+    deadFiles: [],
+    unusedDependencies: [],
+    featureFlags: [],
+    queries: [],
+  });
+  assert.equal(checked.errors.includes('BEHAVIOR_CHANGING_CLEANUP:rename-offer'), true);
+});
+
+test('a green repair without the debug loop is not accepted', () => {
+  assert.equal(debugLoopAccepted({ kind: 'fix', failure: 'red' }).ok, false);
+  assert.equal(debugLoopAccepted({
+    kind: 'fix',
+    failure: 'red',
+    reproducer: 'pnpm test',
+    rootCause: 'missing limit',
+    blastRadius: 'list route',
+    fix: 'add limit',
+    regression: 'query hazard test',
+    effect: 'list stays bounded',
+    durableControl: 'scanQueryHazards',
+  }).ok, true);
+  const checked = checkQualityCoverage({
+    repair: { kind: 'fix', failure: 'red' },
+    imports: [],
+    debug: [],
+    edges: [],
+    ownership: [],
+    deadFiles: [],
+    unusedDependencies: [],
+    featureFlags: [],
+    queries: [],
+  });
+  assert.equal(checked.errors.includes('REPAIR_WITHOUT_ROOT_CAUSE'), true);
+});
+
+test('material quality classes enter the existing FZ-CIS path', () => {
+  for (const kind of ['e2e', 'code_health', 'test_flaky', 'security_finding', 'performance', 'migration', 'restore', 'tech_debt']) {
+    const prepared = qualityLearningInput({
+      kind,
+      observation: 'Offer portal journey lost the client scope.',
+      evidence: [`${kind}:offer-portal`],
+      patternKey: `${kind.replaceAll("_", "-")}-offer-scope`,
+    });
+    assert.equal(prepared.ok, true, kind);
+  }
 });
 
 test('material quality failures can enter FZ-CIS and a pass cannot', () => {

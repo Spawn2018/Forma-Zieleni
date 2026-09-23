@@ -22,6 +22,7 @@ import {
 import { captureRepoState } from '../ci/pre-push-gate.mjs';
 import { learningInterruptFromCheck } from '../fz-cis/analysis.mjs';
 import { reportCheck } from '../fz-cis/store.mjs';
+import { debugLoopAccepted } from '../requirements/quality-coverage.mjs';
 
 function fail(message) {
   console.error(message);
@@ -85,9 +86,33 @@ export function selectionWithQuality(session, options = {}) {
     };
   }
 
+  const working = session || { attempts: {} };
+  const repairPending = Object.keys(working.attempts || {}).some((key) => key.startsWith('ci-repair|'));
+  if (interrupt.reason === 'ci_green' && repairPending) {
+    const accepted = debugLoopAccepted({
+      kind: 'fix',
+      ...(working.repairDisposition || {}),
+      ...(options.repairDisposition || {}),
+    });
+    if (!accepted.ok) {
+      return {
+        selected: null,
+        ready: [],
+        withheld: [],
+        reason: 'repair_without_root_cause',
+        exhaustionAllowed: false,
+        qualityInterrupt: { type: 'REPAIR_WITHOUT_ROOT_CAUSE', reason: accepted.reason },
+        learningInterrupt: null,
+        learningCheck: null,
+        repoState: { head: state.head, originMain: state.originMain, branch: state.branch },
+        sessionPatch: null,
+      };
+    }
+  }
+
   const cleared = interrupt.reason === 'ci_green'
-    ? clearCiRepairAttempts(session || { attempts: {} })
-    : session;
+    ? { ...clearCiRepairAttempts(working), repairDisposition: null }
+    : working;
 
   const learning = options.skipLearningCheck === true
     ? { check: null, learningInterrupt: null, materialLearning: false, urgentLearningInterrupt: false }
@@ -296,6 +321,26 @@ if (command === 'deadline') {
   next.lastBeat = new Date().toISOString();
   writeSession(next);
   print({ blocked: next.blocked, currentSlice: next.currentSlice, attempts: next.attempts });
+} else if (command === 'repair-closed') {
+  const session = readSession();
+  if (!session) fail('no active /noc session');
+  const disposition = {
+    kind: 'fix',
+    failure: option('--failure'),
+    reproducer: option('--reproducer'),
+    rootCause: option('--root-cause'),
+    blastRadius: option('--blast-radius'),
+    fix: option('--fix'),
+    regression: option('--regression'),
+    effect: option('--effect'),
+    durableControl: option('--durable-control'),
+  };
+  const accepted = debugLoopAccepted(disposition);
+  if (!accepted.ok) fail(accepted.reason);
+  session.repairDisposition = disposition;
+  session.lastBeat = new Date().toISOString();
+  writeSession(session);
+  print({ ok: true, reason: accepted.reason });
 } else if (command === 'complete') {
   const session = readSession();
   if (!session) fail('no active /noc session');
@@ -362,6 +407,6 @@ if (command === 'deadline') {
     });
   }
 } else {
-  fail('usage: deadline|start|stop|beat|status|ready|select|attempt|complete');
+  fail('usage: deadline|start|stop|beat|status|ready|select|attempt|repair-closed|complete');
 }
 }
