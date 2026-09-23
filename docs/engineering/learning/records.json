@@ -890,6 +890,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T13:53:08.293Z",
       "lastSeen": "2026-09-23T13:54:15.551Z"
+    },
+    {
+      "patternKey": "cr-update-the-accessibility-6ab505f04a",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the accessibility check in contractErrors to iterate over A11Y instead of a hard-coded subset, so every declare",
+      "evidence": [
+        "cr-occurrence:5c8504fcb07c:82ca683cc0d9:cr-update-the-accessibility-6ab505f04a",
+        "scripts/requirements/experience-contract.mjs",
+        "severity:high",
+        "accepted:cr-update-the-accessibility-6ab505f04a"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "82ca683cc0d99d20bc1e1bea51d8d08733ab969f",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-5bf1b3e7",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T14:10:05.344Z",
+      "lastSeen": "2026-09-23T14:10:05.383Z"
     }
   ]
 }
