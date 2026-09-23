@@ -1125,6 +1125,58 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T19:56:54.822Z",
       "lastSeen": "2026-09-23T20:03:51.929Z"
+    },
+    {
+      "patternKey": "cr-at-line-45-update-the-ga-460daf5f42",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 45, Update the garden creation flow around the `project.status` check to reject `at` values earlier than the pro",
+      "evidence": [
+        "cr-occurrence:bcb388f9a1a3:96129ab41e93:cr-at-line-45-update-the-ga-460daf5f42",
+        "packages/domain/src/garden.ts",
+        "severity:low",
+        "accepted:cr-at-line-45-update-the-ga-460daf5f42"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "96129ab41e934a606289d3ce81c4347490feb465",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-6e7c2eef",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T20:51:40.889Z",
+      "lastSeen": "2026-09-23T20:53:40.450Z"
+    },
+    {
+      "patternKey": "cr-at-line-620-update-the-m-23673ef909",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 620, Update the migration’s rollback path for the `project_status_known` constraint so projects with status `del",
+      "evidence": [
+        "cr-occurrence:bcb388f9a1a3:96129ab41e93:cr-at-line-620-update-the-m-23673ef909",
+        "apps/api/src/db.ts",
+        "severity:high",
+        "accepted:cr-at-line-620-update-the-m-23673ef909"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "96129ab41e934a606289d3ce81c4347490feb465",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260923-0551b55b",
+      "occurrences": 1,
+      "firstSeen": "2026-09-23T20:51:40.923Z",
+      "lastSeen": "2026-09-23T20:53:40.797Z"
     }
   ]
 }
