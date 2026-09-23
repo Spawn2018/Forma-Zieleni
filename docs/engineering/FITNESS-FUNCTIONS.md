@@ -10,6 +10,7 @@ replace `docs/engineering/REPOSITORY-INTEGRITY.md`.
 | execution-loop-unchanged | One execution loop | FZ-CIS must not select product work | CURSOR-OS still says it is the sole binding definition | A second loop appeared | FZ orchestrator |
 | proven-requires-effect | PROVEN needs supported VERIFY EFFECT | Status cannot skip effect evidence | same, over PROVEN/PROMOTED rows | PROVEN without effect support | FZ orchestrator |
 | promoted-requires-control | PROMOTED needs durable `controlRef` | Promotion means a real control exists | same, over PROMOTED rows | Promotion without a durable artifact | FZ orchestrator |
+| quality-coverage-closed | One quality classification per binding capability | Unit green is not journey green, and quality must not fork into a second system | `scripts/requirements/quality-coverage.mjs` | Unknown class, fake production pass, semantic duplicate, or untracked debt | FZ orchestrator |
 
 Already enforced elsewhere, and not copied here: tracked secrets and
 forbidden paths, Canon entrypoints, FZ-SIGN-1 still UNDECIDED,
