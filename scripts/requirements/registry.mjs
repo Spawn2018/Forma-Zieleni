@@ -448,10 +448,9 @@ row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity an
   executableSlice: 'ATLAS-PUBLIC-SURFACE',
   executableWhenComplete: ['ATLAS-PLANT-IDENTITY'],
 });
-row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/SKETCHUP-ADAPTER-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'SketchUp mapping slice', 'REVIEW', 'The adapter boundary is not the mapping runtime.', {
+row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SKETCHUP-PROJECT-MAP.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Model→project mapping only. Plugin runtime stays later.', {
   productCapability: 'SKETCHUP',
   depth: 'INTEGRATION',
-  blockerClass: 'INTERNAL',
   executableSlice: 'SKETCHUP-PROJECT-MAP',
   executableWhenComplete: ['SKETCHUP-ADAPTER-BOUNDARY'],
 });

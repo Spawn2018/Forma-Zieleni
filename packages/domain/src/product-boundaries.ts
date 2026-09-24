@@ -155,3 +155,70 @@ export function assertSketchUpNotBusinessTruth(claim: { pluginOwnsIds?: boolean;
   if (claim.pluginOwnsIds) throw new Error('SKETCHUP_BUSINESS_TRUTH_FORBIDDEN');
   if (claim.localAcl) throw new Error('SKETCHUP_LOCAL_ACL_FORBIDDEN');
 }
+
+const SKETCHUP_OPAQUE = /^[a-z][a-z0-9-]{7,63}$/;
+const SKETCHUP_COMMERCIAL_KEYS = new Set([
+  'price',
+  'pricePln',
+  'contractId',
+  'customerId',
+  'customerName',
+  'offerId',
+  'payment',
+]);
+
+export type SketchUpProjectMap = {
+  requirementId: 'FZ-REQ-SKETCHUP-002';
+  modelRef: string;
+  projectId: string;
+  ownsPrice: false;
+  ownsContract: false;
+  ownsCustomer: false;
+  localBusinessAcl: false;
+  synthetic: true;
+};
+
+export function sketchUpProjectMapBoundary(): {
+  requirementId: 'FZ-REQ-SKETCHUP-002';
+  businessTruth: 'core-api';
+  mappingOwnsCommercialTruth: false;
+  localBusinessAcl: false;
+} {
+  return {
+    requirementId: 'FZ-REQ-SKETCHUP-002',
+    businessTruth: 'core-api',
+    mappingOwnsCommercialTruth: false,
+    localBusinessAcl: false,
+  };
+}
+
+export function mapSketchUpModelToProject(
+  modelRef: string,
+  projectId: string,
+  extras: Record<string, unknown> = {},
+): SketchUpProjectMap {
+  if (typeof modelRef !== 'string' || !SKETCHUP_OPAQUE.test(modelRef) || /^(?:model|skp|id)\d+$/i.test(modelRef)) {
+    throw new Error('SKETCHUP_MODEL_REF_INVALID');
+  }
+  if (typeof projectId !== 'string' || !SKETCHUP_OPAQUE.test(projectId) || /^(?:project|proj|id)\d+$/i.test(projectId)) {
+    throw new Error('SKETCHUP_PROJECT_ID_INVALID');
+  }
+  for (const key of Object.keys(extras)) {
+    if (SKETCHUP_COMMERCIAL_KEYS.has(key)) throw new Error('SKETCHUP_COMMERCIAL_TRUTH_FORBIDDEN');
+    if (key === 'localAcl' || key === 'localBusinessAcl') throw new Error('SKETCHUP_LOCAL_ACL_FORBIDDEN');
+  }
+  assertSketchUpNotBusinessTruth({
+    pluginOwnsIds: extras.pluginOwnsIds === true,
+    localAcl: extras.localAcl === true || extras.localBusinessAcl === true,
+  });
+  return {
+    requirementId: 'FZ-REQ-SKETCHUP-002',
+    modelRef,
+    projectId,
+    ownsPrice: false,
+    ownsContract: false,
+    ownsCustomer: false,
+    localBusinessAcl: false,
+    synthetic: true,
+  };
+}

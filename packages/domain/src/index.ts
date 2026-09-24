@@ -125,15 +125,18 @@ export {
   assertSketchUpNotBusinessTruth,
   applySiteIntelligenceRules,
   gardenOsRelationBoundary,
+  mapSketchUpModelToProject,
   mobileClientBoundary,
   siteIntelligenceOrdering,
   siteIntelligenceRulesBoundary,
   sketchUpAdapterBoundary,
+  sketchUpProjectMapBoundary,
 } from './product-boundaries.ts';
 export type {
   NormalizedSiteObservation,
   SiteIntelligenceRulesBoundary,
   SiteIntelligenceRulesResult,
+  SketchUpProjectMap,
 } from './product-boundaries.ts';
 export {
   OFFER_STATUSES,

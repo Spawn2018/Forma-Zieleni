@@ -422,6 +422,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/SKETCHUP-PROJECT-MAP.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/constitution/PROJECT-CONSTITUTION.md",
       "docType": "DOCUMENT",
       "audience": "developer",

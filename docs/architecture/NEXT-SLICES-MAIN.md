@@ -512,11 +512,15 @@ Next: none.
 
 Dependencies: SKETCHUP-ADAPTER-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for SketchUp model → Core API project id mapping
+(`docs/architecture/SKETCHUP-PROJECT-MAP.md` plus domain helpers/tests).
+The plugin does not own price, contract, or customer truth. No local
+business ACL.
 Autonomous: yes.
 Accept: a mapping from a SketchUp model reference to a Core API project
 id. The plugin does not own price, contract, or customer truth.
-Tests: mapping contract tests with synthetic ids.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/SKETCHUP-PROJECT-MAP.md`.
 Security: no local business ACL.
 Next: none.
 

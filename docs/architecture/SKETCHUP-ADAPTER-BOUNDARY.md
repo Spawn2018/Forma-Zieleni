@@ -14,3 +14,6 @@ Status: contracted for `SKETCHUP-ADAPTER-BOUNDARY` / `FZ-REQ-SKETCHUP-001`.
 - Plugin-owned commercial identifiers.
 
 Machine checks: `sketchUpAdapterBoundary()` in `@forma-zieleni/domain`.
+
+Next contracted step: `docs/architecture/SKETCHUP-PROJECT-MAP.md`
+(`SKETCHUP-PROJECT-MAP` / `FZ-REQ-SKETCHUP-002`).

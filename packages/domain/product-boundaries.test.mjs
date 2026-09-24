@@ -9,10 +9,12 @@ import {
   assertSketchUpNotBusinessTruth,
   applySiteIntelligenceRules,
   gardenOsRelationBoundary,
+  mapSketchUpModelToProject,
   mobileClientBoundary,
   siteIntelligenceOrdering,
   siteIntelligenceRulesBoundary,
   sketchUpAdapterBoundary,
+  sketchUpProjectMapBoundary,
 } from './src/product-boundaries.ts';
 
 test('Site Intelligence ordering is DATA then RULES then DOMAIN then AI', () => {
@@ -103,4 +105,32 @@ test('SketchUp adapter is not business truth and forbids local ACL', () => {
   assert.equal(boundary.localBusinessAcl, false);
   assert.throws(() => assertSketchUpNotBusinessTruth({ pluginOwnsIds: true }), /SKETCHUP_BUSINESS_TRUTH_FORBIDDEN/);
   assert.throws(() => assertSketchUpNotBusinessTruth({ localAcl: true }), /SKETCHUP_LOCAL_ACL_FORBIDDEN/);
+});
+
+test('SketchUp model maps to a Core API project id without commercial truth', () => {
+  const boundary = sketchUpProjectMapBoundary();
+  assert.equal(boundary.requirementId, 'FZ-REQ-SKETCHUP-002');
+  assert.equal(boundary.businessTruth, 'core-api');
+  assert.equal(boundary.mappingOwnsCommercialTruth, false);
+  assert.equal(boundary.localBusinessAcl, false);
+
+  const mapped = mapSketchUpModelToProject('skp-model-alpha1', 'prj-garden-west1');
+  assert.equal(mapped.modelRef, 'skp-model-alpha1');
+  assert.equal(mapped.projectId, 'prj-garden-west1');
+  assert.equal(mapped.ownsPrice, false);
+  assert.equal(mapped.ownsContract, false);
+  assert.equal(mapped.ownsCustomer, false);
+  assert.equal(mapped.localBusinessAcl, false);
+  assert.equal(mapped.synthetic, true);
+
+  assert.throws(() => mapSketchUpModelToProject('model1', 'prj-garden-west1'), /SKETCHUP_MODEL_REF_INVALID/);
+  assert.throws(() => mapSketchUpModelToProject('skp-model-alpha1', 'project1'), /SKETCHUP_PROJECT_ID_INVALID/);
+  assert.throws(
+    () => mapSketchUpModelToProject('skp-model-alpha1', 'prj-garden-west1', { pricePln: 1000 }),
+    /SKETCHUP_COMMERCIAL_TRUTH_FORBIDDEN/,
+  );
+  assert.throws(
+    () => mapSketchUpModelToProject('skp-model-alpha1', 'prj-garden-west1', { localAcl: true }),
+    /SKETCHUP_LOCAL_ACL_FORBIDDEN/,
+  );
 });
