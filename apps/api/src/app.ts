@@ -535,7 +535,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const file = await readProjectFile(options.store, fileId);
     if (!file) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
     const declared = c.req.header('content-length');
-    if (declared !== null && /^\d+$/.test(declared) && Number(declared) > FILE_BYTES_MAX) {
+    if (typeof declared === 'string' && /^\d+$/.test(declared) && Number(declared) > FILE_BYTES_MAX) {
       throw badRequest('BODY_TOO_LARGE', 'Request body is too large.');
     }
     const bytes = await readCapped(c.req.raw, FILE_BYTES_MAX);
@@ -583,7 +583,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
       throw error;
     }
     if (!stored) throw new ApiFailure(404, 'FILE_BYTES_NOT_FOUND', 'Project file bytes were not found.');
-    return new Response(stored.bytes, {
+    return new Response(new Uint8Array(stored.bytes), {
       status: 200,
       headers: {
         'content-type': file.mimeType,
