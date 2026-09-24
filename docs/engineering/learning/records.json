@@ -2617,6 +2617,33 @@
       "lastSeen": "2026-09-24T23:01:05.255Z",
       "rejectionReason": "Adopted in HEAD: createCapacityWindow validates at via assertInstant.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-projectmilestonec-a265765e51",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update ProjectMilestoneCreate.dueAt in the OpenAPI contract to document and constrain the UTC instant format accepted",
+      "evidence": [
+        "cr-occurrence:10a45b6ee6db:46b74e23d542:cr-update-projectmilestonec-a265765e51",
+        "contracts/openapi.json",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "46b74e23d542d7116a4f25f14a4d6f94d2fa9891",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-2b3cae55",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T23:42:55.795Z",
+      "lastSeen": "2026-09-24T23:42:55.795Z",
+      "rejectionReason": "OpenAPI already declares dueAt as format date-time; domain createProjectMilestone enforces UTC INSTANT at runtime. Pattern duplication is not required for this slice.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
