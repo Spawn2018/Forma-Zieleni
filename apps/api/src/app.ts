@@ -7,6 +7,7 @@ import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
+import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
@@ -31,6 +32,8 @@ export type AppOptions = {
   ready?: () => Promise<boolean>;
   authHandler?: (request: Request) => Promise<Response>;
   contentDocuments?: Readonly<Record<string, { title: string; status: 'draft' | 'published' }>>;
+  /** Local private root for project file bytes (FZ-A4). Defaults under repo private/. */
+  fileBytesRoot?: string;
 };
 
 function mintRequestId(): string {
@@ -195,7 +198,7 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
       c.header('Vary', 'Origin');
       c.header('Access-Control-Allow-Credentials', 'true');
       c.header('Access-Control-Allow-Headers', 'authorization, content-type, idempotency-key, x-request-id');
-      c.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     }
     const span = tracer.startSpan('http.request');
     span.setAttribute('http.request.method', c.req.method);
@@ -523,6 +526,74 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const file = await readProjectFile(options.store, pathProjectFileId(c.req.param('fileId')));
     if (!file) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
     return c.json(file);
+  });
+
+  app.put('/v1/files/:fileId/content', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:create');
+    c.set('actorId', actor.actorId);
+    const fileId = pathProjectFileId(c.req.param('fileId'));
+    const file = await readProjectFile(options.store, fileId);
+    if (!file) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
+    const declared = c.req.header('content-length');
+    if (declared !== null && /^\d+$/.test(declared) && Number(declared) > FILE_BYTES_MAX) {
+      throw badRequest('BODY_TOO_LARGE', 'Request body is too large.');
+    }
+    const bytes = await readCapped(c.req.raw, FILE_BYTES_MAX);
+    let stored;
+    try {
+      stored = await storeProjectFileBytes({
+        root: options.fileBytesRoot,
+        fileId,
+        bytes,
+        expectedSizeBytes: file.sizeBytes,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'FILE_BYTES_SIZE_DENIED') {
+        throw badRequest('FILE_BYTES_SIZE_DENIED', 'File bytes size is not allowed.');
+      }
+      if (error instanceof Error && error.message === 'FILE_BYTES_SIZE_MISMATCH') {
+        throw badRequest('FILE_BYTES_SIZE_MISMATCH', 'File bytes size does not match metadata.');
+      }
+      if (error instanceof Error && error.message === 'FILE_BYTES_IMMUTABLE') {
+        throw new ApiFailure(409, 'FILE_BYTES_IMMUTABLE', 'Stored file bytes cannot change.');
+      }
+      throw error;
+    }
+    return c.json({
+      id: file.id,
+      checksum: stored.checksum,
+      sizeBytes: stored.sizeBytes,
+      publicUrl: null,
+    }, 201);
+  });
+
+  app.get('/v1/files/:fileId/content', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:read');
+    c.set('actorId', actor.actorId);
+    const fileId = pathProjectFileId(c.req.param('fileId'));
+    const file = await readProjectFile(options.store, fileId);
+    if (!file) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
+    let stored;
+    try {
+      stored = await readProjectFileBytes({ root: options.fileBytesRoot, fileId });
+    } catch (error) {
+      if (error instanceof Error && (error.message === 'FILE_BYTES_CORRUPT' || error.message === 'FILE_BYTES_INDEX_INVALID')) {
+        throw new ApiFailure(500, 'FILE_BYTES_CORRUPT', 'Stored file bytes are not readable.');
+      }
+      throw error;
+    }
+    if (!stored) throw new ApiFailure(404, 'FILE_BYTES_NOT_FOUND', 'Project file bytes were not found.');
+    return new Response(stored.bytes, {
+      status: 200,
+      headers: {
+        'content-type': file.mimeType,
+        'content-length': String(stored.sizeBytes),
+        'content-disposition': `attachment; filename="${file.name.replace(/["\\]/g, '_')}"`,
+        'x-content-type-options': 'nosniff',
+        'x-content-checksum-sha256': stored.checksum,
+        'cache-control': 'private, no-store',
+      },
+    });
   });
 
   app.post('/v1/growth/plans', async c => {

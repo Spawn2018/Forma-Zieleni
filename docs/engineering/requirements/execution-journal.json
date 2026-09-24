@@ -26,7 +26,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "FZ-CONTINUE-1 authorized. First READY on NEXT-SLICES-MAIN is FILE-BYTES-LOCAL (named Next by ADMIN-CRM-FILE). WWW-LEAD-CAPTURE is also READY. Provider/hosting/crawl remain deferred; do not pick them.",
+  "nextSafeAction": "FILE-BYTES-LOCAL complete. Next READY: ADMIN-FILE-BYTES (staff upload UI) and WWW-LEAD-CAPTURE. FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { failClosedAuthenticator, mintTestSession, testAuthenticator } from './auth.ts';
 import { createApp } from './app.ts';
 import { PersistenceFailure } from './errors.ts';
@@ -859,4 +862,94 @@ test('portal file projection is read-only, empty without grant, and BOLA-isolate
   const otherList = await (await app.request('/v1/portal/files', { headers: bearer(portalOther) })).json();
   assert.deepEqual(otherList.items, []);
   assert.equal((await app.request(`/v1/files/${file.id}`, { headers: bearer(portal) })).status, 403);
+});
+
+test('staff can store and download local private file bytes; portal cannot', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'fz-http-file-bytes-'));
+  try {
+    let tick = 0;
+    const store = new MemoryLeadStore();
+    const app = createApp({
+      store,
+      authenticator: testAuthenticator(SECRET),
+      limiter: new WindowLimiter(100, 60_000),
+      addressOf: () => '198.51.100.10',
+      fileBytesRoot: root,
+      now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
+    });
+    const lead = await (await app.request('/v1/leads', json(capture))).json();
+    await app.request(`/v1/leads/${lead.id}/qualify`, json({ capacityHold: false }, {
+      'idempotency-key': 'qual-bytes-001',
+      ...bearer(staff),
+    }));
+    const opp = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+      'idempotency-key': 'opp-bytes-001',
+      ...bearer(staff),
+    }))).json();
+    const offer = await (await app.request('/v1/offers', json({ opportunityId: opp.id }, {
+      'idempotency-key': 'off-bytes-001',
+      ...bearer(staff),
+    }))).json();
+    const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+      'idempotency-key': 'ctr-bytes-001',
+      ...bearer(staff),
+    }))).json();
+    const project = await (await app.request('/v1/projects', json({ contractId: contract.id }, {
+      'idempotency-key': 'prj-bytes-001',
+      ...bearer(staff),
+    }))).json();
+    const bytes = Buffer.from('synthetic-private-bytes');
+    const meta = await (await app.request('/v1/files', json({
+      projectId: project.id,
+      name: 'notes.bin',
+      mimeType: 'application/octet-stream',
+      sizeBytes: bytes.length,
+    }, {
+      'idempotency-key': 'meta-bytes-001',
+      ...bearer(staff),
+    }))).json();
+
+    assert.equal((await app.request(`/v1/files/${meta.id}/content`, {
+      method: 'PUT',
+      headers: bearer(portal),
+      body: bytes,
+    })).status, 403);
+
+    const put = await app.request(`/v1/files/${meta.id}/content`, {
+      method: 'PUT',
+      headers: {
+        ...bearer(staff),
+        'content-type': 'application/octet-stream',
+        'content-length': String(bytes.length),
+      },
+      body: bytes,
+    });
+    assert.equal(put.status, 201);
+    const receipt = await put.json();
+    assert.equal(receipt.id, meta.id);
+    assert.equal(receipt.publicUrl, null);
+    assert.equal(Object.hasOwn(receipt, 'storageKey'), false);
+    assert.equal(Object.hasOwn(receipt, 'relativePath'), false);
+
+    assert.equal((await app.request(`/v1/files/${meta.id}/content`, { headers: bearer(portal) })).status, 403);
+
+    const get = await app.request(`/v1/files/${meta.id}/content`, { headers: bearer(staff) });
+    assert.equal(get.status, 200);
+    assert.equal(get.headers.get('content-type'), 'application/octet-stream');
+    assert.equal(get.headers.get('x-content-checksum-sha256'), receipt.checksum);
+    assert.equal(Buffer.from(await get.arrayBuffer()).equals(bytes), true);
+
+    const mismatch = await app.request(`/v1/files/${meta.id}/content`, {
+      method: 'PUT',
+      headers: {
+        ...bearer(staff),
+        'content-type': 'application/octet-stream',
+        'content-length': '14',
+      },
+      body: Buffer.from('wrong-length!!'),
+    });
+    assert.equal(mismatch.status, 400);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

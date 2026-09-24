@@ -23,6 +23,7 @@
     "GET /projects/{projectId}",
     "GET /files",
     "GET /files/{fileId}",
+    "GET /files/{fileId}/content",
     "GET /ready",
     "POST /contracts",
     "POST /files",
@@ -31,7 +32,8 @@
     "POST /leads/{leadId}/qualify",
     "POST /offers",
     "POST /opportunities",
-    "POST /projects"
+    "POST /projects",
+    "PUT /files/{fileId}/content"
   ],
   "requiredHeaders": {
     "POST /leads": [

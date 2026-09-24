@@ -441,7 +441,7 @@ row('FZ-REQ-ADMIN-007', 'Staff can list and create project file metadata in apps
   executableSlice: 'ADMIN-CRM-FILE',
   executableWhenComplete: ['ADMIN-CRM-PROJECT'],
 });
-row('FZ-REQ-DATA-002', 'Core API stores and serves project file bytes through the local private adapter. No Garage and no public URL as ACL.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'FILE-BYTES-LOCAL not executed', 'REVIEW', 'FZ-CONTINUE-1 authorized depth; production object store stays Owner-gated.', {
+row('FZ-REQ-DATA-002', 'Core API stores and serves project file bytes through the local private adapter. No Garage and no public URL as ACL.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/api/src/file-bytes.ts', 'apps/api/src/file-bytes.test.mjs', '', 'NONE', 'Local private adapter under private/project-files; staff PUT/GET /v1/files/{fileId}/content; portal denied.', {
   blockerClass: 'INTERNAL',
   productCapability: 'FILES',
   depth: 'BYTES',

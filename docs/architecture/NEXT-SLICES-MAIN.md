@@ -712,17 +712,18 @@ provider-neutral and local-only work.
 
 Dependencies: ADMIN-CRM-FILE.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Core API local private project-file bytes.
 Autonomous: yes.
 Accept: Core API stores and serves project file **bytes** through the
 already-decided local private adapter (FZ-A4). Checksummed immutable
 object under a non-guessable key. Download only through authorized Core
 API. No Garage, no public URL as ACL, no production object store, no
 provider pick.
-Tests: domain or API tests for store/get/deny; BOLA on file id; portal
-cannot use staff byte routes.
+Tests: `apps/api/src/file-bytes.test.mjs`; staff put/get and portal
+deny cases in `apps/api/src/http.test.mjs`. BOLA via staff-only
+capabilities on `/v1/files/{fileId}/content`.
 Security: staff/portal authorization unchanged; no storage keys in
-logs; synthetic bytes only.
+API responses; synthetic bytes only; `publicUrl` stays null.
 Next: ADMIN-FILE-BYTES.
 
 ### ADMIN-FILE-BYTES
