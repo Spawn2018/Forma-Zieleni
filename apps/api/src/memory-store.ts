@@ -8,6 +8,7 @@ import type {
   Opportunity,
   OpportunityStatus,
   Project,
+  ProjectFile,
   ProjectStatus,
 } from '@forma-zieleni/domain';
 import type {
@@ -19,6 +20,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  ProjectFileListQuery,
   ProjectListQuery,
   StoredReply,
 } from './store.ts';
@@ -29,6 +31,7 @@ type MemoryState = {
   offers: Offer[];
   contracts: Contract[];
   projects: Project[];
+  projectFiles: ProjectFile[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -49,6 +52,7 @@ export class MemoryLeadStore implements LeadStore {
     offers: [],
     contracts: [],
     projects: [],
+    projectFiles: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -61,6 +65,7 @@ export class MemoryLeadStore implements LeadStore {
       offers: this.state.offers,
       contracts: this.state.contracts,
       projects: this.state.projects,
+      projectFiles: this.state.projectFiles,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -73,6 +78,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.offers = snapshot.offers;
       this.state.contracts = snapshot.contracts;
       this.state.projects = snapshot.projects;
+      this.state.projectFiles = snapshot.projectFiles;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -262,6 +268,34 @@ class MemoryTx implements LeadTx {
           const at = stamp(project, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && project.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && project.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertProjectFile(file: ProjectFile): Promise<void> {
+    this.state.projectFiles.push(clone(file));
+  }
+
+  async findProjectFile(id: string): Promise<ProjectFile | null> {
+    return clone(this.state.projectFiles.find(item => item.id === id) ?? null);
+  }
+
+  async listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.projectFiles.filter(
+      file => !query.projectId || file.projectId === query.projectId,
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(file => {
+          const at = stamp(file, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && file.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && file.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

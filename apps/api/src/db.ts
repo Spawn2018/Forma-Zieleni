@@ -47,6 +47,16 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  project_file: {
+    id: string;
+    project_id: string;
+    client_subject: string | null;
+    name: string;
+    mime_type: string;
+    size_bytes: number;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -629,6 +639,68 @@ ALTER TABLE project ADD CONSTRAINT project_status_known CHECK (status IN ('plann
   },
 };
 
+const PORTAL_FILE_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const portalFileMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE project_file (
+  id text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES project (id),
+  client_subject text,
+  name text NOT NULL,
+  mime_type text NOT NULL,
+  size_bytes bigint NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT project_file_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT project_file_name_len CHECK (char_length(name) BETWEEN 1 AND 255),
+  CONSTRAINT project_file_mime_len CHECK (char_length(mime_type) BETWEEN 1 AND 200),
+  CONSTRAINT project_file_size_nonneg CHECK (size_bytes >= 0)
+);
+CREATE INDEX project_file_list_created ON project_file (created_at DESC, id DESC);
+CREATE INDEX project_file_list_updated ON project_file (updated_at DESC, id DESC);
+CREATE INDEX project_file_project ON project_file (project_id, created_at DESC, id DESC);
+CREATE INDEX project_file_client_subject ON project_file (client_subject) WHERE client_subject IS NOT NULL;
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_FILE_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability IN ('files:read', 'files:create', 'files:portal-read');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_PROJECT_CAPABILITY_SQL}));
+DROP TABLE IF EXISTS project_file;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -643,6 +715,7 @@ const provider: MigrationProvider = {
       '009_project_domain': projectMigration,
       '010_portal_project_projection': portalProjectMigration,
       '011_project_delivered_status': projectDeliveredMigration,
+      '012_portal_file_projection': portalFileMigration,
     };
   },
 };

@@ -164,6 +164,16 @@ export {
 } from './project.ts';
 export type { Project, ProjectStatus, PortalProjectProjection } from './project.ts';
 export {
+  assertOpaqueProjectFileId,
+  createProjectFile,
+  projectFileForPortal,
+} from './project-file.ts';
+export type {
+  CreateProjectFileInput,
+  PortalProjectFileProjection,
+  ProjectFile,
+} from './project-file.ts';
+export {
   assertGardenHasNoLiveInvent,
   assertOpaqueGardenId,
   createGarden,

@@ -4,6 +4,7 @@ import {
   assertOpaqueContractId,
   assertOpaqueOfferId,
   assertOpaqueOpportunityId,
+  assertOpaqueProjectFileId,
   assertOpaqueProjectId,
 } from '@forma-zieleni/domain';
 
@@ -34,4 +35,8 @@ export function newContractId(): string {
 
 export function newProjectId(): string {
   return assertOpaqueProjectId(newOpaqueId('j'));
+}
+
+export function newProjectFileId(): string {
+  return assertOpaqueProjectFileId(newOpaqueId('u'));
 }

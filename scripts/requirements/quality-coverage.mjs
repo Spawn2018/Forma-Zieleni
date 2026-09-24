@@ -199,7 +199,7 @@ const SUBJECTS = Object.freeze([
   ['CMS', () => domainProfile('CMS public projection')],
   ['SEARCH', () => domainProfile('search intelligence stays non-authoritative over Canon')],
   ['MEDIA', () => domainProfile('media pipeline tests')],
-  ['FILES', () => futureProfile('PORTAL-FILE-PROJECTION')],
+  ['FILES', () => surfaceProfile('PORTAL-FILE-PROJECTION')],
   ['HOSTING', () => classes({
     ...providerProfile('FZ-REQ-HOST-001'),
     UNIT: owner('hosting selection'),

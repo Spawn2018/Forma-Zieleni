@@ -520,7 +520,7 @@ Next: none.
 
 Dependencies: PORTAL-PROJECT-PROJECTION.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: an authenticated client sees only their project files. Staff
 files and other clients' files stay hidden.

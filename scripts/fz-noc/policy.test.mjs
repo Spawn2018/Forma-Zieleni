@@ -220,9 +220,10 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   assert.equal(picked.ready.includes('ADMIN-CRM-LEAD'), false);
   assert.equal(picked.ready.includes('MOBILE-ANDROID-FOUNDATION'), false);
   assert.equal(picked.ready.includes('SIGN-STATE-NEUTRAL'), false);
+  assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);
-  assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), true);
+  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), true);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {
@@ -442,13 +443,13 @@ test('B: Admin binding without ADMIN-APP slice is an internal gap', () => {
   assert.equal(picked.exhaustionAllowed, false);
 });
 
-test('C: Portal foundation alone is not product-complete while a later portal depth stays open', () => {
+test('C: Portal foundation alone is not product-complete; full portal rows are complete after file projection', () => {
   const rows = requirements().filter((row) => row.productCapability === 'PORTAL' || String(row.id).startsWith('FZ-REQ-PORTAL-'));
   assert.ok(rows.some((row) => row.foundationOnly === true && row.status === 'DONE_AT_MAX_DEPTH'));
   assert.equal(portalCapabilityIsProductComplete(rows.filter((row) => row.foundationOnly === true)), false);
-  assert.equal(portalCapabilityIsProductComplete(rows), false);
-  assert.equal(rows.find((row) => row.id === 'FZ-REQ-PORTAL-005').status, 'BLOCKED_BY_DEPENDENCY');
-  for (const id of ['FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004']) {
+  assert.equal(portalCapabilityIsProductComplete(rows), true);
+  assert.equal(rows.find((row) => row.id === 'FZ-REQ-PORTAL-005').status, 'DONE_AT_MAX_DEPTH');
+  for (const id of ['FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004', 'FZ-REQ-PORTAL-005']) {
     assert.equal(rows.find((row) => row.id === id).status, 'DONE_AT_MAX_DEPTH');
   }
 });
@@ -492,7 +493,8 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.match(main, /ZAP ARMED_WAITING_FOR_TARGET/);
   assert.match(main, /does \*\*not\*\* block unrelated product/);
   const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
-  assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), true);
+  assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
+  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), true);
   assert.equal(picked.ready.some((id) => /ZAP|DEPENDENCY-CHECK/.test(id)), false);
   assert.equal(picked.exhaustionAllowed, false);
 });

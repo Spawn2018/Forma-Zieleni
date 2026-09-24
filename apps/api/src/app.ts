@@ -1,11 +1,12 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateContractCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
+import { createProjectFileRecord, listPortalProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
@@ -84,6 +85,14 @@ function pathProjectId(value: string): string {
     return assertOpaqueProjectId(decodeURIComponent(value));
   } catch {
     throw badRequest('PROJECT_ID_INVALID', 'Project id is not valid.');
+  }
+}
+
+function pathProjectFileId(value: string): string {
+  try {
+    return assertOpaqueProjectFileId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('PROJECT_FILE_ID_INVALID', 'Project file id is not valid.');
   }
 }
 
@@ -269,6 +278,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const projection = await readPortalProject(options.store, pathProjectId(c.req.param('projectId')), actor.sub);
     if (!projection) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    return c.json(projection);
+  });
+
+  app.get('/v1/portal/files', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseProjectFileListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listPortalProjectFiles(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/files/:fileId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalProjectFile(options.store, pathProjectFileId(c.req.param('fileId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
     return c.json(projection);
   });
 
@@ -460,6 +492,24 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const project = await readProject(options.store, pathProjectId(c.req.param('projectId')));
     if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
     return c.json(project);
+  });
+
+  app.post('/v1/files', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateProjectFileCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PROJECT_FILE_INVALID', 'Project file could not be accepted.', parsed.errors);
+    const file = await createProjectFileRecord(options.store, parsed.value, actor, key, now());
+    return c.json(file, 201);
+  });
+
+  app.get('/v1/files/:fileId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:read');
+    c.set('actorId', actor.actorId);
+    const file = await readProjectFile(options.store, pathProjectFileId(c.req.param('fileId')));
+    if (!file) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
+    return c.json(file);
   });
 
   app.post('/v1/growth/plans', async c => {

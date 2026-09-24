@@ -6,8 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "node --test lead.test.mjs opportunity.test.mjs offer.test.mjs contract.test.mjs project.test.mjs",
-    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/opportunity.ts src/offer.ts src/contract.ts src/project.ts src/index.ts",
-    "lint": "node --check lead.test.mjs && node --check opportunity.test.mjs && node --check offer.test.mjs && node --check contract.test.mjs && node --check project.test.mjs"
+    "test": "node --test lead.test.mjs opportunity.test.mjs offer.test.mjs contract.test.mjs project.test.mjs project-file.test.mjs",
+    "typecheck": "tsc --noEmit --strict --target es2023 --module nodenext --allowImportingTsExtensions src/lead.ts src/opportunity.ts src/offer.ts src/contract.ts src/project.ts src/project-file.ts src/index.ts",
+    "lint": "node --check lead.test.mjs && node --check opportunity.test.mjs && node --check offer.test.mjs && node --check contract.test.mjs && node --check project.test.mjs && node --check project-file.test.mjs"
   }
 }

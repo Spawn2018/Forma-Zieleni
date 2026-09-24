@@ -15,7 +15,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'projects:read', 'projects:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'projects:read', 'projects:create', 'files:read', 'files:create'],
 };
 
 const portal = {
@@ -23,7 +23,7 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read'],
 };
 
 const portalOther = {
@@ -31,7 +31,7 @@ const portalOther = {
   issuer: 'test-issuer',
   sub: 'portal-other',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
@@ -762,4 +762,91 @@ test('portal offer projection is read-only, empty without grant, and BOLA-isolat
   const otherList = await (await app.request('/v1/portal/offers', { headers: bearer(portalOther) })).json();
   assert.deepEqual(otherList.items, []);
   assert.equal((await app.request(`/v1/offers/${offer.id}`, { headers: bearer(portal) })).status, 403);
+});
+
+test('portal file projection is read-only, empty without grant, and BOLA-isolated', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/portal/files')).status, 401);
+  assert.equal((await app.request('/v1/portal/files', { headers: bearer(staff) })).status, 403);
+  const empty = await app.request('/v1/portal/files', { headers: bearer(portal) });
+  assert.equal(empty.status, 200);
+  assert.deepEqual((await empty.json()).items, []);
+
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'opp-port-file',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'off-port-file',
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'ctr-port-file',
+    ...bearer(staff),
+  }))).json();
+  const project = await (await app.request('/v1/projects', json({
+    contractId: contract.id,
+    clientSubject: 'portal-ola',
+  }, {
+    'idempotency-key': 'prj-port-file',
+    ...bearer(staff),
+  }))).json();
+  const file = await (await app.request('/v1/files', json({
+    projectId: project.id,
+    name: 'plan.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 2048,
+  }, {
+    'idempotency-key': 'file-port-1',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(file.clientSubject, 'portal-ola');
+  assert.equal(Object.hasOwn(file, 'storageKey'), false);
+
+  const staffLead = await captureAndQualify(app);
+  const staffOpp = await (await app.request('/v1/opportunities', json({ leadId: staffLead.id }, {
+    'idempotency-key': 'opp-staff-file',
+    ...bearer(staff),
+  }))).json();
+  const staffOffer = await (await app.request('/v1/offers', json({ opportunityId: staffOpp.id }, {
+    'idempotency-key': 'off-staff-file',
+    ...bearer(staff),
+  }))).json();
+  const staffContract = await (await app.request('/v1/contracts', json({ offerId: staffOffer.id }, {
+    'idempotency-key': 'ctr-staff-file',
+    ...bearer(staff),
+  }))).json();
+  const staffProject = await (await app.request('/v1/projects', json({
+    contractId: staffContract.id,
+  }, {
+    'idempotency-key': 'prj-staff-file',
+    ...bearer(staff),
+  }))).json();
+  const staffFile = await (await app.request('/v1/files', json({
+    projectId: staffProject.id,
+    name: 'staff-notes.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 100,
+  }, {
+    'idempotency-key': 'file-staff-1',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(staffFile.clientSubject, null);
+
+  const listed = await app.request('/v1/portal/files', { headers: bearer(portal) });
+  assert.equal(listed.status, 200);
+  const body = await listed.json();
+  assert.equal(body.items.length, 1);
+  assert.equal(body.items[0].id, file.id);
+  assert.equal(body.items[0].name, 'plan.pdf');
+  assert.equal(Object.hasOwn(body.items[0], 'clientSubject'), false);
+  assert.equal(Object.hasOwn(body.items[0], 'storageKey'), false);
+
+  assert.equal((await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/files/${staffFile.id}`, { headers: bearer(portal) })).status, 404);
+  assert.equal((await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portalOther) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/files', { headers: bearer(portalOther) })).json();
+  assert.deepEqual(otherList.items, []);
+  assert.equal((await app.request(`/v1/files/${file.id}`, { headers: bearer(portal) })).status, 403);
 });

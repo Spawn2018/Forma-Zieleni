@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Lead, Offer, Opportunity, Project } from '@forma-zieleni/domain';
+import type { Contract, Lead, Offer, Opportunity, Project, ProjectFile } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -11,6 +11,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  ProjectFileListQuery,
   ProjectListQuery,
   StoredReply,
 } from './store.ts';
@@ -84,6 +85,19 @@ function toProject(row: Database['project']): Project {
     contractId: row.contract_id,
     status: row.status as Project['status'],
     clientSubject: row.client_subject ?? null,
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
+function toProjectFile(row: Database['project_file']): ProjectFile {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    clientSubject: row.client_subject ?? null,
+    name: row.name,
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -321,6 +335,40 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toProject);
+  }
+
+  async insertProjectFile(file: ProjectFile): Promise<void> {
+    await this.trx.insertInto('project_file').values({
+      id: file.id,
+      project_id: file.projectId,
+      client_subject: file.clientSubject,
+      name: file.name,
+      mime_type: file.mimeType,
+      size_bytes: file.sizeBytes,
+      created_at: new Date(file.createdAt),
+      updated_at: new Date(file.updatedAt),
+    }).execute();
+  }
+
+  async findProjectFile(id: string): Promise<ProjectFile | null> {
+    const row = await this.trx.selectFrom('project_file').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toProjectFile(row) : null;
+  }
+
+  async listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('project_file').selectAll();
+    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toProjectFile);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

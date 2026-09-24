@@ -8,6 +8,7 @@ import type {
   Opportunity,
   OpportunityStatus,
   Project,
+  ProjectFile,
   ProjectStatus,
 } from '@forma-zieleni/domain';
 
@@ -45,6 +46,13 @@ export type ProjectListQuery = {
   limit: number;
   sort: SortField;
   status?: ProjectStatus;
+  cursor?: { at: string; id: string };
+};
+
+export type ProjectFileListQuery = {
+  limit: number;
+  sort: SortField;
+  projectId?: string;
   cursor?: { at: string; id: string };
 };
 
@@ -111,6 +119,9 @@ export interface LeadTx {
   findProject(id: string): Promise<Project | null>;
   findProjectByContract(contractId: string): Promise<Project | null>;
   listProjects(query: ProjectListQuery): Promise<Project[]>;
+  insertProjectFile(file: ProjectFile): Promise<void>;
+  findProjectFile(id: string): Promise<ProjectFile | null>;
+  listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

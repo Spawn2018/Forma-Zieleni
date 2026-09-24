@@ -16,11 +16,15 @@
     "GET /portal/offers/{offerId}",
     "GET /portal/projects",
     "GET /portal/projects/{projectId}",
+    "GET /portal/files",
+    "GET /portal/files/{fileId}",
     "GET /portal/session",
     "GET /projects",
     "GET /projects/{projectId}",
+    "GET /files/{fileId}",
     "GET /ready",
     "POST /contracts",
+    "POST /files",
     "POST /growth/plans",
     "POST /leads",
     "POST /leads/{leadId}/qualify",
@@ -45,6 +49,9 @@
       "Idempotency-Key"
     ],
     "POST /projects": [
+      "Idempotency-Key"
+    ],
+    "POST /files": [
       "Idempotency-Key"
     ]
   },

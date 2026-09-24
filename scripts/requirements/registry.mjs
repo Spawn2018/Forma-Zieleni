@@ -400,10 +400,9 @@ row('FZ-REQ-WWW-002', 'The public site projects real or explicitly synthetic por
   executableSlice: 'WWW-PORTFOLIO-PROJECTION',
   executableWhenComplete: ['CRM-PROJECT-DOMAIN'],
 });
-row('FZ-REQ-PORTAL-005', 'An authenticated client can see their own project files through Core API authorization. Staff files stay hidden.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain/src/project.ts', 'apps/api/src/http.test.mjs', 'portal file projection slice', 'REVIEW', 'Current offer and project projections are not the file portal.', {
+row('FZ-REQ-PORTAL-005', 'An authenticated client can see their own project files through Core API authorization. Staff files stay hidden.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-file.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Portal file projection lists and gets metadata-only files scoped by clientSubject; BOLA denied.', {
   productCapability: 'PORTAL',
   depth: 'CLIENT_PROJECTION',
-  blockerClass: 'INTERNAL',
   executableSlice: 'PORTAL-FILE-PROJECTION',
   executableWhenComplete: ['PORTAL-PROJECT-PROJECTION'],
 });
