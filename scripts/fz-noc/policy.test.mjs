@@ -90,9 +90,10 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('CMS-ACCEPT'), false);
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.selected, null);
-  assert.equal(cmsOnly.masterProductScopeExhausted, true);
+  assert.equal(cmsOnly.masterProductScopeExhausted, false);
+  assert.equal(cmsOnly.exhaustionAllowed, false);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, null);
+  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
   assert.equal(picked.ready.includes('ADMIN-APP'), false);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ATLAS-PROVENANCE-BOUNDARY'), false);
@@ -100,8 +101,9 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(picked.ready.includes('LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
-  assert.equal(picked.exhaustionAllowed, true);
-  assert.equal(picked.masterProductScopeExhausted, true);
+  assert.equal(picked.ready.includes('GARDENOS-DOMAIN'), false);
+  assert.equal(picked.exhaustionAllowed, false);
+  assert.equal(picked.masterProductScopeExhausted, false);
   assert.equal(picked.internalGap, null);
 });
 
@@ -216,19 +218,19 @@ test('main graph after Opportunity exhausts product READY without ZAP or Lead ac
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, null);
+  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ADMIN-CRM-LEAD'), false);
   assert.equal(picked.ready.includes('MOBILE-ANDROID-FOUNDATION'), false);
   assert.equal(picked.ready.includes('SIGN-STATE-NEUTRAL'), false);
   assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
-  assert.equal(picked.exhaustionAllowed, true);
+  assert.equal(picked.exhaustionAllowed, false);
   assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), false);
   assert.equal(picked.ready.includes('SITEINTEL-RULES'), false);
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
-  assert.equal(picked.masterProductScopeExhausted, true);
+  assert.equal(picked.masterProductScopeExhausted, false);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {
@@ -504,7 +506,7 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.some((id) => /ZAP|DEPENDENCY-CHECK/.test(id)), false);
-  assert.equal(picked.selected, null);
+  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
 });
 
 test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {
@@ -536,6 +538,107 @@ test('K: missing executableSlice declaration fails roadmap validation', () => {
     safePreblockerWork: true,
   }]);
   assert.deepEqual(missing, ['FZ-REQ-SYNTH-001']);
+});
+
+test('an empty READY list does not prove master exhaustion while a safe depth is open', () => {
+  const reqs = [{
+    id: 'FZ-REQ-Q-001',
+    status: 'BLOCKED_BY_DEPENDENCY',
+    productCapability: 'Q',
+    depth: 'DOMAIN',
+    gate: 'NONE',
+    blockerClass: 'INTERNAL',
+    executableSlice: 'Q-DOMAIN',
+    executableWhenComplete: ['Q-DONE'],
+    safePreblockerWork: true,
+  }];
+  const picked = selectReady(
+    [{ id: 'Q-DONE', status: 'COMPLETE', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false }],
+    {
+      requirements: reqs,
+      parentModels: [{ capability: 'Q', requiredDepths: ['DOMAIN'] }],
+      scope: [],
+    },
+  );
+  assert.equal(picked.selected, null);
+  assert.equal(picked.ready.length, 0);
+  assert.equal(picked.internalGap.id, 'Q-DOMAIN');
+  assert.equal(picked.masterProductScopeExhausted, false);
+  assert.equal(picked.exhaustionAllowed, false);
+});
+
+test('a local owner gate does not block an unrelated safe product depth', () => {
+  const reqs = [
+    {
+      id: 'FZ-REQ-GATEA-001',
+      status: 'OWNER_GATED',
+      gate: 'OWNER-DECISION',
+      blockerClass: 'OWNER_GATED',
+      productCapability: 'GATEA',
+      depth: 'OWNER_DECISION',
+      safePreblockerWork: false,
+    },
+    {
+      id: 'FZ-REQ-GATEB-001',
+      status: 'BLOCKED_BY_DEPENDENCY',
+      gate: 'NONE',
+      blockerClass: 'INTERNAL',
+      productCapability: 'GATEB',
+      depth: 'DOMAIN',
+      executableSlice: 'GATEB-DOMAIN',
+      executableWhenComplete: [],
+      safePreblockerWork: true,
+    },
+  ];
+  const slices = [
+    { id: 'GATEA-PROVIDER', status: 'OPEN', gate: 'OWNER-DECISION', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+    { id: 'GATEB-DOMAIN', status: 'OPEN', gate: 'REVIEW', dependsOn: [], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices, {
+    requirements: reqs,
+    parentModels: [
+      { capability: 'GATEA', requiredDepths: ['OWNER_DECISION'] },
+      { capability: 'GATEB', requiredDepths: ['DOMAIN'] },
+    ],
+    scope: [],
+  });
+  assert.equal(picked.selected, 'GATEB-DOMAIN');
+  assert.equal(picked.withheld.some((item) => item.id === 'GATEA-PROVIDER'), true);
+  assert.equal(picked.masterProductScopeExhausted, false);
+  assert.equal(picked.exhaustionAllowed, false);
+});
+
+test('an unknown future capability is selectable from scope data, not from a hard-coded id', () => {
+  const sliceId = 'FUTURECAP-DOMAIN';
+  const source = readFileSync(path.join(root, 'scripts/fz-noc/policy.mjs'), 'utf8');
+  assert.equal(source.includes(sliceId), false);
+  assert.equal(source.includes('FUTURECAP'), false);
+  const reqs = [
+    { id: 'FZ-REQ-FUTURECAP-001', status: 'DONE_AT_MAX_DEPTH', productCapability: 'FUTURECAP', depth: 'FOUNDATION', gate: 'NONE' },
+    {
+      id: 'FZ-REQ-FUTURECAP-002',
+      status: 'BLOCKED_BY_DEPENDENCY',
+      productCapability: 'FUTURECAP',
+      depth: 'DOMAIN',
+      gate: 'NONE',
+      blockerClass: 'INTERNAL',
+      executableSlice: sliceId,
+      executableWhenComplete: [],
+      safePreblockerWork: true,
+    },
+  ];
+  const slices = [
+    { id: 'FUTURECAP-FOUNDATION', status: 'COMPLETE', gate: 'REVIEW', dependsOn: [], next: [sliceId], autonomous: true, reportOnly: false, externalUnmet: false },
+    { id: sliceId, status: 'OPEN', gate: 'REVIEW', dependsOn: ['FUTURECAP-FOUNDATION'], next: [], autonomous: true, reportOnly: false, externalUnmet: false },
+  ];
+  const picked = selectReady(slices, {
+    requirements: reqs,
+    parentModels: [{ capability: 'FUTURECAP', requiredDepths: ['FOUNDATION', 'DOMAIN'] }],
+    scope: [{ id: 'FUTURECAP', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-FUTURECAP-001', 'FZ-REQ-FUTURECAP-002'] }],
+  });
+  assert.equal(picked.selected, sliceId);
+  assert.equal(picked.masterProductScopeExhausted, false);
+  assert.equal(picked.exhaustionAllowed, false);
 });
 
 test('L: a synthetic unknown internal requirement omitted from the graph is caught without hard-coding its name', () => {

@@ -476,6 +476,22 @@ facts ahead of those rules.
 Tests: `packages/domain/product-boundaries.test.mjs`,
 `docs/architecture/SITEINTEL-RULES.md`.
 Security: no third-party credentials.
+Next: SITEINTEL-DOMAIN.
+
+### SITEINTEL-DOMAIN
+
+Dependencies: SITEINTEL-RULES.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API domain records of site constraints and opportunities
+produced only from Site Intelligence rules output over normalized
+observations. AI cannot write those records. No HTTP site API, no twin
+database, no live third-party calls, and no production credentials.
+Tests: domain tests for the domain step, named by the slice when
+implemented.
+Security: no third-party credentials; client site facts stay on the
+owning project.
 Next: none.
 
 ### ATLAS-PLANT-IDENTITY

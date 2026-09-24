@@ -75,16 +75,42 @@ test('owner-gated payment still requires the provider-neutral domain depth', () 
   assert.equal(masterProductScopeExhausted(requirements, [], [], models), false);
 });
 
-test('live scope has no coverage gap and master exhaustion is true after WWW portfolio projection', () => {
+test('live scope has no coverage gap and Site Intelligence DOMAIN keeps the master product open', () => {
   const rows = requirements();
   const scope = loadProductScope();
   const models = loadParentModels();
   assert.deepEqual(scopeCoverageGaps(scope, rows), []);
   assert.deepEqual(missingRequiredDepths(rows, models), []);
-  assert.equal(masterProductScopeExhausted(rows, [], scope, models), true);
+  const site = parentProductReport(rows, { capability: 'SITEINTEL', requiredDepths: ['BOUNDARY', 'RULES', 'DOMAIN'] });
+  assert.equal(site.complete, false);
+  assert.deepEqual(site.openDepths, ['DOMAIN']);
+  assert.equal(masterProductScopeExhausted(rows, [], scope, models), false);
   assert.equal(rows.some((row) => row.id === 'FZ-REQ-PXI-001'), true);
   assert.equal(parentProductReport(rows, { capability: 'MOBILE', requiredDepths: ['BOUNDARY', 'ANDROID_RUNTIME', 'IOS_RUNTIME'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PAYMENT', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'SIGNING', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PXI', requiredDepths: ['CONTRACT'] }).complete, true);
+  assert.equal(parentProductReport(rows, { capability: 'GARDENOS', requiredDepths: ['BOUNDARY', 'DOMAIN'] }).complete, true);
+});
+
+test('done earlier depths do not complete a parent while a later approved depth is open', () => {
+  const rows = [
+    { id: 'FZ-REQ-PARENT-001', status: 'DONE_AT_MAX_DEPTH', productCapability: 'PARENT', depth: 'D1' },
+    { id: 'FZ-REQ-PARENT-002', status: 'DONE_AT_MAX_DEPTH', productCapability: 'PARENT', depth: 'D2' },
+    { id: 'FZ-REQ-PARENT-003', status: 'BLOCKED_BY_DEPENDENCY', productCapability: 'PARENT', depth: 'D3', gate: 'NONE', blockerClass: 'INTERNAL', safePreblockerWork: true },
+  ];
+  const model = { capability: 'PARENT', requiredDepths: ['D1', 'D2', 'D3'] };
+  const report = parentProductReport(rows, model);
+  assert.equal(report.complete, false);
+  assert.deepEqual(report.openDepths, ['D3']);
+  assert.equal(masterProductScopeExhausted(rows, [], [], [model]), false);
+  assert.equal(currentBindingDepthExhausted(rows, []), false);
+});
+
+test('an empty requirement set is not master exhaustion when an approved depth is missing', () => {
+  const model = { capability: 'FUTURECAP', requiredDepths: ['FOUNDATION', 'DOMAIN'] };
+  const rows = [{ id: 'FZ-REQ-FUTURECAP-001', status: 'DONE_AT_MAX_DEPTH', productCapability: 'FUTURECAP', depth: 'FOUNDATION' }];
+  const scope = [{ id: 'FUTURECAP', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-FUTURECAP-001'] }];
+  assert.deepEqual(missingRequiredDepths(rows, [model]), ['FUTURECAP:DOMAIN']);
+  assert.equal(masterProductScopeExhausted(rows, [], scope, [model]), false);
 });

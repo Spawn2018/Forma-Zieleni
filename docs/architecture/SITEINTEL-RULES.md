@@ -14,6 +14,10 @@ Rules consume **normalized** site observations only.
 Ordering remains DATA → RULES → DOMAIN → AI
 (`docs/architecture/SITEINTEL-DATA-BOUNDARY.md`).
 
+Next contracted step: `SITEINTEL-DOMAIN` / `FZ-REQ-SITEINTEL-003`
+in `docs/architecture/NEXT-SLICES-MAIN.md`. Domain records follow rules.
+The AI stage stays after those records exist.
+
 ## Out of scope
 
 - Site Intelligence product runtime / HTTP API.
