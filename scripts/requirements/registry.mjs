@@ -448,7 +448,7 @@ row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity an
   executableSlice: 'ATLAS-PUBLIC-SURFACE',
   executableWhenComplete: ['ATLAS-PLANT-IDENTITY'],
 });
-row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SKETCHUP-PROJECT-MAP.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Model→project mapping only. Plugin runtime stays later.', {
+row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/product-boundaries.ts', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Evidence: mapSketchUpModelToProject / sketchUpProjectMapBoundary. Plugin runtime stays later.', {
   productCapability: 'SKETCHUP',
   depth: 'INTEGRATION',
   executableSlice: 'SKETCHUP-PROJECT-MAP',
