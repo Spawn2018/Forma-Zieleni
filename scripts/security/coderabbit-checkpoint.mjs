@@ -262,9 +262,22 @@ export function runCheckpointReview(options = {}) {
     if (plan.state === 'CODERABBIT_DEFERRED_RATE_LIMIT' || plan.state === 'CODERABBIT_DEFERRED_UNAVAILABLE') {
       const prior = loadReviewState(options.stateFile);
       if ((prior.findings || []).length || prior.repairOccurred) {
-        const deferred = saveReviewState({ ...prior, state: plan.state }, options.stateFile);
+        const deferred = saveReviewState({ ...prior, state: plan.state, headSha, baseSha, paths: changed.paths }, options.stateFile);
         return { ...plan, ok: true, paths: changed.paths, findings: prior.findings?.length || 0, reviewState: deferred };
       }
+      // Privacy / rate-limit skip with no open findings must still authorize this HEAD.
+      const deferred = saveReviewState({
+        ...prior,
+        baseSha,
+        headSha,
+        paths: changed.paths,
+        findings: [],
+        dispositions: {},
+        repairOccurred: false,
+        reReviewRequired: false,
+        state: plan.state,
+      }, options.stateFile);
+      return { ...plan, ok: true, paths: changed.paths, findings: 0, structuredFindings: [], reviewState: deferred };
     }
     return { ...plan, ok: true, paths: changed.paths, findings: 0, structuredFindings: [] };
   }
