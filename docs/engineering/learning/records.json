@@ -2368,16 +2368,18 @@
       ],
       "generalizability": "LOCAL",
       "privacyClassification": "INTERNAL",
-      "status": "OBSERVED",
+      "status": "REJECTED",
       "evidenceStrength": "ANECDOTAL",
       "validatedLocally": false,
-      "locallyVerified": false,
+      "locallyVerified": true,
       "relatedCommit": "1a4726e643b9ec3d83fc588b5fd51d0f1da9b232",
       "horizon": "FOUNDATION_NOW",
       "id": "LR-20260924-e6b015c5",
       "occurrences": 1,
       "firstSeen": "2026-09-24T21:13:10.655Z",
-      "lastSeen": "2026-09-24T21:13:10.655Z"
+      "lastSeen": "2026-09-24T21:13:10.655Z",
+      "rejectionReason": "Adopted in HEAD 8b7ca60: OpenAPI marks X-Content-Checksum-Sha256 required on 200 download; download uses c.body so middleware request-id/CORS headers are preserved.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
