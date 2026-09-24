@@ -31,6 +31,22 @@ export type NormalizedSiteObservation = {
   synthetic: true;
 };
 
+/** Deterministic RULES codes from normalized observation kinds. Not AI conclusions. */
+const KIND_TO_FINDING: Readonly<Record<string, { constraint?: string; opportunity?: string }>> = {
+  slope: { constraint: 'slope-constraint' },
+  topography: { constraint: 'topography-constraint' },
+  soil: { constraint: 'soil-constraint' },
+  sun: { opportunity: 'sun-exposure' },
+  aspect: { opportunity: 'aspect-opportunity' },
+  surroundings: { opportunity: 'surroundings-context' },
+  climate: { opportunity: 'climate-context' },
+};
+
+export type SiteIntelligenceCodedFinding = {
+  code: string;
+  observationIds: string[];
+};
+
 export type SiteIntelligenceRulesBoundary = {
   requirementId: 'FZ-REQ-SITEINTEL-002';
   stage: 'RULES';
@@ -42,20 +58,9 @@ export type SiteIntelligenceRulesBoundary = {
 export type SiteIntelligenceRulesResult = {
   stage: 'RULES';
   observationIds: string[];
-  constraints: string[];
-  opportunities: string[];
+  constraints: SiteIntelligenceCodedFinding[];
+  opportunities: SiteIntelligenceCodedFinding[];
   inventedFacts: never[];
-};
-
-/** Deterministic RULES codes from normalized observation kinds. Not AI conclusions. */
-const KIND_TO_FINDING: Readonly<Record<string, { constraint?: string; opportunity?: string }>> = {
-  slope: { constraint: 'steep-grade' },
-  topography: { constraint: 'topography-constraint' },
-  soil: { constraint: 'soil-constraint' },
-  sun: { opportunity: 'sun-exposure' },
-  aspect: { opportunity: 'aspect-opportunity' },
-  surroundings: { opportunity: 'surroundings-context' },
-  climate: { opportunity: 'climate-context' },
 };
 
 export function siteIntelligenceFindingCodes(): ReadonlySet<string> {
@@ -100,10 +105,9 @@ export function applySiteIntelligenceRules(
   if (!Array.isArray(observations) || observations.length === 0) {
     throw new Error('SITEINTEL_OBSERVATIONS_REQUIRED');
   }
-  const constraints: string[] = [];
-  const opportunities: string[] = [];
-  const seenConstraint = new Set<string>();
-  const seenOpportunity = new Set<string>();
+  const constraintsByCode = new Map<string, string[]>();
+  const opportunitiesByCode = new Map<string, string[]>();
+  const observationIds: string[] = [];
   for (const item of observations) {
     if (!item || item.normalized !== true || item.source !== 'normalized') {
       throw new Error('SITEINTEL_OBSERVATION_NOT_NORMALIZED');
@@ -115,22 +119,27 @@ export function applySiteIntelligenceRules(
       throw new Error('SITEINTEL_OBSERVATION_KIND_INVALID');
     }
     const kind = item.kind.trim().toLowerCase();
-    const finding = KIND_TO_FINDING[kind];
-    if (!finding) throw new Error('SITEINTEL_OBSERVATION_KIND_UNKNOWN');
-    if (finding.constraint && !seenConstraint.has(finding.constraint)) {
-      seenConstraint.add(finding.constraint);
-      constraints.push(finding.constraint);
+    if (!Object.hasOwn(KIND_TO_FINDING, kind)) {
+      throw new Error('SITEINTEL_OBSERVATION_KIND_UNKNOWN');
     }
-    if (finding.opportunity && !seenOpportunity.has(finding.opportunity)) {
-      seenOpportunity.add(finding.opportunity);
-      opportunities.push(finding.opportunity);
+    const finding = KIND_TO_FINDING[kind];
+    observationIds.push(item.observationId);
+    if (finding?.constraint) {
+      const list = constraintsByCode.get(finding.constraint) ?? [];
+      list.push(item.observationId);
+      constraintsByCode.set(finding.constraint, list);
+    }
+    if (finding?.opportunity) {
+      const list = opportunitiesByCode.get(finding.opportunity) ?? [];
+      list.push(item.observationId);
+      opportunitiesByCode.set(finding.opportunity, list);
     }
   }
   return {
     stage: 'RULES',
-    observationIds: observations.map((item) => item.observationId),
-    constraints,
-    opportunities,
+    observationIds,
+    constraints: [...constraintsByCode.entries()].map(([code, ids]) => ({ code, observationIds: ids })),
+    opportunities: [...opportunitiesByCode.entries()].map(([code, ids]) => ({ code, observationIds: ids })),
     inventedFacts: [],
   };
 }

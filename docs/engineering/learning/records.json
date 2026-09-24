@@ -1651,6 +1651,58 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T11:17:11.616Z",
       "lastSeen": "2026-09-24T11:19:06.663Z"
+    },
+    {
+      "patternKey": "cr-at-line-122-update-recor-0f41f707c9",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 122, Update recordSiteIntelligenceFromRules to accept findings only when they are tied to the normalized-observa",
+      "evidence": [
+        "cr-occurrence:origin/main:42e9805e9524:cr-at-line-122-update-recor-0f41f707c9",
+        "packages/domain/src/site-intelligence.ts",
+        "severity:high",
+        "accepted:cr-at-line-122-update-recor-0f41f707c9"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "42e9805e9524b279c4c793ec702375e3aaa45ad8",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-fdd4e68f",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T15:19:00.949Z",
+      "lastSeen": "2026-09-24T15:21:21.911Z"
+    },
+    {
+      "patternKey": "cr-update-applysiteintellig-4881f22b9d",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update applySiteIntelligenceRules and the RULES-path test so deterministic input produces nonempty constraints or oppo",
+      "evidence": [
+        "cr-occurrence:origin/main:42e9805e9524:cr-update-applysiteintellig-4881f22b9d",
+        "packages/domain/site-intelligence.test.mjs",
+        "severity:high",
+        "accepted:cr-update-applysiteintellig-4881f22b9d"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "42e9805e9524b279c4c793ec702375e3aaa45ad8",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-64049d85",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T15:19:00.990Z",
+      "lastSeen": "2026-09-24T15:21:22.389Z"
     }
   ]
 }

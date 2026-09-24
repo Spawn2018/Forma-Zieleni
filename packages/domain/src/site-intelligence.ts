@@ -139,9 +139,20 @@ export function recordSiteIntelligenceFromRules(
     throw new Error('SITEINTEL_FINDINGS_REQUIRED');
   }
   const allowedCodes = siteIntelligenceFindingCodes();
-  for (const code of [...rules.constraints, ...rules.opportunities]) {
-    if (typeof code !== 'string' || !allowedCodes.has(code)) {
+  for (const finding of [...rules.constraints, ...rules.opportunities]) {
+    if (!finding || typeof finding.code !== 'string' || !allowedCodes.has(finding.code)) {
       throw new Error('SITEINTEL_CODE_NOT_FROM_OBSERVATIONS');
+    }
+    if (!Array.isArray(finding.observationIds) || finding.observationIds.length === 0) {
+      throw new Error('SITEINTEL_FINDING_OBSERVATION_REQUIRED');
+    }
+    for (const observationId of finding.observationIds) {
+      if (typeof observationId !== 'string' || observationId.length < 8) {
+        throw new Error('SITEINTEL_OBSERVATION_ID_INVALID');
+      }
+      if (!rules.observationIds.includes(observationId)) {
+        throw new Error('SITEINTEL_FINDING_OBSERVATION_UNBOUND');
+      }
     }
   }
   if (ids.constraintIds.length !== rules.constraints.length) {
@@ -158,33 +169,33 @@ export function recordSiteIntelligenceFromRules(
   const opportunities: SiteOpportunityRecord[] = [];
 
   for (let i = 0; i < rules.constraints.length; i += 1) {
-    const code = rules.constraints[i];
+    const finding = rules.constraints[i];
     const constraintId = ids.constraintIds[i];
-    if (typeof code !== 'string' || typeof constraintId !== 'string') {
+    if (!finding || typeof constraintId !== 'string') {
       throw new Error('SITEINTEL_CONSTRAINT_ID_MISMATCH');
     }
     constraints.push({
       id: assertOpaqueSiteConstraintId(constraintId),
       projectId,
       clientSubject,
-      code: assertCode(code),
-      observationIds,
+      code: assertCode(finding.code),
+      observationIds: [...finding.observationIds],
       sourceStage: 'RULES',
       createdAt: at,
     });
   }
   for (let i = 0; i < rules.opportunities.length; i += 1) {
-    const code = rules.opportunities[i];
+    const finding = rules.opportunities[i];
     const opportunityId = ids.opportunityIds[i];
-    if (typeof code !== 'string' || typeof opportunityId !== 'string') {
+    if (!finding || typeof opportunityId !== 'string') {
       throw new Error('SITEINTEL_OPPORTUNITY_ID_MISMATCH');
     }
     opportunities.push({
       id: assertOpaqueSiteOpportunityId(opportunityId),
       projectId,
       clientSubject,
-      code: assertCode(code),
-      observationIds,
+      code: assertCode(finding.code),
+      observationIds: [...finding.observationIds],
       sourceStage: 'RULES',
       createdAt: at,
     });

@@ -135,6 +135,7 @@ export {
 } from './product-boundaries.ts';
 export type {
   NormalizedSiteObservation,
+  SiteIntelligenceCodedFinding,
   SiteIntelligenceRulesBoundary,
   SiteIntelligenceRulesResult,
   SketchUpProjectMap,

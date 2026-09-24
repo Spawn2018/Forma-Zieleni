@@ -75,8 +75,8 @@ test('domain records constraints and opportunities only from RULES over normaliz
       synthetic: true,
     },
   ]);
-  assert.deepEqual(rules.constraints, ['steep-grade']);
-  assert.deepEqual(rules.opportunities, ['sun-exposure']);
+  assert.deepEqual(rules.constraints, [{ code: 'slope-constraint', observationIds: ['obs-slope-01'] }]);
+  assert.deepEqual(rules.opportunities, [{ code: 'sun-exposure', observationIds: ['obs-sun-0001'] }]);
   const bundle = recordSiteIntelligenceFromRules(
     project,
     rules,
@@ -91,16 +91,18 @@ test('domain records constraints and opportunities only from RULES over normaliz
   assert.equal(bundle.clientSubject, 'portal-ola');
   assert.deepEqual(bundle.observationIds, ['obs-slope-01', 'obs-sun-0001']);
   assert.equal(bundle.constraints.length, 1);
-  assert.equal(bundle.constraints[0].code, 'steep-grade');
+  assert.equal(bundle.constraints[0].code, 'slope-constraint');
+  assert.deepEqual(bundle.constraints[0].observationIds, ['obs-slope-01']);
   assert.equal(bundle.constraints[0].sourceStage, 'RULES');
   assert.equal(bundle.constraints[0].clientSubject, 'portal-ola');
   assert.equal(bundle.opportunities[0].code, 'sun-exposure');
+  assert.deepEqual(bundle.opportunities[0].observationIds, ['obs-sun-0001']);
   assert.equal(Object.hasOwn(bundle, 'twinDatabase'), false);
   assert.equal(Object.hasOwn(bundle.constraints[0], 'aiConclusion'), false);
   const mine = projectSiteIntelligenceForPortal(bundle, 'portal-ola');
   assert.ok(mine);
   assert.equal(mine.projectId, project.id);
-  assert.equal(mine.constraints[0].code, 'steep-grade');
+  assert.equal(mine.constraints[0].code, 'slope-constraint');
   assert.equal(Object.hasOwn(mine, 'clientSubject'), false);
   assert.equal(projectSiteIntelligenceForPortal(bundle, 'portal-other'), null);
 });
@@ -158,11 +160,20 @@ test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain re
   assert.throws(
     () => recordSiteIntelligenceFromRules(
       project,
-      { ...rules, constraints: ['invented-code'] },
+      { ...rules, constraints: [{ code: 'invented-code', observationIds: ['obs-slope-01'] }] },
       ids,
       at,
     ),
     /SITEINTEL_CODE_NOT_FROM_OBSERVATIONS/,
+  );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      { ...rules, constraints: [{ code: 'slope-constraint', observationIds: ['obs-other-01'] }] },
+      ids,
+      at,
+    ),
+    /SITEINTEL_FINDING_OBSERVATION_UNBOUND/,
   );
 });
 
