@@ -2380,6 +2380,33 @@
       "lastSeen": "2026-09-24T21:13:10.655Z",
       "rejectionReason": "Adopted in HEAD 8b7ca60: OpenAPI marks X-Content-Checksum-Sha256 required on 200 download; download uses c.body so middleware request-id/CORS headers are preserved.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-content-lengt-b612813b64",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the content-length mismatch test to use fresh file metadata and a request body whose byte length differs from t",
+      "evidence": [
+        "cr-occurrence:387ed21a0224:632fcdecf5f9:cr-update-the-content-lengt-b612813b64",
+        "apps/api/src/http.test.mjs",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "632fcdecf5f983934f3fd830157593e75166e123",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-42d38d34",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T21:31:17.814Z",
+      "lastSeen": "2026-09-24T21:31:17.814Z",
+      "rejectionReason": "Test targets metadata size mismatch (file.sizeBytes 24 vs 14-byte body) which returns 400 FILE_BYTES_SIZE_MISMATCH. Content-Length correctly mirrors the body; a fresh metadata row is not required for this path.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
