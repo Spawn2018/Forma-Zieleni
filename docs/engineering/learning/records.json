@@ -2083,6 +2083,33 @@
       "lastSeen": "2026-09-24T19:18:22.847Z",
       "rejectionReason": "execution-journal nextSafeAction is updated at fz-noc complete after push; not a pre-ship defect.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-527-update-fetch-87c5ef44d2",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 527, Update fetchAdminFiles to preserve the Core API’s meta.nextCursor and use it to request subsequent pages; a",
+      "evidence": [
+        "cr-occurrence:d8c1fc851435:00c5f9c6ab72:cr-at-line-527-update-fetch-87c5ef44d2",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "00c5f9c6ab7277267132daa8a3fd35304a2b621c",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-be6b9baa",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T19:43:44.061Z",
+      "lastSeen": "2026-09-24T19:43:44.061Z",
+      "rejectionReason": "ADMIN-CRM-FILE Accept mirrors ADMIN-CRM-PROJECT/OFFER: first-page limit=50 is enough; cursor pagination is not required by this slice.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
