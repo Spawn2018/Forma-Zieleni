@@ -131,6 +131,44 @@ test('only an explicit true publication mark projects', () => {
   );
 });
 
+test('unpublished drafts with private fields stay off without throwing', () => {
+  assert.equal(
+    projectPortfolioItem({
+      id: 'portfoliodraft0003',
+      title: 'Szkic z ceną',
+      projectClass: 'REAL_PROJECT',
+      markedForPublication: false,
+      price: 12000,
+    }),
+    null,
+  );
+});
+
+test('smuggled realization and non-boolean synthetic fail closed', () => {
+  assert.throws(
+    () =>
+      projectPortfolioItem({
+        ...realPublished,
+        realization: true,
+      }),
+    /PORTFOLIO_REALIZATION_SMUGGLED/,
+  );
+  assert.throws(
+    () =>
+      projectPortfolioItem({
+        ...realPublished,
+        synthetic: 'true',
+      }),
+    /PORTFOLIO_SYNTHETIC_INVALID/,
+  );
+  const syntheticReal = projectPortfolioItem({
+    ...realPublished,
+    synthetic: true,
+  });
+  assert.equal(syntheticReal.realization, true);
+  assert.equal(syntheticReal.synthetic, true);
+});
+
 test('private commercial and client fields stay off the public path', () => {
   for (const field of ['price', 'awards', 'customerName', 'address', 'email', 'phone']) {
     assert.throws(

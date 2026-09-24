@@ -77,8 +77,15 @@ export class PortfolioProjectionError extends Error {
  * Throws when the source carries private commercial or client fields.
  */
 export function projectPortfolioItem(source: PortfolioProjectSource): PublicPortfolioItem | null {
-  assertNoPrivateFields(source);
   if (source.markedForPublication !== true) return null;
+  assertNoPrivateFields(source);
+  const record = source as Record<string, unknown>;
+  if (Object.hasOwn(record, 'realization')) {
+    throw new PortfolioProjectionError('PORTFOLIO_REALIZATION_SMUGGLED');
+  }
+  if (Object.hasOwn(record, 'synthetic') && typeof record.synthetic !== 'boolean') {
+    throw new PortfolioProjectionError('PORTFOLIO_SYNTHETIC_INVALID');
+  }
   if (!OPAQUE_ID.test(source.id) || /^(?:project|prj|id)\d+$/i.test(source.id)) {
     throw new PortfolioProjectionError('PORTFOLIO_ID_INVALID');
   }
@@ -86,12 +93,13 @@ export function projectPortfolioItem(source: PortfolioProjectSource): PublicPort
     throw new PortfolioProjectionError('PORTFOLIO_CLASS_INVALID');
   }
   const title = requiredText(source.title, TITLE_LIMIT, 'PORTFOLIO_TITLE_INVALID');
+  const synthetic = source.synthetic === true;
   const item: PublicPortfolioItem = {
     id: source.id,
     title,
     projectClass: source.projectClass,
     realization: source.projectClass === 'REAL_PROJECT',
-    synthetic: source.synthetic === true,
+    synthetic,
   };
   if (source.summary !== undefined) {
     item.summary = requiredText(source.summary, SUMMARY_LIMIT, 'PORTFOLIO_SUMMARY_INVALID');
