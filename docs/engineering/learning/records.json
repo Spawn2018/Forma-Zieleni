@@ -1441,6 +1441,33 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T00:20:19.663Z",
       "lastSeen": "2026-09-24T00:20:19.663Z"
+    },
+    {
+      "patternKey": "cr-at-line-416-update-the-f-30f0005ef4",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 416, Update the FZ-REQ-MOBILE-002 row in the requirements registry so the Node foundation and mocked-fetch test",
+      "evidence": [
+        "cr-occurrence:973cba672659:3a2fe7590a98:cr-at-line-416-update-the-f-30f0005ef4",
+        "scripts/requirements/registry.mjs",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "3a2fe7590a9879e62a369918de2ba9e8618cf83a",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-e74f12f9",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T01:04:44.811Z",
+      "lastSeen": "2026-09-24T01:04:44.811Z",
+      "rejectionReason": "Registry already points FZ-REQ-MOBILE-002 at apps/mobile-android foundation.mjs and foundation.test.mjs as DONE_AT_MAX_DEPTH/TESTED; Android-surface Node foundation with injectable fetch is the slice accept (Core API client, no commercial state, no Play credentials). Finding text is truncated and asks to update a row that this commit already updated.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
