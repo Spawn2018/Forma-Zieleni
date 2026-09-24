@@ -1494,6 +1494,33 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T02:07:49.429Z",
       "lastSeen": "2026-09-24T02:08:06.013Z"
+    },
+    {
+      "patternKey": "cr-update-createsignaturere-1e77e3d794",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update createSignatureRequest to require the authoritative lock established by lockContractVersion, rejecting a missin",
+      "evidence": [
+        "cr-occurrence:a53c6cb933e7:37691ad41534:cr-update-createsignaturere-1e77e3d794",
+        "packages/domain/src/signing.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "37691ad415347f80535c44b0677d399b78be7de9",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-6f4cd70f",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T03:32:00.037Z",
+      "lastSeen": "2026-09-24T03:32:00.037Z",
+      "rejectionReason": "createSignatureRequest already requires ContractVersionLock from lockContractVersion and rejects CONTRACT_VERSION_MISMATCH when lock.contractId differs; missing lock is a TypeScript/call-site error. Finding text is truncated and does not identify a missing guard beyond the existing lock parameter.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
