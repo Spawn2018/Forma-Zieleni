@@ -25,7 +25,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "ADMIN-CRM-OFFER COMPLETE pending push CI_GREEN. Owner gates (sign/pay/host/CMS-ACCEPT) remain. Do not invent roadmap past Canon; materialize next AUTO/REVIEW depth when registry declares one.",
+  "nextSafeAction": "ADMIN-CRM-CONTRACT COMPLETE pending push CI_GREEN. Owner gates (sign provider/pay/host/CMS-ACCEPT) remain. Do not invent roadmap past Canon.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

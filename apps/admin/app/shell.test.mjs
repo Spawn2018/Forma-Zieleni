@@ -8,14 +8,19 @@ import {
   adminSessionCookiePresent,
   adminShell,
   classifyAdminSession,
+  createAdminContract,
   createAdminOffer,
+  fetchAdminContracts,
   fetchAdminLeads,
   fetchAdminOffers,
+  mapContractPage,
   mapLeadPage,
   mapOfferPage,
   qualifyAdminLead,
   resolveAdminHome,
 } from './shell.ts';
+
+const emptyCrm = { leads: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' } };
 
 const prohibited = [
   'kompleksowe rozwiązania',
@@ -57,15 +62,17 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.deepEqual(await resolveAdminHome({}), { state: 'signed-out' });
   assert.deepEqual(
     await resolveAdminHome({ probe: async () => ({ clientId: 'admin' }) }),
-    { state: 'signed-in', leads: { status: 'empty' }, offers: { status: 'empty' } },
+    { state: 'signed-in', ...emptyCrm },
   );
   const signedIn = renderToStaticMarkup(
-    adminShell({ state: 'signed-in', leads: { status: 'empty' }, offers: { status: 'empty' } }),
+    adminShell({ state: 'signed-in', ...emptyCrm }),
   );
   assert.match(signedIn, /Jesteś zalogowany/);
   assert.match(signedIn, /Brak leadów do pokazania/);
   assert.match(signedIn, /Brak ofert do pokazania/);
+  assert.match(signedIn, /Brak umów do pokazania/);
   assert.match(signedIn, /Utwórz ofertę/);
+  assert.match(signedIn, /Utwórz umowę/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -75,11 +82,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, offers: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, offers: { status: 'empty' }, contracts: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, offers: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, offers: { status: 'empty' }, contracts: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -107,6 +114,16 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      contracts: {
+        status: 'ready',
+        items: [
+          {
+            id: 'ct8k2n4p6q8r0s2t',
+            offerId: 'of8k2n4p6q8r0s2t',
+            status: 'draft',
+          },
+        ],
+      },
     }),
   );
   assert.match(ready, /Anna Kowalska/);
@@ -114,11 +131,68 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Kwalifikuj/);
   assert.match(ready, /name="leadId"/);
   assert.match(ready, /Oferty/);
+  assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /op8k2n4p6q8r0s2t/);
   assert.match(ready, /Utwórz ofertę/);
+  assert.match(ready, /Umowy/);
+  assert.match(ready, /ct8k2n4p6q8r0s2t/);
+  assert.match(ready, /Utwórz umowę/);
   assert.equal(ready.toLowerCase().includes('lead nr'), false);
   assert.equal(ready.toLowerCase().includes('oferta nr'), false);
+  assert.equal(ready.toLowerCase().includes('umowa nr'), false);
   assert.equal(ready.toLowerCase().includes('price'), false);
+  assert.equal(ready.toLowerCase().includes('płatność'), false);
+  assert.equal(ready.toLowerCase().includes('podpis'), false);
+});
+
+test('mapContractPage and Core API contract fetch/create stay truthful', async () => {
+  assert.deepEqual(mapContractPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapContractPage({ items: [{ id: 1 }] }), { status: 'error' });
+  assert.deepEqual(
+    mapContractPage({
+      items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'draft' }],
+    }),
+    {
+      status: 'ready',
+      items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'draft' }],
+    },
+  );
+
+  const empty = await fetchAdminContracts({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response(JSON.stringify({ items: [], meta: {} }), { status: 200 }),
+  });
+  assert.deepEqual(empty, { status: 'empty' });
+
+  const forbidden = await fetchAdminContracts({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(forbidden, { status: 'forbidden' });
+
+  const created = await createAdminContract({
+    base: 'http://127.0.0.1:8787',
+    offerId: 'of8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-contract-0001',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/contracts$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(new Headers(init?.headers).get('idempotency-key'), 'admin-contract-0001');
+      assert.equal(String(init?.body), JSON.stringify({ offerId: 'of8k2n4p6q8r0s2t' }));
+      return new Response(JSON.stringify({ id: 'ct8k2n4p6q8r0s2t', status: 'draft' }), { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
+
+  const denied = await createAdminContract({
+    base: 'http://127.0.0.1:8787',
+    offerId: 'of8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-contract-0002',
+    async fetchImpl() {
+      return new Response('', { status: 403 });
+    },
+  });
+  assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
 test('mapOfferPage and Core API offer fetch/create stay truthful', async () => {
@@ -256,7 +330,7 @@ test('API-backed qualify workflow posts capacityHold with idempotency and blocks
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
-test('the route module keeps an error boundary and wires Core API lead and offer flow', () => {
+test('the route module keeps an error boundary and wires Core API CRM lead/offer/contract flow', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('./shell.ts', import.meta.url), 'utf8');
@@ -264,8 +338,10 @@ test('the route module keeps an error boundary and wires Core API lead and offer
   assert.match(home, /resolveAdminHome/);
   assert.match(home, /fetchAdminLeads/);
   assert.match(home, /fetchAdminOffers/);
+  assert.match(home, /fetchAdminContracts/);
   assert.match(home, /qualifyAdminLead/);
   assert.match(home, /createAdminOffer/);
+  assert.match(home, /createAdminContract/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
@@ -277,7 +353,11 @@ test('the route module keeps an error boundary and wires Core API lead and offer
   assert.equal(shell.includes('leads:read'), false);
   assert.equal(shell.includes('offers:read'), false);
   assert.equal(shell.includes('offers:create'), false);
+  assert.equal(shell.includes('contracts:read'), false);
+  assert.equal(shell.includes('contracts:create'), false);
   assert.equal(shell.includes('projects:'), false);
+  assert.equal(shell.toLowerCase().includes('podpis'), false);
+  assert.equal(shell.toLowerCase().includes('płatność'), false);
   for (const phrase of prohibited) {
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);

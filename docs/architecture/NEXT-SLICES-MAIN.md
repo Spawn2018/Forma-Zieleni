@@ -431,6 +431,24 @@ Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed offer
 fetch/create with synthetic fetch).
 Security: staff session only; portal tokens cannot create or list staff
 offers (Core API).
+Next: ADMIN-CRM-CONTRACT.
+
+### ADMIN-CRM-CONTRACT
+
+Dependencies: ADMIN-CRM-OFFER, CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: COMPLETE for staff list and create of contracts in apps/admin
+through Core API `GET /v1/contracts` and `POST /v1/contracts`. Empty,
+error, and forbidden states are real. No signing ceremony UI, no
+payment UI, no second contract store, and no invented commercial rows.
+Autonomous: yes.
+Accept: staff list and create contracts in apps/admin through Core API.
+Empty, error, and unauthorized states are real. No signing-provider
+ceremony, no payment capture, and no invented customers.
+Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed contract
+fetch/create with synthetic fetch).
+Security: staff session only; portal tokens cannot create or list staff
+contracts (Core API). FZ-SIGN-1 provider stays UNDECIDED.
 Next: none.
 
 ### MOBILE-ANDROID-FOUNDATION

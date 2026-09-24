@@ -4,7 +4,9 @@ import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
   adminShell,
+  createAdminContract,
   createAdminOffer,
+  fetchAdminContracts,
   fetchAdminLeads,
   fetchAdminOffers,
   qualifyAdminLead,
@@ -43,6 +45,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     async loadOffers() {
       return fetchAdminOffers({ base, cookie });
     },
+    async loadContracts() {
+      return fetchAdminContracts({ base, cookie });
+    },
   });
 }
 
@@ -80,6 +85,23 @@ export async function action({ request }: Route.ActionArgs) {
     const result = await createAdminOffer({
       base,
       opportunityId: opportunityId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-contract') {
+    const offerId = form.get('offerId');
+    if (typeof offerId !== 'string' || !offerId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminContract({
+      base,
+      offerId: offerId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

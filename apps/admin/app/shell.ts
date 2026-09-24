@@ -30,10 +30,22 @@ export type AdminOfferList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminContractRow = {
+  id: string;
+  offerId: string;
+  status: string;
+};
+
+export type AdminContractList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminContractRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
-  | { state: 'signed-in'; leads: AdminLeadList; offers: AdminOfferList };
+  | { state: 'signed-in'; leads: AdminLeadList; offers: AdminOfferList; contracts: AdminContractList };
 
 /**
  * Admin trust-zone session classification.
@@ -189,14 +201,90 @@ export async function createAdminOffer(input: {
   }
 }
 
+type ContractApiItem = {
+  id?: unknown;
+  offerId?: unknown;
+  status?: unknown;
+};
+
+export function mapContractPage(body: unknown): AdminContractList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminContractRow[] = [];
+  for (const item of items) {
+    const contract = item as ContractApiItem;
+    if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
+    if (typeof contract.status !== 'string') return { status: 'error' };
+    rows.push({
+      id: contract.id,
+      offerId: contract.offerId,
+      status: contract.status,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminContracts(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminContractList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/contracts?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapContractPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminContract(input: {
+  base: string;
+  offerId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/contracts', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ offerId: input.offerId }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
- * Resolve admin home from optional Core API session probe + lead/offer lists.
+ * Resolve admin home from optional Core API session probe + CRM lists.
  * Unconfigured probe → signed-out (truthful). Never invents CRM rows.
  */
 export async function resolveAdminHome(input: {
   probe?: () => Promise<AdminSessionActor | null>;
   loadLeads?: () => Promise<AdminLeadList>;
   loadOffers?: () => Promise<AdminOfferList>;
+  loadContracts?: () => Promise<AdminContractList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
@@ -204,7 +292,8 @@ export async function resolveAdminHome(input: {
     if (classified.state !== 'signed-in') return classified;
     const leads = input.loadLeads ? await input.loadLeads() : { status: 'empty' as const };
     const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
-    return { state: 'signed-in', leads, offers };
+    const contracts = input.loadContracts ? await input.loadContracts() : { status: 'empty' as const };
+    return { state: 'signed-in', leads, offers, contracts };
   } catch {
     return { state: 'signed-out' };
   }
@@ -320,7 +409,7 @@ function offerListNode(offers: AdminOfferList): ReactNode {
           createElement(
             'p',
             { className: 'admin-offer-meta' },
-            ['szansa ', offer.opportunityId, ' · ', offer.status].join(''),
+            [offer.id, ' · szansa ', offer.opportunityId, ' · ', offer.status].join(''),
           ),
         ),
       ),
@@ -349,8 +438,62 @@ function createOfferForm(): ReactNode {
   );
 }
 
+function contractListNode(contracts: AdminContractList): ReactNode {
+  if (contracts.status === 'empty') {
+    return createElement('p', null, 'Brak umów do pokazania.');
+  }
+  if (contracts.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy umów.');
+  }
+  if (contracts.status === 'error') {
+    return createElement('p', null, 'Listy umów nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-contracts', 'aria-label': 'Umowy' },
+    createElement('h2', null, 'Umowy'),
+    createElement(
+      'ul',
+      { className: 'admin-contract-list' },
+      ...contracts.items.map((contract) =>
+        createElement(
+          'li',
+          { key: contract.id, className: 'admin-contract' },
+          createElement(
+            'p',
+            { className: 'admin-contract-meta' },
+            [contract.id, ' · oferta ', contract.offerId, ' · ', contract.status].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createContractForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-contract' },
+    createElement('h2', null, 'Nowa umowa'),
+    createElement(
+      'label',
+      { className: 'admin-create-contract-id' },
+      'Id oferty',
+      createElement('input', {
+        type: 'text',
+        name: 'offerId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-contract' }, 'Utwórz umowę'),
+  );
+}
+
 /**
- * Staff shell. Signed-in shows real Core API lead/offer states — never invented rows.
+ * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
+ * No signing ceremony and no payment UI.
  */
 export function adminShell(home: AdminHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -380,5 +523,7 @@ export function adminShell(home: AdminHome): ReactNode {
     leadListNode(home.leads),
     offerListNode(home.offers),
     createOfferForm(),
+    contractListNode(home.contracts),
+    createContractForm(),
   );
 }
