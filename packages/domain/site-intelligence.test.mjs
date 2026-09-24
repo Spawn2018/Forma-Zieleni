@@ -184,6 +184,37 @@ test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain re
     ),
     /SITEINTEL_FINDING_KIND_MISMATCH/,
   );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      {
+        ...rules,
+        constraints: [{ code: 'sun-exposure', observationIds: ['obs-slope-01'], kind: 'sun' }],
+      },
+      ids,
+      at,
+    ),
+    /SITEINTEL_CODE_NOT_FROM_OBSERVATIONS/,
+  );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      {
+        ...rules,
+        observationIds: [...rules.observationIds, 'obs-sun-0001'],
+        observationKinds: { ...rules.observationKinds, 'obs-sun-0001': 'sun' },
+        constraints: [{
+          code: 'slope-constraint',
+          observationIds: ['obs-sun-0001'],
+          kind: 'slope',
+        }],
+        opportunities: [],
+      },
+      ids,
+      at,
+    ),
+    /SITEINTEL_FINDING_OBSERVATION_KIND_MISMATCH/,
+  );
 });
 
 test('constraint and opportunity id lists must match RULES codes', () => {

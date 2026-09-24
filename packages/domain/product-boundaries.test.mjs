@@ -79,6 +79,25 @@ test('Site Intelligence rules consume normalized observations and refuse AI-inve
     ]),
     /SITEINTEL_OBSERVATION_KIND_UNKNOWN/,
   );
+  assert.throws(
+    () => applySiteIntelligenceRules([
+      {
+        observationId: 'obs-slope-01',
+        kind: 'slope',
+        normalized: true,
+        source: 'normalized',
+        synthetic: true,
+      },
+      {
+        observationId: 'obs-slope-01',
+        kind: 'slope',
+        normalized: true,
+        source: 'normalized',
+        synthetic: true,
+      },
+    ]),
+    /SITEINTEL_OBSERVATION_ID_DUPLICATE/,
+  );
 
   assert.throws(
     () => applySiteIntelligenceRules(observations, { inventedSiteFacts: true }),

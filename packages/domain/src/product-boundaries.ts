@@ -60,18 +60,31 @@ export type SiteIntelligenceRulesBoundary = {
 export type SiteIntelligenceRulesResult = {
   stage: 'RULES';
   observationIds: string[];
+  /** observationId → normalized kind used when the RULES result was produced. */
+  observationKinds: Readonly<Record<string, string>>;
   constraints: SiteIntelligenceCodedFinding[];
   opportunities: SiteIntelligenceCodedFinding[];
   inventedFacts: never[];
 };
 
-export function siteIntelligenceFindingCodes(): ReadonlySet<string> {
+export function siteIntelligenceConstraintCodes(): ReadonlySet<string> {
   const codes = new Set<string>();
   for (const finding of Object.values(KIND_TO_FINDING)) {
     if (finding.constraint) codes.add(finding.constraint);
+  }
+  return codes;
+}
+
+export function siteIntelligenceOpportunityCodes(): ReadonlySet<string> {
+  const codes = new Set<string>();
+  for (const finding of Object.values(KIND_TO_FINDING)) {
     if (finding.opportunity) codes.add(finding.opportunity);
   }
   return codes;
+}
+
+export function siteIntelligenceFindingCodes(): ReadonlySet<string> {
+  return new Set([...siteIntelligenceConstraintCodes(), ...siteIntelligenceOpportunityCodes()]);
 }
 
 /** Reverse map: finding code → the normalized observation kind that may emit it. */
@@ -118,12 +131,17 @@ export function applySiteIntelligenceRules(
   const constraintsByCode = new Map<string, { observationIds: string[]; kind: string }>();
   const opportunitiesByCode = new Map<string, { observationIds: string[]; kind: string }>();
   const observationIds: string[] = [];
+  const observationKinds: Record<string, string> = {};
+  const seenIds = new Set<string>();
   for (const item of observations) {
     if (!item || item.normalized !== true || item.source !== 'normalized') {
       throw new Error('SITEINTEL_OBSERVATION_NOT_NORMALIZED');
     }
     if (typeof item.observationId !== 'string' || item.observationId.length < 8) {
       throw new Error('SITEINTEL_OBSERVATION_ID_INVALID');
+    }
+    if (seenIds.has(item.observationId)) {
+      throw new Error('SITEINTEL_OBSERVATION_ID_DUPLICATE');
     }
     if (typeof item.kind !== 'string' || item.kind.trim().length === 0) {
       throw new Error('SITEINTEL_OBSERVATION_KIND_INVALID');
@@ -133,15 +151,17 @@ export function applySiteIntelligenceRules(
       throw new Error('SITEINTEL_OBSERVATION_KIND_UNKNOWN');
     }
     const finding = KIND_TO_FINDING[kind];
+    seenIds.add(item.observationId);
     observationIds.push(item.observationId);
+    observationKinds[item.observationId] = kind;
     if (finding?.constraint) {
-      const entry = constraintsByCode.get(finding.constraint) ?? { observationIds: [], kind };
+      const entry = constraintsByCode.get(finding.constraint) ?? { observationIds: [] as string[], kind };
       if (entry.kind !== kind) throw new Error('SITEINTEL_FINDING_KIND_CONFLICT');
       entry.observationIds.push(item.observationId);
       constraintsByCode.set(finding.constraint, entry);
     }
     if (finding?.opportunity) {
-      const entry = opportunitiesByCode.get(finding.opportunity) ?? { observationIds: [], kind };
+      const entry = opportunitiesByCode.get(finding.opportunity) ?? { observationIds: [] as string[], kind };
       if (entry.kind !== kind) throw new Error('SITEINTEL_FINDING_KIND_CONFLICT');
       entry.observationIds.push(item.observationId);
       opportunitiesByCode.set(finding.opportunity, entry);
@@ -150,6 +170,7 @@ export function applySiteIntelligenceRules(
   return {
     stage: 'RULES',
     observationIds,
+    observationKinds,
     constraints: [...constraintsByCode.entries()].map(([code, entry]) => ({
       code,
       observationIds: entry.observationIds,

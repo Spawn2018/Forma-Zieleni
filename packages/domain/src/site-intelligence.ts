@@ -2,8 +2,10 @@ import { assertOpaqueProjectId, type Project } from './project.ts';
 import {
   assertAiCannotInventSiteFacts,
   assertNoSiteIntelTwinDatabase,
-  siteIntelligenceFindingCodes,
+  siteIntelligenceConstraintCodes,
   siteIntelligenceKindForCode,
+  siteIntelligenceOpportunityCodes,
+  type SiteIntelligenceCodedFinding,
   type SiteIntelligenceRulesResult,
 } from './product-boundaries.ts';
 
@@ -139,16 +141,30 @@ export function recordSiteIntelligenceFromRules(
   if (rules.constraints.length + rules.opportunities.length === 0) {
     throw new Error('SITEINTEL_FINDINGS_REQUIRED');
   }
-  const allowedCodes = siteIntelligenceFindingCodes();
-  for (const finding of [...rules.constraints, ...rules.opportunities]) {
-    if (!finding || typeof finding.code !== 'string' || !allowedCodes.has(finding.code)) {
+  if (!rules.observationKinds || typeof rules.observationKinds !== 'object') {
+    throw new Error('SITEINTEL_OBSERVATION_KINDS_REQUIRED');
+  }
+  for (const observationId of rules.observationIds) {
+    const kind = rules.observationKinds[observationId];
+    if (typeof kind !== 'string' || kind.trim().length === 0) {
+      throw new Error('SITEINTEL_OBSERVATION_KIND_MISSING');
+    }
+  }
+  const constraintCodes = siteIntelligenceConstraintCodes();
+  const opportunityCodes = siteIntelligenceOpportunityCodes();
+  const assertFinding = (
+    finding: SiteIntelligenceCodedFinding | undefined,
+    allowed: ReadonlySet<string>,
+  ): void => {
+    if (!finding || typeof finding.code !== 'string' || !allowed.has(finding.code)) {
       throw new Error('SITEINTEL_CODE_NOT_FROM_OBSERVATIONS');
     }
     if (typeof finding.kind !== 'string' || finding.kind.trim().length === 0) {
       throw new Error('SITEINTEL_FINDING_KIND_REQUIRED');
     }
     const expectedKind = siteIntelligenceKindForCode(finding.code);
-    if (!expectedKind || expectedKind !== finding.kind.trim().toLowerCase()) {
+    const findingKind = finding.kind.trim().toLowerCase();
+    if (!expectedKind || expectedKind !== findingKind) {
       throw new Error('SITEINTEL_FINDING_KIND_MISMATCH');
     }
     if (!Array.isArray(finding.observationIds) || finding.observationIds.length === 0) {
@@ -161,8 +177,14 @@ export function recordSiteIntelligenceFromRules(
       if (!rules.observationIds.includes(observationId)) {
         throw new Error('SITEINTEL_FINDING_OBSERVATION_UNBOUND');
       }
+      const observationKind = rules.observationKinds[observationId];
+      if (observationKind !== findingKind) {
+        throw new Error('SITEINTEL_FINDING_OBSERVATION_KIND_MISMATCH');
+      }
     }
-  }
+  };
+  for (const finding of rules.constraints) assertFinding(finding, constraintCodes);
+  for (const finding of rules.opportunities) assertFinding(finding, opportunityCodes);
   if (ids.constraintIds.length !== rules.constraints.length) {
     throw new Error('SITEINTEL_CONSTRAINT_ID_MISMATCH');
   }
