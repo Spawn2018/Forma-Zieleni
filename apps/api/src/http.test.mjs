@@ -875,6 +875,7 @@ test('staff can store and download local private file bytes; portal cannot', asy
       limiter: new WindowLimiter(100, 60_000),
       addressOf: () => '198.51.100.10',
       fileBytesRoot: root,
+      trustedOrigins: ['https://admin.example.test'],
       now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
     });
     const lead = await (await app.request('/v1/leads', json(capture))).json();
@@ -933,10 +934,19 @@ test('staff can store and download local private file bytes; portal cannot', asy
 
     assert.equal((await app.request(`/v1/files/${meta.id}/content`, { headers: bearer(portal) })).status, 403);
 
-    const get = await app.request(`/v1/files/${meta.id}/content`, { headers: bearer(staff) });
+    const get = await app.request(`/v1/files/${meta.id}/content`, {
+      headers: {
+        ...bearer(staff),
+        'x-request-id': 'req-file-bytes-get-01',
+        origin: 'https://admin.example.test',
+      },
+    });
     assert.equal(get.status, 200);
     assert.equal(get.headers.get('content-type'), 'application/octet-stream');
     assert.equal(get.headers.get('x-content-checksum-sha256'), receipt.checksum);
+    assert.equal(get.headers.get('x-request-id'), 'req-file-bytes-get-01');
+    assert.equal(get.headers.get('access-control-allow-origin'), 'https://admin.example.test');
+    assert.match(get.headers.get('content-disposition') || '', /^attachment;/);
     assert.equal(Buffer.from(await get.arrayBuffer()).equals(bytes), true);
 
     const mismatch = await app.request(`/v1/files/${meta.id}/content`, {

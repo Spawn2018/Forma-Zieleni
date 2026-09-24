@@ -2353,6 +2353,31 @@
       "lastSeen": "2026-09-24T20:43:16.638Z",
       "rejectionReason": "Duplicate of index-immutability finding; adopted via wx index publish in amended HEAD.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-1512-mark-the-x-79673dd6c9",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 1512, Mark the X-Content-Checksum-Sha256 response header as required in the download response definition so succ",
+      "evidence": [
+        "cr-occurrence:387ed21a0224:1a4726e643b9:cr-at-line-1512-mark-the-x-79673dd6c9",
+        "contracts/openapi.json",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": false,
+      "relatedCommit": "1a4726e643b9ec3d83fc588b5fd51d0f1da9b232",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-e6b015c5",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T21:13:10.655Z",
+      "lastSeen": "2026-09-24T21:13:10.655Z"
     }
   ]
 }

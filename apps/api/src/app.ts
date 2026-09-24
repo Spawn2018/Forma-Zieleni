@@ -583,17 +583,14 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
       throw error;
     }
     if (!stored) throw new ApiFailure(404, 'FILE_BYTES_NOT_FOUND', 'Project file bytes were not found.');
-    return new Response(new Uint8Array(stored.bytes), {
-      status: 200,
-      headers: {
-        'content-type': file.mimeType,
-        'content-length': String(stored.sizeBytes),
-        'content-disposition': `attachment; filename="${file.name.replace(/["\\]/g, '_')}"`,
-        'x-content-type-options': 'nosniff',
-        'x-content-checksum-sha256': stored.checksum,
-        'cache-control': 'private, no-store',
-      },
-    });
+    c.header('Content-Type', file.mimeType);
+    c.header('Content-Length', String(stored.sizeBytes));
+    c.header('Content-Disposition', `attachment; filename="${file.name.replace(/["\\]/g, '_')}"`);
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('X-Content-Checksum-Sha256', stored.checksum);
+    c.header('Cache-Control', 'private, no-store');
+    // c.body keeps middleware X-Request-Id and trusted-origin CORS headers.
+    return c.body(new Uint8Array(stored.bytes), 200);
   });
 
   app.post('/v1/growth/plans', async c => {

@@ -1510,6 +1510,7 @@
             "description": "File bytes",
             "headers": {
               "X-Content-Checksum-Sha256": {
+                "required": true,
                 "schema": {
                   "type": "string",
                   "pattern": "^[a-f0-9]{64}$"
