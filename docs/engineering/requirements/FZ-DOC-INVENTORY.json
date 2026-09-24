@@ -326,6 +326,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/OWNER-AUTHORIZATION-FZ-CONTINUE-1.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md",
       "docType": "DOCUMENT",
       "audience": "developer",
