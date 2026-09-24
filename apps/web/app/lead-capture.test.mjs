@@ -26,7 +26,7 @@ test('lead capture copy stays concrete and refuses marketing slop', () => {
   for (const phrase of prohibited) {
     assert.equal(copy.includes(phrase), false, phrase);
   }
-  assert.match(leadCaptureCopy().intro, /Core API/);
+  assert.match(leadCaptureCopy().intro, /Forma Zieleni/);
   assert.match(leadCaptureCopy().submitLabel, /Wyślij zapytanie/);
 });
 
@@ -98,6 +98,21 @@ test('postLeadCapture posts to Core API leads path without staff tokens', async 
     locality: 'Kraków',
     siteAnalysisRequested: false,
   });
+});
+
+test('postLeadCapture refuses success without an opaque lead id', async () => {
+  const result = await postLeadCapture({
+    origin: 'http://127.0.0.1:8787',
+    idempotencyKey: 'idem-bad-id',
+    fields: { ...emptyLeadForm(), name: 'Anna', phone: '+48600111222' },
+    fetchImpl: async () => new Response(JSON.stringify({ id: 'lead1' }), {
+      status: 201,
+      headers: { 'content-type': 'application/json' },
+    }),
+  });
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.equal(result.reason, 'unavailable');
 });
 
 test('postLeadCapture reports unconfigured and unavailable without inventing success', async () => {

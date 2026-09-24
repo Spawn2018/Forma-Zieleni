@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Form, useActionData } from 'react-router';
+import { Form, useActionData, useNavigation } from 'react-router';
 import type { Route } from './+types/contact';
 import {
   emptyLeadForm,
@@ -11,6 +11,10 @@ import {
 } from '../lead-capture.ts';
 import { publicHead, seoEnv } from '../technical-seo.ts';
 import '../lead-capture.css';
+
+const IDEMPOTENCY_KEY = /^[\x21-\x7e]{8,128}$/;
+
+export type ContactPageView = LeadCaptureView & { idempotencyKey: string };
 
 export function meta() {
   const copy = leadCaptureCopy();
@@ -24,69 +28,90 @@ export function meta() {
   });
 }
 
-export async function loader(): Promise<LeadCaptureView> {
-  return leadCaptureView({
-    originConfigured: Boolean(process.env.FZ_API_ORIGIN),
-  });
+export async function loader(): Promise<ContactPageView> {
+  return {
+    ...leadCaptureView({
+      originConfigured: Boolean(process.env.FZ_API_ORIGIN),
+    }),
+    idempotencyKey: randomUUID(),
+  };
 }
 
-export async function action({ request }: Route.ActionArgs): Promise<LeadCaptureView> {
+export async function action({ request }: Route.ActionArgs): Promise<ContactPageView> {
   const origin = process.env.FZ_API_ORIGIN;
   const form = await request.formData();
   const fields = parseLeadForm(form);
+  const submittedKey = form.get('idempotencyKey');
+  const idempotencyKey = typeof submittedKey === 'string' && IDEMPOTENCY_KEY.test(submittedKey)
+    ? submittedKey
+    : randomUUID();
   const result = await postLeadCapture({
     origin,
     fields,
-    idempotencyKey: randomUUID(),
+    idempotencyKey,
   });
-  return leadCaptureView({
-    originConfigured: Boolean(origin),
-    fields: result.ok ? emptyLeadForm() : fields,
-    result,
-  });
+  return {
+    ...leadCaptureView({
+      originConfigured: Boolean(origin),
+      fields: result.ok ? emptyLeadForm() : fields,
+      result,
+    }),
+    // Fresh key after accept; keep the same key on validation/API errors for safe retry.
+    idempotencyKey: result.ok ? randomUUID() : idempotencyKey,
+  };
 }
 
 export default function ContactRoute({ loaderData }: Route.ComponentProps) {
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   const view = actionData ?? loaderData;
-  return leadCaptureShell(view);
+  return leadCaptureShell(view, { submitting: navigation.state === 'submitting' });
 }
 
-export function leadCaptureShell(view: LeadCaptureView) {
+export function leadCaptureShell(view: ContactPageView, options: { submitting?: boolean } = {}) {
   const copy = leadCaptureCopy();
-  const disabled = view.state === 'unconfigured';
+  const submitting = options.submitting === true;
+  const disabled = view.state === 'unconfigured' || submitting;
+  const noticeRole = view.state === 'accepted' ? 'status' : 'alert';
   return (
-    <main className="site lead-capture">
+    <main className="site lead-capture" aria-busy={submitting ? 'true' : undefined}>
       <h1>{copy.title}</h1>
       <p>{copy.intro}</p>
-      {view.notice ? <p className={view.state === 'accepted' ? 'lead-capture__notice' : 'lead-capture__error'} role="status">{view.notice}</p> : null}
+      {view.notice ? (
+        <p className={view.state === 'accepted' ? 'lead-capture__notice' : 'lead-capture__error'} role={noticeRole}>
+          {view.notice}
+        </p>
+      ) : null}
       {view.state === 'accepted' ? null : (
         <Form method="post" className="lead-capture__form" replace>
-          <label>
-            <span>{copy.nameLabel}</span>
-            <input name="name" type="text" autoComplete="name" required maxLength={120} defaultValue={view.fields.name} disabled={disabled} aria-invalid={Boolean(view.errors.name)} />
-            {view.errors.name ? <span className="lead-capture__field-error">{view.errors.name}</span> : null}
-          </label>
-          <label>
-            <span>{copy.phoneLabel}</span>
-            <input name="phone" type="tel" autoComplete="tel" required maxLength={32} defaultValue={view.fields.phone} disabled={disabled} aria-invalid={Boolean(view.errors.phone)} />
-            {view.errors.phone ? <span className="lead-capture__field-error">{view.errors.phone}</span> : null}
-          </label>
-          <label>
-            <span>{copy.emailLabel}</span>
-            <input name="email" type="email" autoComplete="email" maxLength={254} defaultValue={view.fields.email} disabled={disabled} aria-invalid={Boolean(view.errors.email)} />
-            {view.errors.email ? <span className="lead-capture__field-error">{view.errors.email}</span> : null}
-          </label>
-          <label>
-            <span>{copy.localityLabel}</span>
-            <input name="locality" type="text" autoComplete="address-level2" maxLength={200} defaultValue={view.fields.locality} disabled={disabled} aria-invalid={Boolean(view.errors.locality)} />
-            {view.errors.locality ? <span className="lead-capture__field-error">{view.errors.locality}</span> : null}
-          </label>
+          <input type="hidden" name="idempotencyKey" value={view.idempotencyKey} />
+          <div className="lead-capture__field">
+            <label htmlFor="lead-name">{copy.nameLabel}</label>
+            <input id="lead-name" name="name" type="text" autoComplete="name" required maxLength={120} defaultValue={view.fields.name} disabled={disabled} aria-invalid={Boolean(view.errors.name)} aria-describedby={view.errors.name ? 'lead-name-error' : undefined} />
+            {view.errors.name ? <span id="lead-name-error" className="lead-capture__field-error">{view.errors.name}</span> : null}
+          </div>
+          <div className="lead-capture__field">
+            <label htmlFor="lead-phone">{copy.phoneLabel}</label>
+            <input id="lead-phone" name="phone" type="tel" autoComplete="tel" required maxLength={32} defaultValue={view.fields.phone} disabled={disabled} aria-invalid={Boolean(view.errors.phone)} aria-describedby={view.errors.phone ? 'lead-phone-error' : undefined} />
+            {view.errors.phone ? <span id="lead-phone-error" className="lead-capture__field-error">{view.errors.phone}</span> : null}
+          </div>
+          <div className="lead-capture__field">
+            <label htmlFor="lead-email">{copy.emailLabel}</label>
+            <input id="lead-email" name="email" type="email" autoComplete="email" maxLength={254} defaultValue={view.fields.email} disabled={disabled} aria-invalid={Boolean(view.errors.email)} aria-describedby={view.errors.email ? 'lead-email-error' : undefined} />
+            {view.errors.email ? <span id="lead-email-error" className="lead-capture__field-error">{view.errors.email}</span> : null}
+          </div>
+          <div className="lead-capture__field">
+            <label htmlFor="lead-locality">{copy.localityLabel}</label>
+            <input id="lead-locality" name="locality" type="text" autoComplete="address-level2" maxLength={200} defaultValue={view.fields.locality} disabled={disabled} aria-invalid={Boolean(view.errors.locality)} aria-describedby={view.errors.locality ? 'lead-locality-error' : undefined} />
+            {view.errors.locality ? <span id="lead-locality-error" className="lead-capture__field-error">{view.errors.locality}</span> : null}
+          </div>
           <label className="lead-capture__check">
             <input name="siteAnalysisRequested" type="checkbox" value="true" defaultChecked={view.fields.siteAnalysisRequested} disabled={disabled} />
             <span>{copy.siteAnalysisLabel}</span>
           </label>
-          <button type="submit" disabled={disabled}>{copy.submitLabel}</button>
+          <button type="submit" disabled={disabled} aria-busy={submitting ? 'true' : undefined}>
+            {submitting ? copy.submittingLabel : copy.submitLabel}
+          </button>
         </Form>
       )}
     </main>

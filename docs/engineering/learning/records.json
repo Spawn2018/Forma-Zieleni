@@ -2407,6 +2407,58 @@
       "lastSeen": "2026-09-24T21:31:17.814Z",
       "rejectionReason": "Test targets metadata size mismatch (file.sizeBytes 24 vs 14-byte body) which returns 400 FILE_BYTES_SIZE_MISMATCH. Content-Length correctly mirrors the body; a fresh metadata row is not required for this path.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-40-update-the-co-291ff9662d",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 40, Update the contact form submission flow around randomUUID() to reuse one idempotency key across retries afte",
+      "evidence": [
+        "cr-occurrence:73ee0c1cd270:4a95398d870d:cr-at-line-40-update-the-co-291ff9662d",
+        "apps/web/app/routes/contact.tsx",
+        "severity:high",
+        "accepted:cr-at-line-40-update-the-co-291ff9662d"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "4a95398d870d3a79a40352692b70d87de2572cc1",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-afba46a4",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T21:57:29.016Z",
+      "lastSeen": "2026-09-24T22:09:10.195Z"
+    },
+    {
+      "patternKey": "cr-at-line-143-validate-the-d0fcf37515",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 143, Validate the response body’s lead ID before returning success from the lead-capture API handler; if the bod",
+      "evidence": [
+        "cr-occurrence:73ee0c1cd270:4a95398d870d:cr-at-line-143-validate-the-d0fcf37515",
+        "apps/web/app/lead-capture.ts",
+        "severity:high",
+        "accepted:cr-at-line-143-validate-the-d0fcf37515"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "4a95398d870d3a79a40352692b70d87de2572cc1",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-239ee932",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T21:57:29.089Z",
+      "lastSeen": "2026-09-24T22:09:10.507Z"
     }
   ]
 }

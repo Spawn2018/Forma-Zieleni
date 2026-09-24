@@ -41,13 +41,14 @@ export function emptyLeadForm(): LeadFormFields {
 export function leadCaptureCopy() {
   return {
     title: 'Kontakt',
-    intro: 'Wyślij zapytanie o projekt ogrodu. Formularz trafia do Core API Forma Zieleni — bez drugiej bazy leadów.',
+    intro: 'Wyślij zapytanie o projekt ogrodu. Trafia bezpośrednio do studia Forma Zieleni — bez drugiej bazy leadów.',
     nameLabel: 'Imię i nazwisko',
     phoneLabel: 'Telefon',
     emailLabel: 'E-mail (opcjonalnie)',
     localityLabel: 'Miejscowość działki (opcjonalnie)',
     siteAnalysisLabel: 'Proszę o wstępną analizę działki',
     submitLabel: 'Wyślij zapytanie',
+    submittingLabel: 'Wysyłanie zapytania…',
     acceptedNotice: 'Zapytanie zostało przyjęte. Studio odpowie w kolejności zgłoszeń.',
     unconfiguredNotice: 'Formularz kontaktu nie jest podłączony do API.',
     unavailableNotice: 'Nie udało się wysłać zapytania. Spróbuj ponownie później.',
@@ -136,9 +137,12 @@ export async function postLeadCapture(input: {
     let leadId = '';
     try {
       const body = (await response.json()) as { id?: unknown };
-      if (typeof body.id === 'string') leadId = body.id;
+      if (typeof body.id === 'string') leadId = body.id.trim();
     } catch {
       leadId = '';
+    }
+    if (!/^[a-z][a-z0-9]{15,63}$/.test(leadId) || /^(?:lead|id)\d+$/i.test(leadId)) {
+      return { ok: false, reason: 'unavailable', errors: {}, message: leadCaptureCopy().unavailableNotice };
     }
     return { ok: true, leadId };
   }
