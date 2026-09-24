@@ -1,0 +1,10 @@
+{
+  "name": "@forma-zieleni/mobile-ios",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "node --check foundation.mjs foundation.test.mjs",
+    "test": "node --test foundation.test.mjs",
+    "typecheck": "node --check foundation.mjs"
+  }
+}

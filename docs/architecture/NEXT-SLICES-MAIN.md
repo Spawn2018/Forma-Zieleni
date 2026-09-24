@@ -429,11 +429,14 @@ Next: none.
 
 Dependencies: MOBILE-CLIENT-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN. App Store credentials stay out.
+Status: COMPLETE for an iOS-surface client foundation in
+`apps/mobile-ios` that probes Core API `/v1/health` and `/v1/ready`
+through typed api-client paths. No on-device commercial state, no App
+Store credentials, no store upload.
 Autonomous: yes.
 Accept: an iOS client foundation that calls Core API and does not own
 commercial state.
-Tests: the foundation's contract tests. No store upload.
+Tests: `apps/mobile-ios/foundation.test.mjs`. No store upload.
 Security: no production credentials in the tree.
 Next: none.
 

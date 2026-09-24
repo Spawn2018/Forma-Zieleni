@@ -79,6 +79,8 @@ importers:
 
   apps/mobile-android: {}
 
+  apps/mobile-ios: {}
+
   apps/portal:
     dependencies:
       '@react-router/node':

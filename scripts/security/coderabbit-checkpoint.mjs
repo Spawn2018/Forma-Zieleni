@@ -17,6 +17,7 @@ import {
 import {
   applyCleanReReviewPure,
   assertReviewDebtClear,
+  allRejected,
   deriveReviewState,
   loadReviewState,
   noteRepair,
@@ -352,14 +353,31 @@ export function runCheckpointReview(options = {}) {
       diffFingerprint: fingerprint,
     }), options.stateFile);
   } else if (parsed.findings.length === 0 && priorOpenDebt) {
-    // A later clean review must not erase undispositioned / unrepaired debt.
-    reviewState = saveReviewState({
-      ...prior,
-      headSha,
-      paths: changed.paths,
-      diffFingerprint: fingerprint,
-      state: priorDerived,
-    }, options.stateFile);
+    // Transport FAILED/DEFERRED must not stick when findings are already
+    // all REJECT_WITH_REASON and a later clean review reports zero findings.
+    if (
+      (priorDerived === 'CODERABBIT_FAILED'
+        || priorDerived === 'CODERABBIT_DEFERRED_RATE_LIMIT'
+        || priorDerived === 'CODERABBIT_DEFERRED_UNAVAILABLE')
+      && allRejected(prior)
+    ) {
+      reviewState = saveReviewState({
+        ...prior,
+        headSha,
+        paths: changed.paths,
+        diffFingerprint: fingerprint,
+        state: 'CODERABBIT_FINDINGS_REJECTED_WITH_REASON',
+      }, options.stateFile);
+    } else {
+      // A later clean review must not erase undispositioned / unrepaired debt.
+      reviewState = saveReviewState({
+        ...prior,
+        headSha,
+        paths: changed.paths,
+        diffFingerprint: fingerprint,
+        state: priorDerived,
+      }, options.stateFile);
+    }
   } else {
     reviewState = recordReviewResult({
       baseSha,

@@ -120,7 +120,7 @@ function anyAccepted(state) {
   return Object.values(state.dispositions || {}).some((item) => item.kind === 'ACCEPT');
 }
 
-function allRejected(state) {
+export function allRejected(state) {
   const findings = state.findings || [];
   if (findings.length === 0) return false;
   return findings.every((finding) => state.dispositions?.[finding.fingerprint]?.kind === 'REJECT_WITH_REASON');

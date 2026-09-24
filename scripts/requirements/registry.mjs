@@ -419,10 +419,9 @@ row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundati
   executableSlice: 'MOBILE-ANDROID-FOUNDATION',
   executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
 });
-row('FZ-REQ-MOBILE-003', 'iOS is a Core API client with its own app foundation, not a second business backend.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/MOBILE-CLIENT-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'iOS foundation slice', 'REVIEW', 'The mobile boundary is not an iOS runtime.', {
+row('FZ-REQ-MOBILE-003', 'iOS is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-ios/foundation.mjs', 'apps/mobile-ios/foundation.test.mjs', '', 'NONE', 'iOS foundation probes Core API only; no commercial state or App Store credentials in tree.', {
   productCapability: 'MOBILE',
   depth: 'IOS_RUNTIME',
-  blockerClass: 'INTERNAL',
   executableSlice: 'MOBILE-IOS-FOUNDATION',
   executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
 });
