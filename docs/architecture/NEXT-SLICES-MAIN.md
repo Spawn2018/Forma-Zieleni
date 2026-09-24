@@ -744,14 +744,17 @@ Next: none.
 
 Dependencies: none. WWW shell and public `POST /leads` already exist.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for a public lead-capture form on `apps/web` at
+`/kontakt` that posts to Core API `POST /v1/leads`. Synthetic copy only.
+No second lead store and no CRM write from WWW loaders.
 Autonomous: yes.
 Accept: a real public lead-capture form on `apps/web` that posts to
 Core API `POST /leads`. Synthetic copy only. No invented business
 facts, no second lead store, no CRM write from WWW loaders.
-Tests: web route/form test plus API contract already covering capture.
+Tests: `apps/web/app/lead-capture.test.mjs`; API contract already
+covering capture in `apps/api/src/http.test.mjs`.
 Security: anonymous capture only; no staff tokens in the browser; rate
-limits remain on the API.
+limits remain on the API; `source` fixed to `www`.
 Next: CAPACITY-DOMAIN.
 
 ### CAPACITY-DOMAIN

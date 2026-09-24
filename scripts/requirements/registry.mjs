@@ -457,13 +457,11 @@ row('FZ-REQ-ADMIN-008', 'Staff can upload and download project file bytes in app
   executableWhenComplete: ['FILE-BYTES-LOCAL'],
   safePreblockerWork: true,
 });
-row('FZ-REQ-WWW-003', 'Public WWW lead capture posts to Core API POST /leads. No second lead store and no invented business facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/web', 'apps/web/app', 'WWW-LEAD-CAPTURE not executed', 'REVIEW', 'FZ-CONTINUE-1 sales-application depth.', {
-  blockerClass: 'INTERNAL',
+row('FZ-REQ-WWW-003', 'Public WWW lead capture posts to Core API POST /leads. No second lead store and no invented business facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/lead-capture.ts', 'apps/web/app/lead-capture.test.mjs', '', 'NONE', 'Evidence: /kontakt posts anonymous capture with source www. No staff tokens in the browser.', {
   productCapability: 'WWW',
   depth: 'LEAD_CAPTURE',
   executableSlice: 'WWW-LEAD-CAPTURE',
   executableWhenComplete: [],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'CAPACITY-DOMAIN not executed', 'REVIEW', 'Product Canon capacity constraint.', {
   blockerClass: 'INTERNAL',

@@ -1,0 +1,67 @@
+.lead-capture p {
+  margin: 0 0 1.5rem;
+}
+
+.lead-capture__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.lead-capture__form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lead-capture__form input[type='text'],
+.lead-capture__form input[type='tel'],
+.lead-capture__form input[type='email'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--kreska);
+  border-radius: 0;
+  background: #fff;
+  color: var(--igliwie);
+  font: inherit;
+}
+
+.lead-capture__check {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.6rem;
+}
+
+.lead-capture__form button {
+  justify-self: start;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  background: var(--igliwie);
+  color: var(--kamien);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lead-capture__form button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lead-capture__notice,
+.lead-capture__error,
+.lead-capture__field-error {
+  margin: 0;
+}
+
+.lead-capture__notice {
+  color: var(--mech);
+}
+
+.lead-capture__error,
+.lead-capture__field-error {
+  color: #7a2e2e;
+}
+
+.lead-capture__field-error {
+  font-size: 0.95rem;
+}
