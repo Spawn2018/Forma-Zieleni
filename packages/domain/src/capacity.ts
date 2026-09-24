@@ -61,9 +61,10 @@ function assertInstant(value: string, code: string): string {
   if (typeof value !== 'string' || !INSTANT.test(value)) throw new Error(code);
   const ms = Date.parse(value);
   if (!Number.isFinite(ms)) throw new Error(code);
-  const match = value.match(/^(.*)(\.\d{1,3})?Z$/);
-  const fraction = match?.[2] ? match[2].slice(1).padEnd(3, '0') : '000';
-  const normalized = `${match?.[1] ?? value.replace(/Z$/, '')}.${fraction}Z`;
+  const match = value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,3}))?Z$/);
+  if (!match) throw new Error(code);
+  const fraction = (match[2] ?? '').padEnd(3, '0') || '000';
+  const normalized = `${match[1]}.${fraction}Z`;
   if (new Date(ms).toISOString() !== normalized) throw new Error(code);
   return value;
 }
