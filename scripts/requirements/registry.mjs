@@ -435,6 +435,12 @@ row('FZ-REQ-ADMIN-005', 'Staff can list and create projects in apps/admin throug
   executableSlice: 'ADMIN-CRM-PROJECT',
   executableWhenComplete: ['ADMIN-CRM-CONTRACT', 'CRM-PROJECT-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-007', 'Staff can list and create project file metadata in apps/admin through the existing Core API. Metadata only on create. No binary upload UI and no storage keys on the list projection.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates file metadata via Core API GET/POST /v1/files. Binary bytes and storage providers stay outside this slice.', {
+  productCapability: 'ADMIN',
+  depth: 'FILE_WORKFLOW',
+  executableSlice: 'ADMIN-CRM-FILE',
+  executableWhenComplete: ['ADMIN-CRM-PROJECT'],
+});
 row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',
   depth: 'ANDROID_RUNTIME',

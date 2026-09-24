@@ -178,7 +178,7 @@ function engineeringProfile(activation) {
 const SUBJECTS = Object.freeze([
   ['WWW', () => surfaceProfile('WWW-PORTFOLIO-PROJECTION')],
   ['PORTAL', () => surfaceProfile('PORTAL-FILE-PROJECTION')],
-  ['ADMIN', () => surfaceProfile('ADMIN-CRM-PROJECT')],
+  ['ADMIN', () => surfaceProfile('ADMIN-CRM-FILE')],
   ['LEAD', () => domainProfile('ADMIN-CRM-LEAD')],
   ['OPPORTUNITY', () => domainProfile('ADMIN-CRM-OPPORTUNITY')],
   ['OFFER', () => domainProfile('ADMIN-CRM-OFFER')],
@@ -199,7 +199,7 @@ const SUBJECTS = Object.freeze([
   ['CMS', () => domainProfile('CMS public projection')],
   ['SEARCH', () => domainProfile('search intelligence stays non-authoritative over Canon')],
   ['MEDIA', () => domainProfile('media pipeline tests')],
-  ['FILES', () => domainProfile('PORTAL-FILE-PROJECTION')],
+  ['FILES', () => domainProfile('ADMIN-CRM-FILE and PORTAL-FILE-PROJECTION')],
   ['HOSTING', () => classes({
     ...providerProfile('FZ-REQ-HOST-001'),
     UNIT: owner('hosting selection'),
@@ -247,6 +247,7 @@ export const CRITICAL_JOURNEYS = Object.freeze([
   journey('offer-portal', 'PORTAL', 'FZ-REQ-PORTAL-002', 'portal-offer', 'PORTAL-OFFER acceptance'),
   journey('offer-contract', 'CONTRACT', 'FZ-REQ-CRM-CONTRACT-001', 'contract-open', 'ADMIN-CRM-CONTRACT'),
   journey('contract-project', 'PROJECT', 'FZ-REQ-ADMIN-005', 'project-create', 'ADMIN-CRM-PROJECT'),
+  journey('project-file', 'FILES', 'FZ-REQ-ADMIN-007', 'file-metadata', 'ADMIN-CRM-FILE'),
   journey('contract-sign', 'SIGNING', 'FZ-REQ-SIGN-001', 'sign-state', 'FZ-SIGN-1'),
   journey('contract-pay', 'PAYMENT', 'FZ-REQ-PAY-001', 'pay-state', 'PAY-DOMAIN-NEUTRAL'),
   journey('project-portal', 'PROJECT', 'FZ-REQ-PROJECT-001', 'project-open', 'PORTAL-PROJECT-PROJECTION'),

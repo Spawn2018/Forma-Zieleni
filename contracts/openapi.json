@@ -1279,6 +1279,53 @@
       }
     },
     "/files": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "listProjectFiles",
+        "summary": "Cursor page of project file metadata visible to staff",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectFileProjectFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of project files visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectFilePage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
       "post": {
         "tags": [
           "Files"
@@ -1524,6 +1571,13 @@
         "in": "query",
         "schema": {
           "$ref": "#/components/schemas/ProjectStatus"
+        }
+      },
+      "ProjectFileProjectFilter": {
+        "name": "projectId",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueId"
         }
       }
     },
@@ -2487,6 +2541,41 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ProjectFilePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectFile"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
           }
         }
       },

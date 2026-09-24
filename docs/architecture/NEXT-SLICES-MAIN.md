@@ -487,6 +487,27 @@ Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed project
 fetch/create with synthetic fetch).
 Security: staff session only; portal tokens cannot create or list staff
 projects (Core API).
+Next: ADMIN-CRM-FILE.
+
+### ADMIN-CRM-FILE
+
+Dependencies: ADMIN-CRM-PROJECT.
+Gate: REVIEW.
+Status: COMPLETE for staff list and create of project file metadata in
+apps/admin through Core API `GET /v1/files` and `POST /v1/files`.
+Empty, error, and forbidden states are real. Metadata-only create
+(`projectId`, `name`, `mimeType`, `sizeBytes`). No binary upload UI,
+no storage keys on the staff list projection, no second file store,
+and no invented file rows.
+Autonomous: yes.
+Accept: staff list and create file metadata in apps/admin through Core
+API. Empty, error, and unauthorized states are real. No binary upload,
+no storage provider ceremony, and no invented customers.
+Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed file
+fetch/create with synthetic fetch); `apps/api/src/http.test.mjs` (staff
+list, portal forbidden on staff route, empty page).
+Security: staff session only; portal tokens cannot list staff files
+(Core API).
 Next: none.
 
 ### MOBILE-ANDROID-FOUNDATION

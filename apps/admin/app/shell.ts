@@ -66,6 +66,20 @@ export type AdminProjectList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminFileRow = {
+  id: string;
+  projectId: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+};
+
+export type AdminFileList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminFileRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -76,6 +90,7 @@ export type AdminHome =
       offers: AdminOfferList;
       contracts: AdminContractList;
       projects: AdminProjectList;
+      files: AdminFileList;
     };
 
 /**
@@ -463,6 +478,101 @@ export async function createAdminProject(input: {
   }
 }
 
+type FileApiItem = {
+  id?: unknown;
+  projectId?: unknown;
+  name?: unknown;
+  mimeType?: unknown;
+  sizeBytes?: unknown;
+  storageKey?: unknown;
+  url?: unknown;
+  bytes?: unknown;
+  price?: unknown;
+};
+
+export function mapFilePage(body: unknown): AdminFileList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminFileRow[] = [];
+  for (const item of items) {
+    const file = item as FileApiItem;
+    if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
+    if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };
+    if (typeof file.sizeBytes !== 'number' || !Number.isInteger(file.sizeBytes) || file.sizeBytes < 0) return { status: 'error' };
+    if (Object.hasOwn(file, 'storageKey') || Object.hasOwn(file, 'url') || Object.hasOwn(file, 'bytes') || Object.hasOwn(file, 'price')) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: file.id,
+      projectId: file.projectId,
+      name: file.name,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminFiles(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminFileList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/files?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapFilePage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminFile(input: {
+  base: string;
+  projectId: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/files', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({
+        projectId: input.projectId,
+        name: input.name,
+        mimeType: input.mimeType,
+        sizeBytes: input.sizeBytes,
+      }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
  * Resolve admin home from optional Core API session probe + CRM lists.
  * Unconfigured probe → signed-out (truthful). Never invents CRM rows.
@@ -474,6 +584,7 @@ export async function resolveAdminHome(input: {
   loadOffers?: () => Promise<AdminOfferList>;
   loadContracts?: () => Promise<AdminContractList>;
   loadProjects?: () => Promise<AdminProjectList>;
+  loadFiles?: () => Promise<AdminFileList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
@@ -484,7 +595,8 @@ export async function resolveAdminHome(input: {
     const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
     const contracts = input.loadContracts ? await input.loadContracts() : { status: 'empty' as const };
     const projects = input.loadProjects ? await input.loadProjects() : { status: 'empty' as const };
-    return { state: 'signed-in', leads, opportunities, offers, contracts, projects };
+    const files = input.loadFiles ? await input.loadFiles() : { status: 'empty' as const };
+    return { state: 'signed-in', leads, opportunities, offers, contracts, projects, files };
   } catch {
     return { state: 'signed-out' };
   }
@@ -788,6 +900,94 @@ function createProjectForm(): ReactNode {
   );
 }
 
+function fileListNode(files: AdminFileList): ReactNode {
+  if (files.status === 'empty') {
+    return createElement('p', null, 'Brak plików do pokazania.');
+  }
+  if (files.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy plików.');
+  }
+  if (files.status === 'error') {
+    return createElement('p', null, 'Listy plików nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-files', 'aria-label': 'Pliki' },
+    createElement('h2', null, 'Pliki'),
+    createElement(
+      'ul',
+      { className: 'admin-file-list' },
+      ...files.items.map((file) =>
+        createElement(
+          'li',
+          { key: file.id, className: 'admin-file' },
+          createElement(
+            'p',
+            { className: 'admin-file-meta' },
+            [file.name, ' · projekt ', file.projectId, ' · ', file.mimeType, ' · ', String(file.sizeBytes), ' B'].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createFileForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-file' },
+    createElement('h2', null, 'Utwórz plik'),
+    createElement(
+      'label',
+      { className: 'admin-create-file-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'projectId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-file-name' },
+      'Nazwa',
+      createElement('input', {
+        type: 'text',
+        name: 'name',
+        required: true,
+        autoComplete: 'off',
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-file-mime' },
+      'Typ MIME',
+      createElement('input', {
+        type: 'text',
+        name: 'mimeType',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-file-size' },
+      'Rozmiar (bajty)',
+      createElement('input', {
+        type: 'number',
+        name: 'sizeBytes',
+        required: true,
+        min: 0,
+        step: 1,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-file' }, 'Utwórz plik'),
+  );
+}
+
 /**
  * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
  * No signing ceremony and no payment UI.
@@ -826,5 +1026,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createContractForm(),
     projectListNode(home.projects),
     createProjectForm(),
+    fileListNode(home.files),
+    createFileForm(),
   );
 }

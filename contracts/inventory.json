@@ -21,6 +21,7 @@
     "GET /portal/session",
     "GET /projects",
     "GET /projects/{projectId}",
+    "GET /files",
     "GET /files/{fileId}",
     "GET /ready",
     "POST /contracts",

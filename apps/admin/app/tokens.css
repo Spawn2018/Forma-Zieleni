@@ -299,6 +299,62 @@ p {
   justify-self: start;
 }
 
+.admin-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-file {
+  padding-top: 1rem;
+  border-top: 1px solid var(--szalwia);
+}
+
+.admin-file-meta {
+  margin-top: 0.25rem;
+  color: var(--mech);
+  font-size: 1rem;
+}
+
+.admin-create-file {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+
+.admin-create-file-project,
+.admin-create-file-name,
+.admin-create-file-mime,
+.admin-create-file-size {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 1rem;
+}
+
+.admin-create-file-project input,
+.admin-create-file-name input,
+.admin-create-file-mime input,
+.admin-create-file-size input {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--szalwia);
+  background: var(--kamien);
+  color: inherit;
+}
+
+.admin-create-file button {
+  font: inherit;
+  color: var(--kamien);
+  background: var(--igliwie);
+  border: 0;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  justify-self: start;
+}
+
 .admin-home > .admin-action-error {
   max-width: 36rem;
   margin: 1.5rem auto 0;

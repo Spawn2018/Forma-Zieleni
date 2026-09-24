@@ -7,8 +7,10 @@ import {
   createAdminContract,
   createAdminOffer,
   createAdminOpportunity,
+  createAdminFile,
   createAdminProject,
   fetchAdminContracts,
+  fetchAdminFiles,
   fetchAdminLeads,
   fetchAdminOffers,
   fetchAdminOpportunities,
@@ -57,6 +59,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadProjects() {
       return fetchAdminProjects({ base, cookie });
+    },
+    async loadFiles() {
+      return fetchAdminFiles({ base, cookie });
     },
   });
 }
@@ -146,6 +151,39 @@ export async function action({ request }: Route.ActionArgs) {
     const result = await createAdminProject({
       base,
       contractId: contractId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-file') {
+    const projectId = form.get('projectId');
+    const name = form.get('name');
+    const mimeType = form.get('mimeType');
+    const sizeText = form.get('sizeBytes');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof name !== 'string' || !name.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof mimeType !== 'string' || !mimeType.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const sizeBytes = typeof sizeText === 'string' ? Number(sizeText) : NaN;
+    if (!Number.isInteger(sizeBytes) || sizeBytes < 0) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminFile({
+      base,
+      projectId: projectId.trim(),
+      name: name.trim(),
+      mimeType: mimeType.trim(),
+      sizeBytes,
       idempotencyKey: randomUUID(),
       cookie,
     });

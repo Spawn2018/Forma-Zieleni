@@ -123,6 +123,19 @@ export async function readProjectFile(store: LeadStore, id: string): Promise<Pro
   return store.transaction(tx => tx.findProjectFile(id));
 }
 
+export async function listVisibleProjectFiles(
+  store: LeadStore,
+  query: ProjectFileListQuery,
+): Promise<{ items: ProjectFile[]; nextCursor: string | null }> {
+  const rows = await store.transaction(tx => tx.listProjectFiles({ ...query, limit: query.limit + 1 }));
+  const page = rows.slice(0, query.limit);
+  const last = page.at(-1);
+  const nextCursor = rows.length > query.limit && last
+    ? encodeCursor(query.sort, query.sort.includes('updatedAt') ? last.updatedAt : last.createdAt, last.id)
+    : null;
+  return { items: page, nextCursor };
+}
+
 export async function listPortalProjectFiles(
   store: LeadStore,
   readerSubject: string,

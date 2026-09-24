@@ -11,13 +11,16 @@ import {
   createAdminContract,
   createAdminOffer,
   createAdminOpportunity,
+  createAdminFile,
   createAdminProject,
   fetchAdminContracts,
+  fetchAdminFiles,
   fetchAdminLeads,
   fetchAdminOffers,
   fetchAdminOpportunities,
   fetchAdminProjects,
   mapContractPage,
+  mapFilePage,
   mapLeadPage,
   mapOfferPage,
   mapOpportunityPage,
@@ -32,6 +35,7 @@ const emptyCrm = {
   offers: { status: 'empty' },
   contracts: { status: 'empty' },
   projects: { status: 'empty' },
+  files: { status: 'empty' },
 };
 
 const prohibited = [
@@ -85,10 +89,12 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.match(signedIn, /Brak ofert do pokazania/);
   assert.match(signedIn, /Brak umów do pokazania/);
   assert.match(signedIn, /Brak projektów do pokazania/);
+  assert.match(signedIn, /Brak plików do pokazania/);
   assert.match(signedIn, /Utwórz szansę/);
   assert.match(signedIn, /Utwórz ofertę/);
   assert.match(signedIn, /Utwórz umowę/);
   assert.match(signedIn, /Utwórz projekt/);
+  assert.match(signedIn, /Utwórz plik/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -98,11 +104,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -160,6 +166,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      files: { status: 'empty' },
     }),
   );
   assert.match(ready, /Anna Kowalska/);
@@ -281,6 +288,95 @@ test('mapProjectPage and Core API project fetch/create stay truthful', async () 
     base: 'http://127.0.0.1:8787',
     contractId: 'ct8k2n4p6q8r0s2t',
     idempotencyKey: 'admin-project-0002',
+    async fetchImpl() {
+      return new Response('', { status: 403 });
+    },
+  });
+  assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
+});
+
+test('mapFilePage and Core API file fetch/create stay truthful', async () => {
+  assert.deepEqual(mapFilePage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapFilePage({ items: [{ id: 1 }] }), { status: 'error' });
+  assert.deepEqual(
+    mapFilePage({
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+        storageKey: 'secret',
+      }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapFilePage({
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+      }],
+    }),
+    {
+      status: 'ready',
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+      }],
+    },
+  );
+
+  const empty = await fetchAdminFiles({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response(JSON.stringify({ items: [], meta: {} }), { status: 200 }),
+  });
+  assert.deepEqual(empty, { status: 'empty' });
+
+  const forbidden = await fetchAdminFiles({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(forbidden, { status: 'forbidden' });
+
+  const created = await createAdminFile({
+    base: 'http://127.0.0.1:8787',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    name: 'plan.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 2048,
+    idempotencyKey: 'admin-file-0001',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/files$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(new Headers(init?.headers).get('idempotency-key'), 'admin-file-0001');
+      assert.equal(
+        String(init?.body),
+        JSON.stringify({
+          projectId: 'pr8k2n4p6q8r0s2t',
+          name: 'plan.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 2048,
+        }),
+      );
+      return new Response(JSON.stringify({ id: 'fl8k2n4p6q8r0s2t' }), { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
+
+  const denied = await createAdminFile({
+    base: 'http://127.0.0.1:8787',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    name: 'plan.pdf',
+    mimeType: 'application/pdf',
+    sizeBytes: 2048,
+    idempotencyKey: 'admin-file-0002',
     async fetchImpl() {
       return new Response('', { status: 403 });
     },
@@ -479,7 +575,7 @@ test('API-backed qualify workflow posts capacityHold with idempotency and blocks
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
-test('the route module keeps an error boundary and wires Core API CRM lead/opportunity/offer/contract/project flow', () => {
+test('the route module keeps an error boundary and wires Core API CRM lead/opportunity/offer/contract/project/file flow', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('./shell.ts', import.meta.url), 'utf8');
@@ -495,6 +591,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminContract/);
   assert.match(home, /fetchAdminProjects/);
   assert.match(home, /createAdminProject/);
+  assert.match(home, /fetchAdminFiles/);
+  assert.match(home, /createAdminFile/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
@@ -512,6 +610,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.equal(shell.includes('contracts:create'), false);
   assert.equal(shell.includes('projects:read'), false);
   assert.equal(shell.includes('projects:create'), false);
+  assert.equal(shell.includes('files:read'), false);
+  assert.equal(shell.includes('files:create'), false);
   assert.equal(shell.toLowerCase().includes('podpis'), false);
   assert.equal(shell.toLowerCase().includes('płatność'), false);
   for (const phrase of prohibited) {

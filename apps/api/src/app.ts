@@ -6,7 +6,7 @@ import { problem, validateContractCreateRequest, validateLeadCaptureRequest, val
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
-import { createProjectFileRecord, listPortalProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
+import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
@@ -492,6 +492,19 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const project = await readProject(options.store, pathProjectId(c.req.param('projectId')));
     if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
     return c.json(project);
+  });
+
+  app.get('/v1/files', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:read');
+    c.set('actorId', actor.actorId);
+    const query = parseProjectFileListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listVisibleProjectFiles(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
   });
 
   app.post('/v1/files', async c => {

@@ -768,9 +768,13 @@ test('portal file projection is read-only, empty without grant, and BOLA-isolate
   const { app } = appFor();
   assert.equal((await app.request('/v1/portal/files')).status, 401);
   assert.equal((await app.request('/v1/portal/files', { headers: bearer(staff) })).status, 403);
+  assert.equal((await app.request('/v1/files', { headers: bearer(portal) })).status, 403);
   const empty = await app.request('/v1/portal/files', { headers: bearer(portal) });
   assert.equal(empty.status, 200);
   assert.deepEqual((await empty.json()).items, []);
+  const staffFilesEmpty = await app.request('/v1/files', { headers: bearer(staff) });
+  assert.equal(staffFilesEmpty.status, 200);
+  assert.deepEqual((await staffFilesEmpty.json()).items, []);
 
   const lead = await captureAndQualify(app);
   const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
@@ -833,6 +837,12 @@ test('portal file projection is read-only, empty without grant, and BOLA-isolate
     ...bearer(staff),
   }))).json();
   assert.equal(staffFile.clientSubject, null);
+
+  const staffListed = await (await app.request('/v1/files', { headers: bearer(staff) })).json();
+  assert.equal(staffListed.items.length, 2);
+  assert.ok(staffListed.items.some((item) => item.id === file.id));
+  assert.ok(staffListed.items.some((item) => item.id === staffFile.id));
+  assert.equal(Object.hasOwn(staffListed.meta, 'limit'), true);
 
   const listed = await app.request('/v1/portal/files', { headers: bearer(portal) });
   assert.equal(listed.status, 200);
