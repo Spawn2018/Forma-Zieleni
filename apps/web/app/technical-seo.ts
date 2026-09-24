@@ -1,8 +1,8 @@
 import { jsonLdScript, webPageJsonLd } from './structured-data.ts';
 
 const TRACKING = /^(?:utm_|fbclid$|gclid$|gbraid$|wbraid$)/;
-const KNOWN_PATHS = new Set(['/', '/galeria', '/porownanie', '/robots.txt', '/sitemap.xml']);
-const PUBLIC_PAGES = new Set(['/', '/galeria', '/porownanie']);
+const KNOWN_PATHS = new Set(['/', '/galeria', '/porownanie', '/atlas', '/robots.txt', '/sitemap.xml']);
+const PUBLIC_PAGES = new Set(['/', '/galeria', '/porownanie', '/atlas']);
 
 export type SeoEnv = 'production' | 'non-production';
 

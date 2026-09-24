@@ -447,11 +447,17 @@ row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxon
   executableSlice: 'ATLAS-PLANT-IDENTITY',
   executableWhenComplete: ['ATLAS-PROVENANCE-BOUNDARY'],
 });
-row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity and cites taxonomy sources. It does not invent cultivation facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/plant-identity.ts', 'packages/domain/plant-identity.test.mjs', '', 'NONE', 'Domain projection only. Full WWW Atlas UI stays later.', {
+row('FZ-REQ-ATLAS-004', 'A public Atlas surface reads approved plant identity and cites taxonomy sources. It does not invent cultivation facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/plant-identity.ts', 'packages/domain/plant-identity.test.mjs', '', 'NONE', 'Domain/public projection only. WWW Atlas UI is FZ-REQ-ATLAS-005 / ATLAS-WWW-SURFACE.', {
   productCapability: 'ATLAS',
-  depth: 'RUNTIME',
+  depth: 'CLIENT_PROJECTION',
   executableSlice: 'ATLAS-PUBLIC-SURFACE',
   executableWhenComplete: ['ATLAS-PLANT-IDENTITY'],
+});
+row('FZ-REQ-ATLAS-005', 'WWW Atlas UI lists approved plant identities from the public projection and cites taxonomy sources without cultivation claims.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/ATLAS-WWW-SURFACE.md', 'apps/web/app/atlas-projection.ts', 'apps/web/app/atlas-projection.test.mjs', '', 'NONE', 'Evidence: atlas route and projectAtlasCatalog. Empty catalog is honest. No cultivation claims or live scrapers.', {
+  productCapability: 'ATLAS',
+  depth: 'RUNTIME',
+  executableSlice: 'ATLAS-WWW-SURFACE',
+  executableWhenComplete: ['ATLAS-PUBLIC-SURFACE'],
 });
 row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids and does not own commercial truth.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/product-boundaries.ts', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Evidence: mapSketchUpModelToProject / sketchUpProjectMapBoundary. Plugin runtime stays later.', {
   productCapability: 'SKETCHUP',

@@ -93,7 +93,6 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.masterProductScopeExhausted, true);
   assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, null);
   assert.equal(picked.ready.includes('ADMIN-APP'), false);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ATLAS-PROVENANCE-BOUNDARY'), false);
@@ -103,6 +102,8 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.includes('GARDENOS-DOMAIN'), false);
   assert.equal(picked.ready.includes('SITEINTEL-DOMAIN'), false);
+  assert.equal(picked.ready.includes('ATLAS-WWW-SURFACE'), false);
+  assert.equal(picked.selected, null);
   assert.equal(picked.exhaustionAllowed, true);
   assert.equal(picked.masterProductScopeExhausted, true);
   assert.equal(picked.internalGap, null);
@@ -232,6 +233,7 @@ test('main graph after Opportunity exhausts product READY without ZAP or Lead ac
   assert.equal(picked.ready.includes('SITEINTEL-DOMAIN'), false);
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
+  assert.equal(picked.ready.includes('ATLAS-WWW-SURFACE'), false);
   assert.equal(picked.masterProductScopeExhausted, true);
 });
 

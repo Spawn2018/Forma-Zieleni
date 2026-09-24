@@ -15,10 +15,12 @@ Machine checks: `projectPlantForPublic()` and `listPublicPlants()` in
 
 ## Out of scope
 
-- Full WWW Atlas UI, search, or SEO pages (may consume this projection later).
+- Full WWW Atlas UI, search, or SEO pages — binding next slice
+  `ATLAS-WWW-SURFACE` / `FZ-REQ-ATLAS-005`.
 - Cultivation facts as product truth.
 - Live third-party scrapers.
 
 ## Relation
 
 Depends on `ATLAS-PLANT-IDENTITY`. Provenance boundary rules still apply.
+Next executable depth: `ATLAS-WWW-SURFACE`.

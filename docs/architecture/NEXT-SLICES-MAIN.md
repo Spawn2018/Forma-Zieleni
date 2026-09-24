@@ -525,6 +525,25 @@ taxonomic citations. It does not state cultivation advice as fact.
 Tests: `packages/domain/plant-identity.test.mjs` public projection cases,
 `docs/architecture/ATLAS-PUBLIC-SURFACE.md`.
 Security: unpublished identities stay off the public response.
+Next: ATLAS-WWW-SURFACE.
+
+### ATLAS-WWW-SURFACE
+
+Dependencies: ATLAS-PUBLIC-SURFACE.
+Gate: REVIEW.
+Status: COMPLETE for a public WWW Atlas page that lists approved plant
+identities from the public projection and shows taxonomic citations
+only (`apps/web/app/atlas-projection.ts`, `/atlas`). No cultivation
+claims, no live third-party scrapers, and no invented SEO copy. Empty
+catalog is an honest empty state.
+Autonomous: yes.
+Accept: `apps/web` renders an Atlas route from the public plant
+projection contract. Drafts stay off the page. Citations link to named
+botanical authorities. Empty catalog is an honest empty state.
+Tests: `apps/web/app/atlas-projection.test.mjs`,
+`docs/architecture/ATLAS-WWW-SURFACE.md`.
+Security: no cultivation advice as product truth; no private plant
+fields on the public response.
 Next: none.
 
 ### SKETCHUP-PROJECT-MAP
