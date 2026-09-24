@@ -360,6 +360,7 @@ class PostgresTx implements LeadTx {
     const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
     let request = this.trx.selectFrom('project_file').selectAll();
     if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.clientSubject) request = request.where('client_subject', '=', query.clientSubject);
     if (query.cursor) {
       const at = new Date(query.cursor.at);
       const id = query.cursor.id;

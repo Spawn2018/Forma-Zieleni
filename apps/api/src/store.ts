@@ -53,6 +53,7 @@ export type ProjectFileListQuery = {
   limit: number;
   sort: SortField;
   projectId?: string;
+  clientSubject?: string;
   cursor?: { at: string; id: string };
 };
 

@@ -1,4 +1,5 @@
 import {
+  assertOpaqueProjectId,
   createProjectFile,
   projectFileForPortal,
   type PortalProjectFileProjection,
@@ -22,10 +23,18 @@ export function parseProjectFileListQuery(input: {
   if (!SORTS.has(sort as SortField)) throw badRequest('SORT_INVALID', 'Sort is not valid.');
   const limitText = input.limit ?? '20';
   if (!/^(?:[1-9]|[1-9][0-9]|100)$/.test(limitText)) throw badRequest('LIMIT_INVALID', 'Limit is not valid.');
+  let projectId: string | undefined;
+  if (input.projectId !== undefined && input.projectId !== '') {
+    try {
+      projectId = assertOpaqueProjectId(input.projectId);
+    } catch {
+      throw badRequest('PROJECT_ID_INVALID', 'Project id is not valid.');
+    }
+  }
   return {
     limit: Number(limitText),
     sort: sort as SortField,
-    projectId: input.projectId,
+    projectId,
     cursor: input.cursor ? decodeCursor(sort as SortField, input.cursor) : undefined,
   };
 }
@@ -119,11 +128,14 @@ export async function listPortalProjectFiles(
   readerSubject: string,
   query: ProjectFileListQuery,
 ): Promise<{ items: PortalProjectFileProjection[]; nextCursor: string | null }> {
-  const rows = await store.transaction(tx => tx.listProjectFiles({ ...query, limit: 100 }));
+  const rows = await store.transaction(tx => tx.listProjectFiles({
+    ...query,
+    clientSubject: readerSubject,
+    limit: query.limit + 1,
+  }));
   const projected = rows
     .map(file => projectFileForPortal(file, readerSubject))
-    .filter((item): item is PortalProjectFileProjection => item !== null)
-    .slice(0, query.limit + 1);
+    .filter((item): item is PortalProjectFileProjection => item !== null);
   const page = projected.slice(0, query.limit);
   const next = projected.length > query.limit ? page[page.length - 1] : null;
   return {

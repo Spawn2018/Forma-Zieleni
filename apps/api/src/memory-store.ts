@@ -285,7 +285,8 @@ class MemoryTx implements LeadTx {
   async listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]> {
     const descending = query.sort.startsWith('-');
     const rows = this.state.projectFiles.filter(
-      file => !query.projectId || file.projectId === query.projectId,
+      file => (!query.projectId || file.projectId === query.projectId)
+        && (!query.clientSubject || file.clientSubject === query.clientSubject),
     );
     rows.sort((left, right) => {
       const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
