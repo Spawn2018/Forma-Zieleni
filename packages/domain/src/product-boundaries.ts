@@ -94,8 +94,8 @@ export function applySiteIntelligenceRules(
   return {
     stage: 'RULES',
     observationIds: observations.map((item) => item.observationId),
-    constraints: observations.map((item) => `constraint:${item.kind}`),
-    opportunities: observations.map((item) => `opportunity:${item.kind}`),
+    constraints: [],
+    opportunities: [],
     inventedFacts: [],
   };
 }

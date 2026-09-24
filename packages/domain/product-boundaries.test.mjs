@@ -44,7 +44,8 @@ test('Site Intelligence rules consume normalized observations and refuse AI-inve
   assert.equal(result.stage, 'RULES');
   assert.deepEqual(result.observationIds, ['obs-slope-01']);
   assert.equal(result.inventedFacts.length, 0);
-  assert.ok(result.constraints.includes('constraint:slope'));
+  assert.deepEqual(result.constraints, []);
+  assert.deepEqual(result.opportunities, []);
 
   assert.throws(
     () => applySiteIntelligenceRules(observations, { inventedSiteFacts: true }),
