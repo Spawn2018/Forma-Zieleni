@@ -2644,6 +2644,60 @@
       "lastSeen": "2026-09-24T23:42:55.795Z",
       "rejectionReason": "OpenAPI already declares dueAt as format date-time; domain createProjectMilestone enforces UTC INSTANT at runtime. Pattern duplication is not required for this slice.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-relatedmilest-7367edff30",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the relatedMilestoneId schema to define its string type and OpaqueId pattern inline alongside nullable, removin",
+      "evidence": [
+        "cr-occurrence:10a45b6ee6db:2b5a250962d7:cr-update-the-relatedmilest-7367edff30",
+        "contracts/openapi.json",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "2b5a250962d73b43cb8fe14c610134ccb4a66678",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-7c2d5f51",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T23:54:10.468Z",
+      "lastSeen": "2026-09-24T23:54:10.468Z",
+      "rejectionReason": "DecisionLogEntry.relatedMilestoneId uses OpenAPI 3.0.4 nullable+allOf OpaqueId consistently; createDecisionLogEntry and validation assert opaque ids at runtime.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-assertinstant-to-d04c5b73c3",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update assertInstant to return the canonical ISO string it computes after validation, rather than the raw input, so du",
+      "evidence": [
+        "cr-occurrence:10a45b6ee6db:2b5a250962d7:cr-update-assertinstant-to-d04c5b73c3",
+        "packages/domain/src/project-milestone.ts",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "2b5a250962d73b43cb8fe14c610134ccb4a66678",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-928bc3d9",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T23:54:10.496Z",
+      "lastSeen": "2026-09-24T23:54:10.496Z",
+      "rejectionReason": "assertInstant matches CAPACITY-DOMAIN: input is validated to equal the canonical ISO form before return; returning the original string preserves caller-supplied fractional precision already proven equal.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
