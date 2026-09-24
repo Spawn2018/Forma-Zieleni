@@ -42,10 +42,28 @@ export type AdminContractList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminProjectRow = {
+  id: string;
+  contractId: string;
+  status: string;
+};
+
+export type AdminProjectList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminProjectRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
-  | { state: 'signed-in'; leads: AdminLeadList; offers: AdminOfferList; contracts: AdminContractList };
+  | {
+      state: 'signed-in';
+      leads: AdminLeadList;
+      offers: AdminOfferList;
+      contracts: AdminContractList;
+      projects: AdminProjectList;
+    };
 
 /**
  * Admin trust-zone session classification.
@@ -276,6 +294,81 @@ export async function createAdminContract(input: {
   }
 }
 
+type ProjectApiItem = {
+  id?: unknown;
+  contractId?: unknown;
+  status?: unknown;
+};
+
+export function mapProjectPage(body: unknown): AdminProjectList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminProjectRow[] = [];
+  for (const item of items) {
+    const project = item as ProjectApiItem;
+    if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
+    if (typeof project.status !== 'string') return { status: 'error' };
+    rows.push({
+      id: project.id,
+      contractId: project.contractId,
+      status: project.status,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminProjects(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminProjectList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/projects?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapProjectPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminProject(input: {
+  base: string;
+  contractId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/projects', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ contractId: input.contractId }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
  * Resolve admin home from optional Core API session probe + CRM lists.
  * Unconfigured probe → signed-out (truthful). Never invents CRM rows.
@@ -285,6 +378,7 @@ export async function resolveAdminHome(input: {
   loadLeads?: () => Promise<AdminLeadList>;
   loadOffers?: () => Promise<AdminOfferList>;
   loadContracts?: () => Promise<AdminContractList>;
+  loadProjects?: () => Promise<AdminProjectList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
@@ -293,7 +387,8 @@ export async function resolveAdminHome(input: {
     const leads = input.loadLeads ? await input.loadLeads() : { status: 'empty' as const };
     const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
     const contracts = input.loadContracts ? await input.loadContracts() : { status: 'empty' as const };
-    return { state: 'signed-in', leads, offers, contracts };
+    const projects = input.loadProjects ? await input.loadProjects() : { status: 'empty' as const };
+    return { state: 'signed-in', leads, offers, contracts, projects };
   } catch {
     return { state: 'signed-out' };
   }
@@ -491,6 +586,59 @@ function createContractForm(): ReactNode {
   );
 }
 
+function projectListNode(projects: AdminProjectList): ReactNode {
+  if (projects.status === 'empty') {
+    return createElement('p', null, 'Brak projektów do pokazania.');
+  }
+  if (projects.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy projektów.');
+  }
+  if (projects.status === 'error') {
+    return createElement('p', null, 'Listy projektów nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-projects', 'aria-label': 'Projekty' },
+    createElement('h2', null, 'Projekty'),
+    createElement(
+      'ul',
+      { className: 'admin-project-list' },
+      ...projects.items.map((project) =>
+        createElement(
+          'li',
+          { key: project.id, className: 'admin-project' },
+          createElement(
+            'p',
+            { className: 'admin-project-meta' },
+            [project.id, ' · umowa ', project.contractId, ' · ', project.status].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createProjectForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-project' },
+    createElement('h2', null, 'Nowy projekt'),
+    createElement(
+      'label',
+      { className: 'admin-create-project-id' },
+      'Id umowy',
+      createElement('input', {
+        type: 'text',
+        name: 'contractId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-project' }, 'Utwórz projekt'),
+  );
+}
+
 /**
  * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
  * No signing ceremony and no payment UI.
@@ -525,5 +673,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createOfferForm(),
     contractListNode(home.contracts),
     createContractForm(),
+    projectListNode(home.projects),
+    createProjectForm(),
   );
 }

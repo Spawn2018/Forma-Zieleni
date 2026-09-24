@@ -53,7 +53,7 @@ The context window size is not a reason to read every document.
 `LEAD-SEC-ACCEPT` report is filed
 (`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is still
 **not** security-accepted; that stays report-only and does not globally
-block product work. After `ADMIN-CRM-CONTRACT`, binding AUTO/REVIEW
+block product work. After `ADMIN-CRM-PROJECT`, binding AUTO/REVIEW
 product depths on `docs/architecture/NEXT-SLICES-MAIN.md` are exhausted.
 Remaining work is Owner-gated (sign provider, payment, hosting,
 CMS-ACCEPT) unless the registry declares a new binding depth. Owner gates do not erase that work. Missing binding

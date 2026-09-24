@@ -423,6 +423,12 @@ row('FZ-REQ-ADMIN-004', 'Staff can list and create contracts in apps/admin throu
   executableSlice: 'ADMIN-CRM-CONTRACT',
   executableWhenComplete: ['ADMIN-CRM-OFFER', 'CRM-CONTRACT-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-005', 'Staff can list and create projects in apps/admin through the existing Core API. contractId only on create. No payment UI and no signing ceremony.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates projects via Core API only. Payment and signing stay Owner-gated.', {
+  productCapability: 'ADMIN',
+  depth: 'PROJECT_WORKFLOW',
+  executableSlice: 'ADMIN-CRM-PROJECT',
+  executableWhenComplete: ['ADMIN-CRM-CONTRACT', 'CRM-PROJECT-DOMAIN'],
+});
 row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',
   depth: 'ANDROID_RUNTIME',

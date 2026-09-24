@@ -6,7 +6,7 @@
 export const PRODUCT_SCOPE = Object.freeze([
   { id: 'WWW', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-WWW-001', 'FZ-REQ-WWW-002'] },
   { id: 'PORTAL', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-PORTAL-001', 'FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004', 'FZ-REQ-PORTAL-005'] },
-  { id: 'ADMIN', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-ADMIN-001', 'FZ-REQ-ADMIN-002', 'FZ-REQ-ADMIN-003', 'FZ-REQ-ADMIN-004'] },
+  { id: 'ADMIN', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-ADMIN-001', 'FZ-REQ-ADMIN-002', 'FZ-REQ-ADMIN-003', 'FZ-REQ-ADMIN-004', 'FZ-REQ-ADMIN-005'] },
   { id: 'LEAD', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-SEC-001'] },
   { id: 'OPPORTUNITY', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-CRM-OPP-001'] },
   { id: 'OFFER', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-CRM-OFFER-001'] },
@@ -34,7 +34,7 @@ export const PARENT_MODELS = Object.freeze([
   { capability: 'SITEINTEL', requiredDepths: ['BOUNDARY', 'RULES', 'DOMAIN'] },
   { capability: 'ATLAS', requiredDepths: ['FOUNDATION', 'BOUNDARY', 'DOMAIN', 'CLIENT_PROJECTION', 'RUNTIME'] },
   { capability: 'SKETCHUP', requiredDepths: ['BOUNDARY', 'INTEGRATION'] },
-  { capability: 'ADMIN', requiredDepths: ['FOUNDATION', 'WORKFLOW', 'OFFER_WORKFLOW', 'CONTRACT_WORKFLOW'] },
+  { capability: 'ADMIN', requiredDepths: ['FOUNDATION', 'WORKFLOW', 'OFFER_WORKFLOW', 'CONTRACT_WORKFLOW', 'PROJECT_WORKFLOW'] },
   { capability: 'PAYMENT', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] },
   { capability: 'SIGNING', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] },
   { capability: 'PXI', requiredDepths: ['CONTRACT'] },

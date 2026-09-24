@@ -6,9 +6,11 @@ import {
   adminShell,
   createAdminContract,
   createAdminOffer,
+  createAdminProject,
   fetchAdminContracts,
   fetchAdminLeads,
   fetchAdminOffers,
+  fetchAdminProjects,
   qualifyAdminLead,
   resolveAdminHome,
   type AdminHome,
@@ -47,6 +49,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadContracts() {
       return fetchAdminContracts({ base, cookie });
+    },
+    async loadProjects() {
+      return fetchAdminProjects({ base, cookie });
     },
   });
 }
@@ -102,6 +107,23 @@ export async function action({ request }: Route.ActionArgs) {
     const result = await createAdminContract({
       base,
       offerId: offerId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-project') {
+    const contractId = form.get('contractId');
+    if (typeof contractId !== 'string' || !contractId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminProject({
+      base,
+      contractId: contractId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });
