@@ -22,6 +22,84 @@ export function assertNoSiteIntelTwinDatabase(flags: { twinDatabase?: boolean; l
   if (flags.liveThirdPartyInCriticalUx) throw new Error('SITEINTEL_LIVE_THIRD_PARTY_FORBIDDEN');
 }
 
+/** Normalized observation only. Raw live third-party payloads are not rules input. */
+export type NormalizedSiteObservation = {
+  observationId: string;
+  kind: string;
+  normalized: true;
+  source: 'normalized';
+  synthetic: true;
+};
+
+export type SiteIntelligenceRulesBoundary = {
+  requirementId: 'FZ-REQ-SITEINTEL-002';
+  stage: 'RULES';
+  consumes: 'normalized-observations';
+  aiInventForbidden: true;
+  thirdPartyCredentials: false;
+};
+
+export type SiteIntelligenceRulesResult = {
+  stage: 'RULES';
+  observationIds: string[];
+  constraints: string[];
+  opportunities: string[];
+  inventedFacts: never[];
+};
+
+export function siteIntelligenceRulesBoundary(): SiteIntelligenceRulesBoundary {
+  return {
+    requirementId: 'FZ-REQ-SITEINTEL-002',
+    stage: 'RULES',
+    consumes: 'normalized-observations',
+    aiInventForbidden: true,
+    thirdPartyCredentials: false,
+  };
+}
+
+export function assertAiCannotInventSiteFacts(claim: {
+  inventedSiteFacts?: boolean;
+  aheadOfRules?: boolean;
+}): void {
+  if (claim.inventedSiteFacts || claim.aheadOfRules) {
+    throw new Error('SITEINTEL_AI_INVENT_FORBIDDEN');
+  }
+}
+
+export function applySiteIntelligenceRules(
+  observations: readonly NormalizedSiteObservation[],
+  proposal: {
+    inventedSiteFacts?: boolean;
+    rawThirdPartyPayload?: boolean;
+    thirdPartyCredentials?: boolean;
+  } = {},
+): SiteIntelligenceRulesResult {
+  if (proposal.thirdPartyCredentials) throw new Error('SITEINTEL_CREDENTIALS_FORBIDDEN');
+  if (proposal.rawThirdPartyPayload) throw new Error('SITEINTEL_RAW_THIRD_PARTY_FORBIDDEN');
+  assertAiCannotInventSiteFacts(proposal);
+  if (!Array.isArray(observations) || observations.length === 0) {
+    throw new Error('SITEINTEL_OBSERVATIONS_REQUIRED');
+  }
+  for (const item of observations) {
+    if (!item || item.normalized !== true || item.source !== 'normalized') {
+      throw new Error('SITEINTEL_OBSERVATION_NOT_NORMALIZED');
+    }
+    if (typeof item.observationId !== 'string' || item.observationId.length < 8) {
+      throw new Error('SITEINTEL_OBSERVATION_ID_INVALID');
+    }
+    if (typeof item.kind !== 'string' || item.kind.trim().length === 0) {
+      throw new Error('SITEINTEL_OBSERVATION_KIND_INVALID');
+    }
+  }
+  return {
+    stage: 'RULES',
+    observationIds: observations.map((item) => item.observationId),
+    constraints: observations.map((item) => `constraint:${item.kind}`),
+    opportunities: observations.map((item) => `opportunity:${item.kind}`),
+    inventedFacts: [],
+  };
+}
+
 export function gardenOsRelationBoundary(): {
   requirementId: 'FZ-REQ-GARDENOS-001';
   relationOnly: true;

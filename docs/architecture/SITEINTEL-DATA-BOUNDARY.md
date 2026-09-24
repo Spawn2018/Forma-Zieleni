@@ -18,3 +18,6 @@ AI must not invent geospatial or site facts ahead of DATA/RULES/DOMAIN.
 - Production third-party credentials.
 
 Machine checks: `siteIntelligenceOrdering()` in `@forma-zieleni/domain`.
+
+Next contracted step: `docs/architecture/SITEINTEL-RULES.md`
+(`SITEINTEL-RULES` / `FZ-REQ-SITEINTEL-002`).

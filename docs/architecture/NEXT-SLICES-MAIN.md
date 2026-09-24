@@ -466,11 +466,15 @@ Next: none.
 
 Dependencies: SITEINTEL-DATA-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for rules over normalized site observations
+(`docs/architecture/SITEINTEL-RULES.md` plus domain helpers/tests).
+AI cannot invent site facts ahead of those rules. No third-party
+credentials.
 Autonomous: yes.
 Accept: rules over normalized site observations. AI cannot invent site
 facts ahead of those rules.
-Tests: domain tests for the rule step.
+Tests: `packages/domain/product-boundaries.test.mjs`,
+`docs/architecture/SITEINTEL-RULES.md`.
 Security: no third-party credentials.
 Next: none.
 

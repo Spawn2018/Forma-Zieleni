@@ -117,15 +117,23 @@ export {
 } from './atlas-boundary.ts';
 export type { AtlasProvenanceBoundary } from './atlas-boundary.ts';
 export {
+  assertAiCannotInventSiteFacts,
   assertGardenOsNotTwin,
   assertMobileUsesCoreApiOnly,
   assertNoSiteIntelTwinDatabase,
   assertSiteIntelligenceOrdering,
   assertSketchUpNotBusinessTruth,
+  applySiteIntelligenceRules,
   gardenOsRelationBoundary,
   mobileClientBoundary,
   siteIntelligenceOrdering,
+  siteIntelligenceRulesBoundary,
   sketchUpAdapterBoundary,
+} from './product-boundaries.ts';
+export type {
+  NormalizedSiteObservation,
+  SiteIntelligenceRulesBoundary,
+  SiteIntelligenceRulesResult,
 } from './product-boundaries.ts';
 export {
   OFFER_STATUSES,

@@ -430,10 +430,9 @@ row('FZ-REQ-GARDENOS-002', 'Garden OS domain state links a delivered project to 
   executableSlice: 'GARDENOS-DOMAIN',
   executableWhenComplete: ['GARDENOS-RELATION-BOUNDARY'],
 });
-row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observations and do not let AI invent site facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/SITEINTEL-DATA-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Site Intelligence rules slice', 'REVIEW', 'The data-order boundary is not the rules runtime.', {
+row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observations and do not let AI invent site facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SITEINTEL-RULES.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Rules over normalized observations only. Runtime Site Intelligence stays later.', {
   productCapability: 'SITEINTEL',
   depth: 'RULES',
-  blockerClass: 'INTERNAL',
   executableSlice: 'SITEINTEL-RULES',
   executableWhenComplete: ['SITEINTEL-DATA-BOUNDARY'],
 });
