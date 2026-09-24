@@ -1948,6 +1948,60 @@
       "lastSeen": "2026-09-24T18:14:53.826Z",
       "rejectionReason": "mapContractPage already rejects non-object page bodies; item fields are validated by typeof id/offerId/status like mapOfferPage. Extra item-shape guard is not required by this slice.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-331-update-the-p-b1622fea82",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 331, Update the project-list flow around `projectListNode` and `AdminProjectList` to carry Core API pagination m",
+      "evidence": [
+        "cr-occurrence:6b16413f933b:4a94b0f951d4:cr-at-line-331-update-the-p-b1622fea82",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "4a94b0f951d4a5203d325913ea95409f48fba657",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-57873983",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T18:27:55.629Z",
+      "lastSeen": "2026-09-24T18:27:55.629Z",
+      "rejectionReason": "ADMIN-CRM-PROJECT Accept mirrors ADMIN-CRM-LEAD/OFFER: first-page limit=50 is enough; cursor pagination is not required by this slice.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-331-update-fetch-96996e19b3",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 331, Update fetchAdminProjects to request and follow cursor pagination, preserve meta.nextCursor through mapProj",
+      "evidence": [
+        "cr-occurrence:6b16413f933b:4a94b0f951d4:cr-at-line-331-update-fetch-96996e19b3",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "4a94b0f951d4a5203d325913ea95409f48fba657",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-7fa45c50",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T18:27:55.649Z",
+      "lastSeen": "2026-09-24T18:27:55.649Z",
+      "rejectionReason": "ADMIN-CRM-PROJECT Accept mirrors ADMIN-CRM-LEAD/OFFER: first-page limit=50 is enough; cursor pagination is not required by this slice.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
