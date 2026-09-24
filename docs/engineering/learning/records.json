@@ -2563,6 +2563,60 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T22:47:11.585Z",
       "lastSeen": "2026-09-24T22:48:06.217Z"
+    },
+    {
+      "patternKey": "cr-update-the-timestamp-nor-c4660c3f99",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the timestamp normalization before the comparison in the capacity validation flow so valid one- and two-digit f",
+      "evidence": [
+        "cr-occurrence:f39e1973db6b:f8479dd1c1de:cr-update-the-timestamp-nor-c4660c3f99",
+        "packages/domain/src/capacity.ts",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "f8479dd1c1de9f37c530548cdaf7e99fba7e7f37",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-661f7e1b",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T23:01:05.232Z",
+      "lastSeen": "2026-09-24T23:01:05.232Z",
+      "rejectionReason": "Adopted in HEAD: fractional seconds pad to 3 digits before ISO roundtrip compare.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-createcapacitywin-0eff51ae29",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update createCapacityWindow to validate at with assertInstant before constructing the window, so createdAt and updated",
+      "evidence": [
+        "cr-occurrence:f39e1973db6b:f8479dd1c1de:cr-update-createcapacitywin-0eff51ae29",
+        "packages/domain/src/capacity.ts",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "f8479dd1c1de9f37c530548cdaf7e99fba7e7f37",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-719c6739",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T23:01:05.255Z",
+      "lastSeen": "2026-09-24T23:01:05.255Z",
+      "rejectionReason": "Adopted in HEAD: createCapacityWindow validates at via assertInstant.",
+      "effectState": "UNPLANNED"
     }
   ]
 }

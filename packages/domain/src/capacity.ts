@@ -61,7 +61,9 @@ function assertInstant(value: string, code: string): string {
   if (typeof value !== 'string' || !INSTANT.test(value)) throw new Error(code);
   const ms = Date.parse(value);
   if (!Number.isFinite(ms)) throw new Error(code);
-  const normalized = value.includes('.') ? value : value.replace(/Z$/, '.000Z');
+  const match = value.match(/^(.*)(\.\d{1,3})?Z$/);
+  const fraction = match?.[2] ? match[2].slice(1).padEnd(3, '0') : '000';
+  const normalized = `${match?.[1] ?? value.replace(/Z$/, '')}.${fraction}Z`;
   if (new Date(ms).toISOString() !== normalized) throw new Error(code);
   return value;
 }
@@ -79,6 +81,7 @@ export function createCapacityWindow(
   if (!CAPACITY_KINDS.includes(kind)) throw new Error('CAPACITY_KIND_INVALID');
   const start = assertInstant(startsAt, 'CAPACITY_START_INVALID');
   const end = assertInstant(endsAt, 'CAPACITY_END_INVALID');
+  const created = assertInstant(at, 'CAPACITY_AT_INVALID');
   if (Date.parse(end) <= Date.parse(start)) throw new Error('CAPACITY_RANGE_INVALID');
   return {
     id: assertOpaqueCapacityWindowId(id),
@@ -86,8 +89,8 @@ export function createCapacityWindow(
     kind,
     startsAt: start,
     endsAt: end,
-    createdAt: at,
-    updatedAt: at,
+    createdAt: created,
+    updatedAt: created,
   };
 }
 
