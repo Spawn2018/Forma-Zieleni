@@ -130,6 +130,10 @@ test('SketchUp model maps to a Core API project id without commercial truth', ()
     /SKETCHUP_COMMERCIAL_TRUTH_FORBIDDEN/,
   );
   assert.throws(
+    () => mapSketchUpModelToProject('skp-model-alpha1', 'prj-garden-west1', { ownsPrice: true }),
+    /SKETCHUP_COMMERCIAL_TRUTH_FORBIDDEN/,
+  );
+  assert.throws(
     () => mapSketchUpModelToProject('skp-model-alpha1', 'prj-garden-west1', { localAcl: true }),
     /SKETCHUP_LOCAL_ACL_FORBIDDEN/,
   );

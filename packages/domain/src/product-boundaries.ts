@@ -165,6 +165,9 @@ const SKETCHUP_COMMERCIAL_KEYS = new Set([
   'customerName',
   'offerId',
   'payment',
+  'ownsPrice',
+  'ownsContract',
+  'ownsCustomer',
 ]);
 
 export type SketchUpProjectMap = {
