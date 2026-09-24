@@ -25,7 +25,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "Publish local SITEINTEL tip (LOCAL_UNPUBLISHED) under Owner /noc-only CR quota waiver, then select next READY. If none: Owner gates only (FZ-SIGN-1, FZ-SEARCH-CRAWL-1, payment, hosting, CMS-ACCEPT). Do not invent roadmap.",
+  "nextSafeAction": "Master product AUTO/REVIEW depths exhausted after SITEINTEL-DOMAIN publish (8867e4f CI_GREEN). Remaining gates are Owner-local only: FZ-SIGN-1, FZ-SEARCH-CRAWL-1, payment, hosting, CMS-ACCEPT. Do not invent a new product roadmap without Owner.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
