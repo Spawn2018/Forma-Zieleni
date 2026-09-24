@@ -139,6 +139,21 @@ export type {
   SketchUpProjectMap,
 } from './product-boundaries.ts';
 export {
+  assertOpaqueSiteConstraintId,
+  assertOpaqueSiteOpportunityId,
+  assertSiteIntelligenceAiCannotWrite,
+  projectSiteIntelligenceForPortal,
+  recordSiteIntelligenceFromRules,
+  siteIntelligenceDomainBoundary,
+} from './site-intelligence.ts';
+export type {
+  PortalSiteIntelligenceProjection,
+  SiteConstraintRecord,
+  SiteIntelligenceDomainBoundary,
+  SiteIntelligenceDomainBundle,
+  SiteOpportunityRecord,
+} from './site-intelligence.ts';
+export {
   OFFER_STATUSES,
   assertOpaqueOfferId,
   createOffer,

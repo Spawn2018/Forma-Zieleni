@@ -90,10 +90,10 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(cmsOnly.ready.includes('CMS-ACCEPT'), false);
   assert.equal(cmsOnly.ready.includes('SEARCH-ACCEPT'), false);
   assert.equal(cmsOnly.selected, null);
-  assert.equal(cmsOnly.masterProductScopeExhausted, false);
-  assert.equal(cmsOnly.exhaustionAllowed, false);
+  assert.equal(cmsOnly.masterProductScopeExhausted, true);
+  assert.equal(cmsOnly.exhaustionAllowed, true);
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
+  assert.equal(picked.selected, null);
   assert.equal(picked.ready.includes('ADMIN-APP'), false);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ATLAS-PROVENANCE-BOUNDARY'), false);
@@ -102,8 +102,9 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(picked.ready.includes('RETURN-ROADMAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.includes('GARDENOS-DOMAIN'), false);
-  assert.equal(picked.exhaustionAllowed, false);
-  assert.equal(picked.masterProductScopeExhausted, false);
+  assert.equal(picked.ready.includes('SITEINTEL-DOMAIN'), false);
+  assert.equal(picked.exhaustionAllowed, true);
+  assert.equal(picked.masterProductScopeExhausted, true);
   assert.equal(picked.internalGap, null);
 });
 
@@ -218,19 +219,20 @@ test('main graph after Opportunity exhausts product READY without ZAP or Lead ac
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
+  assert.equal(picked.selected, null);
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ADMIN-CRM-LEAD'), false);
   assert.equal(picked.ready.includes('MOBILE-ANDROID-FOUNDATION'), false);
   assert.equal(picked.ready.includes('SIGN-STATE-NEUTRAL'), false);
   assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
-  assert.equal(picked.exhaustionAllowed, false);
+  assert.equal(picked.exhaustionAllowed, true);
   assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), false);
   assert.equal(picked.ready.includes('SITEINTEL-RULES'), false);
+  assert.equal(picked.ready.includes('SITEINTEL-DOMAIN'), false);
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
-  assert.equal(picked.masterProductScopeExhausted, false);
+  assert.equal(picked.masterProductScopeExhausted, true);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {
@@ -506,7 +508,9 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.some((id) => /ZAP|DEPENDENCY-CHECK/.test(id)), false);
-  assert.equal(picked.selected, 'SITEINTEL-DOMAIN');
+  assert.equal(picked.selected, null);
+  assert.equal(picked.exhaustionAllowed, true);
+  assert.equal(picked.masterProductScopeExhausted, true);
 });
 
 test('I: Dependency-Check NOT_JUSTIFIED does not create a product blocker', () => {

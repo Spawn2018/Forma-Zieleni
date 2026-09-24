@@ -25,7 +25,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "Selector repair: GARDENOS-DOMAIN is already COMPLETE. Next READY product slice is SITEINTEL-DOMAIN (FZ-REQ-SITEINTEL-003). Do not implement it in the selector repair. Owner gates stay local.",
+  "nextSafeAction": "SITEINTEL-DOMAIN / FZ-REQ-SITEINTEL-003 is COMPLETE. Master product AUTO/REVIEW depths are exhausted; remaining gates are Owner-local (FZ-SIGN-1, FZ-SEARCH-CRAWL-1, payment, hosting, CMS-ACCEPT). Do not invent a new product roadmap without Owner.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

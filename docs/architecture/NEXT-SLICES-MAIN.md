@@ -482,14 +482,17 @@ Next: SITEINTEL-DOMAIN.
 
 Dependencies: SITEINTEL-RULES.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Core API domain records of site constraints and
+opportunities from RULES output (`docs/architecture/SITEINTEL-DOMAIN.md`
+plus domain helpers/tests). AI cannot write those records. No HTTP site
+API, twin database, live third-party calls, or production credentials.
 Autonomous: yes.
 Accept: Core API domain records of site constraints and opportunities
 produced only from Site Intelligence rules output over normalized
 observations. AI cannot write those records. No HTTP site API, no twin
 database, no live third-party calls, and no production credentials.
-Tests: domain tests for the domain step, named by the slice when
-implemented.
+Tests: `packages/domain/site-intelligence.test.mjs`,
+`docs/architecture/SITEINTEL-DOMAIN.md`.
 Security: no third-party credentials; client site facts stay on the
 owning project.
 Next: none.

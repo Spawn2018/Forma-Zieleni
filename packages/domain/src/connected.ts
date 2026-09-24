@@ -612,7 +612,7 @@ export const CONNECTIVITY: Array<{ surface: string; state: string; reason: strin
   ['Content', 'CONNECTED', 'Content proposals stay unpublished until the CMS path approves them.'],
   ['Creative', 'CONNECTED', 'Creative briefs hang off a campaign work item.'],
   ['Product Experience', 'CONNECTED', 'Signals are privacy-filtered and are not conclusions.'],
-  ['Site Intelligence', 'LOCAL_BY_DESIGN', 'DATA to RULES to DOMAIN to AI. No site-intelligence product runtime yet.'],
+  ['Site Intelligence', 'LOCAL_BY_DESIGN', 'DATA to RULES to DOMAIN to AI. Domain records exist; no site-intelligence HTTP runtime yet.'],
   ['Garden OS', 'FUTURE_DEPENDENCY', 'Relationship contract only. No digital-twin runtime.'],
   ['SketchUp', 'FUTURE_DEPENDENCY', 'SketchUp is not business truth. No plugin runtime.'],
   ['Integrations', 'CONNECTED', 'Registry records capability and forbids live mutation.'],

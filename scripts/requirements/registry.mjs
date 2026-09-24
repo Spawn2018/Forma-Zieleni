@@ -429,18 +429,17 @@ row('FZ-REQ-GARDENOS-002', 'Garden OS domain state links a delivered project to 
   executableSlice: 'GARDENOS-DOMAIN',
   executableWhenComplete: ['GARDENOS-RELATION-BOUNDARY'],
 });
-row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observations and do not let AI invent site facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SITEINTEL-RULES.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Rules over normalized observations only. Domain records are the next binding stage.', {
+row('FZ-REQ-SITEINTEL-002', 'Site Intelligence rules consume normalized observations and do not let AI invent site facts.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SITEINTEL-RULES.md', 'packages/domain/product-boundaries.test.mjs', '', 'NONE', 'Rules over normalized observations only. Domain records follow in SITEINTEL-DOMAIN.', {
   productCapability: 'SITEINTEL',
   depth: 'RULES',
   executableSlice: 'SITEINTEL-RULES',
   executableWhenComplete: ['SITEINTEL-DATA-BOUNDARY'],
 });
-row('FZ-REQ-SITEINTEL-003', 'Site Intelligence domain records constraints and opportunities from rules output. AI does not conclude them.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/NEXT-SLICES-MAIN.md', 'docs/architecture/NEXT-SLICES-MAIN.md', 'SITEINTEL-RULES', 'REVIEW', 'DOMAIN follows RULES. HTTP runtime, twin storage, and the AI stage stay out of this slice.', {
+row('FZ-REQ-SITEINTEL-003', 'Site Intelligence domain records constraints and opportunities from rules output. AI does not conclude them.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'docs/architecture/SITEINTEL-DOMAIN.md', 'packages/domain/site-intelligence.test.mjs', '', 'NONE', 'Domain records from RULES only. HTTP runtime, twin storage, and the AI stage stay out of this slice.', {
   productCapability: 'SITEINTEL',
   depth: 'DOMAIN',
   executableSlice: 'SITEINTEL-DOMAIN',
   executableWhenComplete: ['SITEINTEL-RULES'],
-  blockerClass: 'INTERNAL',
 });
 row('FZ-REQ-ATLAS-003', 'Plant identity is a Core API record distinct from taxonomic-source proof and from cultivation claims.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/plant-identity.ts', 'packages/domain/plant-identity.test.mjs', '', 'NONE', 'Domain identity only. Public Atlas surface stays a later slice.', {
   productCapability: 'ATLAS',

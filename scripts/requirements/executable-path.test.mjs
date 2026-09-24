@@ -75,16 +75,16 @@ test('owner-gated payment still requires the provider-neutral domain depth', () 
   assert.equal(masterProductScopeExhausted(requirements, [], [], models), false);
 });
 
-test('live scope has no coverage gap and Site Intelligence DOMAIN keeps the master product open', () => {
+test('live scope has no coverage gap and Site Intelligence DOMAIN completes the master product depths', () => {
   const rows = requirements();
   const scope = loadProductScope();
   const models = loadParentModels();
   assert.deepEqual(scopeCoverageGaps(scope, rows), []);
   assert.deepEqual(missingRequiredDepths(rows, models), []);
   const site = parentProductReport(rows, { capability: 'SITEINTEL', requiredDepths: ['BOUNDARY', 'RULES', 'DOMAIN'] });
-  assert.equal(site.complete, false);
-  assert.deepEqual(site.openDepths, ['DOMAIN']);
-  assert.equal(masterProductScopeExhausted(rows, [], scope, models), false);
+  assert.equal(site.complete, true);
+  assert.deepEqual(site.openDepths, []);
+  assert.equal(masterProductScopeExhausted(rows, [], scope, models), true);
   assert.equal(rows.some((row) => row.id === 'FZ-REQ-PXI-001'), true);
   assert.equal(parentProductReport(rows, { capability: 'MOBILE', requiredDepths: ['BOUNDARY', 'ANDROID_RUNTIME', 'IOS_RUNTIME'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PAYMENT', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
