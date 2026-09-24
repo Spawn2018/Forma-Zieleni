@@ -30,7 +30,9 @@ function fixture(t) {
   });
   const env = Object.fromEntries(['SystemRoot', 'WINDIR', 'TEMP', 'TMP'].filter(key => process.env[key]).map(key => [key, process.env[key]]));
   if (!pwsh) throw new Error('POWERSHELL_UNAVAILABLE');
-  return { executable: executableIdentity(process.execPath), powershell: executableIdentity(pwsh), cwd, env, timeoutMs: 15000 };
+  // GHA Windows cold-start can spend >15s on the first pwsh+Add-Type Job Object
+  // compile before NATIVE_SUPERVISOR_READY; keep the budget above that floor.
+  return { executable: executableIdentity(process.execPath), powershell: executableIdentity(pwsh), cwd, env, timeoutMs: 60000 };
 }
 function alive(pid) { try { process.kill(pid, 0); return true; } catch (error) { if (error.code === 'ESRCH') return false; throw error; } }
 async function eventually(predicate, timeout = 10000) {

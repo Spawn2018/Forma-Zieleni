@@ -1414,6 +1414,33 @@
       "occurrences": 1,
       "firstSeen": "2026-09-23T23:27:39.684Z",
       "lastSeen": "2026-09-23T23:29:01.961Z"
+    },
+    {
+      "patternKey": "ci-ci-windows-supervisor-supervisor-tests",
+      "source": "agent",
+      "scope": "independent-ci",
+      "signalType": "failure",
+      "severity": "critical",
+      "observation": "Mandatory CI regressed after a green baseline for signature ci-ci-windows-supervisor-supervisor-tests",
+      "evidence": [
+        "ci-run:35937844660",
+        "https://github.com/Spawn2018/Forma-Zieleni/actions/runs/35937844660",
+        "sha:28524e1ba608faade85ed2d861eddd03ec59b60c",
+        "signature:ci-ci-windows-supervisor-supervisor-tests",
+        "step:Windows supervisor/Supervisor tests:failure"
+      ],
+      "generalizability": "RECURRING",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "TESTED",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "28524e1ba608faade85ed2d861eddd03ec59b60c",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-2c4eb2cc",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T00:20:19.663Z",
+      "lastSeen": "2026-09-24T00:20:19.663Z"
     }
   ]
 }
