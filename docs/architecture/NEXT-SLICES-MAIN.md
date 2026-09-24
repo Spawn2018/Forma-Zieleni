@@ -388,11 +388,14 @@ Next: SIGN-STATE-NEUTRAL.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN. FZ-SIGN-1 provider stays undecided.
+Status: COMPLETE for contract version lock plus a provider-neutral
+signature request record in `packages/domain/src/signing.ts`. No QES
+claim and no vendor connection. Signer references are opaque actor ids.
 Autonomous: yes.
 Accept: contract version lock plus a provider-neutral signature request
 record. No QES claim and no vendor connection.
-Tests: contract tests extended by the slice when implemented.
+Tests: `packages/domain/signing.test.mjs`,
+`packages/domain/contract.test.mjs`.
 Security: signer references are ids, not documents from a vendor.
 Next: none.
 

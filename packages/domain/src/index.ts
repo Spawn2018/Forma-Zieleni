@@ -143,6 +143,19 @@ export type {
   PaymentSchedule,
 } from './payment.ts';
 export {
+  SIGNATURE_REQUEST_STATUSES,
+  assertOpaqueSignatureRequestId,
+  assertOpaqueSignerActorId,
+  cancelSignatureRequest,
+  createSignatureRequest,
+  lockContractVersion,
+} from './signing.ts';
+export type {
+  ContractVersionLock,
+  SignatureRequest,
+  SignatureRequestStatus,
+} from './signing.ts';
+export {
   PROJECT_STATUSES,
   assertOpaqueProjectId,
   createProject,

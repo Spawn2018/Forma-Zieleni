@@ -4,6 +4,7 @@ import { createLead, qualifyLead } from './src/lead.ts';
 import { createOpportunity } from './src/opportunity.ts';
 import { createOffer } from './src/offer.ts';
 import { assertOpaqueContractId, createContract } from './src/contract.ts';
+import { createSignatureRequest, lockContractVersion } from './src/signing.ts';
 
 const at = '2026-09-22T12:00:00.000Z';
 const capture = {
@@ -34,6 +35,15 @@ test('contract is created only from a draft offer and owns its status', () => {
   assert.equal(contract.status, 'draft');
   assert.equal(Object.hasOwn(contract, 'signedAt'), false);
   assert.equal(Object.hasOwn(contract, 'provider'), false);
+});
+
+test('contract version lock attaches without inventing a signing vendor', () => {
+  const offer = draftOffer();
+  const contract = createContract('c9k2n4p6q8r0s2t4', offer, '2026-09-22T12:20:00.000Z');
+  const lock = lockContractVersion(contract, 'b'.repeat(64), '2026-09-22T12:25:00.000Z');
+  const request = createSignatureRequest('sr8k2n4p6q8r0s2t', contract, lock, 'sa8k2n4p6q8r0s2t', '2026-09-22T12:30:00.000Z');
+  assert.equal(request.qesClaimed, false);
+  assert.equal(Object.hasOwn(request, 'provider'), false);
 });
 
 test('non-draft offers cannot open a contract', () => {

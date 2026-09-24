@@ -463,10 +463,9 @@ row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and 
   executableSlice: 'PAY-DOMAIN-NEUTRAL',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signature request exist without a signing vendor.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'packages/domain/src/contract.ts', 'packages/domain/contract.test.mjs', 'provider-neutral signing slice', 'REVIEW', 'Provider selection stays FZ-REQ-GOV-002. No QES claim.', {
+row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signature request exist without a signing vendor.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'packages/domain/src/signing.ts', 'packages/domain/signing.test.mjs', '', 'NONE', 'Provider-neutral lock + signature request; FZ-REQ-GOV-002 provider stays OWNER-DECISION. No QES claim.', {
   productCapability: 'SIGNING',
   depth: 'DOMAIN',
-  blockerClass: 'INTERNAL',
   executableSlice: 'SIGN-STATE-NEUTRAL',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
