@@ -1468,6 +1468,32 @@
       "lastSeen": "2026-09-24T01:04:44.811Z",
       "rejectionReason": "Registry already points FZ-REQ-MOBILE-002 at apps/mobile-android foundation.mjs and foundation.test.mjs as DONE_AT_MAX_DEPTH/TESTED; Android-surface Node foundation with injectable fetch is the slice accept (Core API client, no commercial state, no Play credentials). Finding text is truncated and asks to update a row that this commit already updated.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-53-add-a-timeout-0b41d1b5b9",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 53, Add a timeout signal to both `fetchImpl` requests in the Core API probe flow so stalled requests return the",
+      "evidence": [
+        "cr-occurrence:6dcb8d60859d:28dedf555680:cr-at-line-53-add-a-timeout-0b41d1b5b9",
+        "apps/mobile-ios/foundation.mjs",
+        "severity:high",
+        "accepted:cr-at-line-53-add-a-timeout-0b41d1b5b9"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "28dedf555680802b8adccb20937d28983f33d2fd",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-de618981",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T02:07:49.429Z",
+      "lastSeen": "2026-09-24T02:08:06.013Z"
     }
   ]
 }

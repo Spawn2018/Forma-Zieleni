@@ -37,6 +37,8 @@ export function assertIosDoesNotOwnCommercialState(claim = {}) {
   }
 }
 
+export const IOS_PROBE_TIMEOUT_MS = 8000;
+
 /**
  * Probe Core API liveness for the iOS surface.
  * Injectable fetch keeps contract tests free of a live network.
@@ -44,6 +46,7 @@ export function assertIosDoesNotOwnCommercialState(claim = {}) {
 export async function fetchIosCoreHealth({
   baseUrl,
   fetchImpl = globalThis.fetch,
+  timeoutMs = IOS_PROBE_TIMEOUT_MS,
 } = {}) {
   if (typeof baseUrl !== 'string' || baseUrl.length === 0) {
     throw new Error('IOS_BASE_URL_REQUIRED');
@@ -53,6 +56,7 @@ export async function fetchIosCoreHealth({
     const response = await fetchImpl(`${root}${leadPaths.health}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (response.status === 403 || response.status === 401) {
       return { status: 'forbidden' };
@@ -73,6 +77,7 @@ export async function fetchIosCoreHealth({
 export async function fetchIosCoreReady({
   baseUrl,
   fetchImpl = globalThis.fetch,
+  timeoutMs = IOS_PROBE_TIMEOUT_MS,
 } = {}) {
   if (typeof baseUrl !== 'string' || baseUrl.length === 0) {
     throw new Error('IOS_BASE_URL_REQUIRED');
@@ -82,6 +87,7 @@ export async function fetchIosCoreReady({
     const response = await fetchImpl(`${root}${leadPaths.ready}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (response.status === 503) {
       return { status: 'not-ready' };

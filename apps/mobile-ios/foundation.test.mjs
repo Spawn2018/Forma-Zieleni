@@ -45,6 +45,7 @@ test('iOS health probe maps ready, error, and forbidden without inventing CRM ro
   });
   assert.deepEqual(ready, { status: 'ready', ok: true });
   assert.equal(calls[0].url, `https://core.example${leadPaths.health}`);
+  assert.equal(calls[0].init.signal instanceof AbortSignal, true);
 
   const forbidden = await fetchIosCoreHealth({
     baseUrl: 'https://core.example/',

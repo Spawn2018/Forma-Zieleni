@@ -45,6 +45,7 @@ test('Android health probe maps ready, error, and forbidden without inventing CR
   });
   assert.deepEqual(ready, { status: 'ready', ok: true });
   assert.equal(calls[0].url, `https://core.example${leadPaths.health}`);
+  assert.equal(calls[0].init.signal instanceof AbortSignal, true);
 
   const forbidden = await fetchAndroidCoreHealth({
     baseUrl: 'https://core.example/',
