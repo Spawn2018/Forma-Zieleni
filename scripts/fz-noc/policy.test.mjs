@@ -105,8 +105,8 @@ test('the CMS graph reconstructs READY work without executing it', () => {
   assert.equal(picked.ready.includes('GARDENOS-DOMAIN'), false);
   assert.equal(picked.ready.includes('SITEINTEL-DOMAIN'), false);
   assert.equal(picked.ready.includes('ATLAS-WWW-SURFACE'), false);
-  assert.equal(picked.selected, 'FILE-BYTES-LOCAL');
-  assert.equal(picked.ready.includes('WWW-LEAD-CAPTURE'), true);
+  assert.equal(picked.selected, 'WWW-LEAD-CAPTURE');
+  assert.equal(picked.ready.includes('ADMIN-FILE-BYTES'), true);
   assert.equal(picked.exhaustionAllowed, false);
   assert.equal(picked.masterProductScopeExhausted, false);
   assert.equal(picked.internalGap, null);
@@ -223,7 +223,7 @@ test('main graph after Opportunity exhausts product READY without ZAP or Lead ac
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'FILE-BYTES-LOCAL');
+  assert.equal(picked.selected, 'WWW-LEAD-CAPTURE');
   assert.equal(picked.ready.includes('MOBILE-CLIENT-BOUNDARY'), false);
   assert.equal(picked.ready.includes('ADMIN-CRM-LEAD'), false);
   assert.equal(picked.ready.includes('MOBILE-ANDROID-FOUNDATION'), false);
@@ -237,7 +237,7 @@ test('main graph after Opportunity exhausts product READY without ZAP or Lead ac
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.includes('ATLAS-WWW-SURFACE'), false);
-  assert.equal(picked.ready.includes('WWW-LEAD-CAPTURE'), true);
+  assert.equal(picked.ready.includes('ADMIN-FILE-BYTES'), true);
   assert.equal(picked.masterProductScopeExhausted, false);
 });
 
@@ -516,8 +516,8 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.equal(picked.ready.includes('SKETCHUP-PROJECT-MAP'), false);
   assert.equal(picked.ready.includes('WWW-PORTFOLIO-PROJECTION'), false);
   assert.equal(picked.ready.some((id) => /ZAP|DEPENDENCY-CHECK/.test(id)), false);
-  assert.equal(picked.selected, 'FILE-BYTES-LOCAL');
-  assert.equal(picked.ready.includes('WWW-LEAD-CAPTURE'), true);
+  assert.equal(picked.selected, 'WWW-LEAD-CAPTURE');
+  assert.equal(picked.ready.includes('ADMIN-FILE-BYTES'), true);
   assert.equal(picked.exhaustionAllowed, false);
 });
 
