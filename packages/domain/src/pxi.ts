@@ -22,6 +22,9 @@ export const EXPERIENCE_SIGNAL_PII_KEYS = [
   'phone',
   'address',
   'message',
+  'messageBody',
+  'body',
+  'content',
   'fieldValue',
 ] as const;
 
@@ -78,12 +81,17 @@ export function assertNoUniversalExperienceScore(claim: {
   universalScore?: boolean;
   experienceScore?: number;
   score?: number;
+  pxiScore?: number;
   universalExperienceScore?: boolean;
 }): void {
   if (claim.universalScore === true || claim.universalExperienceScore === true) {
     throw new Error('UNIVERSAL_EXPERIENCE_SCORE_FORBIDDEN');
   }
-  if (typeof claim.experienceScore === 'number' || typeof claim.score === 'number') {
+  if (
+    typeof claim.experienceScore === 'number'
+    || typeof claim.score === 'number'
+    || typeof claim.pxiScore === 'number'
+  ) {
     throw new Error('UNIVERSAL_EXPERIENCE_SCORE_FORBIDDEN');
   }
 }

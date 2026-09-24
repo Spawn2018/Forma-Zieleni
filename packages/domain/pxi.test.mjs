@@ -31,6 +31,10 @@ test('experience signal contract is versioned and refuses score and replay', () 
     () => assertNoUniversalExperienceScore({ experienceScore: 0.82 }),
     /UNIVERSAL_EXPERIENCE_SCORE_FORBIDDEN/,
   );
+  assert.throws(
+    () => assertNoUniversalExperienceScore({ pxiScore: 0.5 }),
+    /UNIVERSAL_EXPERIENCE_SCORE_FORBIDDEN/,
+  );
 });
 
 test('recordExperienceSignal rejects PII, replay payload, and scores', () => {
@@ -50,6 +54,14 @@ test('recordExperienceSignal rejects PII, replay payload, and scores', () => {
   );
   assert.throws(
     () => recordExperienceSignal({ event: 'form_start', message: 'hello' }),
+    /FORM_VALUE_REJECTED/,
+  );
+  assert.throws(
+    () => recordExperienceSignal({ event: 'form_start', body: 'hello' }),
+    /FORM_VALUE_REJECTED/,
+  );
+  assert.throws(
+    () => recordExperienceSignal({ event: 'form_start', messageBody: 'hello' }),
     /FORM_VALUE_REJECTED/,
   );
   assert.throws(
