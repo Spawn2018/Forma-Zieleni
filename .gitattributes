@@ -1,4 +1,5 @@
 # Keep these worktrees LF. Their git blobs are LF, and SHA256SUMS follows the blob.
+SHA256SUMS.txt text eol=lf
 .env.example text eol=lf
 docs/README.md text eol=lf
 docs/architecture/DECISIONS.md text eol=lf
