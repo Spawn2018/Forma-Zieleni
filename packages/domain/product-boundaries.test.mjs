@@ -46,7 +46,7 @@ test('Site Intelligence rules consume normalized observations and refuse AI-inve
   assert.equal(result.stage, 'RULES');
   assert.deepEqual(result.observationIds, ['obs-slope-01']);
   assert.equal(result.inventedFacts.length, 0);
-  assert.deepEqual(result.constraints, [{ code: 'slope-constraint', observationIds: ['obs-slope-01'] }]);
+  assert.deepEqual(result.constraints, [{ code: 'slope-constraint', observationIds: ['obs-slope-01'], kind: 'slope' }]);
   assert.deepEqual(result.opportunities, []);
 
   const sunAndSoil = applySiteIntelligenceRules([
@@ -65,8 +65,8 @@ test('Site Intelligence rules consume normalized observations and refuse AI-inve
       synthetic: true,
     },
   ]);
-  assert.deepEqual(sunAndSoil.constraints, [{ code: 'soil-constraint', observationIds: ['obs-soil-001'] }]);
-  assert.deepEqual(sunAndSoil.opportunities, [{ code: 'sun-exposure', observationIds: ['obs-sun-0001'] }]);
+  assert.deepEqual(sunAndSoil.constraints, [{ code: 'soil-constraint', observationIds: ['obs-soil-001'], kind: 'soil' }]);
+  assert.deepEqual(sunAndSoil.opportunities, [{ code: 'sun-exposure', observationIds: ['obs-sun-0001'], kind: 'sun' }]);
   assert.throws(
     () => applySiteIntelligenceRules([
       {

@@ -75,8 +75,8 @@ test('domain records constraints and opportunities only from RULES over normaliz
       synthetic: true,
     },
   ]);
-  assert.deepEqual(rules.constraints, [{ code: 'slope-constraint', observationIds: ['obs-slope-01'] }]);
-  assert.deepEqual(rules.opportunities, [{ code: 'sun-exposure', observationIds: ['obs-sun-0001'] }]);
+  assert.deepEqual(rules.constraints, [{ code: 'slope-constraint', observationIds: ['obs-slope-01'], kind: 'slope' }]);
+  assert.deepEqual(rules.opportunities, [{ code: 'sun-exposure', observationIds: ['obs-sun-0001'], kind: 'sun' }]);
   const bundle = recordSiteIntelligenceFromRules(
     project,
     rules,
@@ -160,7 +160,7 @@ test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain re
   assert.throws(
     () => recordSiteIntelligenceFromRules(
       project,
-      { ...rules, constraints: [{ code: 'invented-code', observationIds: ['obs-slope-01'] }] },
+      { ...rules, constraints: [{ code: 'invented-code', observationIds: ['obs-slope-01'], kind: 'slope' }] },
       ids,
       at,
     ),
@@ -169,11 +169,20 @@ test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain re
   assert.throws(
     () => recordSiteIntelligenceFromRules(
       project,
-      { ...rules, constraints: [{ code: 'slope-constraint', observationIds: ['obs-other-01'] }] },
+      { ...rules, constraints: [{ code: 'slope-constraint', observationIds: ['obs-other-01'], kind: 'slope' }] },
       ids,
       at,
     ),
     /SITEINTEL_FINDING_OBSERVATION_UNBOUND/,
+  );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      { ...rules, constraints: [{ code: 'slope-constraint', observationIds: ['obs-slope-01'], kind: 'soil' }] },
+      ids,
+      at,
+    ),
+    /SITEINTEL_FINDING_KIND_MISMATCH/,
   );
 });
 

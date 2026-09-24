@@ -128,6 +128,7 @@ export {
   mapSketchUpModelToProject,
   mobileClientBoundary,
   siteIntelligenceFindingCodes,
+  siteIntelligenceKindForCode,
   siteIntelligenceOrdering,
   siteIntelligenceRulesBoundary,
   sketchUpAdapterBoundary,

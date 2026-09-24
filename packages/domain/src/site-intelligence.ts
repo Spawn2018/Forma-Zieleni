@@ -3,6 +3,7 @@ import {
   assertAiCannotInventSiteFacts,
   assertNoSiteIntelTwinDatabase,
   siteIntelligenceFindingCodes,
+  siteIntelligenceKindForCode,
   type SiteIntelligenceRulesResult,
 } from './product-boundaries.ts';
 
@@ -142,6 +143,13 @@ export function recordSiteIntelligenceFromRules(
   for (const finding of [...rules.constraints, ...rules.opportunities]) {
     if (!finding || typeof finding.code !== 'string' || !allowedCodes.has(finding.code)) {
       throw new Error('SITEINTEL_CODE_NOT_FROM_OBSERVATIONS');
+    }
+    if (typeof finding.kind !== 'string' || finding.kind.trim().length === 0) {
+      throw new Error('SITEINTEL_FINDING_KIND_REQUIRED');
+    }
+    const expectedKind = siteIntelligenceKindForCode(finding.code);
+    if (!expectedKind || expectedKind !== finding.kind.trim().toLowerCase()) {
+      throw new Error('SITEINTEL_FINDING_KIND_MISMATCH');
     }
     if (!Array.isArray(finding.observationIds) || finding.observationIds.length === 0) {
       throw new Error('SITEINTEL_FINDING_OBSERVATION_REQUIRED');
