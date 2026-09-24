@@ -49,3 +49,20 @@ test('validateDecisionLogCreateRequest rejects client-supplied actor id', () => 
   });
   assert.equal(bad.ok, false);
 });
+
+test('validateDecisionLogCreateRequest rejects empty or guessable relatedMilestoneId', () => {
+  const empty = validateDecisionLogCreateRequest({
+    projectId: 'j9k2n4p6q8r0s2t4',
+    kind: 'decision',
+    summary: 'X',
+    relatedMilestoneId: '   ',
+  });
+  assert.equal(empty.ok, false);
+  const guessable = validateDecisionLogCreateRequest({
+    projectId: 'j9k2n4p6q8r0s2t4',
+    kind: 'decision',
+    summary: 'X',
+    relatedMilestoneId: 'ms1',
+  });
+  assert.equal(guessable.ok, false);
+});

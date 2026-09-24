@@ -2,6 +2,7 @@ import { assertOpaqueProjectId } from '../../domain/src/project.ts';
 import {
   DECISION_LOG_KINDS,
   MILESTONE_STATUSES,
+  assertOpaqueMilestoneId,
   type DecisionLogKind,
   type MilestoneStatus,
 } from '../../domain/src/project-milestone.ts';
@@ -104,7 +105,15 @@ export function validateDecisionLogCreateRequest(
     if (typeof body.relatedMilestoneId !== 'string') {
       return { ok: false, errors: [{ field: 'relatedMilestoneId', reason: 'STRING_REQUIRED' }] };
     }
-    relatedMilestoneId = body.relatedMilestoneId;
+    const trimmed = body.relatedMilestoneId.trim();
+    if (!trimmed) {
+      return { ok: false, errors: [{ field: 'relatedMilestoneId', reason: 'MILESTONE_ID_INVALID' }] };
+    }
+    try {
+      relatedMilestoneId = assertOpaqueMilestoneId(trimmed);
+    } catch {
+      return { ok: false, errors: [{ field: 'relatedMilestoneId', reason: 'MILESTONE_ID_INVALID' }] };
+    }
   }
   try {
     return {
