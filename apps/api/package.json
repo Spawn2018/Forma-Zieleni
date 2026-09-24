@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node src/server.ts",
     "test": "node --test src/http.test.mjs src/file-bytes.test.mjs src/rate-limit.test.mjs src/config.test.mjs src/session.test.mjs src/outbox-supervisor.test.mjs src/postgres.integration.test.mjs",
-    "typecheck": "tsc --noEmit --strict --skipLibCheck --target es2023 --module nodenext --allowImportingTsExtensions src/app.ts src/server.ts src/dispatch-once.ts src/dispatch-supervisor.ts src/outbox.ts src/outbox-supervisor.ts src/db.ts src/postgres-store.ts",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target es2023 --module nodenext --allowImportingTsExtensions src/app.ts src/server.ts src/dispatch-once.ts src/dispatch-supervisor.ts src/outbox.ts src/outbox-supervisor.ts src/db.ts src/postgres-store.ts src/milestones.ts",
     "lint": "node --check src/http.test.mjs && node --check src/file-bytes.test.mjs && node --check src/postgres.integration.test.mjs && node --check src/rate-limit.test.mjs && node --check src/config.test.mjs && node --check src/session.test.mjs && node --check src/outbox-supervisor.test.mjs"
   },
   "dependencies": {

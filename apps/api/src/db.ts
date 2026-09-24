@@ -57,6 +57,24 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  project_milestone: {
+    id: string;
+    project_id: string;
+    title: string;
+    status: string;
+    due_at: Date | null;
+    created_at: Date;
+    updated_at: Date;
+  };
+  project_decision_log: {
+    id: string;
+    project_id: string;
+    kind: string;
+    summary: string;
+    recorded_by_actor_id: string;
+    related_milestone_id: string | null;
+    created_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -701,6 +719,83 @@ DROP TABLE IF EXISTS project_file;
   },
 };
 
+const MILESTONE_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const projectMilestoneMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE project_milestone (
+  id text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES project (id),
+  title text NOT NULL,
+  status text NOT NULL,
+  due_at timestamptz,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT project_milestone_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT project_milestone_title_len CHECK (char_length(title) BETWEEN 1 AND 200),
+  CONSTRAINT project_milestone_status_known CHECK (status IN ('planned', 'active', 'done'))
+);
+CREATE INDEX project_milestone_list_created ON project_milestone (created_at DESC, id DESC);
+CREATE INDEX project_milestone_list_updated ON project_milestone (updated_at DESC, id DESC);
+CREATE INDEX project_milestone_project ON project_milestone (project_id, created_at DESC, id DESC);
+CREATE TABLE project_decision_log (
+  id text PRIMARY KEY,
+  project_id text NOT NULL REFERENCES project (id),
+  kind text NOT NULL,
+  summary text NOT NULL,
+  recorded_by_actor_id text NOT NULL,
+  related_milestone_id text REFERENCES project_milestone (id),
+  created_at timestamptz NOT NULL,
+  CONSTRAINT project_decision_log_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT project_decision_log_kind_known CHECK (kind IN ('decision', 'change_order')),
+  CONSTRAINT project_decision_log_summary_len CHECK (char_length(summary) BETWEEN 1 AND 2000),
+  CONSTRAINT project_decision_log_actor_opaque CHECK (recorded_by_actor_id ~ '^[a-z][a-z0-9]{15,63}$')
+);
+CREATE INDEX project_decision_log_list_created ON project_decision_log (created_at DESC, id DESC);
+CREATE INDEX project_decision_log_project ON project_decision_log (project_id, created_at DESC, id DESC);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${MILESTONE_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability IN ('milestones:read', 'milestones:create');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_FILE_CAPABILITY_SQL}));
+DROP TABLE IF EXISTS project_decision_log;
+DROP TABLE IF EXISTS project_milestone;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -716,6 +811,7 @@ const provider: MigrationProvider = {
       '010_portal_project_projection': portalProjectMigration,
       '011_project_delivered_status': projectDeliveredMigration,
       '012_portal_file_projection': portalFileMigration,
+      '013_project_milestone_domain': projectMilestoneMigration,
     };
   },
 };

@@ -232,6 +232,23 @@ export type {
   ProjectFile,
 } from './project-file.ts';
 export {
+  DECISION_LOG_KINDS,
+  MILESTONE_STATUSES,
+  assertOpaqueDecisionLogId,
+  assertOpaqueMilestoneActorId,
+  assertOpaqueMilestoneId,
+  createDecisionLogEntry,
+  createProjectMilestone,
+} from './project-milestone.ts';
+export type {
+  CreateDecisionLogEntryInput,
+  CreateProjectMilestoneInput,
+  DecisionLogKind,
+  MilestoneStatus,
+  ProjectDecisionLogEntry,
+  ProjectMilestone,
+} from './project-milestone.ts';
+export {
   assertGardenHasNoLiveInvent,
   assertOpaqueGardenId,
   createGarden,

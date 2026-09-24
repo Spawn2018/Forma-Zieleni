@@ -93,6 +93,18 @@ test('mutations require idempotency and public capture has no bearer requirement
   assert.deepEqual(spec.paths['/portal/files/{fileId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/files'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/files'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/milestones'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/milestones'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/milestones'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
+  assert.deepEqual(spec.paths['/decision-log'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/decision-log'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/decision-log'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
 });
 
 test('public capture cannot assert internal sources and qualify declares idempotency conflict', () => {

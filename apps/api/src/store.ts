@@ -8,7 +8,9 @@ import type {
   Opportunity,
   OpportunityStatus,
   Project,
+  ProjectDecisionLogEntry,
   ProjectFile,
+  ProjectMilestone,
   ProjectStatus,
 } from '@forma-zieleni/domain';
 
@@ -54,6 +56,20 @@ export type ProjectFileListQuery = {
   sort: SortField;
   projectId?: string;
   clientSubject?: string;
+  cursor?: { at: string; id: string };
+};
+
+export type MilestoneListQuery = {
+  limit: number;
+  sort: SortField;
+  projectId?: string;
+  cursor?: { at: string; id: string };
+};
+
+export type DecisionLogListQuery = {
+  limit: number;
+  sort: SortField;
+  projectId?: string;
   cursor?: { at: string; id: string };
 };
 
@@ -123,6 +139,12 @@ export interface LeadTx {
   insertProjectFile(file: ProjectFile): Promise<void>;
   findProjectFile(id: string): Promise<ProjectFile | null>;
   listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]>;
+  insertMilestone(milestone: ProjectMilestone): Promise<void>;
+  findMilestone(id: string): Promise<ProjectMilestone | null>;
+  listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]>;
+  insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void>;
+  findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null>;
+  listDecisionLogEntries(query: DecisionLogListQuery): Promise<ProjectDecisionLogEntry[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

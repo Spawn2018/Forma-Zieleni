@@ -777,13 +777,20 @@ Next: PROJECT-MILESTONE-DOMAIN.
 
 Dependencies: CAPACITY-DOMAIN, CRM-PROJECT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for OpenAPI + domain Project milestones and a
+decision/change-order log owned by Core API. Staff HTTP create/list with
+BOLA. No payment, no signing provider, no portal UI in this slice.
 Autonomous: yes.
 Accept: OpenAPI + domain Project milestones and a decision/change-order
 log owned by Core API. No payment, no signing provider, no portal UI in
 this slice.
-Tests: domain + OpenAPI + HTTP create/list with BOLA.
-Security: staff capabilities only; client cannot mutate milestones.
+Tests: `packages/domain/project-milestone.test.mjs`;
+`packages/validation/project-milestone.test.mjs`;
+`packages/types/project-milestone.test.mjs`;
+`apps/api/src/http.test.mjs` (milestone/decision-log BOLA).
+Security: staff capabilities `milestones:read` / `milestones:create`
+only; client cannot mutate milestones; actor ids opaque; no payment or
+signing fields.
 Next: SIGN-LIFECYCLE-STAFF.
 
 ### SIGN-LIFECYCLE-STAFF

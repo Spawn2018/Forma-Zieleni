@@ -5,9 +5,13 @@
     "GET /content/{contentId}",
     "GET /contracts",
     "GET /contracts/{contractId}",
+    "GET /decision-log",
+    "GET /decision-log/{entryId}",
     "GET /health",
     "GET /leads",
     "GET /leads/{leadId}",
+    "GET /milestones",
+    "GET /milestones/{milestoneId}",
     "GET /offers",
     "GET /offers/{offerId}",
     "GET /opportunities",
@@ -26,10 +30,12 @@
     "GET /files/{fileId}/content",
     "GET /ready",
     "POST /contracts",
+    "POST /decision-log",
     "POST /files",
     "POST /growth/plans",
     "POST /leads",
     "POST /leads/{leadId}/qualify",
+    "POST /milestones",
     "POST /offers",
     "POST /opportunities",
     "POST /projects",
@@ -55,6 +61,12 @@
       "Idempotency-Key"
     ],
     "POST /files": [
+      "Idempotency-Key"
+    ],
+    "POST /milestones": [
+      "Idempotency-Key"
+    ],
+    "POST /decision-log": [
       "Idempotency-Key"
     ]
   },

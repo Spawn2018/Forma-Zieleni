@@ -8,15 +8,19 @@ import type {
   Opportunity,
   OpportunityStatus,
   Project,
+  ProjectDecisionLogEntry,
   ProjectFile,
+  ProjectMilestone,
   ProjectStatus,
 } from '@forma-zieleni/domain';
 import type {
   AuditEvent,
   ContractListQuery,
+  DecisionLogListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
+  MilestoneListQuery,
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
@@ -32,6 +36,8 @@ type MemoryState = {
   contracts: Contract[];
   projects: Project[];
   projectFiles: ProjectFile[];
+  milestones: ProjectMilestone[];
+  decisionLog: ProjectDecisionLogEntry[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -53,6 +59,8 @@ export class MemoryLeadStore implements LeadStore {
     contracts: [],
     projects: [],
     projectFiles: [],
+    milestones: [],
+    decisionLog: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -66,6 +74,8 @@ export class MemoryLeadStore implements LeadStore {
       contracts: this.state.contracts,
       projects: this.state.projects,
       projectFiles: this.state.projectFiles,
+      milestones: this.state.milestones,
+      decisionLog: this.state.decisionLog,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -79,6 +89,8 @@ export class MemoryLeadStore implements LeadStore {
       this.state.contracts = snapshot.contracts;
       this.state.projects = snapshot.projects;
       this.state.projectFiles = snapshot.projectFiles;
+      this.state.milestones = snapshot.milestones;
+      this.state.decisionLog = snapshot.decisionLog;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -297,6 +309,62 @@ class MemoryTx implements LeadTx {
           const at = stamp(file, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && file.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && file.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertMilestone(milestone: ProjectMilestone): Promise<void> {
+    this.state.milestones.push(clone(milestone));
+  }
+
+  async findMilestone(id: string): Promise<ProjectMilestone | null> {
+    return clone(this.state.milestones.find(item => item.id === id) ?? null);
+  }
+
+  async listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.milestones.filter(
+      milestone => !query.projectId || milestone.projectId === query.projectId,
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(milestone => {
+          const at = stamp(milestone, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && milestone.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && milestone.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void> {
+    this.state.decisionLog.push(clone(entry));
+  }
+
+  async findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null> {
+    return clone(this.state.decisionLog.find(item => item.id === id) ?? null);
+  }
+
+  async listDecisionLogEntries(query: DecisionLogListQuery): Promise<ProjectDecisionLogEntry[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.decisionLog.filter(
+      entry => !query.projectId || entry.projectId === query.projectId,
+    );
+    rows.sort((left, right) => {
+      const compared = left.createdAt.localeCompare(right.createdAt) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(entry => {
+          const at = entry.createdAt;
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && entry.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && entry.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

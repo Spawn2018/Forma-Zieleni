@@ -2,13 +2,25 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateContractCreateRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
+import {
+  createDecisionLogRecord,
+  createMilestoneRecord,
+  listVisibleDecisionLog,
+  listVisibleMilestones,
+  parseDecisionLogListQuery,
+  parseMilestoneListQuery,
+  pathDecisionLogId,
+  pathMilestoneId,
+  readDecisionLogEntry,
+  readMilestone,
+} from './milestones.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
 import { createProjectFromContract, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
@@ -591,6 +603,68 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.header('Cache-Control', 'private, no-store');
     // c.body keeps middleware X-Request-Id and trusted-origin CORS headers.
     return c.body(new Uint8Array(stored.bytes), 200);
+  });
+
+  app.get('/v1/milestones', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:read');
+    c.set('actorId', actor.actorId);
+    const query = parseMilestoneListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listVisibleMilestones(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.post('/v1/milestones', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateProjectMilestoneCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'MILESTONE_INVALID', 'Milestone could not be accepted.', parsed.errors);
+    const milestone = await createMilestoneRecord(options.store, parsed.value, actor, key, now());
+    return c.json(milestone, 201);
+  });
+
+  app.get('/v1/milestones/:milestoneId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:read');
+    c.set('actorId', actor.actorId);
+    const milestone = await readMilestone(options.store, pathMilestoneId(c.req.param('milestoneId')));
+    if (!milestone) throw new ApiFailure(404, 'MILESTONE_NOT_FOUND', 'Milestone was not found.');
+    return c.json(milestone);
+  });
+
+  app.get('/v1/decision-log', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:read');
+    c.set('actorId', actor.actorId);
+    const query = parseDecisionLogListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listVisibleDecisionLog(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.post('/v1/decision-log', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateDecisionLogCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'DECISION_LOG_INVALID', 'Decision log entry could not be accepted.', parsed.errors);
+    const entry = await createDecisionLogRecord(options.store, parsed.value, actor, key, now());
+    return c.json(entry, 201);
+  });
+
+  app.get('/v1/decision-log/:entryId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:read');
+    c.set('actorId', actor.actorId);
+    const entry = await readDecisionLogEntry(options.store, pathDecisionLogId(c.req.param('entryId')));
+    if (!entry) throw new ApiFailure(404, 'DECISION_LOG_NOT_FOUND', 'Decision log entry was not found.');
+    return c.json(entry);
   });
 
   app.post('/v1/growth/plans', async c => {

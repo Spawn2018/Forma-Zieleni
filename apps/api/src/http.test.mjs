@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'projects:read', 'projects:create', 'files:read', 'files:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create'],
 };
 
 const portal = {
@@ -962,4 +962,89 @@ test('staff can store and download local private file bytes; portal cannot', asy
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('staff create and list project milestones and decision log; portal cannot mutate (BOLA)', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/milestones')).status, 401);
+  assert.equal((await app.request('/v1/milestones', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/decision-log', { headers: bearer(portal) })).status, 403);
+
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'ms-opp-0001',
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'ms-offer-0001',
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'ms-contract-01',
+  }))).json();
+  const project = await (await app.request('/v1/projects', json({ contractId: contract.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'ms-project-01',
+  }))).json();
+
+  assert.equal((await app.request('/v1/milestones', json({
+    projectId: project.id,
+    title: 'Koncepcja',
+  }, { ...bearer(portal), 'idempotency-key': 'ms-create-port' }))).status, 403);
+
+  const created = await app.request('/v1/milestones', json({
+    projectId: project.id,
+    title: 'Koncepcja',
+    dueAt: '2026-10-15T12:00:00.000Z',
+  }, { ...bearer(staff), 'idempotency-key': 'ms-create-0001' }));
+  assert.equal(created.status, 201);
+  const milestone = await created.json();
+  assert.equal(milestone.projectId, project.id);
+  assert.equal(milestone.title, 'Koncepcja');
+  assert.equal(Object.hasOwn(milestone, 'payment'), false);
+
+  const listed = await app.request(`/v1/milestones?projectId=${project.id}`, { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  const page = await listed.json();
+  assert.equal(page.items.length, 1);
+  assert.equal(page.items[0].id, milestone.id);
+
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(staff) })).status, 200);
+
+  assert.equal((await app.request('/v1/decision-log', json({
+    projectId: project.id,
+    kind: 'decision',
+    summary: 'Zatwierdzono układ',
+  }, { ...bearer(portal), 'idempotency-key': 'dl-create-port' }))).status, 403);
+
+  const decision = await app.request('/v1/decision-log', json({
+    projectId: project.id,
+    kind: 'decision',
+    summary: 'Zatwierdzono układ',
+    relatedMilestoneId: milestone.id,
+  }, { ...bearer(staff), 'idempotency-key': 'dl-create-0001' }));
+  assert.equal(decision.status, 201);
+  const entry = await decision.json();
+  assert.equal(entry.kind, 'decision');
+  assert.equal(entry.relatedMilestoneId, milestone.id);
+  assert.equal(Object.hasOwn(entry, 'email'), false);
+
+  const change = await app.request('/v1/decision-log', json({
+    projectId: project.id,
+    kind: 'change_order',
+    summary: 'Dodano strefę grillową',
+  }, { ...bearer(staff), 'idempotency-key': 'dl-create-0002' }));
+  assert.equal(change.status, 201);
+
+  const logPage = await (await app.request(`/v1/decision-log?projectId=${project.id}`, { headers: bearer(staff) })).json();
+  assert.equal(logPage.items.length, 2);
+
+  const paymentRejected = await app.request('/v1/milestones', json({
+    projectId: project.id,
+    title: 'X',
+    payment: true,
+  }, { ...bearer(staff), 'idempotency-key': 'ms-create-bad1' }));
+  assert.equal(paymentRejected.status, 400);
 });

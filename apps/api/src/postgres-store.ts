@@ -1,13 +1,15 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Lead, Offer, Opportunity, Project, ProjectFile } from '@forma-zieleni/domain';
+import type { Contract, Lead, Offer, Opportunity, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
   AuditEvent,
   ContractListQuery,
+  DecisionLogListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
+  MilestoneListQuery,
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
@@ -100,6 +102,30 @@ function toProjectFile(row: Database['project_file']): ProjectFile {
     sizeBytes: row.size_bytes,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
+  };
+}
+
+function toMilestone(row: Database['project_milestone']): ProjectMilestone {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title,
+    status: row.status as ProjectMilestone['status'],
+    dueAt: row.due_at ? iso(row.due_at) : null,
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
+function toDecisionLog(row: Database['project_decision_log']): ProjectDecisionLogEntry {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    kind: row.kind as ProjectDecisionLogEntry['kind'],
+    summary: row.summary,
+    recordedByActorId: row.recorded_by_actor_id,
+    relatedMilestoneId: row.related_milestone_id,
+    createdAt: iso(row.created_at),
   };
 }
 
@@ -370,6 +396,71 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toProjectFile);
+  }
+
+  async insertMilestone(milestone: ProjectMilestone): Promise<void> {
+    await this.trx.insertInto('project_milestone').values({
+      id: milestone.id,
+      project_id: milestone.projectId,
+      title: milestone.title,
+      status: milestone.status,
+      due_at: milestone.dueAt ? new Date(milestone.dueAt) : null,
+      created_at: new Date(milestone.createdAt),
+      updated_at: new Date(milestone.updatedAt),
+    }).execute();
+  }
+
+  async findMilestone(id: string): Promise<ProjectMilestone | null> {
+    const row = await this.trx.selectFrom('project_milestone').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toMilestone(row) : null;
+  }
+
+  async listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('project_milestone').selectAll();
+    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toMilestone);
+  }
+
+  async insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void> {
+    await this.trx.insertInto('project_decision_log').values({
+      id: entry.id,
+      project_id: entry.projectId,
+      kind: entry.kind,
+      summary: entry.summary,
+      recorded_by_actor_id: entry.recordedByActorId,
+      related_milestone_id: entry.relatedMilestoneId,
+      created_at: new Date(entry.createdAt),
+    }).execute();
+  }
+
+  async findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null> {
+    const row = await this.trx.selectFrom('project_decision_log').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toDecisionLog(row) : null;
+  }
+
+  async listDecisionLogEntries(query: DecisionLogListQuery): Promise<ProjectDecisionLogEntry[]> {
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('project_decision_log').selectAll();
+    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb('created_at', '<', at), eb.and([eb('created_at', '=', at), eb('id', '<', id)])])
+        : eb.or([eb('created_at', '>', at), eb.and([eb('created_at', '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy('created_at', direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toDecisionLog);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

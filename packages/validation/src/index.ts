@@ -14,3 +14,11 @@ export { validateProjectCreateRequest } from './project.ts';
 export type { ProjectCreateRequest } from './project.ts';
 export { validateProjectFileCreateRequest } from './project-file.ts';
 export type { ProjectFileCreateRequest } from './project-file.ts';
+export {
+  validateDecisionLogCreateRequest,
+  validateProjectMilestoneCreateRequest,
+} from './project-milestone.ts';
+export type {
+  DecisionLogCreateRequest,
+  ProjectMilestoneCreateRequest,
+} from './project-milestone.ts';

@@ -469,13 +469,11 @@ row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised 
   executableSlice: 'CAPACITY-DOMAIN',
   executableWhenComplete: ['WWW-LEAD-CAPTURE'],
 });
-row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'PROJECT-MILESTONE-DOMAIN not executed', 'REVIEW', 'Project OS depth under FZ-CONTINUE-1.', {
-  blockerClass: 'INTERNAL',
+row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'packages/domain/project-milestone.test.mjs', '', 'NONE', 'Evidence: OpenAPI + HTTP create/list with BOLA. Staff milestones:* capabilities. No payment/signing providers.', {
   productCapability: 'PROJECT',
   depth: 'MILESTONE',
   executableSlice: 'PROJECT-MILESTONE-DOMAIN',
   executableWhenComplete: ['CAPACITY-DOMAIN', 'CRM-PROJECT-DOMAIN'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-009', 'Staff can advance provider-neutral contract lifecycle states in apps/admin without a signing vendor.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'SIGN-LIFECYCLE-STAFF not executed', 'REVIEW', 'FZ-SIGN-1 provider stays OWNER-DECISION.', {
   blockerClass: 'INTERNAL',
