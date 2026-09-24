@@ -10,7 +10,8 @@ Status: contracted for `SITEINTEL-DOMAIN` / `FZ-REQ-SITEINTEL-003`.
   `recordSiteIntelligenceFromRules`).
 - AI cannot author or invent those records.
 - Client isolation follows the owning project's `clientSubject` (BOLA).
-- Empty RULES findings are valid; they do not invent facts.
+- Empty RULES findings are refused at the domain step; RULES must emit
+  at least one observation-backed constraint or opportunity code.
 
 Machine checks: `recordSiteIntelligenceFromRules()`,
 `projectSiteIntelligenceForPortal()`,

@@ -47,6 +47,26 @@ export type SiteIntelligenceRulesResult = {
   inventedFacts: never[];
 };
 
+/** Deterministic RULES codes from normalized observation kinds. Not AI conclusions. */
+const KIND_TO_FINDING: Readonly<Record<string, { constraint?: string; opportunity?: string }>> = {
+  slope: { constraint: 'steep-grade' },
+  topography: { constraint: 'topography-constraint' },
+  soil: { constraint: 'soil-constraint' },
+  sun: { opportunity: 'sun-exposure' },
+  aspect: { opportunity: 'aspect-opportunity' },
+  surroundings: { opportunity: 'surroundings-context' },
+  climate: { opportunity: 'climate-context' },
+};
+
+export function siteIntelligenceFindingCodes(): ReadonlySet<string> {
+  const codes = new Set<string>();
+  for (const finding of Object.values(KIND_TO_FINDING)) {
+    if (finding.constraint) codes.add(finding.constraint);
+    if (finding.opportunity) codes.add(finding.opportunity);
+  }
+  return codes;
+}
+
 export function siteIntelligenceRulesBoundary(): SiteIntelligenceRulesBoundary {
   return {
     requirementId: 'FZ-REQ-SITEINTEL-002',
@@ -80,6 +100,10 @@ export function applySiteIntelligenceRules(
   if (!Array.isArray(observations) || observations.length === 0) {
     throw new Error('SITEINTEL_OBSERVATIONS_REQUIRED');
   }
+  const constraints: string[] = [];
+  const opportunities: string[] = [];
+  const seenConstraint = new Set<string>();
+  const seenOpportunity = new Set<string>();
   for (const item of observations) {
     if (!item || item.normalized !== true || item.source !== 'normalized') {
       throw new Error('SITEINTEL_OBSERVATION_NOT_NORMALIZED');
@@ -90,12 +114,23 @@ export function applySiteIntelligenceRules(
     if (typeof item.kind !== 'string' || item.kind.trim().length === 0) {
       throw new Error('SITEINTEL_OBSERVATION_KIND_INVALID');
     }
+    const kind = item.kind.trim().toLowerCase();
+    const finding = KIND_TO_FINDING[kind];
+    if (!finding) throw new Error('SITEINTEL_OBSERVATION_KIND_UNKNOWN');
+    if (finding.constraint && !seenConstraint.has(finding.constraint)) {
+      seenConstraint.add(finding.constraint);
+      constraints.push(finding.constraint);
+    }
+    if (finding.opportunity && !seenOpportunity.has(finding.opportunity)) {
+      seenOpportunity.add(finding.opportunity);
+      opportunities.push(finding.opportunity);
+    }
   }
   return {
     stage: 'RULES',
     observationIds: observations.map((item) => item.observationId),
-    constraints: [],
-    opportunities: [],
+    constraints,
+    opportunities,
     inventedFacts: [],
   };
 }

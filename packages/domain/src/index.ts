@@ -127,6 +127,7 @@ export {
   gardenOsRelationBoundary,
   mapSketchUpModelToProject,
   mobileClientBoundary,
+  siteIntelligenceFindingCodes,
   siteIntelligenceOrdering,
   siteIntelligenceRulesBoundary,
   sketchUpAdapterBoundary,

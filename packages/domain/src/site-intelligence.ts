@@ -2,6 +2,7 @@ import { assertOpaqueProjectId, type Project } from './project.ts';
 import {
   assertAiCannotInventSiteFacts,
   assertNoSiteIntelTwinDatabase,
+  siteIntelligenceFindingCodes,
   type SiteIntelligenceRulesResult,
 } from './product-boundaries.ts';
 
@@ -133,6 +134,15 @@ export function recordSiteIntelligenceFromRules(
   }
   if (!Array.isArray(rules.constraints) || !Array.isArray(rules.opportunities)) {
     throw new Error('SITEINTEL_RULES_MALFORMED');
+  }
+  if (rules.constraints.length + rules.opportunities.length === 0) {
+    throw new Error('SITEINTEL_FINDINGS_REQUIRED');
+  }
+  const allowedCodes = siteIntelligenceFindingCodes();
+  for (const code of [...rules.constraints, ...rules.opportunities]) {
+    if (typeof code !== 'string' || !allowedCodes.has(code)) {
+      throw new Error('SITEINTEL_CODE_NOT_FROM_OBSERVATIONS');
+    }
   }
   if (ids.constraintIds.length !== rules.constraints.length) {
     throw new Error('SITEINTEL_CONSTRAINT_ID_MISMATCH');

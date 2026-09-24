@@ -10,6 +10,8 @@ Rules consume **normalized** site observations only.
 - AI must not invent site facts ahead of or instead of rules.
 - Raw live third-party payloads are refused as rules input.
 - Third-party credentials stay out of this contract.
+- Known observation kinds emit deterministic constraint or opportunity
+  codes. Unknown kinds are refused.
 
 Ordering remains DATA → RULES → DOMAIN → AI
 (`docs/architecture/SITEINTEL-DATA-BOUNDARY.md`).

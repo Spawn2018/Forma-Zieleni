@@ -57,15 +57,26 @@ test('opaque site intelligence identifiers reject guessable values', () => {
   assert.throws(() => assertOpaqueSiteOpportunityId('opportunity1'), /SITEINTEL_OPPORTUNITY_ID_GUESSABLE/);
 });
 
-test('domain records constraints and opportunities only from RULES output on the owning project', () => {
+test('domain records constraints and opportunities only from RULES over normalized observations', () => {
   const project = ownedProject('portal-ola');
-  const rules = {
-    stage: 'RULES',
-    observationIds: ['obs-slope-01'],
-    constraints: ['steep-grade'],
-    opportunities: ['south-aspect'],
-    inventedFacts: [],
-  };
+  const rules = applySiteIntelligenceRules([
+    {
+      observationId: 'obs-slope-01',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    },
+    {
+      observationId: 'obs-sun-0001',
+      kind: 'sun',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    },
+  ]);
+  assert.deepEqual(rules.constraints, ['steep-grade']);
+  assert.deepEqual(rules.opportunities, ['sun-exposure']);
   const bundle = recordSiteIntelligenceFromRules(
     project,
     rules,
@@ -78,12 +89,12 @@ test('domain records constraints and opportunities only from RULES output on the
   assert.equal(bundle.sourceStage, 'RULES');
   assert.equal(bundle.projectId, project.id);
   assert.equal(bundle.clientSubject, 'portal-ola');
-  assert.deepEqual(bundle.observationIds, ['obs-slope-01']);
+  assert.deepEqual(bundle.observationIds, ['obs-slope-01', 'obs-sun-0001']);
   assert.equal(bundle.constraints.length, 1);
   assert.equal(bundle.constraints[0].code, 'steep-grade');
   assert.equal(bundle.constraints[0].sourceStage, 'RULES');
   assert.equal(bundle.constraints[0].clientSubject, 'portal-ola');
-  assert.equal(bundle.opportunities[0].code, 'south-aspect');
+  assert.equal(bundle.opportunities[0].code, 'sun-exposure');
   assert.equal(Object.hasOwn(bundle, 'twinDatabase'), false);
   assert.equal(Object.hasOwn(bundle.constraints[0], 'aiConclusion'), false);
   const mine = projectSiteIntelligenceForPortal(bundle, 'portal-ola');
@@ -94,7 +105,7 @@ test('domain records constraints and opportunities only from RULES output on the
   assert.equal(projectSiteIntelligenceForPortal(bundle, 'portal-other'), null);
 });
 
-test('empty RULES findings still record a domain bundle without inventing facts', () => {
+test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain records', () => {
   const project = ownedProject();
   const rules = applySiteIntelligenceRules([
     {
@@ -105,26 +116,6 @@ test('empty RULES findings still record a domain bundle without inventing facts'
       synthetic: true,
     },
   ]);
-  const bundle = recordSiteIntelligenceFromRules(
-    project,
-    rules,
-    { constraintIds: [], opportunityIds: [] },
-    '2026-09-24T15:30:00.000Z',
-  );
-  assert.equal(bundle.constraints.length, 0);
-  assert.equal(bundle.opportunities.length, 0);
-  assert.deepEqual(bundle.observationIds, ['obs-slope-01']);
-});
-
-test('AI, twin, credentials, and HTTP proposals cannot write site domain records', () => {
-  const project = ownedProject();
-  const rules = {
-    stage: 'RULES',
-    observationIds: ['obs-slope-01'],
-    constraints: ['steep-grade'],
-    opportunities: [],
-    inventedFacts: [],
-  };
   const ids = { constraintIds: ['s9k2n4p6q8r0s2t4'], opportunityIds: [] };
   assert.throws(
     () => recordSiteIntelligenceFromRules(project, rules, ids, at, { aiAuthored: true }),
@@ -155,17 +146,44 @@ test('AI, twin, credentials, and HTTP proposals cannot write site domain records
     ),
     /SITEINTEL_RULES_REQUIRED/,
   );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      { ...rules, constraints: [], opportunities: [] },
+      { constraintIds: [], opportunityIds: [] },
+      at,
+    ),
+    /SITEINTEL_FINDINGS_REQUIRED/,
+  );
+  assert.throws(
+    () => recordSiteIntelligenceFromRules(
+      project,
+      { ...rules, constraints: ['invented-code'] },
+      ids,
+      at,
+    ),
+    /SITEINTEL_CODE_NOT_FROM_OBSERVATIONS/,
+  );
 });
 
 test('constraint and opportunity id lists must match RULES codes', () => {
   const project = ownedProject();
-  const rules = {
-    stage: 'RULES',
-    observationIds: ['obs-slope-01'],
-    constraints: ['steep-grade'],
-    opportunities: ['south-aspect'],
-    inventedFacts: [],
-  };
+  const rules = applySiteIntelligenceRules([
+    {
+      observationId: 'obs-slope-01',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    },
+    {
+      observationId: 'obs-sun-0001',
+      kind: 'sun',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    },
+  ]);
   assert.throws(
     () => recordSiteIntelligenceFromRules(
       project,
@@ -183,14 +201,5 @@ test('constraint and opportunity id lists must match RULES codes', () => {
       at,
     ),
     /SITEINTEL_OPPORTUNITY_ID_MISMATCH/,
-  );
-  assert.throws(
-    () => recordSiteIntelligenceFromRules(
-      project,
-      { ...rules, constraints: ['Bad Code'] },
-      { constraintIds: ['s9k2n4p6q8r0s2t4'], opportunityIds: ['o9k2n4p6q8r0s2t4'] },
-      at,
-    ),
-    /SITEINTEL_CODE_INVALID/,
   );
 });
