@@ -61,6 +61,8 @@ function assertInstant(value: string, code: string): string {
   if (typeof value !== 'string' || !INSTANT.test(value)) throw new Error(code);
   const ms = Date.parse(value);
   if (!Number.isFinite(ms)) throw new Error(code);
+  const normalized = value.includes('.') ? value : value.replace(/Z$/, '.000Z');
+  if (new Date(ms).toISOString() !== normalized) throw new Error(code);
   return value;
 }
 
@@ -91,20 +93,31 @@ export function createCapacityWindow(
 
 /**
  * Refuse a promised consultation or project start outside recorded capacity.
- * Empty capacity never authorizes a promise.
+ * Empty capacity never authorizes a promise. When actorId is set, only that
+ * staff actor's windows count.
  */
 export function decidePromisedDate(
   windows: readonly CapacityWindow[],
   kind: CapacityKind,
   promisedAt: string,
+  actorId?: string,
 ): CapacityDecision {
   if (!CAPACITY_KINDS.includes(kind)) throw new Error('CAPACITY_KIND_INVALID');
   const instant = assertInstant(promisedAt, 'CAPACITY_PROMISE_INVALID');
   const ms = Date.parse(instant);
-  const matching = windows.filter((window) => window.kind === kind);
+  const actor = actorId === undefined ? null : assertOpaqueCapacityActorId(actorId);
+  const matching = windows.filter((window) => {
+    if (window.kind !== kind) return false;
+    if (actor !== null && window.actorId !== actor) return false;
+    return true;
+  });
   if (matching.length === 0) {
-    return windows.length === 0
-      ? { ok: false, reason: 'CAPACITY_EMPTY' }
+    if (windows.length === 0) return { ok: false, reason: 'CAPACITY_EMPTY' };
+    if (actor !== null && windows.some((window) => window.kind === kind)) {
+      return { ok: false, reason: 'CAPACITY_EMPTY' };
+    }
+    return windows.some((window) => window.kind === kind)
+      ? { ok: false, reason: 'CAPACITY_OUTSIDE' }
       : { ok: false, reason: 'CAPACITY_KIND_MISMATCH' };
   }
   for (const window of matching) {
@@ -119,8 +132,9 @@ export function assertPromisedDateInsideCapacity(
   windows: readonly CapacityWindow[],
   kind: CapacityKind,
   promisedAt: string,
+  actorId?: string,
 ): string {
-  const decision = decidePromisedDate(windows, kind, promisedAt);
+  const decision = decidePromisedDate(windows, kind, promisedAt, actorId);
   if (!decision.ok) throw new Error(decision.reason);
   return decision.windowId;
 }

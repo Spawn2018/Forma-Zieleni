@@ -101,3 +101,35 @@ test('start capacity is distinct from consultation capacity', () => {
     /CAPACITY_KIND_MISMATCH/,
   );
 });
+
+test('actor-scoped promises ignore another staff window and reject calendar-normalized dates', () => {
+  const other = 'bstaffactor00002';
+  const mine = createCapacityWindow(
+    'cwindowopaque0030',
+    ACTOR,
+    'consultation',
+    '2026-10-01T08:00:00.000Z',
+    '2026-10-01T12:00:00.000Z',
+    AT,
+  );
+  const theirs = createCapacityWindow(
+    'cwindowopaque0031',
+    other,
+    'consultation',
+    '2026-10-01T08:00:00.000Z',
+    '2026-10-01T12:00:00.000Z',
+    AT,
+  );
+  assert.equal(
+    assertPromisedDateInsideCapacity([mine, theirs], 'consultation', '2026-10-01T09:00:00.000Z', ACTOR),
+    mine.id,
+  );
+  assert.deepEqual(
+    decidePromisedDate([theirs], 'consultation', '2026-10-01T09:00:00.000Z', ACTOR),
+    { ok: false, reason: 'CAPACITY_EMPTY' },
+  );
+  assert.throws(
+    () => createCapacityWindow('cwindowopaque0032', ACTOR, 'consultation', '2026-02-30T08:00:00.000Z', '2026-02-30T12:00:00.000Z', AT),
+    /CAPACITY_START_INVALID|CAPACITY_END_INVALID/,
+  );
+});

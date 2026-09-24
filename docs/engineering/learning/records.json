@@ -2486,6 +2486,83 @@
       "lastSeen": "2026-09-24T22:19:54.708Z",
       "rejectionReason": "Matches published-home origin rules: http and https allowed for local/lab Core API; credentials and non-http(s) protocols stay rejected.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-104-update-decid-5943e89ae3",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 104, Update decidePromisedDate to accept the promised actor ID and filter windows by both kind and actorId befor",
+      "evidence": [
+        "cr-occurrence:f39e1973db6b:be8f4187a85a:cr-at-line-104-update-decid-5943e89ae3",
+        "packages/domain/src/capacity.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": false,
+      "relatedCommit": "be8f4187a85a6f0ca80b15925262928d110b66b0",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-7bb9b16f",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T22:45:01.803Z",
+      "lastSeen": "2026-09-24T22:45:01.803Z"
+    },
+    {
+      "patternKey": "cr-at-line-104-update-decid-0eefd6a77b",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 104, Update decidePromisedDate to accept an actorId and filter consultation windows by both kind and actorId bef",
+      "evidence": [
+        "cr-occurrence:f39e1973db6b:be8f4187a85a:cr-at-line-104-update-decid-0eefd6a77b",
+        "packages/domain/src/capacity.ts",
+        "severity:high",
+        "accepted:cr-at-line-104-update-decid-0eefd6a77b"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "be8f4187a85a6f0ca80b15925262928d110b66b0",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-2095110e",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T22:47:11.540Z",
+      "lastSeen": "2026-09-24T22:48:05.895Z"
+    },
+    {
+      "patternKey": "cr-update-assertinstant-to-23e96e1ecd",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update assertInstant to reject timestamps whose calendar components are normalized by Date.parse: compare the parsed U",
+      "evidence": [
+        "cr-occurrence:f39e1973db6b:be8f4187a85a:cr-update-assertinstant-to-23e96e1ecd",
+        "packages/domain/src/capacity.ts",
+        "severity:low",
+        "accepted:cr-update-assertinstant-to-23e96e1ecd"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "be8f4187a85a6f0ca80b15925262928d110b66b0",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-4358c148",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T22:47:11.585Z",
+      "lastSeen": "2026-09-24T22:48:06.217Z"
     }
   ]
 }
