@@ -1599,6 +1599,58 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T03:57:45.041Z",
       "lastSeen": "2026-09-24T03:58:31.643Z"
+    },
+    {
+      "patternKey": "cr-at-line-80-update-projec-95a66db699",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 80, Update projectPortfolioItem to return null when source.markedForPublication is not true before calling asser",
+      "evidence": [
+        "cr-occurrence:de81bfff9f06:40d6b9cfef76:cr-at-line-80-update-projec-95a66db699",
+        "apps/web/app/portfolio-projection.ts",
+        "severity:high",
+        "accepted:cr-at-line-80-update-projec-95a66db699"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "40d6b9cfef767676c88544b847fe0912a53c5bd9",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-f60347b7",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T11:17:11.595Z",
+      "lastSeen": "2026-09-24T11:19:06.490Z"
+    },
+    {
+      "patternKey": "cr-update-the-projection-lo-a8456b67c8",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the projection logic around realization and synthetic status so a source with projectClass 'REAL_PROJECT' and s",
+      "evidence": [
+        "cr-occurrence:de81bfff9f06:40d6b9cfef76:cr-update-the-projection-lo-a8456b67c8",
+        "apps/web/app/portfolio-projection.ts",
+        "severity:high",
+        "accepted:cr-update-the-projection-lo-a8456b67c8"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "40d6b9cfef767676c88544b847fe0912a53c5bd9",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-541904f9",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T11:17:11.616Z",
+      "lastSeen": "2026-09-24T11:19:06.663Z"
     }
   ]
 }
