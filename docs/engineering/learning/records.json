@@ -1521,6 +1521,84 @@
       "lastSeen": "2026-09-24T03:32:00.037Z",
       "rejectionReason": "createSignatureRequest already requires ContractVersionLock from lockContractVersion and rejects CONTRACT_VERSION_MISMATCH when lock.contractId differs; missing lock is a TypeScript/call-site error. Finding text is truncated and does not identify a missing guard beyond the existing lock parameter.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-202-change-the-f-403160217b",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 202, Change the `FILES` registry entry to use `domainProfile('PORTAL-FILE-PROJECTION')` so its database and migr",
+      "evidence": [
+        "cr-occurrence:da6265095c7e:e0e95ba55d7e:cr-at-line-202-change-the-f-403160217b",
+        "scripts/requirements/quality-coverage.mjs",
+        "severity:low",
+        "accepted:cr-at-line-202-change-the-f-403160217b"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "e0e95ba55d7eaf8cafe1a52d43cefabfaa37c7e2",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-b8fc0736",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T03:57:44.995Z",
+      "lastSeen": "2026-09-24T03:58:31.260Z"
+    },
+    {
+      "patternKey": "cr-in-parseprojectfilelistq-fb62e3681d",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", In parseProjectFileListQuery, validate a supplied projectId with assertOpaqueProjectId so invalid IDs produce PROJECT_",
+      "evidence": [
+        "cr-occurrence:da6265095c7e:e0e95ba55d7e:cr-in-parseprojectfilelistq-fb62e3681d",
+        "apps/api/src/app.ts",
+        "severity:low",
+        "accepted:cr-in-parseprojectfilelistq-fb62e3681d"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "e0e95ba55d7eaf8cafe1a52d43cefabfaa37c7e2",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-a155e5f2",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T03:57:45.020Z",
+      "lastSeen": "2026-09-24T03:58:31.446Z"
+    },
+    {
+      "patternKey": "cr-update-listportalproject-4f816fab5f",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update listPortalProjectFiles to pass readerSubject as clientSubject and request query.limit + 1 rows; add clientSubje",
+      "evidence": [
+        "cr-occurrence:da6265095c7e:e0e95ba55d7e:cr-update-listportalproject-4f816fab5f",
+        "apps/api/src/files.ts",
+        "severity:high",
+        "accepted:cr-update-listportalproject-4f816fab5f"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "e0e95ba55d7eaf8cafe1a52d43cefabfaa37c7e2",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-95a67b30",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T03:57:45.041Z",
+      "lastSeen": "2026-09-24T03:58:31.643Z"
     }
   ]
 }
