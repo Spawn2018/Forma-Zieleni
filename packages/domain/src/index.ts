@@ -188,6 +188,19 @@ export type {
   PaymentSchedule,
 } from './payment.ts';
 export {
+  CAPACITY_KINDS,
+  assertOpaqueCapacityActorId,
+  assertOpaqueCapacityWindowId,
+  assertPromisedDateInsideCapacity,
+  createCapacityWindow,
+  decidePromisedDate,
+} from './capacity.ts';
+export type {
+  CapacityDecision,
+  CapacityKind,
+  CapacityWindow,
+} from './capacity.ts';
+export {
   SIGNATURE_REQUEST_STATUSES,
   assertOpaqueSignatureRequestId,
   assertOpaqueSignerActorId,

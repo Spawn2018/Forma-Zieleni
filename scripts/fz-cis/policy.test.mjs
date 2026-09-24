@@ -292,7 +292,7 @@ test('the /noc contract and READY selection stay intact', () => {
   const cms = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-CMS.md'), 'utf8');
   const main = readFileSync(path.join(root, 'docs/architecture/NEXT-SLICES-MAIN.md'), 'utf8');
   const picked = selectReady(activeExecutionGraph(cms, main));
-  assert.equal(picked.selected, 'CAPACITY-DOMAIN');
+  assert.equal(picked.selected, 'PROJECT-MILESTONE-DOMAIN');
   assert.equal(picked.ready.includes('FZ-CIS'), false);
   assert.equal(picked.masterProductScopeExhausted, false);
   assert.equal(picked.exhaustionAllowed, false);

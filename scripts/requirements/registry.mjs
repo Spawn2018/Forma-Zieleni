@@ -463,13 +463,11 @@ row('FZ-REQ-WWW-003', 'Public WWW lead capture posts to Core API POST /leads. No
   executableSlice: 'WWW-LEAD-CAPTURE',
   executableWhenComplete: [],
 });
-row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'CAPACITY-DOMAIN not executed', 'REVIEW', 'Product Canon capacity constraint.', {
-  blockerClass: 'INTERNAL',
+row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/capacity.ts', 'packages/domain/capacity.test.mjs', '', 'NONE', 'Evidence: decidePromisedDate / assertPromisedDateInsideCapacity. Staff HTTP UI stays later.', {
   productCapability: 'CAPACITY',
   depth: 'DOMAIN',
   executableSlice: 'CAPACITY-DOMAIN',
   executableWhenComplete: ['WWW-LEAD-CAPTURE'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'PROJECT-MILESTONE-DOMAIN not executed', 'REVIEW', 'Project OS depth under FZ-CONTINUE-1.', {
   blockerClass: 'INTERNAL',

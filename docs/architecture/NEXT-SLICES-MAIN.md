@@ -761,14 +761,16 @@ Next: CAPACITY-DOMAIN.
 
 Dependencies: WWW-LEAD-CAPTURE.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for Core API domain Capacity windows that refuse a
+promised consultation or start outside availability. No calendar SaaS,
+no Google hard-wire, no spend. Staff actor ids only; no customer PII.
 Autonomous: yes.
 Accept: Core API / domain Capacity that records owner/designer
 availability windows and refuses a promised consultation or start date
 outside capacity. No calendar SaaS, no Google hard-wire, no spend.
-Tests: domain tests for refuse-outside-capacity; no PII in capacity
-rows beyond actor ids if needed.
-Security: staff-only mutation; public cannot read raw capacity.
+Tests: `packages/domain/capacity.test.mjs`.
+Security: capacity rows carry opaque actor ids only; public cannot read
+raw capacity (no public projection in this slice).
 Next: PROJECT-MILESTONE-DOMAIN.
 
 ### PROJECT-MILESTONE-DOMAIN
