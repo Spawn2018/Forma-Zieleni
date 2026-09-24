@@ -411,11 +411,17 @@ row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through 
   executableSlice: 'ADMIN-CRM-LEAD',
   executableWhenComplete: ['ADMIN-APP'],
 });
+row('FZ-REQ-ADMIN-006', 'Staff can list and create opportunities in apps/admin through the existing Core API. No second opportunity store and no stage or price on the list UI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates opportunities via Core API only. Stage and price stay off the staff list projection.', {
+  productCapability: 'ADMIN',
+  depth: 'OPPORTUNITY_WORKFLOW',
+  executableSlice: 'ADMIN-CRM-OPPORTUNITY',
+  executableWhenComplete: ['ADMIN-CRM-LEAD', 'CRM-OPPORTUNITY-CONTRACT'],
+});
 row('FZ-REQ-ADMIN-003', 'Staff can list and create offers in apps/admin through the existing Core API. No second offer store and no price on the list UI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates offers via Core API only. Price stays off the staff list projection.', {
   productCapability: 'ADMIN',
   depth: 'OFFER_WORKFLOW',
   executableSlice: 'ADMIN-CRM-OFFER',
-  executableWhenComplete: ['ADMIN-CRM-LEAD', 'CRM-OFFER-CONTRACT'],
+  executableWhenComplete: ['ADMIN-CRM-OPPORTUNITY', 'CRM-OFFER-CONTRACT'],
 });
 row('FZ-REQ-ADMIN-004', 'Staff can list and create contracts in apps/admin through the existing Core API. No signing ceremony and no payment UI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates contracts via Core API only. FZ-SIGN-1 provider stays OWNER-DECISION.', {
   productCapability: 'ADMIN',

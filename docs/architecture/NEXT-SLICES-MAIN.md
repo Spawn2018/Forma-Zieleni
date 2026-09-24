@@ -413,11 +413,30 @@ and no invented customers.
 Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed qualify
 workflow with synthetic fetch).
 Security: staff session only; client tokens cannot qualify (Core API).
+Next: ADMIN-CRM-OPPORTUNITY.
+
+### ADMIN-CRM-OPPORTUNITY
+
+Dependencies: ADMIN-CRM-LEAD, CRM-OPPORTUNITY-CONTRACT.
+Gate: REVIEW.
+Status: COMPLETE for staff list and create of opportunities in apps/admin
+through Core API `GET /v1/opportunities` and `POST /v1/opportunities`.
+Empty, error, and forbidden states are real. No stage, price, or
+probability on the list UI. No second opportunity store and no invented
+commercial rows.
+Autonomous: yes.
+Accept: staff list and create opportunities in apps/admin through Core
+API. Empty, error, and unauthorized states are real. No second
+opportunity store and no invented customers.
+Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed opportunity
+fetch/create with synthetic fetch).
+Security: staff session only; portal tokens cannot create or list staff
+opportunities (Core API).
 Next: ADMIN-CRM-OFFER.
 
 ### ADMIN-CRM-OFFER
 
-Dependencies: ADMIN-CRM-LEAD, CRM-OFFER-CONTRACT.
+Dependencies: ADMIN-CRM-OPPORTUNITY, CRM-OFFER-CONTRACT.
 Gate: REVIEW.
 Status: COMPLETE for staff list and create of offers in apps/admin
 through Core API `GET /v1/offers` and `POST /v1/offers`. Empty, error,

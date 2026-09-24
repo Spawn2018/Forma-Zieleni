@@ -53,8 +53,11 @@ The context window size is not a reason to read every document.
 `LEAD-SEC-ACCEPT` report is filed
 (`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is still
 **not** security-accepted; that stays report-only and does not globally
-block product work. After `ADMIN-CRM-PROJECT`, binding AUTO/REVIEW
-product depths on `docs/architecture/NEXT-SLICES-MAIN.md` are exhausted.
+block product work. After `ADMIN-CRM-OPPORTUNITY`, binding AUTO/REVIEW
+Admin CRM depths include lead, opportunity, offer, contract, and project
+in `apps/admin`. Remaining binding work follows
+`docs/architecture/NEXT-SLICES-MAIN.md`; do not infer exhaustion from an
+older journal line.
 Remaining work is Owner-gated (sign provider, payment, hosting,
 CMS-ACCEPT) unless the registry declares a new binding depth. Owner gates do not erase that work. Missing binding
 slices are an internal materialization defect, not Owner roadmap

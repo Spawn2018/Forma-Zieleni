@@ -6,10 +6,12 @@ import {
   adminShell,
   createAdminContract,
   createAdminOffer,
+  createAdminOpportunity,
   createAdminProject,
   fetchAdminContracts,
   fetchAdminLeads,
   fetchAdminOffers,
+  fetchAdminOpportunities,
   fetchAdminProjects,
   qualifyAdminLead,
   resolveAdminHome,
@@ -44,6 +46,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     async loadLeads() {
       return fetchAdminLeads({ base, cookie });
     },
+    async loadOpportunities() {
+      return fetchAdminOpportunities({ base, cookie });
+    },
     async loadOffers() {
       return fetchAdminOffers({ base, cookie });
     },
@@ -73,6 +78,23 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       leadId,
       capacityHold,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-opportunity') {
+    const leadId = form.get('leadId');
+    if (typeof leadId !== 'string' || !leadId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminOpportunity({
+      base,
+      leadId: leadId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

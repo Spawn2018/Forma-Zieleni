@@ -10,14 +10,17 @@ import {
   classifyAdminSession,
   createAdminContract,
   createAdminOffer,
+  createAdminOpportunity,
   createAdminProject,
   fetchAdminContracts,
   fetchAdminLeads,
   fetchAdminOffers,
+  fetchAdminOpportunities,
   fetchAdminProjects,
   mapContractPage,
   mapLeadPage,
   mapOfferPage,
+  mapOpportunityPage,
   mapProjectPage,
   qualifyAdminLead,
   resolveAdminHome,
@@ -25,6 +28,7 @@ import {
 
 const emptyCrm = {
   leads: { status: 'empty' },
+  opportunities: { status: 'empty' },
   offers: { status: 'empty' },
   contracts: { status: 'empty' },
   projects: { status: 'empty' },
@@ -77,9 +81,11 @@ test('admin session classification enforces the admin trust zone', async () => {
   );
   assert.match(signedIn, /Jesteś zalogowany/);
   assert.match(signedIn, /Brak leadów do pokazania/);
+  assert.match(signedIn, /Brak szans do pokazania/);
   assert.match(signedIn, /Brak ofert do pokazania/);
   assert.match(signedIn, /Brak umów do pokazania/);
   assert.match(signedIn, /Brak projektów do pokazania/);
+  assert.match(signedIn, /Utwórz szansę/);
   assert.match(signedIn, /Utwórz ofertę/);
   assert.match(signedIn, /Utwórz umowę/);
   assert.match(signedIn, /Utwórz projekt/);
@@ -92,11 +98,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -111,6 +117,16 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             contactName: 'Anna Kowalska',
             locality: 'Kraków',
             qualificationResult: 'pending',
+          },
+        ],
+      },
+      opportunities: {
+        status: 'ready',
+        items: [
+          {
+            id: 'op8k2n4p6q8r0s2t',
+            leadId: 'ld8k2n4p6q8r0s2t',
+            status: 'open',
           },
         ],
       },
@@ -150,9 +166,12 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Kraków/);
   assert.match(ready, /Kwalifikuj/);
   assert.match(ready, /name="leadId"/);
+  assert.match(ready, /Szanse/);
+  assert.match(ready, /op8k2n4p6q8r0s2t/);
+  assert.match(ready, /ld8k2n4p6q8r0s2t/);
+  assert.match(ready, /Utwórz szansę/);
   assert.match(ready, /Oferty/);
   assert.match(ready, /of8k2n4p6q8r0s2t/);
-  assert.match(ready, /op8k2n4p6q8r0s2t/);
   assert.match(ready, /Utwórz ofertę/);
   assert.match(ready, /Umowy/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
@@ -262,6 +281,62 @@ test('mapProjectPage and Core API project fetch/create stay truthful', async () 
     base: 'http://127.0.0.1:8787',
     contractId: 'ct8k2n4p6q8r0s2t',
     idempotencyKey: 'admin-project-0002',
+    async fetchImpl() {
+      return new Response('', { status: 403 });
+    },
+  });
+  assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
+});
+
+test('mapOpportunityPage and Core API opportunity fetch/create stay truthful', async () => {
+  assert.deepEqual(mapOpportunityPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapOpportunityPage({ items: [{ id: 1 }] }), { status: 'error' });
+  assert.deepEqual(
+    mapOpportunityPage({
+      items: [{ id: 'op8k2n4p6q8r0s2t', leadId: 'ld8k2n4p6q8r0s2t', status: 'open', stage: 'x' }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapOpportunityPage({
+      items: [{ id: 'op8k2n4p6q8r0s2t', leadId: 'ld8k2n4p6q8r0s2t', status: 'open' }],
+    }),
+    {
+      status: 'ready',
+      items: [{ id: 'op8k2n4p6q8r0s2t', leadId: 'ld8k2n4p6q8r0s2t', status: 'open' }],
+    },
+  );
+
+  const empty = await fetchAdminOpportunities({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response(JSON.stringify({ items: [], meta: {} }), { status: 200 }),
+  });
+  assert.deepEqual(empty, { status: 'empty' });
+
+  const forbidden = await fetchAdminOpportunities({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(forbidden, { status: 'forbidden' });
+
+  const created = await createAdminOpportunity({
+    base: 'http://127.0.0.1:8787',
+    leadId: 'ld8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-opportunity-0001',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/opportunities$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(new Headers(init?.headers).get('idempotency-key'), 'admin-opportunity-0001');
+      assert.equal(String(init?.body), JSON.stringify({ leadId: 'ld8k2n4p6q8r0s2t' }));
+      return new Response(JSON.stringify({ id: 'op8k2n4p6q8r0s2t', status: 'open' }), { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
+
+  const denied = await createAdminOpportunity({
+    base: 'http://127.0.0.1:8787',
+    leadId: 'ld8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-opportunity-0002',
     async fetchImpl() {
       return new Response('', { status: 403 });
     },
@@ -404,16 +479,18 @@ test('API-backed qualify workflow posts capacityHold with idempotency and blocks
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
-test('the route module keeps an error boundary and wires Core API CRM lead/offer/contract/project flow', () => {
+test('the route module keeps an error boundary and wires Core API CRM lead/opportunity/offer/contract/project flow', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('./shell.ts', import.meta.url), 'utf8');
   assert.match(home, /adminShell/);
   assert.match(home, /resolveAdminHome/);
   assert.match(home, /fetchAdminLeads/);
+  assert.match(home, /fetchAdminOpportunities/);
   assert.match(home, /fetchAdminOffers/);
   assert.match(home, /fetchAdminContracts/);
   assert.match(home, /qualifyAdminLead/);
+  assert.match(home, /createAdminOpportunity/);
   assert.match(home, /createAdminOffer/);
   assert.match(home, /createAdminContract/);
   assert.match(home, /fetchAdminProjects/);
@@ -427,6 +504,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/offer
   assert.equal(home.includes('fonts.googleapis.com'), false);
   assert.equal(root.includes('fonts.googleapis.com'), false);
   assert.equal(shell.includes('leads:read'), false);
+  assert.equal(shell.includes('opportunities:read'), false);
+  assert.equal(shell.includes('opportunities:create'), false);
   assert.equal(shell.includes('offers:read'), false);
   assert.equal(shell.includes('offers:create'), false);
   assert.equal(shell.includes('contracts:read'), false);

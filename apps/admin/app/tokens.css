@@ -99,6 +99,56 @@ p {
   cursor: pointer;
 }
 
+.admin-opportunity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-opportunity {
+  padding-top: 1rem;
+  border-top: 1px solid var(--szalwia);
+}
+
+.admin-opportunity-meta {
+  margin-top: 0.25rem;
+  color: var(--mech);
+  font-size: 1rem;
+}
+
+.admin-create-opportunity {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+
+.admin-create-opportunity-id {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 1rem;
+}
+
+.admin-create-opportunity-id input {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--szalwia);
+  background: var(--kamien);
+  color: inherit;
+}
+
+.admin-create-opportunity button {
+  font: inherit;
+  color: var(--kamien);
+  background: var(--igliwie);
+  border: 0;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  justify-self: start;
+}
+
 .admin-offer-list {
   list-style: none;
   margin: 0;

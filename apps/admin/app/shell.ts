@@ -18,6 +18,18 @@ export type AdminLeadList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminOpportunityRow = {
+  id: string;
+  leadId: string;
+  status: string;
+};
+
+export type AdminOpportunityList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminOpportunityRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminOfferRow = {
   id: string;
   opportunityId: string;
@@ -60,6 +72,7 @@ export type AdminHome =
   | {
       state: 'signed-in';
       leads: AdminLeadList;
+      opportunities: AdminOpportunityList;
       offers: AdminOfferList;
       contracts: AdminContractList;
       projects: AdminProjectList;
@@ -139,6 +152,87 @@ export async function fetchAdminLeads(input: {
     return mapLeadPage(await response.json());
   } catch {
     return { status: 'error' };
+  }
+}
+
+type OpportunityApiItem = {
+  id?: unknown;
+  leadId?: unknown;
+  status?: unknown;
+  stage?: unknown;
+  price?: unknown;
+  probability?: unknown;
+};
+
+export function mapOpportunityPage(body: unknown): AdminOpportunityList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminOpportunityRow[] = [];
+  for (const item of items) {
+    const opportunity = item as OpportunityApiItem;
+    if (typeof opportunity.id !== 'string' || typeof opportunity.leadId !== 'string') return { status: 'error' };
+    if (typeof opportunity.status !== 'string') return { status: 'error' };
+    if (Object.hasOwn(opportunity, 'stage') || Object.hasOwn(opportunity, 'price') || Object.hasOwn(opportunity, 'probability')) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: opportunity.id,
+      leadId: opportunity.leadId,
+      status: opportunity.status,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminOpportunities(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminOpportunityList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/opportunities?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapOpportunityPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminOpportunity(input: {
+  base: string;
+  leadId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/opportunities', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ leadId: input.leadId }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
   }
 }
 
@@ -376,6 +470,7 @@ export async function createAdminProject(input: {
 export async function resolveAdminHome(input: {
   probe?: () => Promise<AdminSessionActor | null>;
   loadLeads?: () => Promise<AdminLeadList>;
+  loadOpportunities?: () => Promise<AdminOpportunityList>;
   loadOffers?: () => Promise<AdminOfferList>;
   loadContracts?: () => Promise<AdminContractList>;
   loadProjects?: () => Promise<AdminProjectList>;
@@ -385,10 +480,11 @@ export async function resolveAdminHome(input: {
     const classified = classifyAdminSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
     const leads = input.loadLeads ? await input.loadLeads() : { status: 'empty' as const };
+    const opportunities = input.loadOpportunities ? await input.loadOpportunities() : { status: 'empty' as const };
     const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
     const contracts = input.loadContracts ? await input.loadContracts() : { status: 'empty' as const };
     const projects = input.loadProjects ? await input.loadProjects() : { status: 'empty' as const };
-    return { state: 'signed-in', leads, offers, contracts, projects };
+    return { state: 'signed-in', leads, opportunities, offers, contracts, projects };
   } catch {
     return { state: 'signed-out' };
   }
@@ -477,6 +573,59 @@ function leadListNode(leads: AdminLeadList): ReactNode {
         ),
       ),
     ),
+  );
+}
+
+function opportunityListNode(opportunities: AdminOpportunityList): ReactNode {
+  if (opportunities.status === 'empty') {
+    return createElement('p', null, 'Brak szans do pokazania.');
+  }
+  if (opportunities.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy szans.');
+  }
+  if (opportunities.status === 'error') {
+    return createElement('p', null, 'Listy szans nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-opportunities', 'aria-label': 'Szanse' },
+    createElement('h2', null, 'Szanse'),
+    createElement(
+      'ul',
+      { className: 'admin-opportunity-list' },
+      ...opportunities.items.map((opportunity) =>
+        createElement(
+          'li',
+          { key: opportunity.id, className: 'admin-opportunity' },
+          createElement(
+            'p',
+            { className: 'admin-opportunity-meta' },
+            [opportunity.id, ' · lead ', opportunity.leadId, ' · ', opportunity.status].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createOpportunityForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-opportunity' },
+    createElement('h2', null, 'Nowa szansa'),
+    createElement(
+      'label',
+      { className: 'admin-create-opportunity-id' },
+      'Id leada',
+      createElement('input', {
+        type: 'text',
+        name: 'leadId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-opportunity' }, 'Utwórz szansę'),
   );
 }
 
@@ -669,6 +818,8 @@ export function adminShell(home: AdminHome): ReactNode {
     createElement('h1', null, 'Panel personelu'),
     createElement('p', null, 'Jesteś zalogowany.'),
     leadListNode(home.leads),
+    opportunityListNode(home.opportunities),
+    createOpportunityForm(),
     offerListNode(home.offers),
     createOfferForm(),
     contractListNode(home.contracts),
