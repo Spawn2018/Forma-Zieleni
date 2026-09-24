@@ -254,6 +254,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/MOBILE-ANDROID-FOUNDATION.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Android Core API client foundation; no Play credentials."
+    },
+    {
       "path": "docs/architecture/NEXT-SLICE-LEAD-VERTICAL.md",
       "docType": "DOCUMENT",
       "audience": "developer",

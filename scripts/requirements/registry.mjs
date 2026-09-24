@@ -413,10 +413,9 @@ row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through 
   executableSlice: 'ADMIN-CRM-LEAD',
   executableWhenComplete: ['ADMIN-APP'],
 });
-row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/MOBILE-CLIENT-BOUNDARY.md', 'packages/domain/product-boundaries.test.mjs', 'Android foundation slice', 'REVIEW', 'The mobile boundary is not an Android runtime.', {
+row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',
   depth: 'ANDROID_RUNTIME',
-  blockerClass: 'INTERNAL',
   executableSlice: 'MOBILE-ANDROID-FOUNDATION',
   executableWhenComplete: ['MOBILE-CLIENT-BOUNDARY'],
 });

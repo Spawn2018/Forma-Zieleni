@@ -414,11 +414,14 @@ Next: none.
 
 Dependencies: MOBILE-CLIENT-BOUNDARY.
 Gate: REVIEW.
-Status: OPEN. Store signing and Play credentials stay out.
+Status: COMPLETE for an Android-surface client foundation in
+`apps/mobile-android` that probes Core API `/v1/health` and `/v1/ready`
+through typed api-client paths. No on-device commercial state, no Play
+credentials, no store upload.
 Autonomous: yes.
 Accept: an Android client foundation that calls Core API and does not
 own commercial state.
-Tests: the foundation's contract tests. No store upload.
+Tests: `apps/mobile-android/foundation.test.mjs`. No store upload.
 Security: no production credentials in the tree.
 Next: none.
 
