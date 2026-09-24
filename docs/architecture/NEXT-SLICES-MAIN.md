@@ -373,12 +373,14 @@ Next: GARDENOS-DOMAIN.
 
 Dependencies: CRM-CONTRACT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN. Provider selection stays undecided.
+Status: COMPLETE for a provider-neutral payment schedule and installment
+states on a Contract in `packages/domain/src/payment.ts`. Synthetic
+amounts only. No provider, charge, webhook, or card data.
 Autonomous: yes.
 Accept: a provider-neutral payment schedule and states on a contract,
 with synthetic amounts only. No provider, no charge, no webhook to a
 vendor.
-Tests: domain payment tests named by the slice when implemented.
+Tests: `packages/domain/payment.test.mjs`.
 Security: no card data, no provider secrets.
 Next: SIGN-STATE-NEUTRAL.
 

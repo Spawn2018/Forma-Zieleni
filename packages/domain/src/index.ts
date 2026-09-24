@@ -127,6 +127,22 @@ export {
 } from './contract.ts';
 export type { Contract, ContractStatus } from './contract.ts';
 export {
+  PAYMENT_INSTALLMENT_STATUSES,
+  assertOpaquePaymentInstallmentId,
+  assertOpaquePaymentScheduleId,
+  cancelInstallment,
+  createPaymentSchedule,
+  markInstallmentDue,
+  recordInstallmentSynthetic,
+  waiveInstallment,
+} from './payment.ts';
+export type {
+  PaymentInstallment,
+  PaymentInstallmentSpec,
+  PaymentInstallmentStatus,
+  PaymentSchedule,
+} from './payment.ts';
+export {
   PROJECT_STATUSES,
   assertOpaqueProjectId,
   createProject,

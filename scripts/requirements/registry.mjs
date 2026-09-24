@@ -457,10 +457,9 @@ row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids a
   executableSlice: 'SKETCHUP-PROJECT-MAP',
   executableWhenComplete: ['SKETCHUP-ADAPTER-BOUNDARY'],
 });
-row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and without moving money.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, 'packages/domain/contract.test.mjs', 'provider-neutral payment slice', 'REVIEW', 'Provider selection stays FZ-REQ-PAY-001.', {
+row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and without moving money.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/payment.ts', 'packages/domain/payment.test.mjs', '', 'NONE', 'Provider-neutral schedule on Contract; FZ-REQ-PAY-001 provider stays OWNER-DECISION.', {
   productCapability: 'PAYMENT',
   depth: 'DOMAIN',
-  blockerClass: 'INTERNAL',
   executableSlice: 'PAY-DOMAIN-NEUTRAL',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
