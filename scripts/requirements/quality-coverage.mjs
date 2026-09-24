@@ -178,10 +178,10 @@ function engineeringProfile(activation) {
 const SUBJECTS = Object.freeze([
   ['WWW', () => surfaceProfile('WWW-PORTFOLIO-PROJECTION')],
   ['PORTAL', () => surfaceProfile('PORTAL-FILE-PROJECTION')],
-  ['ADMIN', () => surfaceProfile('ADMIN-CRM-LEAD')],
+  ['ADMIN', () => surfaceProfile('ADMIN-CRM-OFFER')],
   ['LEAD', () => domainProfile('ADMIN-CRM-LEAD')],
   ['OPPORTUNITY', () => domainProfile('CRM-OPPORTUNITY-CONTRACT is complete; browser journey waits')],
-  ['OFFER', () => domainProfile('PORTAL-OFFER acceptance journey')],
+  ['OFFER', () => domainProfile('ADMIN-CRM-OFFER')],
   ['CONTRACT', () => domainProfile('SIGN-STATE-NEUTRAL')],
   ['SIGNING', () => providerProfile('FZ-SIGN-1')],
   ['PAYMENT', () => providerProfile('PAY-DOMAIN-NEUTRAL')],
@@ -242,7 +242,7 @@ export const E2E_FOUNDATION = Object.freeze({
 export const CRITICAL_JOURNEYS = Object.freeze([
   journey('www-lead', 'WWW', 'FZ-REQ-WWW-001', 'public-enquiry', 'WWW-PORTFOLIO-PROJECTION'),
   journey('lead-opportunity', 'LEAD', 'FZ-REQ-SEC-001', 'lead-qualify', 'ADMIN-CRM-LEAD'),
-  journey('opportunity-offer', 'OFFER', 'FZ-REQ-CRM-OFFER-001', 'offer-issue', 'PORTAL-OFFER acceptance'),
+  journey('opportunity-offer', 'OFFER', 'FZ-REQ-CRM-OFFER-001', 'offer-issue', 'ADMIN-CRM-OFFER'),
   journey('offer-portal', 'PORTAL', 'FZ-REQ-PORTAL-002', 'portal-offer', 'PORTAL-OFFER acceptance'),
   journey('offer-contract', 'CONTRACT', 'FZ-REQ-CRM-CONTRACT-001', 'contract-open', 'SIGN-STATE-NEUTRAL'),
   journey('contract-sign', 'SIGNING', 'FZ-REQ-SIGN-001', 'sign-state', 'FZ-SIGN-1'),

@@ -4,7 +4,9 @@ import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
   adminShell,
+  createAdminOffer,
   fetchAdminLeads,
+  fetchAdminOffers,
   qualifyAdminLead,
   resolveAdminHome,
   type AdminHome,
@@ -15,7 +17,7 @@ function apiOrigin(): string | undefined {
 }
 
 export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> {
-  // Session + leads come from Core API when configured. Forward the browser
+  // Session + CRM lists come from Core API when configured. Forward the browser
   // session cookie on the SSR hop — credentials alone do not. Never invents
   // CRM writes or client facts.
   const base = apiOrigin();
@@ -38,6 +40,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     async loadLeads() {
       return fetchAdminLeads({ base, cookie });
     },
+    async loadOffers() {
+      return fetchAdminOffers({ base, cookie });
+    },
   });
 }
 
@@ -45,26 +50,46 @@ export async function action({ request }: Route.ActionArgs) {
   const base = apiOrigin();
   if (!base) return data({ ok: false as const, reason: 'error' as const }, { status: 503 });
   const form = await request.formData();
-  if (form.get('intent') !== 'qualify') {
-    return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
-  }
-  const leadId = form.get('leadId');
-  if (typeof leadId !== 'string' || !leadId) {
-    return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
-  }
-  const capacityHold = form.get('capacityHold') === 'true';
+  const intent = form.get('intent');
   const cookie = request.headers.get('cookie') ?? '';
-  const result = await qualifyAdminLead({
-    base,
-    leadId,
-    capacityHold,
-    idempotencyKey: randomUUID(),
-    cookie,
-  });
-  if (!result.ok) {
-    return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+
+  if (intent === 'qualify') {
+    const leadId = form.get('leadId');
+    if (typeof leadId !== 'string' || !leadId) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const capacityHold = form.get('capacityHold') === 'true';
+    const result = await qualifyAdminLead({
+      base,
+      leadId,
+      capacityHold,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
   }
-  return redirect('/');
+
+  if (intent === 'create-offer') {
+    const opportunityId = form.get('opportunityId');
+    if (typeof opportunityId !== 'string' || !opportunityId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminOffer({
+      base,
+      opportunityId: opportunityId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
 }
 
 export function meta() {
@@ -74,15 +99,15 @@ export function meta() {
   ];
 }
 
-function qualifyFailureMessage(reason: 'forbidden' | 'error'): string {
-  if (reason === 'forbidden') return 'Nie masz uprawnień, aby kwalifikować leady.';
-  return 'Kwalifikacji nie udało się zapisać. Odśwież stronę i spróbuj ponownie.';
+function actionFailureMessage(reason: 'forbidden' | 'error'): string {
+  if (reason === 'forbidden') return 'Nie masz uprawnień do tej operacji personelu.';
+  return 'Operacji nie udało się zapisać. Odśwież stronę i spróbuj ponownie.';
 }
 
 export default function Home({ loaderData, actionData }: Route.ComponentProps) {
   const failure =
     actionData && actionData.ok === false
-      ? createElement('p', { className: 'admin-action-error', role: 'alert' }, qualifyFailureMessage(actionData.reason))
+      ? createElement('p', { className: 'admin-action-error', role: 'alert' }, actionFailureMessage(actionData.reason))
       : null;
   return createElement(
     'div',

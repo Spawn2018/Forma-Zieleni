@@ -83,7 +83,7 @@ tested('FZ-REQ-CREATIVE-001', 'Platform specs stay UNVERIFIED until a dated offi
 tested('FZ-REQ-EXPERIENCE-001', 'Behavior events reject name, email, phone, address and message. They are not conclusions.', GROWTH, PLAN);
 tested('FZ-REQ-EXPERIENCE-002', 'Session replay is off and cannot be enabled by this module.', GROWTH, PLAN);
 tested('FZ-REQ-CRM-001', 'Qualified path outranks raw lead volume when both numbers exist.', GROWTH, PLAN);
-row('FZ-REQ-CRM-OFFER-001', 'Offer is a first-class Core API domain object created from an Opportunity.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/offer.ts', 'packages/domain/offer.test.mjs', '', 'NONE', 'Staff create/list/get only. Portal projection and Admin UI stay later.', {
+row('FZ-REQ-CRM-OFFER-001', 'Offer is a first-class Core API domain object created from an Opportunity.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/offer.ts', 'packages/domain/offer.test.mjs', '', 'NONE', 'Staff create/list/get in Core API. Admin offer UI is FZ-REQ-ADMIN-003. Portal projection stays separate.', {
   productCapability: 'OFFER',
   executableSlice: 'CRM-OFFER-CONTRACT',
   executableWhenComplete: ['CRM-OPPORTUNITY-CONTRACT'],
@@ -410,6 +410,12 @@ row('FZ-REQ-ADMIN-002', 'Staff can list and qualify leads in apps/admin through 
   depth: 'WORKFLOW',
   executableSlice: 'ADMIN-CRM-LEAD',
   executableWhenComplete: ['ADMIN-APP'],
+});
+row('FZ-REQ-ADMIN-003', 'Staff can list and create offers in apps/admin through the existing Core API. No second offer store and no price on the list UI.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates offers via Core API only. Price stays off the staff list projection.', {
+  productCapability: 'ADMIN',
+  depth: 'OFFER_WORKFLOW',
+  executableSlice: 'ADMIN-CRM-OFFER',
+  executableWhenComplete: ['ADMIN-CRM-LEAD', 'CRM-OFFER-CONTRACT'],
 });
 row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',

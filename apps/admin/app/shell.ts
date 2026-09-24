@@ -18,10 +18,22 @@ export type AdminLeadList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminOfferRow = {
+  id: string;
+  opportunityId: string;
+  status: string;
+};
+
+export type AdminOfferList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminOfferRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
-  | { state: 'signed-in'; leads: AdminLeadList };
+  | { state: 'signed-in'; leads: AdminLeadList; offers: AdminOfferList };
 
 /**
  * Admin trust-zone session classification.
@@ -100,20 +112,99 @@ export async function fetchAdminLeads(input: {
   }
 }
 
+type OfferApiItem = {
+  id?: unknown;
+  opportunityId?: unknown;
+  status?: unknown;
+  price?: unknown;
+};
+
+export function mapOfferPage(body: unknown): AdminOfferList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminOfferRow[] = [];
+  for (const item of items) {
+    const offer = item as OfferApiItem;
+    if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
+    if (typeof offer.status !== 'string') return { status: 'error' };
+    if (Object.hasOwn(offer, 'price')) return { status: 'error' };
+    rows.push({
+      id: offer.id,
+      opportunityId: offer.opportunityId,
+      status: offer.status,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminOffers(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminOfferList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/offers?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapOfferPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminOffer(input: {
+  base: string;
+  opportunityId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/offers', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ opportunityId: input.opportunityId }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
- * Resolve admin home from optional Core API session probe + lead list.
- * Unconfigured probe → signed-out (truthful). Never invents leads.
+ * Resolve admin home from optional Core API session probe + lead/offer lists.
+ * Unconfigured probe → signed-out (truthful). Never invents CRM rows.
  */
 export async function resolveAdminHome(input: {
   probe?: () => Promise<AdminSessionActor | null>;
   loadLeads?: () => Promise<AdminLeadList>;
+  loadOffers?: () => Promise<AdminOfferList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
     const classified = classifyAdminSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    if (!input.loadLeads) return { state: 'signed-in', leads: { status: 'empty' } };
-    return { state: 'signed-in', leads: await input.loadLeads() };
+    const leads = input.loadLeads ? await input.loadLeads() : { status: 'empty' as const };
+    const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
+    return { state: 'signed-in', leads, offers };
   } catch {
     return { state: 'signed-out' };
   }
@@ -205,8 +296,61 @@ function leadListNode(leads: AdminLeadList): ReactNode {
   );
 }
 
+function offerListNode(offers: AdminOfferList): ReactNode {
+  if (offers.status === 'empty') {
+    return createElement('p', null, 'Brak ofert do pokazania.');
+  }
+  if (offers.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy ofert.');
+  }
+  if (offers.status === 'error') {
+    return createElement('p', null, 'Listy ofert nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-offers', 'aria-label': 'Oferty' },
+    createElement('h2', null, 'Oferty'),
+    createElement(
+      'ul',
+      { className: 'admin-offer-list' },
+      ...offers.items.map((offer) =>
+        createElement(
+          'li',
+          { key: offer.id, className: 'admin-offer' },
+          createElement(
+            'p',
+            { className: 'admin-offer-meta' },
+            ['szansa ', offer.opportunityId, ' · ', offer.status].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createOfferForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-offer' },
+    createElement('h2', null, 'Nowa oferta'),
+    createElement(
+      'label',
+      { className: 'admin-create-offer-id' },
+      'Id szansy',
+      createElement('input', {
+        type: 'text',
+        name: 'opportunityId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-offer' }, 'Utwórz ofertę'),
+  );
+}
+
 /**
- * Staff shell. Signed-in shows real Core API lead list states — never invented rows.
+ * Staff shell. Signed-in shows real Core API lead/offer states — never invented rows.
  */
 export function adminShell(home: AdminHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -234,5 +378,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createElement('h1', null, 'Panel personelu'),
     createElement('p', null, 'Jesteś zalogowany.'),
     leadListNode(home.leads),
+    offerListNode(home.offers),
+    createOfferForm(),
   );
 }

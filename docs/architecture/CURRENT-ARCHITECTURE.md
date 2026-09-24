@@ -17,7 +17,9 @@ ADR-014). Implementation and security acceptance are not complete.
   classification (signed-out / unauthorized / signed-in empty). Does not
   invent project, offer, or file facts. Core API exposes client-safe
   offer, project, and file metadata projections under `/v1/portal/*`.
-- `apps/admin` = README only until ADMIN-APP ships a real React Router app.
+- `apps/admin` = React Router Framework Mode. Staff trust-zone session
+  classification plus lead list/qualify and offer list/create through
+  Core API. Does not invent CRM rows or show price on the offer list.
 - WWW, Portal and Admin stay separate applications and trust zones.
 - React Router loaders and actions may act as BFF adapters only. They
   are not domain or business truth.

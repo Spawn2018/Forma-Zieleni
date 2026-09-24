@@ -582,7 +582,7 @@ export const CONNECTIVITY: Array<{ surface: string; state: string; reason: strin
   ['Core API', 'CONNECTED', 'Canonical business owner.'],
   ['Database', 'CONNECTED', 'PostgreSQL is the persistence truth. This module is the domain contract.'],
   ['Portal', 'PROJECTION', 'apps/portal is a React Router shell with session classification plus client offer, project, and file projections through Core API.'],
-  ['Admin', 'PROJECTION', 'apps/admin is a React Router application with staff lead list and qualify against Core API.'],
+  ['Admin', 'PROJECTION', 'apps/admin is a React Router application with staff lead list/qualify and offer list/create against Core API.'],
   ['Android', 'LOCAL_BY_DESIGN', 'Android foundation probes Core API only. Store distribution and commercial mobile state stay later.'],
   ['iOS', 'LOCAL_BY_DESIGN', 'iOS foundation probes Core API only. Store distribution and commercial mobile state stay later.'],
   ['CRM', 'CONNECTED', 'Lead vertical exists. Offer linkage is a domain contract, not a second CRM.'],

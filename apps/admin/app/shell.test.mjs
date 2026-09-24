@@ -8,8 +8,11 @@ import {
   adminSessionCookiePresent,
   adminShell,
   classifyAdminSession,
+  createAdminOffer,
   fetchAdminLeads,
+  fetchAdminOffers,
   mapLeadPage,
+  mapOfferPage,
   qualifyAdminLead,
   resolveAdminHome,
 } from './shell.ts';
@@ -54,11 +57,15 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.deepEqual(await resolveAdminHome({}), { state: 'signed-out' });
   assert.deepEqual(
     await resolveAdminHome({ probe: async () => ({ clientId: 'admin' }) }),
-    { state: 'signed-in', leads: { status: 'empty' } },
+    { state: 'signed-in', leads: { status: 'empty' }, offers: { status: 'empty' } },
   );
-  const signedIn = renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'empty' } }));
+  const signedIn = renderToStaticMarkup(
+    adminShell({ state: 'signed-in', leads: { status: 'empty' }, offers: { status: 'empty' } }),
+  );
   assert.match(signedIn, /Jesteś zalogowany/);
   assert.match(signedIn, /Brak leadów do pokazania/);
+  assert.match(signedIn, /Brak ofert do pokazania/);
+  assert.match(signedIn, /Utwórz ofertę/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -68,11 +75,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, offers: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, offers: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -90,13 +97,84 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      offers: {
+        status: 'ready',
+        items: [
+          {
+            id: 'of8k2n4p6q8r0s2t',
+            opportunityId: 'op8k2n4p6q8r0s2t',
+            status: 'draft',
+          },
+        ],
+      },
     }),
   );
   assert.match(ready, /Anna Kowalska/);
   assert.match(ready, /Kraków/);
   assert.match(ready, /Kwalifikuj/);
   assert.match(ready, /name="leadId"/);
+  assert.match(ready, /Oferty/);
+  assert.match(ready, /op8k2n4p6q8r0s2t/);
+  assert.match(ready, /Utwórz ofertę/);
   assert.equal(ready.toLowerCase().includes('lead nr'), false);
+  assert.equal(ready.toLowerCase().includes('oferta nr'), false);
+  assert.equal(ready.toLowerCase().includes('price'), false);
+});
+
+test('mapOfferPage and Core API offer fetch/create stay truthful', async () => {
+  assert.deepEqual(mapOfferPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapOfferPage({ items: [{ id: 1 }] }), { status: 'error' });
+  assert.deepEqual(
+    mapOfferPage({
+      items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft', price: 10 }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapOfferPage({
+      items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft' }],
+    }),
+    {
+      status: 'ready',
+      items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft' }],
+    },
+  );
+
+  const empty = await fetchAdminOffers({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response(JSON.stringify({ items: [], meta: {} }), { status: 200 }),
+  });
+  assert.deepEqual(empty, { status: 'empty' });
+
+  const forbidden = await fetchAdminOffers({
+    base: 'http://127.0.0.1:8787',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(forbidden, { status: 'forbidden' });
+
+  const created = await createAdminOffer({
+    base: 'http://127.0.0.1:8787',
+    opportunityId: 'op8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-offer-0001',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/offers$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(new Headers(init?.headers).get('idempotency-key'), 'admin-offer-0001');
+      assert.equal(String(init?.body), JSON.stringify({ opportunityId: 'op8k2n4p6q8r0s2t' }));
+      return new Response(JSON.stringify({ id: 'of8k2n4p6q8r0s2t', status: 'draft' }), { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
+
+  const denied = await createAdminOffer({
+    base: 'http://127.0.0.1:8787',
+    opportunityId: 'op8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-offer-0002',
+    async fetchImpl() {
+      return new Response('', { status: 403 });
+    },
+  });
+  assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
 test('mapLeadPage and Core API lead fetch stay truthful', async () => {
@@ -178,14 +256,16 @@ test('API-backed qualify workflow posts capacityHold with idempotency and blocks
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
-test('the route module keeps an error boundary and wires Core API lead flow', () => {
+test('the route module keeps an error boundary and wires Core API lead and offer flow', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('./shell.ts', import.meta.url), 'utf8');
   assert.match(home, /adminShell/);
   assert.match(home, /resolveAdminHome/);
   assert.match(home, /fetchAdminLeads/);
+  assert.match(home, /fetchAdminOffers/);
   assert.match(home, /qualifyAdminLead/);
+  assert.match(home, /createAdminOffer/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
@@ -195,7 +275,8 @@ test('the route module keeps an error boundary and wires Core API lead flow', ()
   assert.equal(home.includes('fonts.googleapis.com'), false);
   assert.equal(root.includes('fonts.googleapis.com'), false);
   assert.equal(shell.includes('leads:read'), false);
-  assert.equal(shell.includes('offers:'), false);
+  assert.equal(shell.includes('offers:read'), false);
+  assert.equal(shell.includes('offers:create'), false);
   assert.equal(shell.includes('projects:'), false);
   for (const phrase of prohibited) {
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);

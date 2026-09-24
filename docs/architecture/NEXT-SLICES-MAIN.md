@@ -413,6 +413,24 @@ and no invented customers.
 Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed qualify
 workflow with synthetic fetch).
 Security: staff session only; client tokens cannot qualify (Core API).
+Next: ADMIN-CRM-OFFER.
+
+### ADMIN-CRM-OFFER
+
+Dependencies: ADMIN-CRM-LEAD, CRM-OFFER-CONTRACT.
+Gate: REVIEW.
+Status: COMPLETE for staff list and create of offers in apps/admin
+through Core API `GET /v1/offers` and `POST /v1/offers`. Empty, error,
+and forbidden states are real. Price stays off the staff list UI. No
+second offer store and no invented commercial rows.
+Autonomous: yes.
+Accept: staff list and create offers in apps/admin through Core API.
+Empty, error, and unauthorized states are real. No second offer store,
+no price on the list UI, and no invented customers.
+Tests: `apps/admin/app/shell.test.mjs` (shell + API-backed offer
+fetch/create with synthetic fetch).
+Security: staff session only; portal tokens cannot create or list staff
+offers (Core API).
 Next: none.
 
 ### MOBILE-ANDROID-FOUNDATION
