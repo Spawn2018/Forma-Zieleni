@@ -64,7 +64,9 @@ ADR-014). Implementation and security acceptance are not complete.
   PostgreSQL. CMS-ACCEPT is not granted.
 - Published WWW content is a projection. The last published snapshot
   remains servable if the editorial process is down. Drafts stay
-  private.
+  private. Public portfolio items project only when marked for
+  publication (`WWW-PORTFOLIO-PROJECTION`); concept and illustrative
+  classes stay distinct; awards and prices are not invented.
 - Search Intelligence is a bounded FZ capability
   ([`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md)). It does not live in
   Apostrophe tables and does not write CRM state. Fixture connector

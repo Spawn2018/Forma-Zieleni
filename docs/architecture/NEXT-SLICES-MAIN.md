@@ -540,12 +540,15 @@ Next: none.
 
 Dependencies: CRM-PROJECT-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for a pure public portfolio projection
+(`apps/web/app/portfolio-projection.ts`). Sales portfolio UI and CMS
+case-study pages stay later.
 Autonomous: yes.
 Accept: the public site can project a project only when it is marked
 for publication. Concept and illustrative projects stay distinct. No
 invented awards or prices.
-Tests: web projection tests with synthetic projects.
+Tests: `apps/web/app/portfolio-projection.test.mjs` with synthetic
+projects.
 Security: private project fields stay off the public response.
 Next: none.
 

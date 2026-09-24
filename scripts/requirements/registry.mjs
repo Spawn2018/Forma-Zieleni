@@ -393,10 +393,9 @@ row('FZ-REQ-CRM-OPP-001', 'Opportunity is a first-class Core API object on the L
   productCapability: 'OPPORTUNITY',
   depth: 'DOMAIN',
 });
-row('FZ-REQ-WWW-002', 'The public site projects real or explicitly synthetic portfolio projects. It does not invent awards, prices, or client claims.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/web/app/published-home.ts', 'apps/web/app/published-home.test.mjs', 'portfolio projection slice', 'REVIEW', 'WWW foundation is not the sales portfolio.', {
+row('FZ-REQ-WWW-002', 'The public site projects real or explicitly synthetic portfolio projects. It does not invent awards, prices, or client claims.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/web/app/portfolio-projection.ts', 'apps/web/app/portfolio-projection.test.mjs', '', 'NONE', 'Evidence: projectPortfolioItem / projectPublicPortfolio. Concept and illustrative stay non-realizations; private fields refused. Sales portfolio UI and CMS case-study pages stay later.', {
   productCapability: 'WWW',
   depth: 'CLIENT_PROJECTION',
-  blockerClass: 'INTERNAL',
   executableSlice: 'WWW-PORTFOLIO-PROJECTION',
   executableWhenComplete: ['CRM-PROJECT-DOMAIN'],
 });

@@ -6,8 +6,8 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "typecheck": "react-router typegen && tsc -p tsconfig.json --noEmit",
-    "lint": "node --check app/published-home.test.mjs && node --check app/shell.test.mjs && node --check app/gallery.test.mjs && node --check app/before-after.test.mjs && node --check app/technical-seo.test.mjs && node --check app/structured-data.test.mjs && node --check app/cms-seo.test.mjs && node --check app/cms-harden.test.mjs && node --check app/cms-perf.test.mjs",
-    "test": "node --test app/published-home.test.mjs app/shell.test.mjs app/gallery.test.mjs app/before-after.test.mjs app/technical-seo.test.mjs app/structured-data.test.mjs app/cms-seo.test.mjs app/cms-harden.test.mjs app/cms-perf.test.mjs"
+    "lint": "node --check app/published-home.test.mjs && node --check app/shell.test.mjs && node --check app/gallery.test.mjs && node --check app/before-after.test.mjs && node --check app/technical-seo.test.mjs && node --check app/structured-data.test.mjs && node --check app/cms-seo.test.mjs && node --check app/cms-harden.test.mjs && node --check app/cms-perf.test.mjs && node --check app/portfolio-projection.test.mjs",
+    "test": "node --test app/published-home.test.mjs app/shell.test.mjs app/gallery.test.mjs app/before-after.test.mjs app/technical-seo.test.mjs app/structured-data.test.mjs app/cms-seo.test.mjs app/cms-harden.test.mjs app/cms-perf.test.mjs app/portfolio-projection.test.mjs"
   },
   "dependencies": {
     "@forma-zieleni/api-client": "workspace:*",

@@ -5,7 +5,7 @@
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
   "publishedHead": "3b6a88f",
   "postPushSafety": "PASS",
-  "codeRabbit": "Pending checkpoint review after remaining product boundary slices.",
+  "codeRabbit": "WWW-PORTFOLIO-PROJECTION checkpoint after local verification.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -25,10 +25,13 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "Boundary slices COMPLETE pending push. No safe READY AUTO/REVIEW product slice remains; remaining items are Owner gates / report-only / deferred. ExhaustionAllowed under /noc.",
+  "nextSafeAction": "WWW-PORTFOLIO-PROJECTION COMPLETE pending publish. No further safe READY AUTO/REVIEW product slice on MAIN; ExhaustionAllowed under /noc. Remaining work is Owner gates / report-only / deferred.",
   "learningCheck": "MATERIAL: unfinished binding internal requirements must declare executableSlice metadata; registryMaterializationGap is generic (no hard-coded capability names). Foundation-only DONE_AT_MAX_DEPTH must not make a product capability appear complete (Portal).",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
+    "apps/web/app/portfolio-projection.ts",
+    "apps/web/app/portfolio-projection.test.mjs",
+    "docs/architecture/WWW-PORTFOLIO-PROJECTION.md",
     "packages/domain/src/search-alerts.ts",
     "packages/domain/search-alerts.test.mjs",
     "apps/web/app/gallery.ts",
