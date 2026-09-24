@@ -1813,6 +1813,33 @@
       "lastSeen": "2026-09-24T16:01:40.365Z",
       "rejectionReason": "Owner temporary /noc consent (until 2026-09-24T21:00:00+02:00 Europe/Warsaw only) waives CodeRabbit free-tier re-review for this coherent unpublished SITEINTEL range; quota DEFERRED 3/3; repairs already landed locally. Not a permanent policy change.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-7-update-the-loa-28bb577a39",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 7, Update the `loader()` flow to obtain approved plants through `listPublicPlants` and `projectPlantForPublic`,",
+      "evidence": [
+        "cr-occurrence:origin/main:3369364c482a:cr-at-line-7-update-the-loa-28bb577a39",
+        "apps/web/app/routes/atlas.tsx",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "3369364c482abdccd70c342c3878cb3522332920",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-51d27b40",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T16:55:20.137Z",
+      "lastSeen": "2026-09-24T16:55:20.137Z",
+      "rejectionReason": "WWW apps cannot import @forma-zieleni/domain (client-app-owns-domain). Atlas loader uses projectAtlasCatalog over public DTOs; empty synthetic catalog is the accepted honest empty state until Core API feeds approved plants.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
