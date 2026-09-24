@@ -508,7 +508,7 @@ fetch/create with synthetic fetch); `apps/api/src/http.test.mjs` (staff
 list, portal forbidden on staff route, empty page).
 Security: staff session only; portal tokens cannot list staff files
 (Core API).
-Next: none.
+Next: FILE-BYTES-LOCAL.
 
 ### MOBILE-ANDROID-FOUNDATION
 
@@ -683,7 +683,7 @@ invented awards or prices.
 Tests: `apps/web/app/portfolio-projection.test.mjs` with synthetic
 projects.
 Security: private project fields stay off the public response.
-Next: none.
+Next: WWW-LEAD-CAPTURE.
 
 ### PXI-SIGNAL-MODEL
 
@@ -700,6 +700,180 @@ thin alias of `recordExperienceSignal`.
 Security: no customer PII and no replay payload.
 Next: none.
 
+## FZ-CONTINUE-1 — authorized depth while Owner gates stay deferred
+
+Owner authorization 2026-09-24:
+[`OWNER-AUTHORIZATION-FZ-CONTINUE-1.md`](./OWNER-AUTHORIZATION-FZ-CONTINUE-1.md).
+Provider picks, hosting, crawl policy, Cloudflare, secrets, spend, and
+live data stay gated. These slices deepen product surfaces with
+provider-neutral and local-only work.
+
+### FILE-BYTES-LOCAL
+
+Dependencies: ADMIN-CRM-FILE.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API stores and serves project file **bytes** through the
+already-decided local private adapter (FZ-A4). Checksummed immutable
+object under a non-guessable key. Download only through authorized Core
+API. No Garage, no public URL as ACL, no production object store, no
+provider pick.
+Tests: domain or API tests for store/get/deny; BOLA on file id; portal
+cannot use staff byte routes.
+Security: staff/portal authorization unchanged; no storage keys in
+logs; synthetic bytes only.
+Next: ADMIN-FILE-BYTES.
+
+### ADMIN-FILE-BYTES
+
+Dependencies: FILE-BYTES-LOCAL.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff upload and download of project file bytes in `apps/admin`
+through Core API only. Empty, error, and forbidden states are real. No
+second store and no invented files.
+Tests: `apps/admin` shell/API-backed tests with synthetic bytes.
+Security: staff session only; no client MIME trust beyond server sniff
+or allowlist already used by media rules where applicable.
+Next: none.
+
+### WWW-LEAD-CAPTURE
+
+Dependencies: none. WWW shell and public `POST /leads` already exist.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: a real public lead-capture form on `apps/web` that posts to
+Core API `POST /leads`. Synthetic copy only. No invented business
+facts, no second lead store, no CRM write from WWW loaders.
+Tests: web route/form test plus API contract already covering capture.
+Security: anonymous capture only; no staff tokens in the browser; rate
+limits remain on the API.
+Next: CAPACITY-DOMAIN.
+
+### CAPACITY-DOMAIN
+
+Dependencies: WWW-LEAD-CAPTURE.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API / domain Capacity that records owner/designer
+availability windows and refuses a promised consultation or start date
+outside capacity. No calendar SaaS, no Google hard-wire, no spend.
+Tests: domain tests for refuse-outside-capacity; no PII in capacity
+rows beyond actor ids if needed.
+Security: staff-only mutation; public cannot read raw capacity.
+Next: PROJECT-MILESTONE-DOMAIN.
+
+### PROJECT-MILESTONE-DOMAIN
+
+Dependencies: CAPACITY-DOMAIN, CRM-PROJECT-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: OpenAPI + domain Project milestones and a decision/change-order
+log owned by Core API. No payment, no signing provider, no portal UI in
+this slice.
+Tests: domain + OpenAPI + HTTP create/list with BOLA.
+Security: staff capabilities only; client cannot mutate milestones.
+Next: SIGN-LIFECYCLE-STAFF.
+
+### SIGN-LIFECYCLE-STAFF
+
+Dependencies: PROJECT-MILESTONE-DOMAIN, ADMIN-CRM-CONTRACT, SIGN-STATE-NEUTRAL.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff can advance provider-neutral contract lifecycle states
+already owned by Core API (for example DRAFT → INTERNAL_REVIEW →
+APPROVED → SENT) in `apps/admin`. No signing vendor, no ceremony, no
+QES claim, no webhook to a SaaS.
+Tests: admin + API transition tests; illegal transitions rejected.
+Security: staff session only; audit without contract body PII in logs.
+Next: PAY-SCHEDULE-STAFF.
+
+### PAY-SCHEDULE-STAFF
+
+Dependencies: SIGN-LIFECYCLE-STAFF, PAY-DOMAIN-NEUTRAL.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff can view and adjust the provider-neutral payment schedule
+on a Contract in `apps/admin`. No payment provider, no charge, no BLIK,
+no card, no money movement.
+Tests: admin + API schedule tests; amount fields stay server-validated.
+Security: staff only; no provider secrets; no real payment action.
+Next: PORTAL-OFFER-VIEW.
+
+### PORTAL-OFFER-VIEW
+
+Dependencies: PAY-SCHEDULE-STAFF, PORTAL-OFFER-PROJECTION.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: authenticated portal UI renders the existing client-safe Offer
+projection. Price/terms stay off if the projection already omits them.
+No staff mutation from Portal.
+Tests: portal route/view tests with synthetic projection.
+Security: clientSubject isolation; no staff tokens.
+Next: PORTAL-PROJECT-VIEW.
+
+### PORTAL-PROJECT-VIEW
+
+Dependencies: PORTAL-OFFER-VIEW, PORTAL-PROJECT-PROJECTION.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: authenticated portal UI renders the existing client-safe Project
+projection and metadata-only files already exposed. No upload from
+Portal in this slice unless FILE-BYTES-LOCAL already defines a client
+path (default: no).
+Tests: portal route/view tests; BOLA denied for another client.
+Security: clientSubject isolation.
+Next: ADMIN-APPROVAL-SURFACE.
+
+### ADMIN-APPROVAL-SURFACE
+
+Dependencies: PORTAL-PROJECT-VIEW, ADMIN-APP.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff approval UI in `apps/admin` for the existing Agnieszka
+approval domain actions (edit / partial approve / approve / reject /
+defer) over synthetic proposals. Cannot override Owner, spend, price,
+or live publication gates.
+Tests: admin UI + domain/API wiring tests.
+Security: staff capabilities; AI cannot overwrite human-locked fields.
+Next: GARDENOS-HTTP.
+
+### GARDENOS-HTTP
+
+Dependencies: ADMIN-APPROVAL-SURFACE, GARDENOS-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API HTTP routes for Garden records already modeled in
+domain. No digital-twin runtime, no XR, no invented plant advice.
+Tests: HTTP create/list/get with BOLA; portal read only if a safe
+projection already exists (otherwise staff-only).
+Security: authorization in Core API; no twin claim.
+Next: SITEINTEL-HTTP.
+
+### SITEINTEL-HTTP
+
+Dependencies: GARDENOS-HTTP, SITEINTEL-DOMAIN.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API HTTP routes for Site Intelligence domain records from
+rules output. No live Geoportal credentials, no AI conclusion stage, no
+production crawl.
+Tests: HTTP + BOLA; AI cannot invent site facts.
+Security: staff-only writes; synthetic observations only.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
@@ -708,13 +882,15 @@ Next: none.
 | Off-site backup / restic-pgBackRest | later staging | Local dump/restore exists; off-site is not this graph’s first READY |
 | OpenObserve / Garage / Compose staging | later | Gate A horizons, not Lead acceptance |
 | Cloudflare Tunnel / DNS / private-origin | DANGEROUS | Owner approval required |
-| FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED; does not block Contract domain without a SaaS adapter |
-| Payment provider | OWNER-DECISION | FZ-REQ-PAY-001; no transactions |
-| FZ-SEARCH-CRAWL-1 | OWNER-DECISION | OPEN |
+| FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED; FZ-CONTINUE-1 authorizes neutral lifecycle staff UI only |
+| Payment provider | OWNER-DECISION | FZ-REQ-PAY-001; no transactions; schedule staff UI only |
+| FZ-SEARCH-CRAWL-1 | OWNER-DECISION | OPEN; continue does not invent crawl policy |
+| Production hosting | OWNER-DECISION | UNDECIDED; no deploy |
 | CMS-ACCEPT / SEARCH-ACCEPT | report only | Stay on the CMS graph; not a global MAIN product barrier |
 | Lead security acceptance | OPEN | Blocks only claims of Lead security-accepted; does **not** block Offer/Admin/Portal |
 | ZAP ARMED_WAITING_FOR_TARGET | DEFERRED | Truthful; does **not** block unrelated product slices |
 | MFA / operator provisioning UI | later | ASVS V6 later row |
+| FZ-CONTINUE-1 | AUTHORIZED | Defer open Owner gates; keep DANGEROUS/OWNER-ONLY |
 
 ## Continuous improvement
 

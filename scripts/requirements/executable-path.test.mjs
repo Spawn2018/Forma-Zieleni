@@ -84,13 +84,16 @@ test('live scope has no coverage gap and Site Intelligence DOMAIN completes the 
   const site = parentProductReport(rows, { capability: 'SITEINTEL', requiredDepths: ['BOUNDARY', 'RULES', 'DOMAIN'] });
   assert.equal(site.complete, true);
   assert.deepEqual(site.openDepths, []);
-  assert.equal(masterProductScopeExhausted(rows, [], scope, models), true);
+  // FZ-CONTINUE-1 opened further approved depths; master is not exhausted.
+  assert.equal(masterProductScopeExhausted(rows, [], scope, models), false);
   assert.equal(rows.some((row) => row.id === 'FZ-REQ-PXI-001'), true);
   assert.equal(parentProductReport(rows, { capability: 'MOBILE', requiredDepths: ['BOUNDARY', 'ANDROID_RUNTIME', 'IOS_RUNTIME'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PAYMENT', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'SIGNING', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PXI', requiredDepths: ['CONTRACT'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'GARDENOS', requiredDepths: ['BOUNDARY', 'DOMAIN'] }).complete, true);
+  assert.equal(parentProductReport(rows, { capability: 'WWW', requiredDepths: ['FOUNDATION', 'CLIENT_PROJECTION', 'LEAD_CAPTURE'] }).complete, false);
+  assert.equal(rows.some((row) => row.id === 'FZ-REQ-DATA-002'), true);
 });
 
 test('done earlier depths do not complete a parent while a later approved depth is open', () => {

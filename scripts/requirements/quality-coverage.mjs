@@ -200,6 +200,7 @@ const SUBJECTS = Object.freeze([
   ['SEARCH', () => domainProfile('search intelligence stays non-authoritative over Canon')],
   ['MEDIA', () => domainProfile('media pipeline tests')],
   ['FILES', () => domainProfile('ADMIN-CRM-FILE and PORTAL-FILE-PROJECTION')],
+  ['CAPACITY', () => domainProfile('CAPACITY-DOMAIN; calendar SaaS stays out')],
   ['HOSTING', () => classes({
     ...providerProfile('FZ-REQ-HOST-001'),
     UNIT: owner('hosting selection'),

@@ -441,6 +441,102 @@ row('FZ-REQ-ADMIN-007', 'Staff can list and create project file metadata in apps
   executableSlice: 'ADMIN-CRM-FILE',
   executableWhenComplete: ['ADMIN-CRM-PROJECT'],
 });
+row('FZ-REQ-DATA-002', 'Core API stores and serves project file bytes through the local private adapter. No Garage and no public URL as ACL.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'FILE-BYTES-LOCAL not executed', 'REVIEW', 'FZ-CONTINUE-1 authorized depth; production object store stays Owner-gated.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'FILES',
+  depth: 'BYTES',
+  executableSlice: 'FILE-BYTES-LOCAL',
+  executableWhenComplete: ['ADMIN-CRM-FILE'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-008', 'Staff can upload and download project file bytes in apps/admin through Core API only.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'ADMIN-FILE-BYTES not executed', 'REVIEW', 'Depends on FILE-BYTES-LOCAL.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'FILE_BYTES_WORKFLOW',
+  executableSlice: 'ADMIN-FILE-BYTES',
+  executableWhenComplete: ['FILE-BYTES-LOCAL'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-WWW-003', 'Public WWW lead capture posts to Core API POST /leads. No second lead store and no invented business facts.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/web', 'apps/web/app', 'WWW-LEAD-CAPTURE not executed', 'REVIEW', 'FZ-CONTINUE-1 sales-application depth.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'WWW',
+  depth: 'LEAD_CAPTURE',
+  executableSlice: 'WWW-LEAD-CAPTURE',
+  executableWhenComplete: [],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'CAPACITY-DOMAIN not executed', 'REVIEW', 'Product Canon capacity constraint.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'CAPACITY',
+  depth: 'DOMAIN',
+  executableSlice: 'CAPACITY-DOMAIN',
+  executableWhenComplete: ['WWW-LEAD-CAPTURE'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'packages/domain', 'packages/domain', 'PROJECT-MILESTONE-DOMAIN not executed', 'REVIEW', 'Project OS depth under FZ-CONTINUE-1.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PROJECT',
+  depth: 'MILESTONE',
+  executableSlice: 'PROJECT-MILESTONE-DOMAIN',
+  executableWhenComplete: ['CAPACITY-DOMAIN', 'CRM-PROJECT-DOMAIN'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-009', 'Staff can advance provider-neutral contract lifecycle states in apps/admin without a signing vendor.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'SIGN-LIFECYCLE-STAFF not executed', 'REVIEW', 'FZ-SIGN-1 provider stays OWNER-DECISION.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'SIGNING',
+  depth: 'STAFF_WORKFLOW',
+  executableSlice: 'SIGN-LIFECYCLE-STAFF',
+  executableWhenComplete: ['PROJECT-MILESTONE-DOMAIN', 'ADMIN-CRM-CONTRACT', 'SIGN-STATE-NEUTRAL'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-010', 'Staff can view and adjust a provider-neutral payment schedule in apps/admin without moving money.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'PAY-SCHEDULE-STAFF not executed', 'REVIEW', 'Payment provider stays OWNER-DECISION.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PAYMENT',
+  depth: 'STAFF_WORKFLOW',
+  executableSlice: 'PAY-SCHEDULE-STAFF',
+  executableWhenComplete: ['SIGN-LIFECYCLE-STAFF', 'PAY-DOMAIN-NEUTRAL'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-PORTAL-006', 'Authenticated portal UI renders the client-safe Offer projection without staff mutation.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-OFFER-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-OFFER-VIEW',
+  executableWhenComplete: ['PAY-SCHEDULE-STAFF', 'PORTAL-OFFER-PROJECTION'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Project projection and metadata-only files.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-PROJECT-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-PROJECT-VIEW',
+  executableWhenComplete: ['PORTAL-OFFER-VIEW', 'PORTAL-PROJECT-PROJECTION'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'ADMIN-APPROVAL-SURFACE not executed', 'REVIEW', 'UI over existing approval domain.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'APPROVAL_WORKFLOW',
+  executableSlice: 'ADMIN-APPROVAL-SURFACE',
+  executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'ADMIN-APP'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, API, HTTP, 'GARDENOS-HTTP not executed', 'REVIEW', 'HTTP over GARDENOS-DOMAIN.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'GARDENOS',
+  depth: 'HTTP',
+  executableSlice: 'GARDENOS-HTTP',
+  executableWhenComplete: ['ADMIN-APPROVAL-SURFACE', 'GARDENOS-DOMAIN'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-SITEINTEL-004', 'Core API HTTP routes expose Site Intelligence domain records from rules output without live third-party credentials.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, API, HTTP, 'SITEINTEL-HTTP not executed', 'REVIEW', 'HTTP over SITEINTEL-DOMAIN.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'SITEINTEL',
+  depth: 'HTTP',
+  executableSlice: 'SITEINTEL-HTTP',
+  executableWhenComplete: ['GARDENOS-HTTP', 'SITEINTEL-DOMAIN'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',
   depth: 'ANDROID_RUNTIME',

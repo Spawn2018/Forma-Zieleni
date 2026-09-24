@@ -20,7 +20,9 @@ Contract lifecycle (provider undecided, not a Gate A blocker):
 CMS / public content is DECIDED (ADR-015, Apostrophe; CMS-ACCEPT remains open):
 `docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md` and
 `docs/architecture/NEXT-SLICES-CMS.md`. After RETURN-ROADMAP, ordinary
-READY work is `docs/architecture/NEXT-SLICES-MAIN.md`.
+READY work is `docs/architecture/NEXT-SLICES-MAIN.md`. Owner authorized
+further depth while deferring open provider/hosting gates:
+`docs/architecture/OWNER-AUTHORIZATION-FZ-CONTINUE-1.md` (FZ-CONTINUE-1).
 
 Rules: - Current canon outranks legacy implementation. - Legacy material
 is preserved for provenance and detailed domain/UX knowledge. - Supplied
