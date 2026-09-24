@@ -2002,6 +2002,87 @@
       "lastSeen": "2026-09-24T18:27:55.649Z",
       "rejectionReason": "ADMIN-CRM-PROJECT Accept mirrors ADMIN-CRM-LEAD/OFFER: first-page limit=50 is enough; cursor pagination is not required by this slice.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-lead-list-ren-b7dcb5a019",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the lead list rendered by leadListNode to provide staff a way to obtain the lead ID when creating an opportunit",
+      "evidence": [
+        "cr-occurrence:5dfdd9ef6a88:388f0c4eff2e:cr-update-the-lead-list-ren-b7dcb5a019",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "388f0c4eff2e5a189121b0ba0e7a375673658783",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-007ce4c3",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T19:18:22.790Z",
+      "lastSeen": "2026-09-24T19:18:22.790Z",
+      "rejectionReason": "ADMIN-CRM-OPPORTUNITY mirrors ADMIN-CRM-OFFER: staff paste opaque leadId; list UI does not expose ids on sibling entities.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-198-update-the-o-84e393afb3",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 198, Update the opportunity loader and opportunityListNode flow in the admin shell to support pagination: expose",
+      "evidence": [
+        "cr-occurrence:5dfdd9ef6a88:388f0c4eff2e:cr-at-line-198-update-the-o-84e393afb3",
+        "apps/admin/app/shell.ts",
+        "severity:high"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "388f0c4eff2e5a189121b0ba0e7a375673658783",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-8ca8e36d",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T19:18:22.818Z",
+      "lastSeen": "2026-09-24T19:18:22.818Z",
+      "rejectionReason": "First-page limit=50 matches ADMIN-CRM-PROJECT/OFFER; cursor pagination is not required by this slice.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-at-line-28-update-the-ne-4d38bc2cb7",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "at line 28, Update the nextSafeAction field so recovery does not select the completed ADMIN-CRM-OPPORTUNITY slice again;",
+      "evidence": [
+        "cr-occurrence:5dfdd9ef6a88:388f0c4eff2e:cr-at-line-28-update-the-ne-4d38bc2cb7",
+        "docs/engineering/requirements/execution-journal.json",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "388f0c4eff2e5a189121b0ba0e7a375673658783",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-b9b0be49",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T19:18:22.847Z",
+      "lastSeen": "2026-09-24T19:18:22.847Z",
+      "rejectionReason": "execution-journal nextSafeAction is updated at fz-noc complete after push; not a pre-ship defect.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
