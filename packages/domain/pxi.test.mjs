@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   EXPERIENCE_SIGNAL_CONTRACT_VERSION,
+  EXPERIENCE_SIGNAL_PII_KEYS,
   assertNoUniversalExperienceScore,
   enableSessionReplay,
   experienceSignalContract,
@@ -18,9 +19,8 @@ test('experience signal contract is versioned and refuses score and replay', () 
   assert.equal(contract.replay, 'OFF');
   assert.equal(contract.productionTelemetry, false);
   assert.equal(contract.universalExperienceScore, false);
-  assert.ok(contract.rejectedPiiKeys.includes('email'));
-  assert.ok(contract.rejectedPiiKeys.includes('phone'));
-  assert.ok(contract.rejectedPiiKeys.includes('message'));
+  assert.equal(contract.rejectedPiiKeys.length, 9);
+  assert.deepEqual([...contract.rejectedPiiKeys], [...EXPERIENCE_SIGNAL_PII_KEYS]);
   assert.equal(sessionReplayStatus(), 'OFF');
   assert.throws(() => enableSessionReplay(), /SESSION_REPLAY_OFF/);
   assert.throws(
@@ -37,33 +37,20 @@ test('experience signal contract is versioned and refuses score and replay', () 
   );
 });
 
-test('recordExperienceSignal rejects PII, replay payload, and scores', () => {
+test('recordExperienceSignal rejects every declared PII key, replay, and scores', () => {
   const ok = recordExperienceSignal({ event: 'form_start' });
   assert.equal(ok.version, 1);
   assert.equal(ok.name, 'form_start');
   assert.equal(ok.conclusion, false);
   assert.equal(ok.score, null);
 
-  assert.throws(
-    () => recordExperienceSignal({ event: 'form_start', email: 'a@example.invalid' }),
-    /FORM_VALUE_REJECTED/,
-  );
-  assert.throws(
-    () => recordExperienceSignal({ event: 'form_start', phone: '+48 600 000 000' }),
-    /FORM_VALUE_REJECTED/,
-  );
-  assert.throws(
-    () => recordExperienceSignal({ event: 'form_start', message: 'hello' }),
-    /FORM_VALUE_REJECTED/,
-  );
-  assert.throws(
-    () => recordExperienceSignal({ event: 'form_start', body: 'hello' }),
-    /FORM_VALUE_REJECTED/,
-  );
-  assert.throws(
-    () => recordExperienceSignal({ event: 'form_start', messageBody: 'hello' }),
-    /FORM_VALUE_REJECTED/,
-  );
+  for (const key of EXPERIENCE_SIGNAL_PII_KEYS) {
+    assert.throws(
+      () => recordExperienceSignal({ event: 'form_start', [key]: 'synthetic-value' }),
+      /FORM_VALUE_REJECTED/,
+      `expected ${key} to be rejected`,
+    );
+  }
   assert.throws(
     () => recordExperienceSignal({ event: 'form_start', sessionReplay: true }),
     /SESSION_REPLAY_OFF/,
