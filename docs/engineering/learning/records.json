@@ -1703,6 +1703,32 @@
       "occurrences": 1,
       "firstSeen": "2026-09-24T15:19:00.990Z",
       "lastSeen": "2026-09-24T15:21:22.389Z"
+    },
+    {
+      "patternKey": "cr-update-recordsiteintelli-9ecc3f7c4e",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update recordSiteIntelligenceFromRules so each finding code is validated against the normalized kind of its referenced",
+      "evidence": [
+        "cr-occurrence:origin/main:dcce376ddb78:cr-update-recordsiteintelli-9ecc3f7c4e",
+        "packages/domain/src/site-intelligence.ts",
+        "severity:high",
+        "accepted:cr-update-recordsiteintelli-9ecc3f7c4e"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "dcce376ddb780b49ca65c0d7297acd25610e51ae",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260924-7ffb4f5c",
+      "occurrences": 1,
+      "firstSeen": "2026-09-24T15:30:08.779Z",
+      "lastSeen": "2026-09-24T15:31:15.807Z"
     }
   ]
 }
