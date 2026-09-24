@@ -98,6 +98,20 @@ export {
 } from './growth.ts';
 export type { MarketingPlan, Offer as MarketingOffer, WorkItem } from './growth.ts';
 export {
+  EXPERIENCE_SIGNAL_CONTRACT_VERSION,
+  EXPERIENCE_SIGNAL_EVENTS,
+  EXPERIENCE_SIGNAL_PII_KEYS,
+  assertNoUniversalExperienceScore,
+  experienceSignalContract,
+  recordExperienceSignal,
+} from './pxi.ts';
+export type {
+  ExperienceSignal,
+  ExperienceSignalContract,
+  ExperienceSignalEvent,
+  ExperienceSignalPiiKey,
+} from './pxi.ts';
+export {
   atlasProvenanceBoundary,
   assertAtlasDoesNotAuthorizeAdvice,
 } from './atlas-boundary.ts';

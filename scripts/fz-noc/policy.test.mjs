@@ -223,7 +223,8 @@ test('main graph after Opportunity keeps product READY without ZAP or Lead accep
   assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
   assert.equal(picked.withheld.some((item) => item.id === 'LEAD-SEC-ACCEPT'), false);
   assert.equal(picked.exhaustionAllowed, false);
-  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), true);
+  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), false);
+  assert.equal(picked.ready.includes('SITEINTEL-RULES'), true);
 });
 
 test('a report-only acceptance checkpoint does not block the return', () => {
@@ -494,7 +495,8 @@ test('H: ZAP waiting does not appear as a READY product blocker', () => {
   assert.match(main, /does \*\*not\*\* block unrelated product/);
   const picked = selectReady(parseExecutionGraph(main), { requirements: [] });
   assert.equal(picked.ready.includes('PORTAL-FILE-PROJECTION'), false);
-  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), true);
+  assert.equal(picked.ready.includes('PXI-SIGNAL-MODEL'), false);
+  assert.equal(picked.ready.includes('SITEINTEL-RULES'), true);
   assert.equal(picked.ready.some((id) => /ZAP|DEPENDENCY-CHECK/.test(id)), false);
   assert.equal(picked.exhaustionAllowed, false);
 });

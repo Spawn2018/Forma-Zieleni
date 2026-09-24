@@ -545,12 +545,14 @@ Next: none.
 
 Dependencies: ADMIN-APP.
 Gate: REVIEW.
-Status: OPEN. Production telemetry stays off.
+Status: COMPLETE for a versioned experience-signal contract
+(`packages/domain/src/pxi.ts`). Production telemetry stays off.
 Autonomous: yes.
 Accept: a versioned experience-signal contract that rejects email,
 phone, and message bodies, keeps replay off, and refuses a universal
 experience score.
-Tests: domain tests for the signal contract.
+Tests: `packages/domain/pxi.test.mjs`; growth `recordBehavior` stays a
+thin alias of `recordExperienceSignal`.
 Security: no customer PII and no replay payload.
 Next: none.
 

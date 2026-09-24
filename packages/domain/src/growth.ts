@@ -386,25 +386,11 @@ export function assertRealFreshness(input: { bodyChanged: boolean; dateOnly: boo
   if (input.dateOnly && !input.bodyChanged) throw new Error('FAKE_FRESHNESS');
 }
 
-export function recordBehavior(event: Record<string, unknown>): { name: string; conclusion: false } {
-  if (event.sessionReplay === true) throw new Error('SESSION_REPLAY_OFF');
-  const forbidden = ['name', 'email', 'phone', 'address', 'message', 'fieldValue'];
-  for (const key of forbidden) {
-    if (key in event && event[key] != null && event[key] !== '') throw new Error('FORM_VALUE_REJECTED');
-  }
-  if (typeof event.event !== 'string') throw new Error('EVENT_NAME_REQUIRED');
-  const allowed = new Set(['form_view', 'form_start', 'field_error', 'validation_retry', 'abandon', 'submit_success']);
-  if (!allowed.has(event.event)) throw new Error('EVENT_NAME_REJECTED');
-  return { name: event.event, conclusion: false };
-}
-
-export function sessionReplayStatus(): 'OFF' {
-  return 'OFF';
-}
-
-export function enableSessionReplay(): void {
-  throw new Error('SESSION_REPLAY_OFF');
-}
+export {
+  enableSessionReplay,
+  recordExperienceSignal as recordBehavior,
+  sessionReplayStatus,
+} from './pxi.ts';
 
 export type Offer = {
   offerId: string;

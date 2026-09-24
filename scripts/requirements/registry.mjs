@@ -468,10 +468,9 @@ row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signatur
   executableSlice: 'SIGN-STATE-NEUTRAL',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-PXI-001', 'Experience signals are versioned, minimized, and replay-off. They do not become a universal experience score.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', GROWTH, PLAN, TEST, 'PXI signal slice', 'REVIEW', 'Production telemetry stays gated. The signal contract is safe now.', {
+row('FZ-REQ-PXI-001', 'Experience signals are versioned, minimized, and replay-off. They do not become a universal experience score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', GROWTH, 'packages/domain/src/pxi.ts', 'packages/domain/pxi.test.mjs', '', 'NONE', 'Production telemetry stays gated. The signal contract is safe now.', {
   productCapability: 'PXI',
   depth: 'CONTRACT',
-  blockerClass: 'INTERNAL',
   executableSlice: 'PXI-SIGNAL-MODEL',
   executableWhenComplete: ['ADMIN-APP'],
 });
