@@ -92,7 +92,7 @@ test('live scope has no coverage gap and Site Intelligence DOMAIN completes the 
   assert.equal(parentProductReport(rows, { capability: 'SIGNING', requiredDepths: ['OWNER_DECISION', 'DOMAIN'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'PXI', requiredDepths: ['CONTRACT'] }).complete, true);
   assert.equal(parentProductReport(rows, { capability: 'GARDENOS', requiredDepths: ['BOUNDARY', 'DOMAIN'] }).complete, true);
-  assert.equal(parentProductReport(rows, { capability: 'WWW', requiredDepths: ['FOUNDATION', 'CLIENT_PROJECTION', 'LEAD_CAPTURE'] }).complete, false);
+  assert.equal(parentProductReport(rows, { capability: 'WWW', requiredDepths: ['FOUNDATION', 'CLIENT_PROJECTION', 'LEAD_CAPTURE'] }).complete, true);
   assert.equal(rows.some((row) => row.id === 'FZ-REQ-DATA-002'), true);
 });
 
