@@ -81,7 +81,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'project.created';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created';
   leadId: string;
   payload: {
     leadId: string;
@@ -91,13 +91,14 @@ export type OutboxMessage = {
     offerId?: string;
     contractId?: string;
     projectId?: string;
+    fromStatus?: string;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'project.created';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -110,6 +111,7 @@ export type AuditEvent = {
     offerId?: string;
     contractId?: string;
     projectId?: string;
+    fromStatus?: string;
   };
 };
 
