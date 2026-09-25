@@ -488,13 +488,12 @@ row('FZ-REQ-ADMIN-010', 'Staff can view and adjust a provider-neutral payment sc
   executableSlice: 'PAY-SCHEDULE-STAFF',
   executableWhenComplete: ['SIGN-LIFECYCLE-STAFF', 'PAY-DOMAIN-NEUTRAL'],
 });
-row('FZ-REQ-PORTAL-006', 'Authenticated portal UI renders the client-safe Offer projection without staff mutation.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-OFFER-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
+row('FZ-REQ-PORTAL-006', 'Authenticated portal UI renders the client-safe Offer projection without staff mutation.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'UI over existing Core API portal offer projection. No price/terms.', {
   blockerClass: 'INTERNAL',
   productCapability: 'PORTAL',
   depth: 'CLIENT_UI',
   executableSlice: 'PORTAL-OFFER-VIEW',
   executableWhenComplete: ['PAY-SCHEDULE-STAFF', 'PORTAL-OFFER-PROJECTION'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Project projection and metadata-only files.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-PROJECT-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
   blockerClass: 'INTERNAL',

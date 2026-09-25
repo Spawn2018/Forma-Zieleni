@@ -833,13 +833,15 @@ Next: PORTAL-OFFER-VIEW.
 
 Dependencies: PAY-SCHEDULE-STAFF, PORTAL-OFFER-PROJECTION.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: authenticated portal UI renders the existing client-safe Offer
 projection. Price/terms stay off if the projection already omits them.
-No staff mutation from Portal.
-Tests: portal route/view tests with synthetic projection.
-Security: clientSubject isolation; no staff tokens.
+No staff mutation from Portal. `apps/portal` loads
+`GET /v1/portal/offers` with session cookie; empty/error/forbidden
+states are real.
+Tests: `apps/portal/app/shell.test.mjs`.
+Security: clientSubject isolation; no staff tokens; no price/terms UI.
 Next: PORTAL-PROJECT-VIEW.
 
 ### PORTAL-PROJECT-VIEW

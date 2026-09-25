@@ -13,9 +13,9 @@ Portal klienta Forma Zieleni.
 Aplikacja React Router Framework Mode (SSR). Układ, trasa `/` i granica
 błędu są w `app/`. Sesja portalu klasyfikuje stany: wylogowany,
 nieuprawniony, zalogowany (pusty). Tożsamość pochodzi z Core API
-`GET /v1/portal/session` (Better Auth). Loader nie zmyśla ofert,
-projektów ani plików. Projekcja ofert to osobny slice
-`PORTAL-OFFER-PROJECTION`.
+`GET /v1/portal/session` (Better Auth). Loader nie zmyśla ofert, projektów ani plików. Zalogowany klient
+widzi projekcję ofert z Core API (`GET /v1/portal/offers`) — bez ceny
+i warunków. Projekcja projektów to `PORTAL-PROJECT-VIEW`.
 
 Kolory są tokenami kanonu. Kroje Newsreader i Schibsted Grotesk są
 wskazane w CSS. Pliki fontów nie są dołączone.
