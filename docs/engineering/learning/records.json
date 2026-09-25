@@ -2698,6 +2698,61 @@
       "lastSeen": "2026-09-24T23:54:10.496Z",
       "rejectionReason": "assertInstant matches CAPACITY-DOMAIN: input is validated to equal the canonical ISO form before return; returning the original string preserves caller-supplied fractional precision already proven equal.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-update-the-outboxmessage-9decc70256",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Update the OutboxMessage and AuditEvent store types to allow the contract.lifecycle_advanced event/action and the from",
+      "evidence": [
+        "cr-occurrence:98cf64c26e32:d085b7770082:cr-update-the-outboxmessage-9decc70256",
+        "apps/api/src/contracts.ts",
+        "severity:high",
+        "accepted:cr-update-the-outboxmessage-9decc70256"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "d085b7770082ce19b1e15594f19836b1a724eab5",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260925-80c39096",
+      "occurrences": 1,
+      "firstSeen": "2026-09-25T00:20:02.953Z",
+      "lastSeen": "2026-09-25T00:20:55.785Z",
+      "rejectionReason": "Applied locally in 93371a1 (OutboxMessage/AuditEvent unions). Free-tier re-review rate-limited; verified by apps/api http lifecycle tests.",
+      "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-lock-the-contract-row-wh-d316bfc9a2",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": ", Lock the contract row when `findContract` loads it, before `advanceContractLifecycle` checks its status",
+      "evidence": [
+        "cr-occurrence:98cf64c26e32:d085b7770082:cr-lock-the-contract-row-wh-d316bfc9a2",
+        "apps/api/src/contracts.ts",
+        "severity:low"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "REJECTED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "d085b7770082ce19b1e15594f19836b1a724eab5",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20260925-d0e35258",
+      "occurrences": 1,
+      "firstSeen": "2026-09-25T00:20:02.979Z",
+      "lastSeen": "2026-09-25T00:20:02.979Z",
+      "rejectionReason": "Lifecycle advance already runs inside LeadStore.transaction; memory store is single-writer serial, and FOR UPDATE is a postgres-only optimization outside this slice.",
+      "effectState": "UNPLANNED"
     }
   ]
 }
