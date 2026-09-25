@@ -467,7 +467,7 @@ test('C: Portal foundation alone is not product-complete; CLIENT_UI stays open u
   for (const id of ['FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004', 'FZ-REQ-PORTAL-005']) {
     assert.equal(rows.find((row) => row.id === id).status, 'DONE_AT_MAX_DEPTH');
   }
-  assert.equal(rows.find((row) => row.id === 'FZ-REQ-PORTAL-006').status, 'BLOCKED_BY_DEPENDENCY');
+  assert.equal(rows.find((row) => row.id === 'FZ-REQ-PORTAL-006').status, 'DONE_AT_MAX_DEPTH');
   assert.equal(rows.find((row) => row.id === 'FZ-REQ-PORTAL-007').status, 'BLOCKED_BY_DEPENDENCY');
 });
 
