@@ -2,10 +2,10 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
-import { createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
+import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
@@ -468,6 +468,23 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const contract = await readContract(options.store, pathContractId(c.req.param('contractId')));
     if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    return c.json(contract);
+  });
+
+  app.post('/v1/contracts/:contractId/lifecycle', async c => {
+    const actor = await requireActor(c, options.authenticator, 'contracts:lifecycle');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateContractLifecycleAdvanceRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'CONTRACT_INVALID', 'Contract lifecycle could not be accepted.', parsed.errors);
+    const contract = await advanceContractLifecycleStatus(
+      options.store,
+      pathContractId(c.req.param('contractId')),
+      parsed.value.status,
+      actor,
+      key,
+      now(),
+    );
     return c.json(contract);
   });
 

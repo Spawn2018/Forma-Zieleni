@@ -822,6 +822,68 @@
         }
       }
     },
+    "/contracts/{contractId}/lifecycle": {
+      "post": {
+        "tags": [
+          "Contracts"
+        ],
+        "operationId": "advanceContractLifecycle",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff advance provider-neutral Contract lifecycle (draft → internal_review → approved → sent). No signing vendor, QES claim, payment, or webhook fields.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ContractId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractLifecycleAdvance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lifecycle advanced.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contract"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
     "/projects": {
       "post": {
         "tags": [
@@ -2585,9 +2647,12 @@
       "ContractStatus": {
         "type": "string",
         "enum": [
-          "draft"
+          "draft",
+          "internal_review",
+          "approved",
+          "sent"
         ],
-        "description": "Domain-owned Contract status. Callers cannot supply signing provider or lifecycle on create."
+        "description": "Domain-owned Contract lifecycle status. Create assigns draft; staff advance via lifecycle endpoint."
       },
       "ContractCreate": {
         "type": "object",
@@ -2600,6 +2665,19 @@
             "$ref": "#/components/schemas/OpaqueId"
           }
         }
+      },
+      "ContractLifecycleAdvance": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ContractStatus"
+          }
+        },
+        "description": "Next lifecycle status only. Payment, signing provider, and QES fields are forbidden."
       },
       "Contract": {
         "type": "object",

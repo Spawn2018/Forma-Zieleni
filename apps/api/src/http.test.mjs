@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create'],
 };
 
 const portal = {
@@ -609,6 +609,78 @@ test('contract create rejects missing offer, duplicate offer and client lifecycl
     ...bearer(staff),
   }));
   assert.equal(second.status, 409);
+});
+
+test('staff can advance contract lifecycle; portal cannot; illegal transitions rejected', async () => {
+  const { app, store } = appFor();
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'life-opp-1',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'life-offer-1',
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'life-ctr-1',
+    ...bearer(staff),
+  }))).json();
+  const path = `/v1/contracts/${contract.id}/lifecycle`;
+  assert.equal((await app.request(path, json({ status: 'internal_review' }))).status, 401);
+  assert.equal((await app.request(path, json({ status: 'internal_review' }, {
+    'idempotency-key': 'life-port-1',
+    ...bearer(portal),
+  }))).status, 403);
+  const skip = await app.request(path, json({ status: 'approved' }, {
+    'idempotency-key': 'life-skip-1',
+    ...bearer(staff),
+  }));
+  assert.equal(skip.status, 409);
+  assert.equal((await skip.json()).error.code, 'CONTRACT_TRANSITION_FORBIDDEN');
+  const vendor = await app.request(path, json({ status: 'internal_review', provider: 'x' }, {
+    'idempotency-key': 'life-vendor-1',
+    ...bearer(staff),
+  }));
+  assert.equal(vendor.status, 400);
+  const reviewed = await app.request(path, json({ status: 'internal_review' }, {
+    'idempotency-key': 'life-ok-1',
+    ...bearer(staff),
+  }));
+  assert.equal(reviewed.status, 200);
+  assert.equal((await reviewed.json()).status, 'internal_review');
+  const replay = await app.request(path, json({ status: 'internal_review' }, {
+    'idempotency-key': 'life-ok-1',
+    ...bearer(staff),
+  }));
+  assert.equal(replay.status, 200);
+  assert.equal((await replay.json()).status, 'internal_review');
+  const approved = await app.request(path, json({ status: 'approved' }, {
+    'idempotency-key': 'life-ok-2',
+    ...bearer(staff),
+  }));
+  assert.equal(approved.status, 200);
+  assert.equal((await approved.json()).status, 'approved');
+  const sent = await app.request(path, json({ status: 'sent' }, {
+    'idempotency-key': 'life-ok-3',
+    ...bearer(staff),
+  }));
+  assert.equal(sent.status, 200);
+  assert.equal((await sent.json()).status, 'sent');
+  const terminal = await app.request(path, json({ status: 'sent' }, {
+    'idempotency-key': 'life-term-1',
+    ...bearer(staff),
+  }));
+  assert.equal(terminal.status, 409);
+  const lifecycleAudits = store.state.audits.filter(event => event.action === 'contract.lifecycle_advanced');
+  assert.equal(lifecycleAudits.length, 3);
+  const auditish = JSON.stringify(lifecycleAudits);
+  assert.equal(auditish.includes(PHONE), false);
+  assert.equal(auditish.includes(NAME), false);
+  assert.equal(auditish.includes('provider'), false);
+  assert.equal(Object.hasOwn(lifecycleAudits[0].metadata, 'contractId'), true);
+  assert.equal(Object.hasOwn(lifecycleAudits[0].metadata, 'fromStatus'), true);
+  assert.equal(Object.hasOwn(lifecycleAudits[0].metadata, 'status'), true);
 });
 
 test('anonymous and portal actors cannot create, list or get projects; staff can', async () => {

@@ -797,14 +797,18 @@ Next: SIGN-LIFECYCLE-STAFF.
 
 Dependencies: PROJECT-MILESTONE-DOMAIN, ADMIN-CRM-CONTRACT, SIGN-STATE-NEUTRAL.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: staff can advance provider-neutral contract lifecycle states
-already owned by Core API (for example DRAFT → INTERNAL_REVIEW →
-APPROVED → SENT) in `apps/admin`. No signing vendor, no ceremony, no
-QES claim, no webhook to a SaaS.
-Tests: admin + API transition tests; illegal transitions rejected.
-Security: staff session only; audit without contract body PII in logs.
+already owned by Core API (`draft` → `internal_review` → `approved` →
+`sent`) in `apps/admin`. No signing vendor, no ceremony, no QES claim,
+no webhook to a SaaS. Domain `advanceContractLifecycle`; Core API
+`POST /v1/contracts/{contractId}/lifecycle` with `contracts:lifecycle`,
+Idempotency-Key, staff session; illegal transitions `409`; audit without
+contract body PII.
+Tests: `packages/domain/contract.test.mjs`, `apps/api/src/http.test.mjs`,
+`apps/admin/app/shell.test.mjs`, OpenAPI/inventory.
+Security: staff session only; portal 403; no payment/signing surface.
 Next: PAY-SCHEDULE-STAFF.
 
 ### PAY-SCHEDULE-STAFF

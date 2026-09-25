@@ -300,6 +300,15 @@ class PostgresTx implements LeadTx {
     }).execute();
   }
 
+  async saveContract(contract: Contract): Promise<void> {
+    await this.trx.updateTable('contract').set({
+      offer_id: contract.offerId,
+      status: contract.status,
+      created_at: new Date(contract.createdAt),
+      updated_at: new Date(contract.updatedAt),
+    }).where('id', '=', contract.id).execute();
+  }
+
   async findContract(id: string): Promise<Contract | null> {
     const row = await this.trx.selectFrom('contract').selectAll().where('id', '=', id).executeTakeFirst();
     return row ? toContract(row) : null;

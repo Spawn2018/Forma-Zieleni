@@ -475,13 +475,11 @@ row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log ar
   executableSlice: 'PROJECT-MILESTONE-DOMAIN',
   executableWhenComplete: ['CAPACITY-DOMAIN', 'CRM-PROJECT-DOMAIN'],
 });
-row('FZ-REQ-ADMIN-009', 'Staff can advance provider-neutral contract lifecycle states in apps/admin without a signing vendor.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'SIGN-LIFECYCLE-STAFF not executed', 'REVIEW', 'FZ-SIGN-1 provider stays OWNER-DECISION.', {
-  blockerClass: 'INTERNAL',
+row('FZ-REQ-ADMIN-009', 'Staff can advance provider-neutral contract lifecycle states in apps/admin without a signing vendor.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'FZ-SIGN-1 provider stays OWNER-DECISION. Evidence: domain advance + Core API lifecycle + admin UI.', {
   productCapability: 'SIGNING',
   depth: 'STAFF_WORKFLOW',
   executableSlice: 'SIGN-LIFECYCLE-STAFF',
   executableWhenComplete: ['PROJECT-MILESTONE-DOMAIN', 'ADMIN-CRM-CONTRACT', 'SIGN-STATE-NEUTRAL'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-010', 'Staff can view and adjust a provider-neutral payment schedule in apps/admin without moving money.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'PAY-SCHEDULE-STAFF not executed', 'REVIEW', 'Payment provider stays OWNER-DECISION.', {
   blockerClass: 'INTERNAL',

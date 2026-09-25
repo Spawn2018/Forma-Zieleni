@@ -129,6 +129,7 @@ export interface LeadTx {
   findOfferByOpportunity(opportunityId: string): Promise<Offer | null>;
   listOffers(query: OfferListQuery): Promise<Offer[]>;
   insertContract(contract: Contract): Promise<void>;
+  saveContract(contract: Contract): Promise<void>;
   findContract(id: string): Promise<Contract | null>;
   findContractByOffer(offerId: string): Promise<Contract | null>;
   listContracts(query: ContractListQuery): Promise<Contract[]>;

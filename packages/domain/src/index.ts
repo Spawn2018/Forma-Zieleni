@@ -167,8 +167,10 @@ export {
 export type { Offer, OfferStatus, PortalOfferProjection } from './offer.ts';
 export {
   CONTRACT_STATUSES,
+  advanceContractLifecycle,
   assertOpaqueContractId,
   createContract,
+  nextContractLifecycleStatus,
 } from './contract.ts';
 export type { Contract, ContractStatus } from './contract.ts';
 export {

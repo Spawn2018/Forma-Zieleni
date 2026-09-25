@@ -10,9 +10,16 @@ test('shared ContractRecord fields stay aligned with the OpenAPI Contract schema
   const contract = spec.components.schemas.Contract;
   assert.deepEqual(contract.required, ['id', 'offerId', 'status', 'createdAt', 'updatedAt']);
   assert.equal(contract.properties.status.$ref, '#/components/schemas/ContractStatus');
-  assert.deepEqual(spec.components.schemas.ContractStatus.enum, ['draft']);
+  assert.deepEqual(spec.components.schemas.ContractStatus.enum, [
+    'draft',
+    'internal_review',
+    'approved',
+    'sent',
+  ]);
   assert.equal(Object.hasOwn(contract.properties, 'signedAt'), false);
   assert.equal(Object.hasOwn(contract.properties, 'provider'), false);
   assert.deepEqual(spec.components.schemas.ContractCreate.required, ['offerId']);
   assert.equal(Object.hasOwn(spec.components.schemas.ContractCreate.properties, 'status'), false);
+  assert.deepEqual(spec.components.schemas.ContractLifecycleAdvance.required, ['status']);
+  assert.equal(Object.hasOwn(spec.components.schemas.ContractLifecycleAdvance.properties, 'provider'), false);
 });

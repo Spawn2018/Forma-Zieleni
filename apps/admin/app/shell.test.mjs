@@ -7,6 +7,7 @@ import {
   adminOriginAllowed,
   adminSessionCookiePresent,
   adminShell,
+  advanceAdminContractLifecycle,
   classifyAdminSession,
   createAdminContract,
   createAdminOffer,
@@ -25,6 +26,7 @@ import {
   mapOfferPage,
   mapOpportunityPage,
   mapProjectPage,
+  nextAdminContractLifecycleStatus,
   qualifyAdminLead,
   resolveAdminHome,
 } from './shell.ts';
@@ -183,6 +185,8 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Umowy/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
   assert.match(ready, /Utwórz umowę/);
+  assert.match(ready, /Do przeglądu/);
+  assert.match(ready, /advance-contract-lifecycle/);
   assert.match(ready, /Projekty/);
   assert.match(ready, /pr8k2n4p6q8r0s2t/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
@@ -243,6 +247,37 @@ test('mapContractPage and Core API contract fetch/create stay truthful', async (
     },
   });
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
+
+  assert.equal(nextAdminContractLifecycleStatus('draft'), 'internal_review');
+  assert.equal(nextAdminContractLifecycleStatus('internal_review'), 'approved');
+  assert.equal(nextAdminContractLifecycleStatus('approved'), 'sent');
+  assert.equal(nextAdminContractLifecycleStatus('sent'), null);
+
+  const advanced = await advanceAdminContractLifecycle({
+    base: 'http://127.0.0.1:8787',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    status: 'internal_review',
+    idempotencyKey: 'admin-life-0001',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/contracts\/ct8k2n4p6q8r0s2t\/lifecycle$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(new Headers(init?.headers).get('idempotency-key'), 'admin-life-0001');
+      assert.equal(String(init?.body), JSON.stringify({ status: 'internal_review' }));
+      return new Response(JSON.stringify({ id: 'ct8k2n4p6q8r0s2t', status: 'internal_review' }), { status: 200 });
+    },
+  });
+  assert.deepEqual(advanced, { ok: true });
+
+  const lifecycleDenied = await advanceAdminContractLifecycle({
+    base: 'http://127.0.0.1:8787',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    status: 'internal_review',
+    idempotencyKey: 'admin-life-0002',
+    async fetchImpl() {
+      return new Response('', { status: 403 });
+    },
+  });
+  assert.deepEqual(lifecycleDenied, { ok: false, reason: 'forbidden' });
 });
 
 test('mapProjectPage and Core API project fetch/create stay truthful', async () => {
@@ -589,6 +624,7 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminOpportunity/);
   assert.match(home, /createAdminOffer/);
   assert.match(home, /createAdminContract/);
+  assert.match(home, /advanceAdminContractLifecycle/);
   assert.match(home, /fetchAdminProjects/);
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
@@ -608,6 +644,7 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.equal(shell.includes('offers:create'), false);
   assert.equal(shell.includes('contracts:read'), false);
   assert.equal(shell.includes('contracts:create'), false);
+  assert.equal(shell.includes('contracts:lifecycle'), false);
   assert.equal(shell.includes('projects:read'), false);
   assert.equal(shell.includes('projects:create'), false);
   assert.equal(shell.includes('files:read'), false);

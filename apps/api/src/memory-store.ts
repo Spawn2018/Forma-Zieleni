@@ -223,6 +223,12 @@ class MemoryTx implements LeadTx {
     this.state.contracts.push(clone(contract));
   }
 
+  async saveContract(contract: Contract): Promise<void> {
+    const index = this.state.contracts.findIndex(item => item.id === contract.id);
+    if (index < 0) throw new Error('CONTRACT_MISSING');
+    this.state.contracts[index] = clone(contract);
+  }
+
   async findContract(id: string): Promise<Contract | null> {
     return clone(this.state.contracts.find(item => item.id === id) ?? null);
   }

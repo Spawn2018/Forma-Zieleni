@@ -80,6 +80,12 @@ test('mutations require idempotency and public capture has no bearer requirement
   ]);
   assert.deepEqual(spec.paths['/contracts'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/contracts/{contractId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/contracts/{contractId}/lifecycle'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/contracts/{contractId}/lifecycle'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/ContractId',
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
   assert.deepEqual(spec.paths['/projects'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/projects'].post.parameters.map(p => p.$ref), [
     '#/components/parameters/IdempotencyKey',

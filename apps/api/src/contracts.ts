@@ -1,4 +1,4 @@
-import { createContract, type Contract, type ContractStatus } from '@forma-zieleni/domain';
+import { advanceContractLifecycle, createContract, type Contract, type ContractStatus } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
 import { newContractId, newOpaqueId } from './ids.ts';
@@ -6,7 +6,7 @@ import { decodeCursor, encodeCursor, requestHash } from './leads.ts';
 import type { ContractListQuery, LeadStore, SortField, StoredReply } from './store.ts';
 
 const SORTS = new Set<SortField>(['createdAt', '-createdAt', 'updatedAt', '-updatedAt']);
-const STATUSES = new Set<ContractStatus>(['draft']);
+const STATUSES = new Set<ContractStatus>(['draft', 'internal_review', 'approved', 'sent']);
 
 export function parseContractListQuery(input: {
   limit?: string;
@@ -100,6 +100,74 @@ export async function createContractFromOffer(
       'contract.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: contract },
+      at,
+    );
+    return contract;
+  });
+}
+
+export async function advanceContractLifecycleStatus(
+  store: LeadStore,
+  contractId: string,
+  nextStatus: ContractStatus,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<Contract> {
+  const hash = requestHash({ scope: 'contract.lifecycle', contractId, status: nextStatus });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'contract.lifecycle', idempotencyKey, hash);
+    if (replay) return replay.responseBody as Contract;
+    const current = await tx.findContract(contractId);
+    if (!current) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(current.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let contract: Contract;
+    try {
+      contract = advanceContractLifecycle(current, nextStatus, at);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'CONTRACT_TRANSITION_FORBIDDEN') {
+        throw new ApiFailure(409, 'CONTRACT_TRANSITION_FORBIDDEN', 'Contract lifecycle transition is not allowed.');
+      }
+      if (error instanceof Error && error.message === 'CONTRACT_STATUS_INVALID') {
+        throw new ApiFailure(400, 'CONTRACT_STATUS_INVALID', 'Contract status is not valid.');
+      }
+      if (error instanceof Error && error.message === 'CONTRACT_SURFACE_FORBIDDEN') {
+        throw new ApiFailure(400, 'CONTRACT_SURFACE_FORBIDDEN', 'Contract surface fields are not allowed.');
+      }
+      throw error;
+    }
+    await tx.saveContract(contract);
+    await tx.insertOutbox({
+      id: newOpaqueId('o'),
+      eventType: 'contract.lifecycle_advanced',
+      leadId: opportunity.leadId,
+      payload: {
+        leadId: opportunity.leadId,
+        contractId: contract.id,
+        fromStatus: current.status,
+        status: contract.status,
+      },
+      at,
+    });
+    await tx.insertAudit({
+      id: newOpaqueId('a'),
+      action: 'contract.lifecycle_advanced',
+      actorId: actor.actorId,
+      leadId: opportunity.leadId,
+      at,
+      metadata: {
+        contractId: contract.id,
+        fromStatus: current.status,
+        status: contract.status,
+      },
+    });
+    await tx.saveIdempotency(
+      'contract.lifecycle',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: contract },
       at,
     );
     return contract;

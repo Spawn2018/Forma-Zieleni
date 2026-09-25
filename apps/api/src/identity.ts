@@ -16,8 +16,10 @@ function isCapability(value: string): value is Capability {
   return value === 'leads:read' || value === 'leads:qualify'
     || value === 'opportunities:read' || value === 'opportunities:create'
     || value === 'offers:read' || value === 'offers:create' || value === 'offers:portal-read'
-    || value === 'contracts:read' || value === 'contracts:create'
+    || value === 'contracts:read' || value === 'contracts:create' || value === 'contracts:lifecycle'
     || value === 'projects:read' || value === 'projects:create' || value === 'projects:portal-read'
+    || value === 'files:read' || value === 'files:create' || value === 'files:portal-read'
+    || value === 'milestones:read' || value === 'milestones:create'
     || isContentCapability(value) || isGrowthCapability(value);
 }
 

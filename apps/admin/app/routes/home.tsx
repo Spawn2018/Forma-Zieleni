@@ -4,6 +4,7 @@ import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
   adminShell,
+  advanceAdminContractLifecycle,
   createAdminContract,
   createAdminOffer,
   createAdminOpportunity,
@@ -134,6 +135,28 @@ export async function action({ request }: Route.ActionArgs) {
     const result = await createAdminContract({
       base,
       offerId: offerId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'advance-contract-lifecycle') {
+    const contractId = form.get('contractId');
+    const status = form.get('status');
+    if (typeof contractId !== 'string' || !contractId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof status !== 'string' || !status.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await advanceAdminContractLifecycle({
+      base,
+      contractId: contractId.trim(),
+      status: status.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

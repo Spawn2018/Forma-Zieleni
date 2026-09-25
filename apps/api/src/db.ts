@@ -796,6 +796,67 @@ DROP TABLE IF EXISTS project_milestone;
   },
 };
 
+const CONTRACT_LIFECYCLE_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const contractLifecycleMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE contract DROP CONSTRAINT IF EXISTS contract_status_known;
+ALTER TABLE contract ADD CONSTRAINT contract_status_known
+  CHECK (status IN ('draft', 'internal_review', 'approved', 'sent'));
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${CONTRACT_LIFECYCLE_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DO $contract_lifecycle_down$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM contract
+    WHERE status IN ('internal_review', 'approved', 'sent')
+  ) THEN
+    RAISE EXCEPTION 'CONTRACT_LIFECYCLE_ROWS_BLOCK_DOWN';
+  END IF;
+END
+$contract_lifecycle_down$;
+DELETE FROM actor_capability WHERE capability = 'contracts:lifecycle';
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${MILESTONE_CAPABILITY_SQL}));
+ALTER TABLE contract DROP CONSTRAINT IF EXISTS contract_status_known;
+ALTER TABLE contract ADD CONSTRAINT contract_status_known CHECK (status IN ('draft'));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -812,6 +873,7 @@ const provider: MigrationProvider = {
       '011_project_delivered_status': projectDeliveredMigration,
       '012_portal_file_projection': portalFileMigration,
       '013_project_milestone_domain': projectMilestoneMigration,
+      '014_contract_lifecycle': contractLifecycleMigration,
     };
   },
 };

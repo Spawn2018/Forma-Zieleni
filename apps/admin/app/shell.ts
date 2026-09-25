@@ -403,6 +403,54 @@ export async function createAdminContract(input: {
   }
 }
 
+/** Next allowed provider-neutral lifecycle status, or null when terminal. */
+export function nextAdminContractLifecycleStatus(status: string): string | null {
+  if (status === 'draft') return 'internal_review';
+  if (status === 'internal_review') return 'approved';
+  if (status === 'approved') return 'sent';
+  return null;
+}
+
+function lifecycleAdvanceLabel(nextStatus: string): string {
+  if (nextStatus === 'internal_review') return 'Do przeglądu';
+  if (nextStatus === 'approved') return 'Zatwierdź';
+  if (nextStatus === 'sent') return 'Oznacz jako wysłaną';
+  return 'Dalej';
+}
+
+export async function advanceAdminContractLifecycle(input: {
+  base: string;
+  contractId: string;
+  status: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/contracts/${encodeURIComponent(input.contractId)}/lifecycle`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ status: input.status }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 type ProjectApiItem = {
   id?: unknown;
   contractId?: unknown;
@@ -811,8 +859,9 @@ function contractListNode(contracts: AdminContractList): ReactNode {
     createElement(
       'ul',
       { className: 'admin-contract-list' },
-      ...contracts.items.map((contract) =>
-        createElement(
+      ...contracts.items.map((contract) => {
+        const nextStatus = nextAdminContractLifecycleStatus(contract.status);
+        return createElement(
           'li',
           { key: contract.id, className: 'admin-contract' },
           createElement(
@@ -820,8 +869,21 @@ function contractListNode(contracts: AdminContractList): ReactNode {
             { className: 'admin-contract-meta' },
             [contract.id, ' · oferta ', contract.offerId, ' · ', contract.status].join(''),
           ),
-        ),
-      ),
+          nextStatus
+            ? createElement(
+                'form',
+                { method: 'post', className: 'admin-contract-lifecycle' },
+                createElement('input', { type: 'hidden', name: 'contractId', value: contract.id }),
+                createElement('input', { type: 'hidden', name: 'status', value: nextStatus }),
+                createElement(
+                  'button',
+                  { type: 'submit', name: 'intent', value: 'advance-contract-lifecycle' },
+                  lifecycleAdvanceLabel(nextStatus),
+                ),
+              )
+            : null,
+        );
+      }),
     ),
   );
 }

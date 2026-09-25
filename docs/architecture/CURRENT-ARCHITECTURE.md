@@ -19,9 +19,9 @@ ADR-014). Implementation and security acceptance are not complete.
   offer, project, and file metadata projections under `/v1/portal/*`.
 - `apps/admin` = React Router Framework Mode. Staff trust-zone session
   classification plus lead list/qualify, offer list/create, contract
-  list/create, project list/create, and file metadata list/create
-  through Core API. No signing ceremony, no payment UI, and no invented
-  CRM rows.
+  list/create/lifecycle advance, project list/create, and file metadata
+  list/create through Core API. No signing ceremony, no payment UI, and
+  no invented CRM rows.
 - WWW, Portal and Admin stay separate applications and trust zones.
 - React Router loaders and actions may act as BFF adapters only. They
   are not domain or business truth.

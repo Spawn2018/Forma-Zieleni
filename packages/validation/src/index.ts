@@ -8,8 +8,14 @@ export { validateOpportunityCreateRequest } from './opportunity.ts';
 export type { OpportunityCreateRequest } from './opportunity.ts';
 export { validateOfferCreateRequest } from './offer.ts';
 export type { OfferCreateRequest } from './offer.ts';
-export { validateContractCreateRequest } from './contract.ts';
-export type { ContractCreateRequest } from './contract.ts';
+export {
+  validateContractCreateRequest,
+  validateContractLifecycleAdvanceRequest,
+} from './contract.ts';
+export type {
+  ContractCreateRequest,
+  ContractLifecycleAdvanceRequest,
+} from './contract.ts';
 export { validateProjectCreateRequest } from './project.ts';
 export type { ProjectCreateRequest } from './project.ts';
 export { validateProjectFileCreateRequest } from './project-file.ts';
