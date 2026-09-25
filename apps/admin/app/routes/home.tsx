@@ -9,15 +9,18 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  createAdminPaymentSchedule,
   createAdminProject,
   fetchAdminContracts,
   fetchAdminFiles,
   fetchAdminLeads,
   fetchAdminOffers,
   fetchAdminOpportunities,
+  fetchAdminPaymentSchedules,
   fetchAdminProjects,
   qualifyAdminLead,
   resolveAdminHome,
+  transitionAdminPaymentInstallment,
   type AdminHome,
 } from '../shell.ts';
 
@@ -63,6 +66,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadFiles() {
       return fetchAdminFiles({ base, cookie });
+    },
+    async loadPaymentSchedules() {
+      return fetchAdminPaymentSchedules({ base, cookie });
     },
   });
 }
@@ -156,6 +162,63 @@ export async function action({ request }: Route.ActionArgs) {
     const result = await advanceAdminContractLifecycle({
       base,
       contractId: contractId.trim(),
+      status: status.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-payment-schedule') {
+    const contractId = form.get('contractId');
+    const firstText = form.get('amountMinorFirst');
+    const secondText = form.get('amountMinorSecond');
+    if (typeof contractId !== 'string' || !contractId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const amountMinorFirst = typeof firstText === 'string' ? Number(firstText) : NaN;
+    const amountMinorSecond = typeof secondText === 'string' ? Number(secondText) : NaN;
+    if (!Number.isInteger(amountMinorFirst) || amountMinorFirst < 1) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (!Number.isInteger(amountMinorSecond) || amountMinorSecond < 1) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminPaymentSchedule({
+      base,
+      contractId: contractId.trim(),
+      currency: 'PLN',
+      amountMinorFirst,
+      amountMinorSecond,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'transition-payment-installment') {
+    const scheduleId = form.get('scheduleId');
+    const installmentId = form.get('installmentId');
+    const status = form.get('status');
+    if (typeof scheduleId !== 'string' || !scheduleId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof installmentId !== 'string' || !installmentId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof status !== 'string' || !status.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await transitionAdminPaymentInstallment({
+      base,
+      scheduleId: scheduleId.trim(),
+      installmentId: installmentId.trim(),
       status: status.trim(),
       idempotencyKey: randomUUID(),
       cookie,

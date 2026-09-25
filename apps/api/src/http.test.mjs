@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write'],
 };
 
 const portal = {
@@ -1119,4 +1119,92 @@ test('staff create and list project milestones and decision log; portal cannot m
     payment: true,
   }, { ...bearer(staff), 'idempotency-key': 'ms-create-bad1' }));
   assert.equal(paymentRejected.status, 400);
+});
+
+test('staff create, replace and transition payment schedules; portal cannot (BOLA)', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/payment-schedules')).status, 401);
+  assert.equal((await app.request('/v1/payment-schedules', { headers: bearer(portal) })).status, 403);
+
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'pay-opp-0001',
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'pay-offer-0001',
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'pay-contract-0001',
+  }))).json();
+
+  assert.equal((await app.request('/v1/payment-schedules', json({
+    contractId: contract.id,
+    currency: 'PLN',
+    installments: [{ sequence: 1, amountMinor: 100_00 }],
+    provider: 'stripe',
+  }, { ...bearer(staff), 'idempotency-key': 'pay-create-bad1' }))).status, 400);
+
+  const created = await app.request('/v1/payment-schedules', json({
+    contractId: contract.id,
+    currency: 'PLN',
+    installments: [
+      { sequence: 1, amountMinor: 400_00 },
+      { sequence: 2, amountMinor: 600_00 },
+    ],
+  }, { ...bearer(staff), 'idempotency-key': 'pay-create-0001' }));
+  assert.equal(created.status, 201);
+  const schedule = await created.json();
+  assert.equal(schedule.contractId, contract.id);
+  assert.equal(schedule.currency, 'PLN');
+  assert.equal(schedule.installments.length, 2);
+  assert.equal(Object.hasOwn(schedule, 'provider'), false);
+
+  assert.equal((await app.request('/v1/payment-schedules', json({
+    contractId: contract.id,
+    currency: 'PLN',
+    installments: [{ sequence: 1, amountMinor: 100_00 }],
+  }, { ...bearer(staff), 'idempotency-key': 'pay-create-0002' }))).status, 409);
+
+  const listed = await app.request(`/v1/payment-schedules?contractId=${contract.id}`, { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).items[0].id, schedule.id);
+  assert.equal((await app.request(`/v1/payment-schedules/${schedule.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request(`/v1/payment-schedules/${schedule.id}`, { headers: bearer(staff) })).status, 200);
+
+  const replaced = await app.request(`/v1/payment-schedules/${schedule.id}`, {
+    method: 'PUT',
+    headers: {
+      ...bearer(staff),
+      'content-type': 'application/json',
+      'idempotency-key': 'pay-replace-0001',
+    },
+    body: JSON.stringify({
+      installments: [{ sequence: 1, amountMinor: 250_00 }],
+    }),
+  });
+  assert.equal(replaced.status, 200);
+  const afterReplace = await replaced.json();
+  assert.equal(afterReplace.installments.length, 1);
+  assert.equal(afterReplace.installments[0].amountMinor, 250_00);
+
+  const installmentId = afterReplace.installments[0].id;
+  const due = await app.request(
+    `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
+    json({ status: 'due' }, { ...bearer(staff), 'idempotency-key': 'pay-due-0001' }),
+  );
+  assert.equal(due.status, 200);
+  assert.equal((await due.json()).installments[0].status, 'due');
+
+  assert.equal((await app.request(
+    `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
+    json({ status: 'due' }, { ...bearer(portal), 'idempotency-key': 'pay-due-portal' }),
+  )).status, 403);
+
+  assert.equal((await app.request(
+    `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
+    json({ status: 'due', chargeId: 'x' }, { ...bearer(staff), 'idempotency-key': 'pay-due-bad' }),
+  )).status, 400);
 });

@@ -28,3 +28,13 @@ export type {
   DecisionLogCreateRequest,
   ProjectMilestoneCreateRequest,
 } from './project-milestone.ts';
+export {
+  validatePaymentInstallmentTransitionRequest,
+  validatePaymentScheduleCreateRequest,
+  validatePaymentScheduleReplaceRequest,
+} from './payment.ts';
+export type {
+  PaymentInstallmentTransitionRequest,
+  PaymentScheduleCreateRequest,
+  PaymentScheduleReplaceRequest,
+} from './payment.ts';

@@ -80,6 +80,26 @@ export type AdminFileList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminPaymentInstallmentRow = {
+  id: string;
+  sequence: number;
+  amountMinor: number;
+  status: string;
+};
+
+export type AdminPaymentScheduleRow = {
+  id: string;
+  contractId: string;
+  currency: string;
+  installments: readonly AdminPaymentInstallmentRow[];
+};
+
+export type AdminPaymentScheduleList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminPaymentScheduleRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -91,6 +111,7 @@ export type AdminHome =
       contracts: AdminContractList;
       projects: AdminProjectList;
       files: AdminFileList;
+      paymentSchedules: AdminPaymentScheduleList;
     };
 
 /**
@@ -451,6 +472,143 @@ export async function advanceAdminContractLifecycle(input: {
   }
 }
 
+type PaymentScheduleApiItem = {
+  id?: unknown;
+  contractId?: unknown;
+  currency?: unknown;
+  installments?: unknown;
+};
+
+export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminPaymentScheduleRow[] = [];
+  for (const item of items) {
+    const schedule = item as PaymentScheduleApiItem;
+    if (typeof schedule.id !== 'string' || typeof schedule.contractId !== 'string') return { status: 'error' };
+    if (typeof schedule.currency !== 'string' || !Array.isArray(schedule.installments)) return { status: 'error' };
+    const installments: AdminPaymentInstallmentRow[] = [];
+    for (const raw of schedule.installments) {
+      if (!raw || typeof raw !== 'object') return { status: 'error' };
+      const line = raw as Record<string, unknown>;
+      if (typeof line.id !== 'string' || typeof line.status !== 'string') return { status: 'error' };
+      if (!Number.isInteger(line.sequence) || !Number.isInteger(line.amountMinor)) return { status: 'error' };
+      installments.push({
+        id: line.id,
+        sequence: line.sequence as number,
+        amountMinor: line.amountMinor as number,
+        status: line.status,
+      });
+    }
+    rows.push({
+      id: schedule.id,
+      contractId: schedule.contractId,
+      currency: schedule.currency,
+      installments,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminPaymentSchedules(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminPaymentScheduleList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/payment-schedules?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapPaymentSchedulePage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminPaymentSchedule(input: {
+  base: string;
+  contractId: string;
+  currency: string;
+  amountMinorFirst: number;
+  amountMinorSecond: number;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/payment-schedules', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({
+        contractId: input.contractId,
+        currency: input.currency,
+        installments: [
+          { sequence: 1, amountMinor: input.amountMinorFirst },
+          { sequence: 2, amountMinor: input.amountMinorSecond },
+        ],
+      }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export async function transitionAdminPaymentInstallment(input: {
+  base: string;
+  scheduleId: string;
+  installmentId: string;
+  status: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(
+        `/v1/payment-schedules/${encodeURIComponent(input.scheduleId)}/installments/${encodeURIComponent(input.installmentId)}/transition`,
+        input.base,
+      ),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ status: input.status }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 type ProjectApiItem = {
   id?: unknown;
   contractId?: unknown;
@@ -633,6 +791,7 @@ export async function resolveAdminHome(input: {
   loadContracts?: () => Promise<AdminContractList>;
   loadProjects?: () => Promise<AdminProjectList>;
   loadFiles?: () => Promise<AdminFileList>;
+  loadPaymentSchedules?: () => Promise<AdminPaymentScheduleList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
@@ -644,7 +803,10 @@ export async function resolveAdminHome(input: {
     const contracts = input.loadContracts ? await input.loadContracts() : { status: 'empty' as const };
     const projects = input.loadProjects ? await input.loadProjects() : { status: 'empty' as const };
     const files = input.loadFiles ? await input.loadFiles() : { status: 'empty' as const };
-    return { state: 'signed-in', leads, opportunities, offers, contracts, projects, files };
+    const paymentSchedules = input.loadPaymentSchedules
+      ? await input.loadPaymentSchedules()
+      : { status: 'empty' as const };
+    return { state: 'signed-in', leads, opportunities, offers, contracts, projects, files, paymentSchedules };
   } catch {
     return { state: 'signed-out' };
   }
@@ -1050,9 +1212,133 @@ function createFileForm(): ReactNode {
   );
 }
 
+function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode {
+  if (schedules.status === 'empty') {
+    return createElement('p', null, 'Brak harmonogramów płatności do pokazania.');
+  }
+  if (schedules.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać harmonogramów płatności.');
+  }
+  if (schedules.status === 'error') {
+    return createElement('p', null, 'Harmonogramów płatności nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-payment-schedules', 'aria-label': 'Harmonogramy płatności' },
+    createElement('h2', null, 'Harmonogramy płatności'),
+    createElement(
+      'ul',
+      { className: 'admin-payment-schedule-list' },
+      ...schedules.items.map((schedule) =>
+        createElement(
+          'li',
+          { key: schedule.id, className: 'admin-payment-schedule' },
+          createElement(
+            'p',
+            { className: 'admin-payment-schedule-meta' },
+            [schedule.id, ' · umowa ', schedule.contractId, ' · ', schedule.currency].join(''),
+          ),
+          createElement(
+            'ul',
+            { className: 'admin-payment-installment-list' },
+            ...schedule.installments.map((line) =>
+              createElement(
+                'li',
+                { key: line.id, className: 'admin-payment-installment' },
+                createElement(
+                  'p',
+                  { className: 'admin-payment-installment-meta' },
+                  ['#', String(line.sequence), ' · ', String(line.amountMinor), ' · ', line.status].join(''),
+                ),
+                line.status === 'scheduled'
+                  ? createElement(
+                      'form',
+                      { method: 'post', className: 'admin-payment-installment-transition' },
+                      createElement('input', { type: 'hidden', name: 'scheduleId', value: schedule.id }),
+                      createElement('input', { type: 'hidden', name: 'installmentId', value: line.id }),
+                      createElement('input', { type: 'hidden', name: 'status', value: 'due' }),
+                      createElement(
+                        'button',
+                        { type: 'submit', name: 'intent', value: 'transition-payment-installment' },
+                        'Oznacz jako należną',
+                      ),
+                    )
+                  : null,
+                line.status === 'due'
+                  ? createElement(
+                      'form',
+                      { method: 'post', className: 'admin-payment-installment-transition' },
+                      createElement('input', { type: 'hidden', name: 'scheduleId', value: schedule.id }),
+                      createElement('input', { type: 'hidden', name: 'installmentId', value: line.id }),
+                      createElement('input', { type: 'hidden', name: 'status', value: 'waived' }),
+                      createElement(
+                        'button',
+                        { type: 'submit', name: 'intent', value: 'transition-payment-installment' },
+                        'Zwolnij',
+                      ),
+                    )
+                  : null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createPaymentScheduleForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-payment-schedule' },
+    createElement('h2', null, 'Nowy harmonogram płatności'),
+    createElement(
+      'label',
+      { className: 'admin-create-payment-contract' },
+      'Id umowy',
+      createElement('input', {
+        type: 'text',
+        name: 'contractId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-payment-first' },
+      'Kwota 1 (grosze)',
+      createElement('input', {
+        type: 'number',
+        name: 'amountMinorFirst',
+        required: true,
+        min: 1,
+        step: 1,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-payment-second' },
+      'Kwota 2 (grosze)',
+      createElement('input', {
+        type: 'number',
+        name: 'amountMinorSecond',
+        required: true,
+        min: 1,
+        step: 1,
+      }),
+    ),
+    createElement(
+      'button',
+      { type: 'submit', name: 'intent', value: 'create-payment-schedule' },
+      'Utwórz harmonogram',
+    ),
+  );
+}
+
 /**
  * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
- * No signing ceremony and no payment UI.
+ * Payment schedule is provider-neutral; no signing ceremony and no money movement.
  */
 export function adminShell(home: AdminHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -1086,6 +1372,8 @@ export function adminShell(home: AdminHome): ReactNode {
     createOfferForm(),
     contractListNode(home.contracts),
     createContractForm(),
+    paymentScheduleListNode(home.paymentSchedules),
+    createPaymentScheduleForm(),
     projectListNode(home.projects),
     createProjectForm(),
     fileListNode(home.files),

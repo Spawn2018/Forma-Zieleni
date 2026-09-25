@@ -11,8 +11,9 @@ export type ContractCapability = 'contracts:read' | 'contracts:create' | 'contra
 export type ProjectCapability = 'projects:read' | 'projects:create' | 'projects:portal-read';
 export type FileCapability = 'files:read' | 'files:create' | 'files:portal-read';
 export type MilestoneCapability = 'milestones:read' | 'milestones:create';
+export type PaymentCapability = 'payments:read' | 'payments:write';
 export type GrowthCapability = 'growth:plan' | 'semantic:review';
-export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ProjectCapability | FileCapability | MilestoneCapability | ContentCapability | GrowthCapability;
+export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ProjectCapability | FileCapability | MilestoneCapability | PaymentCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -46,6 +47,7 @@ function isCapability(value: unknown): value is Capability {
     || value === 'projects:read' || value === 'projects:create' || value === 'projects:portal-read'
     || value === 'files:read' || value === 'files:create' || value === 'files:portal-read'
     || value === 'milestones:read' || value === 'milestones:create'
+    || value === 'payments:read' || value === 'payments:write'
     || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 

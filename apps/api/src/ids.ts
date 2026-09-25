@@ -8,6 +8,8 @@ import {
   assertOpaqueProjectId,
   assertOpaqueMilestoneId,
   assertOpaqueDecisionLogId,
+  assertOpaquePaymentScheduleId,
+  assertOpaquePaymentInstallmentId,
 } from '@forma-zieleni/domain';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -49,4 +51,12 @@ export function newMilestoneId(): string {
 
 export function newDecisionLogId(): string {
   return assertOpaqueDecisionLogId(newOpaqueId('d'));
+}
+
+export function newPaymentScheduleId(): string {
+  return assertOpaquePaymentScheduleId(newOpaqueId('s'));
+}
+
+export function newPaymentInstallmentId(): string {
+  return assertOpaquePaymentInstallmentId(newOpaqueId('i'));
 }

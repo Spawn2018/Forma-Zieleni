@@ -181,6 +181,8 @@ export {
   createPaymentSchedule,
   markInstallmentDue,
   recordInstallmentSynthetic,
+  replacePaymentScheduleInstallments,
+  transitionPaymentInstallment,
   waiveInstallment,
 } from './payment.ts';
 export type {

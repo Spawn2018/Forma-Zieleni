@@ -75,6 +75,14 @@ export interface Database {
     related_milestone_id: string | null;
     created_at: Date;
   };
+  payment_schedule: {
+    id: string;
+    contract_id: string;
+    currency: string;
+    installments: unknown;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -857,6 +865,67 @@ ALTER TABLE contract ADD CONSTRAINT contract_status_known CHECK (status IN ('dra
   },
 };
 
+const PAYMENT_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'payments:read',
+  'payments:write',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const paymentScheduleMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE payment_schedule (
+  id text PRIMARY KEY,
+  contract_id text NOT NULL UNIQUE REFERENCES contract (id),
+  currency text NOT NULL,
+  installments jsonb NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT payment_schedule_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT payment_schedule_currency_known CHECK (currency ~ '^[A-Z]{3}$')
+);
+CREATE INDEX payment_schedule_list_created ON payment_schedule (created_at DESC, id DESC);
+CREATE INDEX payment_schedule_list_updated ON payment_schedule (updated_at DESC, id DESC);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PAYMENT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DROP TABLE IF EXISTS payment_schedule;
+DELETE FROM actor_capability WHERE capability IN ('payments:read', 'payments:write');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${CONTRACT_LIFECYCLE_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -874,6 +943,7 @@ const provider: MigrationProvider = {
       '012_portal_file_projection': portalFileMigration,
       '013_project_milestone_domain': projectMilestoneMigration,
       '014_contract_lifecycle': contractLifecycleMigration,
+      '015_payment_schedule': paymentScheduleMigration,
     };
   },
 };

@@ -11,8 +11,11 @@ import {
   createPaymentSchedule,
   markInstallmentDue,
   recordInstallmentSynthetic,
+  replacePaymentScheduleInstallments,
+  transitionPaymentInstallment,
   waiveInstallment,
 } from './src/payment.ts';
+import { advanceContractLifecycle } from './src/contract.ts';
 
 const at = '2026-09-24T12:00:00.000Z';
 const capture = {
@@ -125,4 +128,55 @@ test('installment transitions stay provider-neutral without moving money', () =>
   );
   cancelled = cancelInstallment(cancelled, 'pi8k2n4p6q8r0s2d', '2026-09-24T13:00:00.000Z');
   assert.equal(cancelled.installments[0].status, 'cancelled');
+});
+
+test('staff can replace draft schedule installments and transition via one entrypoint', () => {
+  const contract = draftContract();
+  let schedule = createPaymentSchedule(
+    'ps8k2n4p6q8r0s2w',
+    contract,
+    'PLN',
+    [{ id: 'pi8k2n4p6q8r0s2e', sequence: 1, amountMinor: 100_00 }],
+    at,
+  );
+  schedule = replacePaymentScheduleInstallments(
+    schedule,
+    contract,
+    [
+      { id: 'pi8k2n4p6q8r0s2f', sequence: 1, amountMinor: 250_00 },
+      { id: 'pi8k2n4p6q8r0s2g', sequence: 2, amountMinor: 750_00 },
+    ],
+    '2026-09-24T12:30:00.000Z',
+  );
+  assert.equal(schedule.installments.length, 2);
+  assert.equal(schedule.installments[0].amountMinor, 250_00);
+  assert.equal(schedule.createdAt, at);
+  schedule = transitionPaymentInstallment(schedule, 'pi8k2n4p6q8r0s2f', 'due', '2026-09-24T13:00:00.000Z');
+  assert.equal(schedule.installments[0].status, 'due');
+  assert.throws(
+    () => replacePaymentScheduleInstallments(
+      schedule,
+      contract,
+      [{ id: 'pi8k2n4p6q8r0s2h', sequence: 1, amountMinor: 10_00 }],
+      '2026-09-24T13:30:00.000Z',
+    ),
+    /PAYMENT_SCHEDULE_LOCKED/,
+  );
+  const advanced = advanceContractLifecycle(contract, 'internal_review', '2026-09-24T14:00:00.000Z');
+  const locked = createPaymentSchedule(
+    'ps8k2n4p6q8r0s2x',
+    contract,
+    'PLN',
+    [{ id: 'pi8k2n4p6q8r0s2i', sequence: 1, amountMinor: 100_00 }],
+    at,
+  );
+  assert.throws(
+    () => replacePaymentScheduleInstallments(
+      locked,
+      advanced,
+      [{ id: 'pi8k2n4p6q8r0s2j', sequence: 1, amountMinor: 10_00 }],
+      '2026-09-24T14:30:00.000Z',
+    ),
+    /CONTRACT_NOT_READY/,
+  );
 });

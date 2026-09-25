@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
@@ -23,6 +23,16 @@ import {
 } from './milestones.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
+import {
+  createPaymentScheduleRecord,
+  listVisiblePaymentSchedules,
+  parsePaymentScheduleListQuery,
+  pathPaymentInstallmentId,
+  pathPaymentScheduleId,
+  readPaymentSchedule,
+  replacePaymentScheduleRecord,
+  transitionPaymentInstallmentRecord,
+} from './payments.ts';
 import { createProjectFromContract, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
@@ -682,6 +692,74 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const entry = await readDecisionLogEntry(options.store, pathDecisionLogId(c.req.param('entryId')));
     if (!entry) throw new ApiFailure(404, 'DECISION_LOG_NOT_FOUND', 'Decision log entry was not found.');
     return c.json(entry);
+  });
+
+  app.get('/v1/payment-schedules', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:read');
+    c.set('actorId', actor.actorId);
+    const query = parsePaymentScheduleListQuery({
+      limit: c.req.query('limit') ?? undefined,
+      cursor: c.req.query('cursor') ?? undefined,
+      sort: c.req.query('sort') ?? undefined,
+      contractId: c.req.query('contractId') ?? undefined,
+    });
+    return c.json(await listVisiblePaymentSchedules(options.store, query));
+  });
+
+  app.post('/v1/payment-schedules', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validatePaymentScheduleCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PAYMENT_SCHEDULE_INVALID', 'Payment schedule could not be accepted.', parsed.errors);
+    const schedule = await createPaymentScheduleRecord(options.store, parsed.value, actor, key, now());
+    return c.json(schedule, 201);
+  });
+
+  app.get('/v1/payment-schedules/:scheduleId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:read');
+    c.set('actorId', actor.actorId);
+    const schedule = await readPaymentSchedule(options.store, pathPaymentScheduleId(c.req.param('scheduleId')));
+    if (!schedule) throw new ApiFailure(404, 'PAYMENT_SCHEDULE_NOT_FOUND', 'Payment schedule was not found.');
+    return c.json(schedule);
+  });
+
+  app.put('/v1/payment-schedules/:scheduleId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const scheduleId = pathPaymentScheduleId(c.req.param('scheduleId'));
+    const parsed = validatePaymentScheduleReplaceRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PAYMENT_SCHEDULE_INVALID', 'Payment schedule could not be accepted.', parsed.errors);
+    const schedule = await replacePaymentScheduleRecord(
+      options.store,
+      scheduleId,
+      parsed.value.installments,
+      actor,
+      key,
+      now(),
+    );
+    return c.json(schedule);
+  });
+
+  app.post('/v1/payment-schedules/:scheduleId/installments/:installmentId/transition', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const scheduleId = pathPaymentScheduleId(c.req.param('scheduleId'));
+    const installmentId = pathPaymentInstallmentId(c.req.param('installmentId'));
+    const parsed = validatePaymentInstallmentTransitionRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PAYMENT_TRANSITION_INVALID', 'Installment transition could not be accepted.', parsed.errors);
+    const schedule = await transitionPaymentInstallmentRecord(
+      options.store,
+      scheduleId,
+      installmentId,
+      parsed.value.status,
+      actor,
+      key,
+      now(),
+    );
+    return c.json(schedule);
   });
 
   app.post('/v1/growth/plans', async c => {

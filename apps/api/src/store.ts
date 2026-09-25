@@ -7,6 +7,7 @@ import type {
   OfferStatus,
   Opportunity,
   OpportunityStatus,
+  PaymentSchedule,
   Project,
   ProjectDecisionLogEntry,
   ProjectFile,
@@ -73,6 +74,13 @@ export type DecisionLogListQuery = {
   cursor?: { at: string; id: string };
 };
 
+export type PaymentScheduleListQuery = {
+  limit: number;
+  sort: SortField;
+  contractId?: string;
+  cursor?: { at: string; id: string };
+};
+
 export type StoredReply = {
   requestHash: string;
   responseStatus: number;
@@ -98,7 +106,7 @@ export type OutboxMessage = {
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -112,6 +120,8 @@ export type AuditEvent = {
     contractId?: string;
     projectId?: string;
     fromStatus?: string;
+    scheduleId?: string;
+    installmentId?: string;
   };
 };
 
@@ -148,6 +158,11 @@ export interface LeadTx {
   insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void>;
   findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null>;
   listDecisionLogEntries(query: DecisionLogListQuery): Promise<ProjectDecisionLogEntry[]>;
+  insertPaymentSchedule(schedule: PaymentSchedule): Promise<void>;
+  savePaymentSchedule(schedule: PaymentSchedule): Promise<void>;
+  findPaymentSchedule(id: string): Promise<PaymentSchedule | null>;
+  findPaymentScheduleByContract(contractId: string): Promise<PaymentSchedule | null>;
+  listPaymentSchedules(query: PaymentScheduleListQuery): Promise<PaymentSchedule[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

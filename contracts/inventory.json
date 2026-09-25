@@ -16,6 +16,8 @@
     "GET /offers/{offerId}",
     "GET /opportunities",
     "GET /opportunities/{opportunityId}",
+    "GET /payment-schedules",
+    "GET /payment-schedules/{scheduleId}",
     "GET /portal/offers",
     "GET /portal/offers/{offerId}",
     "GET /portal/projects",
@@ -39,8 +41,11 @@
     "POST /milestones",
     "POST /offers",
     "POST /opportunities",
+    "POST /payment-schedules",
+    "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition",
     "POST /projects",
-    "PUT /files/{fileId}/content"
+    "PUT /files/{fileId}/content",
+    "PUT /payment-schedules/{scheduleId}"
   ],
   "requiredHeaders": {
     "POST /leads": [
@@ -71,6 +76,15 @@
       "Idempotency-Key"
     ],
     "POST /decision-log": [
+      "Idempotency-Key"
+    ],
+    "POST /payment-schedules": [
+      "Idempotency-Key"
+    ],
+    "PUT /payment-schedules/{scheduleId}": [
+      "Idempotency-Key"
+    ],
+    "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition": [
       "Idempotency-Key"
     ]
   },

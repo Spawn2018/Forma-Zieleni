@@ -481,13 +481,12 @@ row('FZ-REQ-ADMIN-009', 'Staff can advance provider-neutral contract lifecycle s
   executableSlice: 'SIGN-LIFECYCLE-STAFF',
   executableWhenComplete: ['PROJECT-MILESTONE-DOMAIN', 'ADMIN-CRM-CONTRACT', 'SIGN-STATE-NEUTRAL'],
 });
-row('FZ-REQ-ADMIN-010', 'Staff can view and adjust a provider-neutral payment schedule in apps/admin without moving money.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'PAY-SCHEDULE-STAFF not executed', 'REVIEW', 'Payment provider stays OWNER-DECISION.', {
+row('FZ-REQ-ADMIN-010', 'Staff can view and adjust a provider-neutral payment schedule in apps/admin without moving money.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Payment provider stays OWNER-DECISION. Evidence: domain schedule + Core API payments + admin UI.', {
   blockerClass: 'INTERNAL',
   productCapability: 'PAYMENT',
   depth: 'STAFF_WORKFLOW',
   executableSlice: 'PAY-SCHEDULE-STAFF',
   executableWhenComplete: ['SIGN-LIFECYCLE-STAFF', 'PAY-DOMAIN-NEUTRAL'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-PORTAL-006', 'Authenticated portal UI renders the client-safe Offer projection without staff mutation.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-OFFER-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
   blockerClass: 'INTERNAL',

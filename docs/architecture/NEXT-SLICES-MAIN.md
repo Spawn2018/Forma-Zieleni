@@ -815,13 +815,18 @@ Next: PAY-SCHEDULE-STAFF.
 
 Dependencies: SIGN-LIFECYCLE-STAFF, PAY-DOMAIN-NEUTRAL.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: staff can view and adjust the provider-neutral payment schedule
 on a Contract in `apps/admin`. No payment provider, no charge, no BLIK,
-no card, no money movement.
-Tests: admin + API schedule tests; amount fields stay server-validated.
-Security: staff only; no provider secrets; no real payment action.
+no card, no money movement. Domain replace + installment transition;
+Core API `GET/POST /v1/payment-schedules`, `PUT /v1/payment-schedules/{id}`,
+`POST .../installments/{id}/transition` with `payments:read` /
+`payments:write`, Idempotency-Key; amounts server-validated.
+Tests: `packages/domain/payment.test.mjs`,
+`packages/validation/payment.test.mjs`, `apps/api/src/http.test.mjs`,
+`apps/admin/app/shell.test.mjs`, OpenAPI/inventory.
+Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
 ### PORTAL-OFFER-VIEW

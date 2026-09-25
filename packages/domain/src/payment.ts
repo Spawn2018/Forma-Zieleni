@@ -184,3 +184,62 @@ export function cancelInstallment(
 ): PaymentSchedule {
   return mapInstallment(schedule, installmentId, at, 'cancelled', ['scheduled', 'due']);
 }
+
+/**
+ * Replace installment lines while the contract is still draft and every
+ * installment remains `scheduled`. No provider or money movement.
+ */
+export function replacePaymentScheduleInstallments(
+  schedule: PaymentSchedule,
+  contract: Contract,
+  installmentSpecs: readonly PaymentInstallmentSpec[],
+  at: string,
+): PaymentSchedule {
+  if (contract.id !== schedule.contractId) {
+    throw new Error('PAYMENT_CONTRACT_MISMATCH');
+  }
+  if (contract.status !== 'draft') {
+    throw new Error('CONTRACT_NOT_READY');
+  }
+  if (schedule.installments.some((item) => item.status !== 'scheduled')) {
+    throw new Error('PAYMENT_SCHEDULE_LOCKED');
+  }
+  const rebuilt = createPaymentSchedule(
+    schedule.id,
+    contract,
+    schedule.currency,
+    installmentSpecs,
+    at,
+  );
+  return {
+    ...rebuilt,
+    createdAt: schedule.createdAt,
+    updatedAt: at,
+  };
+}
+
+/** Apply a staff installment status transition without a payment provider. */
+export function transitionPaymentInstallment(
+  schedule: PaymentSchedule,
+  installmentId: string,
+  nextStatus: PaymentInstallmentStatus,
+  at: string,
+): PaymentSchedule {
+  switch (nextStatus) {
+    case 'due':
+      return markInstallmentDue(schedule, installmentId, at);
+    case 'recorded':
+      return recordInstallmentSynthetic(schedule, installmentId, at);
+    case 'waived':
+      return waiveInstallment(schedule, installmentId, at);
+    case 'cancelled':
+      return cancelInstallment(schedule, installmentId, at);
+    case 'scheduled':
+      throw new Error('PAYMENT_TRANSITION_FORBIDDEN');
+    default: {
+      const _exhaustive: never = nextStatus;
+      void _exhaustive;
+      throw new Error('PAYMENT_STATUS_INVALID');
+    }
+  }
+}

@@ -7,6 +7,7 @@ import type {
   OfferStatus,
   Opportunity,
   OpportunityStatus,
+  PaymentSchedule,
   Project,
   ProjectDecisionLogEntry,
   ProjectFile,
@@ -24,6 +25,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  PaymentScheduleListQuery,
   ProjectFileListQuery,
   ProjectListQuery,
   StoredReply,
@@ -38,6 +40,7 @@ type MemoryState = {
   projectFiles: ProjectFile[];
   milestones: ProjectMilestone[];
   decisionLog: ProjectDecisionLogEntry[];
+  paymentSchedules: PaymentSchedule[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -61,6 +64,7 @@ export class MemoryLeadStore implements LeadStore {
     projectFiles: [],
     milestones: [],
     decisionLog: [],
+    paymentSchedules: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -76,6 +80,7 @@ export class MemoryLeadStore implements LeadStore {
       projectFiles: this.state.projectFiles,
       milestones: this.state.milestones,
       decisionLog: this.state.decisionLog,
+      paymentSchedules: this.state.paymentSchedules,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -91,6 +96,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.projectFiles = snapshot.projectFiles;
       this.state.milestones = snapshot.milestones;
       this.state.decisionLog = snapshot.decisionLog;
+      this.state.paymentSchedules = snapshot.paymentSchedules;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -371,6 +377,44 @@ class MemoryTx implements LeadTx {
           const at = entry.createdAt;
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && entry.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && entry.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertPaymentSchedule(schedule: PaymentSchedule): Promise<void> {
+    this.state.paymentSchedules.push(clone(schedule));
+  }
+
+  async savePaymentSchedule(schedule: PaymentSchedule): Promise<void> {
+    const index = this.state.paymentSchedules.findIndex(item => item.id === schedule.id);
+    if (index < 0) throw new Error('PAYMENT_SCHEDULE_MISSING');
+    this.state.paymentSchedules[index] = clone(schedule);
+  }
+
+  async findPaymentSchedule(id: string): Promise<PaymentSchedule | null> {
+    return clone(this.state.paymentSchedules.find(item => item.id === id) ?? null);
+  }
+
+  async findPaymentScheduleByContract(contractId: string): Promise<PaymentSchedule | null> {
+    return clone(this.state.paymentSchedules.find(item => item.contractId === contractId) ?? null);
+  }
+
+  async listPaymentSchedules(query: PaymentScheduleListQuery): Promise<PaymentSchedule[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.paymentSchedules.filter(
+      schedule => !query.contractId || schedule.contractId === query.contractId,
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(schedule => {
+          const at = stamp(schedule, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && schedule.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && schedule.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

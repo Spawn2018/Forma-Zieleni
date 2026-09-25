@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Lead, Offer, Opportunity, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
+import type { Contract, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -13,6 +13,7 @@ import type {
   OfferListQuery,
   OpportunityListQuery,
   OutboxMessage,
+  PaymentScheduleListQuery,
   ProjectFileListQuery,
   ProjectListQuery,
   StoredReply,
@@ -126,6 +127,18 @@ function toDecisionLog(row: Database['project_decision_log']): ProjectDecisionLo
     recordedByActorId: row.recorded_by_actor_id,
     relatedMilestoneId: row.related_milestone_id,
     createdAt: iso(row.created_at),
+  };
+}
+
+function toPaymentSchedule(row: Database['payment_schedule']): PaymentSchedule {
+  const installments = Array.isArray(row.installments) ? row.installments : [];
+  return {
+    id: row.id,
+    contractId: row.contract_id,
+    currency: row.currency,
+    installments: installments as PaymentSchedule['installments'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
   };
 }
 
@@ -470,6 +483,51 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy('created_at', direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toDecisionLog);
+  }
+
+  async insertPaymentSchedule(schedule: PaymentSchedule): Promise<void> {
+    await this.trx.insertInto('payment_schedule').values({
+      id: schedule.id,
+      contract_id: schedule.contractId,
+      currency: schedule.currency,
+      installments: jsonb(schedule.installments),
+      created_at: new Date(schedule.createdAt),
+      updated_at: new Date(schedule.updatedAt),
+    }).execute();
+  }
+
+  async savePaymentSchedule(schedule: PaymentSchedule): Promise<void> {
+    await this.trx.updateTable('payment_schedule').set({
+      currency: schedule.currency,
+      installments: jsonb(schedule.installments),
+      updated_at: new Date(schedule.updatedAt),
+    }).where('id', '=', schedule.id).execute();
+  }
+
+  async findPaymentSchedule(id: string): Promise<PaymentSchedule | null> {
+    const row = await this.trx.selectFrom('payment_schedule').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toPaymentSchedule(row) : null;
+  }
+
+  async findPaymentScheduleByContract(contractId: string): Promise<PaymentSchedule | null> {
+    const row = await this.trx.selectFrom('payment_schedule').selectAll().where('contract_id', '=', contractId).executeTakeFirst();
+    return row ? toPaymentSchedule(row) : null;
+  }
+
+  async listPaymentSchedules(query: PaymentScheduleListQuery): Promise<PaymentSchedule[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('payment_schedule').selectAll();
+    if (query.contractId) request = request.where('contract_id', '=', query.contractId);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toPaymentSchedule);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

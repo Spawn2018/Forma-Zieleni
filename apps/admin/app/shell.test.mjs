@@ -38,6 +38,7 @@ const emptyCrm = {
   contracts: { status: 'empty' },
   projects: { status: 'empty' },
   files: { status: 'empty' },
+  paymentSchedules: { status: 'empty' },
 };
 
 const prohibited = [
@@ -106,11 +107,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -169,6 +170,19 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
         ],
       },
       files: { status: 'empty' },
+      paymentSchedules: {
+        status: 'ready',
+        items: [
+          {
+            id: 'ps8k2n4p6q8r0s2t',
+            contractId: 'ct8k2n4p6q8r0s2t',
+            currency: 'PLN',
+            installments: [
+              { id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled' },
+            ],
+          },
+        ],
+      },
     }),
   );
   assert.match(ready, /Anna Kowalska/);
@@ -187,6 +201,11 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Utwórz umowę/);
   assert.match(ready, /Do przeglądu/);
   assert.match(ready, /advance-contract-lifecycle/);
+  assert.match(ready, /Harmonogramy płatności/);
+  assert.match(ready, /ps8k2n4p6q8r0s2t/);
+  assert.match(ready, /create-payment-schedule/);
+  assert.match(ready, /transition-payment-installment/);
+  assert.match(ready, /Oznacz jako należną/);
   assert.match(ready, /Projekty/);
   assert.match(ready, /pr8k2n4p6q8r0s2t/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
@@ -629,6 +648,9 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
+  assert.match(home, /fetchAdminPaymentSchedules/);
+  assert.match(home, /createAdminPaymentSchedule/);
+  assert.match(home, /transitionAdminPaymentInstallment/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
@@ -649,8 +671,12 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.equal(shell.includes('projects:create'), false);
   assert.equal(shell.includes('files:read'), false);
   assert.equal(shell.includes('files:create'), false);
+  assert.equal(shell.includes('payments:read'), false);
+  assert.equal(shell.includes('payments:write'), false);
   assert.equal(shell.toLowerCase().includes('podpis'), false);
-  assert.equal(shell.toLowerCase().includes('płatność'), false);
+  assert.equal(shell.toLowerCase().includes('stripe'), false);
+  assert.equal(shell.toLowerCase().includes('blik'), false);
+  assert.equal(shell.toLowerCase().includes('card'), false);
   for (const phrase of prohibited) {
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
