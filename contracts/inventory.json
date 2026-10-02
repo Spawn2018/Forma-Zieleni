@@ -3,6 +3,8 @@
   "versioning": "/v1",
   "paths": [
     "GET /approvals/proposals",
+    "GET /capacity-windows",
+    "GET /capacity-windows/{windowId}",
     "GET /content/{contentId}",
     "GET /contracts",
     "GET /contracts/{contractId}",
@@ -41,6 +43,8 @@
     "GET /site-intelligence",
     "GET /site-intelligence/{recordId}",
     "POST /approvals/proposals/{changeSetId}/review",
+    "POST /capacity-decisions",
+    "POST /capacity-windows",
     "POST /contracts",
     "POST /contracts/{contractId}/lifecycle",
     "GET /contracts/{contractId}/signing-sandbox-envelope",
@@ -188,6 +192,24 @@
     "provider",
     "deposit",
     "price"
+  ],
+  "requiredCapacityWindowFields": [
+    "id",
+    "actorId",
+    "kind",
+    "startsAt",
+    "endsAt",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenCapacityFields": [
+    "email",
+    "phone",
+    "name",
+    "calendar",
+    "google",
+    "price",
+    "spend"
   ],
   "requiredGardenFields": [
     "id",

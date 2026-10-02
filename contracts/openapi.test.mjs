@@ -54,6 +54,11 @@ test('breaking-change inventory of lead paths and required fields remains exact'
     assert.equal(Object.hasOwn(spec.components.schemas.Garden.properties, field), false);
     assert.equal(Object.hasOwn(spec.components.schemas.GardenCreate.properties, field), false);
   }
+  assert.deepEqual(spec.components.schemas.CapacityWindow.required, inventory.requiredCapacityWindowFields);
+  for (const field of inventory.forbiddenCapacityFields) {
+    assert.equal(Object.hasOwn(spec.components.schemas.CapacityWindow.properties, field), false);
+    assert.equal(Object.hasOwn(spec.components.schemas.CapacityWindowCreate.properties, field), false);
+  }
 });
 
 test('mutations require idempotency and public capture has no bearer requirement', () => {
@@ -119,6 +124,14 @@ test('mutations require idempotency and public capture has no bearer requirement
     '#/components/parameters/RequestId',
   ]);
   assert.deepEqual(spec.paths['/gardens/{gardenId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-windows'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-windows'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-windows'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
+  assert.deepEqual(spec.paths['/capacity-windows/{windowId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-decisions'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/site-intelligence'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/site-intelligence'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/site-intelligence'].post.parameters.map(p => p.$ref), [
