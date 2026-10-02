@@ -12,6 +12,7 @@ import {
   createAdminFile,
   capacityDecisionMessage,
   createAdminCapacityWindow,
+  createAdminMilestone,
   createAdminPaymentSchedule,
   createAdminProject,
   decideAdminCapacity,
@@ -19,6 +20,7 @@ import {
   fetchAdminContracts,
   fetchAdminFiles,
   fetchAdminLeads,
+  fetchAdminMilestones,
   fetchAdminOffers,
   fetchAdminOpportunities,
   fetchAdminPaymentSchedules,
@@ -86,6 +88,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       const contractId = new URL(request.url).searchParams.get('contractId') ?? '';
       if (!contractId) return { status: 'empty' };
       return fetchAdminSigningSandbox({ base, cookie, contractId });
+    },
+    async loadMilestones() {
+      return fetchAdminMilestones({ base, cookie });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -296,6 +301,28 @@ export async function action({ request }: Route.ActionArgs) {
       scheduleId: scheduleId.trim(),
       installmentId: installmentId.trim(),
       status: status.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-milestone') {
+    const projectId = form.get('projectId');
+    const title = form.get('title');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof title !== 'string' || !title.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminMilestone({
+      base,
+      projectId: projectId.trim(),
+      title: title.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

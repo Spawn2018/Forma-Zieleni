@@ -1039,6 +1039,22 @@ Security: uses existing `siteintel:portal-read`. The portal does not
 create or mutate a finding.
 Next: none.
 
+### ADMIN-MILESTONE-STAFF
+
+Dependencies: PROJECT-MILESTONE-DOMAIN, ADMIN-CRM-PROJECT.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in admin lists project milestones that Core API
+already stores and can create one with a project id and a title.
+Empty, forbidden, and error states are visible. A payment, signing, or
+price field is refused. The decision log stays off this screen.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-MILESTONE-STAFF.md`](./ADMIN-MILESTONE-STAFF.md).
+Security: uses existing `milestones:read` and `milestones:create`.
+The admin does not invent a second milestone store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

@@ -528,6 +528,12 @@ row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain a
   executableSlice: 'ADMIN-APPROVAL-SURFACE',
   executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'ADMIN-APP'],
 });
+row('FZ-REQ-ADMIN-012', 'Staff can list and create project milestones in apps/admin through the existing Core API. No second milestone store, no payment, and no decision-log mutation on this screen.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates milestones via Core API GET/POST /v1/milestones. Decision log and portal milestone UI stay later.', {
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_STAFF',
+  executableSlice: 'ADMIN-MILESTONE-STAFF',
+  executableWhenComplete: ['PROJECT-MILESTONE-DOMAIN', 'ADMIN-CRM-PROJECT'],
+});
 row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', 'Evidence: OpenAPI + HTTP create/list/get with BOLA portal projection. gardens:* capabilities. Project deliver unlocks linkage. No twin/XR/plant advice.', {
   blockerClass: 'INTERNAL',
   productCapability: 'GARDENOS',

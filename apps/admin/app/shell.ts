@@ -122,6 +122,20 @@ export type AdminCapacityDecision =
   | { ok: true; windowId: string }
   | { ok: false; reason: 'CAPACITY_EMPTY' | 'CAPACITY_OUTSIDE' | 'CAPACITY_KIND_MISMATCH' };
 
+export type AdminMilestoneRow = {
+  id: string;
+  projectId: string;
+  title: string;
+  status: string;
+  dueAt: string | null;
+};
+
+export type AdminMilestoneList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminMilestoneRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminSigningSandbox =
   | { status: 'empty' }
   | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
@@ -142,6 +156,7 @@ export type AdminHome =
       paymentSchedules: AdminPaymentScheduleList;
       capacityWindows: AdminCapacityWindowList;
       signingSandbox: AdminSigningSandbox;
+      milestones: AdminMilestoneList;
       proposals: AdminProposalList;
     };
 
@@ -686,6 +701,100 @@ export async function fetchAdminProjects(input: {
   }
 }
 
+type MilestoneApiItem = {
+  id?: unknown;
+  projectId?: unknown;
+  title?: unknown;
+  status?: unknown;
+  dueAt?: unknown;
+  payment?: unknown;
+  signing?: unknown;
+  price?: unknown;
+  provider?: unknown;
+};
+
+export function mapMilestonePage(body: unknown): AdminMilestoneList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminMilestoneRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const milestone = item as MilestoneApiItem;
+    if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string') return { status: 'error' };
+    if (typeof milestone.title !== 'string' || typeof milestone.status !== 'string') return { status: 'error' };
+    if (milestone.dueAt !== null && typeof milestone.dueAt !== 'string') return { status: 'error' };
+    if (
+      Object.hasOwn(milestone, 'payment')
+      || Object.hasOwn(milestone, 'signing')
+      || Object.hasOwn(milestone, 'price')
+      || Object.hasOwn(milestone, 'provider')
+    ) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: milestone.id,
+      projectId: milestone.projectId,
+      title: milestone.title,
+      status: milestone.status,
+      dueAt: milestone.dueAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminMilestones(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminMilestoneList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/milestones?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapMilestonePage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminMilestone(input: {
+  base: string;
+  projectId: string;
+  title: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/milestones', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ projectId: input.projectId, title: input.title }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export async function createAdminProject(input: {
   base: string;
   contractId: string;
@@ -962,6 +1071,7 @@ export async function resolveAdminHome(input: {
   loadPaymentSchedules?: () => Promise<AdminPaymentScheduleList>;
   loadCapacityWindows?: () => Promise<AdminCapacityWindowList>;
   loadSigningSandbox?: () => Promise<AdminSigningSandbox>;
+  loadMilestones?: () => Promise<AdminMilestoneList>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
@@ -983,6 +1093,9 @@ export async function resolveAdminHome(input: {
     const signingSandbox = input.loadSigningSandbox
       ? await input.loadSigningSandbox()
       : { status: 'empty' as const };
+    const milestones = input.loadMilestones
+      ? await input.loadMilestones()
+      : { status: 'empty' as const };
     const proposals = input.loadProposals
       ? await input.loadProposals()
       : { status: 'empty' as const };
@@ -997,6 +1110,7 @@ export async function resolveAdminHome(input: {
       paymentSchedules,
       capacityWindows,
       signingSandbox,
+      milestones,
       proposals,
     };
   } catch {
@@ -1349,6 +1463,79 @@ function projectListNode(projects: AdminProjectList): ReactNode {
         ),
       ),
     ),
+  );
+}
+
+function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
+  if (milestones.status === 'empty') {
+    return createElement('p', null, 'Brak kamieni milowych do pokazania.');
+  }
+  if (milestones.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy kamieni milowych.');
+  }
+  if (milestones.status === 'error') {
+    return createElement('p', null, 'Listy kamieni milowych nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-milestones', 'aria-label': 'Kamienie milowe' },
+    createElement('h2', null, 'Kamienie milowe'),
+    createElement(
+      'ul',
+      { className: 'admin-milestone-list' },
+      ...milestones.items.map((milestone) =>
+        createElement(
+          'li',
+          { key: milestone.id, className: 'admin-milestone' },
+          createElement(
+            'p',
+            { className: 'admin-milestone-meta' },
+            [
+              milestone.title,
+              ' · ',
+              milestone.status,
+              ' · ',
+              milestone.dueAt ?? 'bez terminu',
+              ' · ',
+              milestone.projectId,
+            ].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createMilestoneForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-milestone' },
+    createElement('h2', null, 'Nowy kamień milowy'),
+    createElement(
+      'label',
+      { className: 'admin-create-milestone-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'projectId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-milestone-title' },
+      'Tytuł',
+      createElement('input', {
+        type: 'text',
+        name: 'title',
+        required: true,
+        maxLength: 200,
+        autoComplete: 'off',
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-milestone' }, 'Zapisz kamień milowy'),
   );
 }
 
@@ -1930,6 +2117,8 @@ export function adminShell(home: AdminHome): ReactNode {
     signingSandboxNode(home.signingSandbox),
     projectListNode(home.projects),
     createProjectForm(),
+    milestoneListNode(home.milestones),
+    createMilestoneForm(),
     fileListNode(home.files),
     createFileForm(),
   );

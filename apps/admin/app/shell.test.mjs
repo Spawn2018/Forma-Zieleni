@@ -18,17 +18,20 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  createAdminMilestone,
   createAdminProject,
   fetchAdminContracts,
   fetchAdminFileBytes,
   fetchAdminFiles,
   fetchAdminLeads,
+  fetchAdminMilestones,
   fetchAdminOffers,
   fetchAdminOpportunities,
   fetchAdminProjects,
   mapContractPage,
   mapFilePage,
   mapLeadPage,
+  mapMilestonePage,
   mapOfferPage,
   mapOpportunityPage,
   mapProjectPage,
@@ -50,6 +53,7 @@ const emptyCrm = {
   paymentSchedules: { status: 'empty' },
   capacityWindows: { status: 'empty' },
   signingSandbox: { status: 'empty' },
+  milestones: { status: 'empty' },
   proposals: { status: 'empty' },
 };
 
@@ -109,6 +113,8 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.match(signedIn, /Utwórz ofertę/);
   assert.match(signedIn, /Utwórz umowę/);
   assert.match(signedIn, /Utwórz projekt/);
+  assert.match(signedIn, /Brak kamieni milowych do pokazania/);
+  assert.match(signedIn, /Zapisz kamień milowy/);
   assert.match(signedIn, /Utwórz plik/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
@@ -119,11 +125,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -197,6 +203,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       },
       capacityWindows: { status: 'empty' },
       signingSandbox: { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'pending' },
+      milestones: { status: 'empty' },
       proposals: { status: 'empty' },
     }),
   );
@@ -836,6 +843,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminContract/);
   assert.match(home, /advanceAdminContractLifecycle/);
   assert.match(home, /fetchAdminProjects/);
+  assert.match(home, /fetchAdminMilestones/);
+  assert.match(home, /createAdminMilestone/);
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
@@ -891,6 +900,59 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
   }
+});
+
+test('staff milestone UI lists a title and refuses a payment field', async () => {
+  assert.deepEqual(mapMilestonePage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapMilestonePage({
+    items: [{ id: 'x', projectId: 'y', title: 'Sadzenie', status: 'planned', dueAt: null, payment: 1 }],
+  }), { status: 'error' });
+  const mapped = mapMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: null,
+      createdAt: '2026-09-24T12:00:00.000Z',
+      updatedAt: '2026-09-24T12:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: mapped,
+  }));
+  assert.match(html, /Kamienie milowe/);
+  assert.match(html, /Sadzenie/);
+  assert.match(html, /bez terminu/);
+  assert.match(html, /Zapisz kamień milowy/);
+  const fetched = await fetchAdminMilestones({
+    base: 'http://admin.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/milestones\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      return new Response(JSON.stringify({ items: [], nextCursor: null }), { status: 200 });
+    },
+  });
+  assert.deepEqual(fetched, { status: 'empty' });
+  const created = await createAdminMilestone({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    title: 'Sadzenie',
+    idempotencyKey: 'ms-1',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/milestones$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(init?.headers?.['idempotency-key'], 'ms-1');
+      const body = JSON.parse(String(init?.body));
+      assert.deepEqual(body, { projectId: 'pr8k2n4p6q8r0s2t', title: 'Sadzenie' });
+      return new Response('{}', { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
 });
 
 test('staff approval UI reviews synthetic proposals without Owner or spend gates', async () => {
