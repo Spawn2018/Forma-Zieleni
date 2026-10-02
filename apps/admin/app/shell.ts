@@ -1281,6 +1281,7 @@ function createProjectForm(): ReactNode {
 }
 
 function fileBytesControls(file: AdminFileRow): ReactNode {
+  const hintId = `admin-file-bytes-hint-${file.id}`;
   return createElement(
     'div',
     { className: 'admin-file-bytes' },
@@ -1290,7 +1291,7 @@ function fileBytesControls(file: AdminFileRow): ReactNode {
       createElement(
         'a',
         { href: `/files/${encodeURIComponent(file.id)}/content` },
-        'Pobierz bajty',
+        `Pobierz «${file.name}»`,
       ),
     ),
     createElement(
@@ -1304,22 +1305,23 @@ function fileBytesControls(file: AdminFileRow): ReactNode {
       createElement(
         'label',
         { className: 'admin-upload-file-bytes-input' },
-        'Bajty pliku',
+        `Bajty pliku «${file.name}»`,
         createElement('input', {
           type: 'file',
           name: 'bytes',
           required: true,
+          'aria-describedby': hintId,
         }),
       ),
       createElement(
         'p',
-        { className: 'admin-upload-file-bytes-hint' },
+        { id: hintId, className: 'admin-upload-file-bytes-hint' },
         `Wgrywany plik musi mieć dokładnie ${String(file.sizeBytes)} B.`,
       ),
       createElement(
         'button',
         { type: 'submit', name: 'intent', value: 'upload-file-bytes' },
-        'Wgraj bajty',
+        `Wgraj bajty «${file.name}»`,
       ),
     ),
   );

@@ -603,13 +603,17 @@ test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty
       }],
     },
   }));
-  assert.match(markup, /Pobierz bajty/);
+  assert.match(markup, /Pobierz «notes\.bin»/);
   assert.match(markup, /\/files\/fl8k2n4p6q8r0s2t\/content/);
   assert.match(markup, /upload-file-bytes/);
-  assert.match(markup, /Wgraj bajty/);
+  assert.match(markup, /Wgraj bajty «notes\.bin»/);
   assert.match(markup, /dokładnie 23 B/);
+  assert.match(markup, /aria-describedby="admin-file-bytes-hint-fl8k2n4p6q8r0s2t"/);
   assert.equal(markup.toLowerCase().includes('storagekey'), false);
   assert.equal(markup.toLowerCase().includes('garage'), false);
+  const tokens = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
+  assert.match(tokens, /\.admin-upload-file-bytes-hint\s*\{[^}]*color:\s*var\(--mech\)/s);
+  assert.equal(/\.admin-upload-file-bytes-hint\s*\{[^}]*color:\s*var\(--kreska\)/s.test(tokens), false);
 });
 
 test('mapOpportunityPage and Core API opportunity fetch/create stay truthful', async () => {
