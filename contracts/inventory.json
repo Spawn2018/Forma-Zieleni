@@ -33,9 +33,13 @@
     "GET /portal/projects",
     "GET /portal/projects/{projectId}",
     "GET /portal/session",
+    "GET /portal/site-intelligence",
+    "GET /portal/site-intelligence/{recordId}",
     "GET /projects",
     "GET /projects/{projectId}",
     "GET /ready",
+    "GET /site-intelligence",
+    "GET /site-intelligence/{recordId}",
     "POST /approvals/proposals/{changeSetId}/review",
     "POST /contracts",
     "POST /contracts/{contractId}/lifecycle",
@@ -52,6 +56,7 @@
     "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition",
     "POST /projects",
     "POST /projects/{projectId}/deliver",
+    "POST /site-intelligence",
     "PUT /files/{fileId}/content",
     "PUT /payment-schedules/{scheduleId}"
   ],
@@ -187,5 +192,23 @@
     "plants",
     "xr",
     "advice"
+  ],
+  "requiredSiteIntelligenceFields": [
+    "id",
+    "projectId",
+    "clientSubject",
+    "observationIds",
+    "constraints",
+    "opportunities",
+    "sourceStage",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenSiteIntelligenceFields": [
+    "twinDatabase",
+    "aiConclusion",
+    "thirdPartyCredentials",
+    "geoportal",
+    "inventedSiteFacts"
   ]
 }
