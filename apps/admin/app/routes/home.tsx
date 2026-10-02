@@ -12,6 +12,7 @@ import {
   createAdminFile,
   capacityDecisionMessage,
   createAdminCapacityWindow,
+  createAdminGarden,
   createAdminMilestone,
   createAdminPaymentSchedule,
   createAdminProject,
@@ -19,6 +20,7 @@ import {
   fetchAdminCapacityWindows,
   fetchAdminContracts,
   fetchAdminFiles,
+  fetchAdminGardens,
   fetchAdminLeads,
   fetchAdminMilestones,
   fetchAdminOffers,
@@ -91,6 +93,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadMilestones() {
       return fetchAdminMilestones({ base, cookie });
+    },
+    async loadGardens() {
+      return fetchAdminGardens({ base, cookie });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -301,6 +306,23 @@ export async function action({ request }: Route.ActionArgs) {
       scheduleId: scheduleId.trim(),
       installmentId: installmentId.trim(),
       status: status.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-garden') {
+    const projectId = form.get('projectId');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminGarden({
+      base,
+      projectId: projectId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

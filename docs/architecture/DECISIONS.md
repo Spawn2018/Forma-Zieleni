@@ -229,9 +229,9 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 |------|---------|
 | Data | 2026-10-02 |
 | Status | Accepted |
-| Decyzja | Owner: pominąć pauzy OWNER-DECISION i budować dalej do 10:00 Europe/Warsaw w oknie `/noc`. `AUTHORIZE CAPACITY-STAFF`. `AUTHORIZE ADMIN-MILESTONE-STAFF`. |
+| Decyzja | Owner: pominąć pauzy OWNER-DECISION i budować dalej do 10:00 Europe/Warsaw w oknie `/noc`. `AUTHORIZE CAPACITY-STAFF`. `AUTHORIZE ADMIN-MILESTONE-STAFF`. `AUTHORIZE ADMIN-GARDEN-STAFF`. |
 | Kontekst | Graf AUTO/REVIEW był wyczerpany. Owner nie wybrał dostawcy ani wdrożenia. Polecił kontynuację bezpiecznej głębokości produktu. |
-| Konsekwencje | CAPACITY-STAFF jest panelem dyspozycyjności personelu w Core API i `apps/admin`. PORTAL-CONTRACT-VIEW pokazuje klientowi status własnej umowy, bez ceny, podpisu i płatności. ADMIN-MILESTONE-STAFF pokazuje personelowi kamienie milowe projektu przez istniejące Core API, bez płatności i bez dziennika decyzji. Brak kalendarza zewnętrznego, brak obietnicy zapisu poza oknem. Cloudflare, DNS, sekrety, spend, prawdziwa wpłata, dane klientów i deploy zostają DANGEROUS. |
+| Konsekwencje | CAPACITY-STAFF jest panelem dyspozycyjności personelu w Core API i `apps/admin`. PORTAL-CONTRACT-VIEW pokazuje klientowi status własnej umowy, bez ceny, podpisu i płatności. ADMIN-MILESTONE-STAFF pokazuje personelowi kamienie milowe projektu przez istniejące Core API, bez płatności i bez dziennika decyzji. ADMIN-GARDEN-STAFF pokazuje personelowi ogród dostarczonego projektu, bez bliźniaka cyfrowego i bez podmiotu klienta na liście. Brak kalendarza zewnętrznego, brak obietnicy zapisu poza oknem. Cloudflare, DNS, sekrety, spend, prawdziwa wpłata, dane klientów i deploy zostają DANGEROUS. |
 
 ## Szablon kolejnego ADR
 

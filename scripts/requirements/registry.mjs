@@ -534,6 +534,12 @@ row('FZ-REQ-ADMIN-012', 'Staff can list and create project milestones in apps/ad
   executableSlice: 'ADMIN-MILESTONE-STAFF',
   executableWhenComplete: ['PROJECT-MILESTONE-DOMAIN', 'ADMIN-CRM-PROJECT'],
 });
+row('FZ-REQ-ADMIN-013', 'Staff can list and create a garden for a delivered project in apps/admin through the existing Core API. No second garden store, no twin, and no client subject on the list.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists and creates gardens via Core API GET/POST /v1/gardens. The list shows id, project, and createdAt. Twin, sensor, and plant advice stay off the screen.', {
+  productCapability: 'ADMIN',
+  depth: 'GARDEN_STAFF',
+  executableSlice: 'ADMIN-GARDEN-STAFF',
+  executableWhenComplete: ['GARDENOS-HTTP', 'ADMIN-CRM-PROJECT'],
+});
 row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', 'Evidence: OpenAPI + HTTP create/list/get with BOLA portal projection. gardens:* capabilities. Project deliver unlocks linkage. No twin/XR/plant advice.', {
   blockerClass: 'INTERNAL',
   productCapability: 'GARDENOS',

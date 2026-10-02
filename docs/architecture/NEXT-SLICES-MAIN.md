@@ -1055,6 +1055,22 @@ Security: uses existing `milestones:read` and `milestones:create`.
 The admin does not invent a second milestone store.
 Next: none.
 
+### ADMIN-GARDEN-STAFF
+
+Dependencies: GARDENOS-HTTP, ADMIN-CRM-PROJECT.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in admin lists gardens that Core API already stores
+and can create one for a delivered project. A row shows the garden id,
+project id, and created time. The client subject stays off the list.
+A twin, sensor, plant, or advice field is refused.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-GARDEN-STAFF.md`](./ADMIN-GARDEN-STAFF.md).
+Security: uses existing `gardens:read` and `gardens:create`.
+The admin does not invent a second garden store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

@@ -136,6 +136,18 @@ export type AdminMilestoneList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminGardenRow = {
+  id: string;
+  projectId: string;
+  createdAt: string;
+};
+
+export type AdminGardenList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminGardenRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminSigningSandbox =
   | { status: 'empty' }
   | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
@@ -157,6 +169,7 @@ export type AdminHome =
       capacityWindows: AdminCapacityWindowList;
       signingSandbox: AdminSigningSandbox;
       milestones: AdminMilestoneList;
+      gardens: AdminGardenList;
       proposals: AdminProposalList;
     };
 
@@ -795,6 +808,102 @@ export async function createAdminMilestone(input: {
   }
 }
 
+const GARDEN_FORBIDDEN = [
+  'twinDatabase',
+  'liveTwinUi',
+  'liveGarden',
+  'sensorFeed',
+  'plants',
+  'advice',
+  'xr',
+] as const;
+
+type GardenApiItem = {
+  id?: unknown;
+  projectId?: unknown;
+  clientSubject?: unknown;
+  createdAt?: unknown;
+  twinDatabase?: unknown;
+  liveTwinUi?: unknown;
+  liveGarden?: unknown;
+  sensorFeed?: unknown;
+  plants?: unknown;
+  advice?: unknown;
+  xr?: unknown;
+};
+
+export function mapGardenPage(body: unknown): AdminGardenList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminGardenRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const garden = item as GardenApiItem;
+    if (typeof garden.id !== 'string' || typeof garden.projectId !== 'string') return { status: 'error' };
+    if (typeof garden.createdAt !== 'string') return { status: 'error' };
+    if (garden.clientSubject !== null && typeof garden.clientSubject !== 'string') return { status: 'error' };
+    if (GARDEN_FORBIDDEN.some((key) => Object.hasOwn(garden, key))) return { status: 'error' };
+    rows.push({
+      id: garden.id,
+      projectId: garden.projectId,
+      createdAt: garden.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminGardens(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminGardenList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/gardens?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapGardenPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminGarden(input: {
+  base: string;
+  projectId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/gardens', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({ projectId: input.projectId }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export async function createAdminProject(input: {
   base: string;
   contractId: string;
@@ -1072,6 +1181,7 @@ export async function resolveAdminHome(input: {
   loadCapacityWindows?: () => Promise<AdminCapacityWindowList>;
   loadSigningSandbox?: () => Promise<AdminSigningSandbox>;
   loadMilestones?: () => Promise<AdminMilestoneList>;
+  loadGardens?: () => Promise<AdminGardenList>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
@@ -1096,6 +1206,9 @@ export async function resolveAdminHome(input: {
     const milestones = input.loadMilestones
       ? await input.loadMilestones()
       : { status: 'empty' as const };
+    const gardens = input.loadGardens
+      ? await input.loadGardens()
+      : { status: 'empty' as const };
     const proposals = input.loadProposals
       ? await input.loadProposals()
       : { status: 'empty' as const };
@@ -1111,6 +1224,7 @@ export async function resolveAdminHome(input: {
       capacityWindows,
       signingSandbox,
       milestones,
+      gardens,
       proposals,
     };
   } catch {
@@ -1536,6 +1650,59 @@ function createMilestoneForm(): ReactNode {
       }),
     ),
     createElement('button', { type: 'submit', name: 'intent', value: 'create-milestone' }, 'Zapisz kamień milowy'),
+  );
+}
+
+function gardenListNode(gardens: AdminGardenList): ReactNode {
+  if (gardens.status === 'empty') {
+    return createElement('p', null, 'Brak ogrodów do pokazania.');
+  }
+  if (gardens.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać listy ogrodów.');
+  }
+  if (gardens.status === 'error') {
+    return createElement('p', null, 'Listy ogrodów nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-gardens', 'aria-label': 'Ogrody' },
+    createElement('h2', null, 'Ogrody'),
+    createElement(
+      'ul',
+      { className: 'admin-garden-list' },
+      ...gardens.items.map((garden) =>
+        createElement(
+          'li',
+          { key: garden.id, className: 'admin-garden' },
+          createElement(
+            'p',
+            { className: 'admin-garden-meta' },
+            [garden.id, ' · projekt ', garden.projectId, ' · ', garden.createdAt].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createGardenForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-garden' },
+    createElement('h2', null, 'Nowy ogród'),
+    createElement(
+      'label',
+      { className: 'admin-create-garden-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'projectId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-garden' }, 'Utwórz ogród'),
   );
 }
 
@@ -2119,6 +2286,8 @@ export function adminShell(home: AdminHome): ReactNode {
     createProjectForm(),
     milestoneListNode(home.milestones),
     createMilestoneForm(),
+    gardenListNode(home.gardens),
+    createGardenForm(),
     fileListNode(home.files),
     createFileForm(),
   );

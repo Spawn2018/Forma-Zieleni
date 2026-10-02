@@ -18,12 +18,14 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  createAdminGarden,
   createAdminMilestone,
   createAdminProject,
   fetchAdminContracts,
   fetchAdminFileBytes,
   fetchAdminFiles,
   fetchAdminLeads,
+  fetchAdminGardens,
   fetchAdminMilestones,
   fetchAdminOffers,
   fetchAdminOpportunities,
@@ -31,6 +33,7 @@ import {
   mapContractPage,
   mapFilePage,
   mapLeadPage,
+  mapGardenPage,
   mapMilestonePage,
   mapOfferPage,
   mapOpportunityPage,
@@ -54,6 +57,7 @@ const emptyCrm = {
   capacityWindows: { status: 'empty' },
   signingSandbox: { status: 'empty' },
   milestones: { status: 'empty' },
+  gardens: { status: 'empty' },
   proposals: { status: 'empty' },
 };
 
@@ -115,6 +119,8 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.match(signedIn, /Utwórz projekt/);
   assert.match(signedIn, /Brak kamieni milowych do pokazania/);
   assert.match(signedIn, /Zapisz kamień milowy/);
+  assert.match(signedIn, /Brak ogrodów do pokazania/);
+  assert.match(signedIn, /Utwórz ogród/);
   assert.match(signedIn, /Utwórz plik/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
@@ -125,11 +131,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -204,6 +210,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       capacityWindows: { status: 'empty' },
       signingSandbox: { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'pending' },
       milestones: { status: 'empty' },
+      gardens: { status: 'empty' },
       proposals: { status: 'empty' },
     }),
   );
@@ -845,6 +852,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /fetchAdminProjects/);
   assert.match(home, /fetchAdminMilestones/);
   assert.match(home, /createAdminMilestone/);
+  assert.match(home, /fetchAdminGardens/);
+  assert.match(home, /createAdminGarden/);
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
@@ -900,6 +909,63 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
   }
+});
+
+test('staff garden UI lists a delivered project garden and refuses a twin field', async () => {
+  assert.deepEqual(mapGardenPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapGardenPage({
+    items: [{
+      id: 'gd8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      clientSubject: null,
+      createdAt: '2026-09-24T12:00:00.000Z',
+      twinDatabase: true,
+    }],
+  }), { status: 'error' });
+  const mapped = mapGardenPage({
+    items: [{
+      id: 'gd8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      clientSubject: 'client-subject-opaque',
+      createdAt: '2026-09-24T12:00:00.000Z',
+      updatedAt: '2026-09-24T12:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    gardens: mapped,
+  }));
+  assert.match(html, /Ogrody/);
+  assert.match(html, /gd8k2n4p6q8r0s2t/);
+  assert.match(html, /Utwórz ogród/);
+  assert.equal(html.includes('client-subject-opaque'), false);
+  assert.equal(html.toLowerCase().includes('twin'), false);
+  const fetched = await fetchAdminGardens({
+    base: 'http://admin.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/gardens\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      return new Response(JSON.stringify({ items: [], nextCursor: null }), { status: 200 });
+    },
+  });
+  assert.deepEqual(fetched, { status: 'empty' });
+  const created = await createAdminGarden({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    idempotencyKey: 'gd-1',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/gardens$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(init?.headers?.['idempotency-key'], 'gd-1');
+      const body = JSON.parse(String(init?.body));
+      assert.deepEqual(body, { projectId: 'pr8k2n4p6q8r0s2t' });
+      return new Response('{}', { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
 });
 
 test('staff milestone UI lists a title and refuses a payment field', async () => {
