@@ -502,13 +502,12 @@ row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Projec
   executableSlice: 'PORTAL-PROJECT-VIEW',
   executableWhenComplete: ['PORTAL-OFFER-VIEW', 'PORTAL-PROJECT-PROJECTION'],
 });
-row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'ADMIN-APPROVAL-SURFACE not executed', 'REVIEW', 'UI over existing approval domain.', {
+row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
   depth: 'APPROVAL_WORKFLOW',
   executableSlice: 'ADMIN-APPROVAL-SURFACE',
   executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'ADMIN-APP'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, API, HTTP, 'GARDENOS-HTTP not executed', 'REVIEW', 'HTTP over GARDENOS-DOMAIN.', {
   blockerClass: 'INTERNAL',

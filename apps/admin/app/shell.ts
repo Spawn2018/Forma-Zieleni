@@ -1,4 +1,8 @@
 import { createElement, type ReactNode } from 'react';
+import {
+  proposalListNode,
+  type AdminProposalList,
+} from './approvals.ts';
 
 export type AdminSessionActor = {
   clientId: string;
@@ -112,6 +116,7 @@ export type AdminHome =
       projects: AdminProjectList;
       files: AdminFileList;
       paymentSchedules: AdminPaymentScheduleList;
+      proposals: AdminProposalList;
     };
 
 /**
@@ -792,6 +797,7 @@ export async function resolveAdminHome(input: {
   loadProjects?: () => Promise<AdminProjectList>;
   loadFiles?: () => Promise<AdminFileList>;
   loadPaymentSchedules?: () => Promise<AdminPaymentScheduleList>;
+  loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
@@ -806,7 +812,20 @@ export async function resolveAdminHome(input: {
     const paymentSchedules = input.loadPaymentSchedules
       ? await input.loadPaymentSchedules()
       : { status: 'empty' as const };
-    return { state: 'signed-in', leads, opportunities, offers, contracts, projects, files, paymentSchedules };
+    const proposals = input.loadProposals
+      ? await input.loadProposals()
+      : { status: 'empty' as const };
+    return {
+      state: 'signed-in',
+      leads,
+      opportunities,
+      offers,
+      contracts,
+      projects,
+      files,
+      paymentSchedules,
+      proposals,
+    };
   } catch {
     return { state: 'signed-out' };
   }
@@ -1339,6 +1358,7 @@ function createPaymentScheduleForm(): ReactNode {
 /**
  * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
  * Payment schedule is provider-neutral; no signing ceremony and no money movement.
+ * Proposals are synthetic Agnieszka review actions over the domain Fabric.
  */
 export function adminShell(home: AdminHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -1365,6 +1385,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createElement('p', { className: 'admin-brand' }, 'Forma Zieleni'),
     createElement('h1', null, 'Panel personelu'),
     createElement('p', null, 'Jesteś zalogowany.'),
+    proposalListNode(home.proposals),
     leadListNode(home.leads),
     opportunityListNode(home.opportunities),
     createOpportunityForm(),

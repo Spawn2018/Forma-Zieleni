@@ -2,6 +2,7 @@
   "openapi": "3.0.4",
   "versioning": "/v1",
   "paths": [
+    "GET /approvals/proposals",
     "GET /content/{contentId}",
     "GET /contracts",
     "GET /contracts/{contractId}",
@@ -31,6 +32,7 @@
     "GET /files/{fileId}",
     "GET /files/{fileId}/content",
     "GET /ready",
+    "POST /approvals/proposals/{changeSetId}/review",
     "POST /contracts",
     "POST /contracts/{contractId}/lifecycle",
     "POST /decision-log",

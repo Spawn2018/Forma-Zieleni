@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'semantic:review'],
 };
 
 const portal = {
@@ -1207,4 +1207,35 @@ test('staff create, replace and transition payment schedules; portal cannot (BOL
     `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
     json({ status: 'due', chargeId: 'x' }, { ...bearer(staff), 'idempotency-key': 'pay-due-bad' }),
   )).status, 400);
+});
+
+test('staff can list and review synthetic approval proposals; portal cannot; spend override refused', async () => {
+  const { app } = appFor();
+  const { getApprovalFabric } = await import('./approvals.ts');
+  getApprovalFabric({ reset: true });
+  assert.equal((await app.request('/v1/approvals/proposals')).status, 401);
+  assert.equal((await app.request('/v1/approvals/proposals', { headers: bearer(portal) })).status, 403);
+  const listed = await app.request('/v1/approvals/proposals', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  const body = await listed.json();
+  assert.equal(body.items.length, 1);
+  assert.equal(body.items[0].synthetic, true);
+  const id = body.items[0].id;
+  const rejected = await app.request(`/v1/approvals/proposals/${id}/review`, json({
+    action: 'REJECT',
+  }, bearer(staff)));
+  assert.equal(rejected.status, 200);
+  assert.equal((await rejected.json()).status, 'REJECTED');
+  getApprovalFabric({ reset: true });
+  const again = await (await app.request('/v1/approvals/proposals', { headers: bearer(staff) })).json();
+  const defer = await app.request(`/v1/approvals/proposals/${again.items[0].id}/review`, json({
+    action: 'DEFER',
+  }, bearer(staff)));
+  assert.equal(defer.status, 200);
+  assert.equal((await app.request(`/v1/approvals/proposals/${again.items[0].id}/review`, json({
+    action: 'spend',
+  }, bearer(staff)))).status, 400);
+  assert.equal((await app.request(`/v1/approvals/proposals/${again.items[0].id}/review`, json({
+    action: 'REJECT',
+  }, bearer(portal)))).status, 403);
 });

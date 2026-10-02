@@ -26,8 +26,8 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "PORTAL-PROJECT-VIEW complete. Next READY: ADMIN-APPROVAL-SURFACE (also ADMIN-FILE-BYTES). FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
-  "learningCheck": "MATERIAL: portal signed-in home must load project and file projections alongside offers; refuse payment/provider and binary fields in the UI mapper.",
+  "nextSafeAction": "ADMIN-APPROVAL-SURFACE complete. Next READY: GARDENOS-HTTP (also ADMIN-FILE-BYTES). FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
+  "learningCheck": "MATERIAL: portal signed-in home must load project and file projections alongside offers; refuse payment/provider and binary fields in the UI mapper. Admin approval UI stays on synthetic Fabric without inventing Core HTTP for change-sets.",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "apps/web/app/portfolio-projection.ts",

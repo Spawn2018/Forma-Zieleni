@@ -34,6 +34,7 @@ import {
   transitionPaymentInstallmentRecord,
 } from './payments.ts';
 import { createProjectFromContract, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
+import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
@@ -760,6 +761,72 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
       now(),
     );
     return c.json(schedule);
+  });
+
+  app.get('/v1/approvals/proposals', async c => {
+    const actor = await requireActor(c, options.authenticator, 'semantic:review');
+    c.set('actorId', actor.actorId);
+    getApprovalFabric();
+    return c.json({ items: listApprovalProposals(), nextCursor: null });
+  });
+
+  app.post('/v1/approvals/proposals/:changeSetId/review', async c => {
+    const actor = await requireActor(c, options.authenticator, 'semantic:review');
+    c.set('actorId', actor.actorId);
+    const changeSetId = c.req.param('changeSetId');
+    if (!changeSetId || !/^[a-z0-9]{16,64}$/i.test(changeSetId)) {
+      throw badRequest('CHANGE_SET_ID_INVALID', 'Change set id is not valid.');
+    }
+    const body = await readJson(c.req.raw);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      throw badRequest('REVIEW_INVALID', 'Review input is not valid.');
+    }
+    const record = body as Record<string, unknown>;
+    for (const blocked of ['spend', 'price-change', 'publish-live', 'owner-decision', 'dangerous']) {
+      if (record.action === blocked || record.override === blocked) {
+        throw badRequest('AGNIESZKA_CANNOT_OVERRIDE', 'This action is outside Agnieszka approval scope.');
+      }
+    }
+    const action = record.action;
+    if (
+      action !== 'EDIT'
+      && action !== 'APPROVE_ALL'
+      && action !== 'PARTIAL_APPROVE'
+      && action !== 'REJECT'
+      && action !== 'DEFER'
+    ) {
+      throw badRequest('REVIEW_INVALID', 'Review action is not valid.');
+    }
+    try {
+      const proposal = reviewApprovalProposal({
+        changeSetId,
+        action,
+        selectedIds: Array.isArray(record.selectedIds)
+          ? record.selectedIds.filter((item): item is string => typeof item === 'string')
+          : undefined,
+        edits: Array.isArray(record.edits)
+          ? record.edits
+            .filter((item): item is { changeId: string; after: string } => (
+              !!item
+              && typeof item === 'object'
+              && !Array.isArray(item)
+              && typeof (item as { changeId?: unknown }).changeId === 'string'
+              && typeof (item as { after?: unknown }).after === 'string'
+            ))
+            .map((item) => ({ changeId: item.changeId, after: item.after }))
+          : undefined,
+        at: now(),
+      });
+      return c.json(proposal);
+    } catch (error) {
+      if (error instanceof Error && /AGNIESZKA_CANNOT_OVERRIDE/.test(error.message)) {
+        throw badRequest('AGNIESZKA_CANNOT_OVERRIDE', 'This action is outside Agnieszka approval scope.');
+      }
+      if (error instanceof Error && /CHANGE_ABSENT|REVIEW_CLOSED|SELECTION_EMPTY|NOT_APPROVED|STALE/.test(error.message)) {
+        throw badRequest('REVIEW_INVALID', 'Review input is not valid.');
+      }
+      throw error;
+    }
   });
 
   app.post('/v1/growth/plans', async c => {

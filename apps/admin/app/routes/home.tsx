@@ -23,6 +23,7 @@ import {
   transitionAdminPaymentInstallment,
   type AdminHome,
 } from '../shell.ts';
+import { fetchAdminProposals, reviewAdminProposal } from '../approvals.ts';
 
 function apiOrigin(): string | undefined {
   return typeof process !== 'undefined' ? process.env.FZ_API_ORIGIN || process.env.CORE_API_URL : undefined;
@@ -70,6 +71,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     async loadPaymentSchedules() {
       return fetchAdminPaymentSchedules({ base, cookie });
     },
+    async loadProposals() {
+      return fetchAdminProposals({ base, cookie });
+    },
   });
 }
 
@@ -79,6 +83,45 @@ export async function action({ request }: Route.ActionArgs) {
   const form = await request.formData();
   const intent = form.get('intent');
   const cookie = request.headers.get('cookie') ?? '';
+
+  if (
+    intent === 'edit-proposal'
+    || intent === 'approve-proposal'
+    || intent === 'partial-approve-proposal'
+    || intent === 'reject-proposal'
+    || intent === 'defer-proposal'
+  ) {
+    const changeSetId = form.get('changeSetId');
+    if (typeof changeSetId !== 'string' || !changeSetId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const action =
+      intent === 'edit-proposal' ? 'EDIT'
+        : intent === 'approve-proposal' ? 'APPROVE_ALL'
+          : intent === 'partial-approve-proposal' ? 'PARTIAL_APPROVE'
+            : intent === 'reject-proposal' ? 'REJECT'
+              : 'DEFER';
+    const editChangeId = form.get('editChangeId');
+    const editAfter = form.get('editAfter');
+    const result = await reviewAdminProposal({
+      base,
+      changeSetId: changeSetId.trim(),
+      action,
+      selectedIds: intent === 'partial-approve-proposal' && typeof editChangeId === 'string'
+        ? [editChangeId]
+        : undefined,
+      edits: intent === 'edit-proposal'
+        && typeof editChangeId === 'string'
+        && typeof editAfter === 'string'
+        ? [{ changeId: editChangeId, after: editAfter }]
+        : undefined,
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
 
   if (intent === 'qualify') {
     const leadId = form.get('leadId');

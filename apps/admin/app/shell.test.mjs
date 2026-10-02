@@ -39,6 +39,8 @@ const emptyCrm = {
   projects: { status: 'empty' },
   files: { status: 'empty' },
   paymentSchedules: { status: 'empty' },
+      proposals: { status: 'empty' },
+  proposals: { status: 'empty' },
 };
 
 const prohibited = [
@@ -107,11 +109,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -183,6 +185,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      proposals: { status: 'empty' },
     }),
   );
   assert.match(ready, /Anna Kowalska/);
@@ -651,6 +654,10 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /fetchAdminPaymentSchedules/);
   assert.match(home, /createAdminPaymentSchedule/);
   assert.match(home, /transitionAdminPaymentInstallment/);
+  assert.match(home, /fetchAdminProposals/);
+  assert.match(home, /reviewAdminProposal/);
+  assert.match(home, /edit-proposal/);
+  assert.match(home, /approve-proposal/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
@@ -681,4 +688,82 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
   }
+});
+
+test('staff approval UI reviews synthetic proposals without Owner or spend gates', async () => {
+  const {
+    BLOCKED_APPROVAL_INTENTS,
+    fetchAdminProposals,
+    mapAdminProposalPage,
+    reviewAdminProposal,
+  } = await import('./approvals.ts');
+
+  const sample = {
+    items: [{
+      id: 'setadminapprove001',
+      status: 'PROPOSED',
+      reason: 'Syntetyczna propozycja do przeglądu.',
+      trigger: 'suggestion',
+      synthetic: true,
+      changes: [{
+        id: 'chgadminplant0001',
+        entityId: 'plantrecord000001',
+        field: 'scientificName',
+        before: 'Taxus baccata',
+        after: 'Taxus baccata L.',
+      }],
+    }],
+    nextCursor: null,
+  };
+  const mapped = mapAdminProposalPage(sample);
+  assert.equal(mapped.status, 'ready');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    proposals: mapped,
+  }));
+  assert.match(html, /Propozycje do przeglądu/);
+  assert.match(html, /Zatwierdź/);
+  assert.match(html, /Odrzuć/);
+  assert.match(html, /Odłóż/);
+  assert.match(html, /Edytuj/);
+  assert.match(html, /Zatwierdź wybrane/);
+  for (const blocked of BLOCKED_APPROVAL_INTENTS) {
+    assert.equal(html.toLowerCase().includes(blocked), false, blocked);
+  }
+  assert.equal(html.toLowerCase().includes('spend'), false);
+  assert.equal(html.toLowerCase().includes('publish-live'), false);
+  assert.equal(html.toLowerCase().includes('price-change'), false);
+
+  const listed = await fetchAdminProposals({
+    base: 'http://admin.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/approvals\/proposals$/);
+      assert.equal(init?.credentials, 'include');
+      return new Response(JSON.stringify(sample), { status: 200 });
+    },
+  });
+  assert.equal(listed.status, 'ready');
+
+  const reviewed = await reviewAdminProposal({
+    base: 'http://admin.test',
+    changeSetId: 'setadminapprove001',
+    action: 'REJECT',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/approvals\/proposals\/setadminapprove001\/review$/);
+      assert.equal(init?.method, 'POST');
+      return new Response(JSON.stringify({ id: 'setadminapprove001', status: 'REJECTED' }), { status: 200 });
+    },
+  });
+  assert.deepEqual(reviewed, { ok: true });
+
+  const denied = await reviewAdminProposal({
+    base: 'http://admin.test',
+    changeSetId: 'setadminapprove001',
+    action: 'APPROVE_ALL',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });

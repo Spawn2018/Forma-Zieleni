@@ -862,14 +862,15 @@ Next: ADMIN-APPROVAL-SURFACE.
 
 Dependencies: PORTAL-PROJECT-VIEW, ADMIN-APP.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: staff approval UI in `apps/admin` for the existing Agnieszka
 approval domain actions (edit / partial approve / approve / reject /
 defer) over synthetic proposals. Cannot override Owner, spend, price,
 or live publication gates.
-Tests: admin UI + domain/API wiring tests.
-Security: staff capabilities; AI cannot overwrite human-locked fields.
+Tests: `apps/admin/app/shell.test.mjs` approval cases over domain Fabric.
+Security: staff shell only; no spend/price/publish-live intents; AI cannot
+overwrite human-locked fields (domain).
 Next: GARDENOS-HTTP.
 
 ### GARDENOS-HTTP
