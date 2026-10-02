@@ -45,3 +45,11 @@ export {
 export type { GardenCreateRequest } from './garden.ts';
 export { validateSiteIntelligenceCreateRequest } from './site-intelligence.ts';
 export type { SiteIntelligenceCreateRequest } from './site-intelligence.ts';
+export {
+  validateCapacityDecisionRequest,
+  validateCapacityWindowCreateRequest,
+} from './capacity.ts';
+export type {
+  CapacityDecisionRequest,
+  CapacityWindowCreateRequest,
+} from './capacity.ts';

@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'gardens:read', 'gardens:create', 'siteintel:read', 'siteintel:create', 'semantic:review'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'gardens:read', 'gardens:create', 'siteintel:read', 'siteintel:create', 'capacity:read', 'capacity:write', 'semantic:review'],
 };
 
 const portal = {
@@ -1676,4 +1676,93 @@ test('site intelligence HTTP create/list/get from synthetic RULES; rejects AI in
   }))).json();
   assert.equal(staffRecord.clientSubject, null);
   assert.equal((await app.request(`/v1/portal/site-intelligence/${staffRecord.id}`, { headers: bearer(portal) })).status, 404);
+});
+
+test('capacity windows are staff-only and refuse a promised instant outside the window', async () => {
+  const { app } = appFor();
+  const actorId = 'staffdesignerana1';
+  const windowBody = {
+    actorId,
+    kind: 'consultation',
+    startsAt: '2026-06-01T08:00:00.000Z',
+    endsAt: '2026-06-01T12:00:00.000Z',
+  };
+  assert.equal((await app.request('/v1/capacity-windows')).status, 401);
+  assert.equal((await app.request('/v1/capacity-windows', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/capacity-decisions', json({
+    kind: 'consultation',
+    promisedAt: '2026-06-01T09:00:00.000Z',
+  }, bearer(portal)))).status, 403);
+
+  const empty = await app.request('/v1/capacity-decisions', json({
+    kind: 'consultation',
+    promisedAt: '2026-06-01T09:00:00.000Z',
+    actorId,
+  }, bearer(staff)));
+  assert.equal(empty.status, 200);
+  assert.deepEqual(await empty.json(), { ok: false, reason: 'CAPACITY_EMPTY' });
+
+  const calendar = await app.request('/v1/capacity-windows', json({ ...windowBody, email: 'a@b.c' }, {
+    'idempotency-key': 'cap-mail-1',
+    ...bearer(staff),
+  }));
+  assert.equal(calendar.status, 400);
+
+  const created = await app.request('/v1/capacity-windows', json(windowBody, {
+    'idempotency-key': 'cap-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const window = await created.json();
+  assert.equal(window.actorId, actorId);
+  assert.equal(window.kind, 'consultation');
+  assert.equal(Object.hasOwn(window, 'email'), false);
+
+  const replay = await app.request('/v1/capacity-windows', json(windowBody, {
+    'idempotency-key': 'cap-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(replay.status, 201);
+  assert.equal((await replay.json()).id, window.id);
+
+  const conflict = await app.request('/v1/capacity-windows', json({
+    ...windowBody,
+    endsAt: '2026-06-01T13:00:00.000Z',
+  }, {
+    'idempotency-key': 'cap-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(conflict.status, 409);
+
+  const inside = await app.request('/v1/capacity-decisions', json({
+    kind: 'consultation',
+    promisedAt: '2026-06-01T09:00:00.000Z',
+    actorId,
+  }, bearer(staff)));
+  assert.equal(inside.status, 200);
+  assert.deepEqual(await inside.json(), { ok: true, windowId: window.id });
+
+  const outside = await app.request('/v1/capacity-decisions', json({
+    kind: 'consultation',
+    promisedAt: '2026-06-01T13:00:00.000Z',
+    actorId,
+  }, bearer(staff)));
+  assert.equal(outside.status, 200);
+  assert.deepEqual(await outside.json(), { ok: false, reason: 'CAPACITY_OUTSIDE' });
+
+  const mismatch = await app.request('/v1/capacity-decisions', json({
+    kind: 'start',
+    promisedAt: '2026-06-01T09:00:00.000Z',
+    actorId,
+  }, bearer(staff)));
+  assert.equal(mismatch.status, 200);
+  assert.deepEqual(await mismatch.json(), { ok: false, reason: 'CAPACITY_KIND_MISMATCH' });
+
+  const listed = await app.request('/v1/capacity-windows', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  const page = await listed.json();
+  assert.equal(page.items.length, 1);
+  assert.equal(page.items[0].id, window.id);
+  assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(staff) })).status, 200);
+  assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(portal) })).status, 403);
 });

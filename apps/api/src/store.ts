@@ -1,4 +1,6 @@
 import type {
+  CapacityKind,
+  CapacityWindow,
   Contract,
   ContractStatus,
   Garden,
@@ -82,6 +84,14 @@ export type PaymentScheduleListQuery = {
   limit: number;
   sort: SortField;
   contractId?: string;
+  cursor?: { at: string; id: string };
+};
+
+export type CapacityListQuery = {
+  limit: number;
+  sort: SortField;
+  kind?: CapacityKind;
+  actorId?: string;
   cursor?: { at: string; id: string };
 };
 
@@ -192,6 +202,9 @@ export interface LeadTx {
   saveSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void>;
   findSigningEnvelope(id: string): Promise<SigningSandboxEnvelope | null>;
   findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null>;
+  insertCapacityWindow(window: CapacityWindow): Promise<void>;
+  findCapacityWindow(id: string): Promise<CapacityWindow | null>;
+  listCapacityWindows(query: CapacityListQuery): Promise<CapacityWindow[]>;
   insertGarden(garden: Garden): Promise<void>;
   findGarden(id: string): Promise<Garden | null>;
   findGardenByProject(projectId: string): Promise<Garden | null>;

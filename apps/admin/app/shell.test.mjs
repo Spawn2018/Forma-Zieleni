@@ -8,6 +8,11 @@ import {
   adminSessionCookiePresent,
   adminShell,
   advanceAdminContractLifecycle,
+  capacityDecisionMessage,
+  createAdminCapacityWindow,
+  decideAdminCapacity,
+  fetchAdminCapacityWindows,
+  mapCapacityWindowPage,
   classifyAdminSession,
   createAdminContract,
   createAdminOffer,
@@ -43,6 +48,7 @@ const emptyCrm = {
   projects: { status: 'empty' },
   files: { status: 'empty' },
   paymentSchedules: { status: 'empty' },
+  capacityWindows: { status: 'empty' },
   signingSandbox: { status: 'empty' },
   proposals: { status: 'empty' },
 };
@@ -113,11 +119,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -189,6 +195,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      capacityWindows: { status: 'empty' },
       signingSandbox: { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'pending' },
       proposals: { status: 'empty' },
     }),
@@ -994,4 +1001,60 @@ test('staff open a documenso sandbox envelope without sending a secret', async (
     }), { status: 200 }),
   });
   assert.deepEqual(read, { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'completed' });
+});
+
+test('capacity staff UI lists windows and explains a refusal without a calendar', async () => {
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    capacityWindows: {
+      status: 'ready',
+      items: [{
+        id: 'wcapacitywindow01',
+        actorId: 'staffdesignerana1',
+        kind: 'consultation',
+        startsAt: '2026-06-01T08:00:00.000Z',
+        endsAt: '2026-06-01T12:00:00.000Z',
+      }],
+    },
+  }));
+  assert.match(html, /Dyspozycyjność/);
+  assert.match(html, /konsultacja/);
+  assert.match(html, /staffdesignerana1/);
+  assert.match(html, /Zapisz okno/);
+  assert.match(html, /Sprawdź obiecany termin/);
+  assert.equal(html.toLowerCase().includes('google'), false);
+  assert.equal(html.toLowerCase().includes('calendar'), false);
+  assert.equal(capacityDecisionMessage({ ok: false, reason: 'CAPACITY_OUTSIDE' }), 'Termin wypada poza dyspozycyjnością.');
+  assert.equal(capacityDecisionMessage({ ok: true, windowId: 'wcapacitywindow01' }), 'Termin mieści się w oknie dyspozycyjności.');
+  assert.deepEqual(mapCapacityWindowPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(
+    await fetchAdminCapacityWindows({
+      base: 'http://admin.test',
+      fetchImpl: async () => new Response('', { status: 403 }),
+    }),
+    { status: 'forbidden' },
+  );
+  assert.deepEqual(
+    await createAdminCapacityWindow({
+      base: 'http://admin.test',
+      actorId: 'staffdesignerana1',
+      kind: 'consultation',
+      startsAt: '2026-06-01T08:00:00.000Z',
+      endsAt: '2026-06-01T12:00:00.000Z',
+      idempotencyKey: 'cap-ui-1',
+      fetchImpl: async () => new Response('{}', { status: 201 }),
+    }),
+    { ok: true },
+  );
+  assert.deepEqual(
+    await decideAdminCapacity({
+      base: 'http://admin.test',
+      kind: 'consultation',
+      promisedAt: '2026-06-01T13:00:00.000Z',
+      actorId: 'staffdesignerana1',
+      fetchImpl: async () => new Response(JSON.stringify({ ok: false, reason: 'CAPACITY_OUTSIDE' }), { status: 200 }),
+    }),
+    { ok: true, decision: { ok: false, reason: 'CAPACITY_OUTSIDE' } },
+  );
 });

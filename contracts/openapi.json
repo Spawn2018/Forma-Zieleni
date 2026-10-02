@@ -33,6 +33,10 @@
       "name": "Gardens"
     },
     {
+      "name": "Capacity",
+      "description": "Staff availability windows. No external calendar and no customer fields."
+    },
+    {
       "name": "SiteIntelligence",
       "description": "RULES-derived site constraints and opportunities. Synthetic observations only; no live Geoportal credentials or AI conclusions."
     },
@@ -2564,6 +2568,126 @@
         }
       }
     },
+    "/capacity-windows": {
+      "get": {
+        "tags": ["Capacity"],
+        "operationId": "listCapacityWindows",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Staff list of capacity windows. Public and portal clients are not authorized.",
+        "parameters": [
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Cursor" },
+          { "$ref": "#/components/parameters/Sort" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of capacity windows.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CapacityWindowPage" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      },
+      "post": {
+        "tags": ["Capacity"],
+        "operationId": "createCapacityWindow",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Create a staff capacity window. Idempotent. Rejects calendar and customer fields.",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CapacityWindowCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Capacity window created.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CapacityWindow" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/capacity-windows/{windowId}": {
+      "get": {
+        "tags": ["Capacity"],
+        "operationId": "getCapacityWindow",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "windowId",
+            "in": "path",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/OpaqueId" }
+          },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Capacity window visible to staff.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CapacityWindow" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/capacity-decisions": {
+      "post": {
+        "tags": ["Capacity"],
+        "operationId": "decideCapacityPromise",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Decide whether a promised instant sits inside recorded capacity. Does not write a promise.",
+        "parameters": [
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CapacityDecisionRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Capacity decision. A refusal is a successful response.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CapacityDecision" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
     "/gardens": {
       "get": {
         "tags": [
@@ -4912,6 +5036,75 @@
         "additionalProperties": false,
         "properties": {},
         "description": "Empty body. Callers cannot supply status, payment, or provider fields."
+      },
+      "CapacityWindowCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actorId", "kind", "startsAt", "endsAt"],
+        "properties": {
+          "actorId": { "$ref": "#/components/schemas/OpaqueId" },
+          "kind": { "type": "string", "enum": ["consultation", "start"] },
+          "startsAt": { "type": "string", "format": "date-time" },
+          "endsAt": { "type": "string", "format": "date-time" }
+        },
+        "description": "Staff capacity window. No calendar provider and no customer fields."
+      },
+      "CapacityWindow": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "actorId", "kind", "startsAt", "endsAt", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "actorId": { "$ref": "#/components/schemas/OpaqueId" },
+          "kind": { "type": "string", "enum": ["consultation", "start"] },
+          "startsAt": { "type": "string", "format": "date-time" },
+          "endsAt": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CapacityWindowPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items", "meta"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CapacityWindow" }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["limit", "nextCursor"],
+            "properties": {
+              "limit": { "type": "integer" },
+              "nextCursor": { "type": ["string", "null"] }
+            }
+          }
+        }
+      },
+      "CapacityDecisionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "promisedAt"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["consultation", "start"] },
+          "promisedAt": { "type": "string", "format": "date-time" },
+          "actorId": { "$ref": "#/components/schemas/OpaqueId" }
+        }
+      },
+      "CapacityDecision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ok"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "reason": {
+            "type": "string",
+            "enum": ["CAPACITY_EMPTY", "CAPACITY_OUTSIDE", "CAPACITY_KIND_MISMATCH"]
+          },
+          "windowId": { "$ref": "#/components/schemas/OpaqueId" }
+        }
       },
       "GardenCreate": {
         "type": "object",

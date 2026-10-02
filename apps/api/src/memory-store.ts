@@ -1,4 +1,5 @@
 import type {
+  CapacityWindow,
   Contract,
   ContractStatus,
   Garden,
@@ -22,6 +23,7 @@ import type {
   AuditEvent,
   ContractListQuery,
   DecisionLogListQuery,
+  CapacityListQuery,
   GardenListQuery,
   LeadStore,
   LeadTx,
@@ -49,6 +51,7 @@ type MemoryState = {
   paymentSchedules: PaymentSchedule[];
   sandboxIntents: SandboxPaymentIntent[];
   signingEnvelopes: SigningSandboxEnvelope[];
+  capacityWindows: CapacityWindow[];
   gardens: Garden[];
   siteIntelligence: SiteIntelligenceRecord[];
   idempotency: Map<string, StoredReply>;
@@ -77,6 +80,7 @@ export class MemoryLeadStore implements LeadStore {
     paymentSchedules: [],
     sandboxIntents: [],
     signingEnvelopes: [],
+    capacityWindows: [],
     gardens: [],
     siteIntelligence: [],
     idempotency: new Map(),
@@ -97,6 +101,7 @@ export class MemoryLeadStore implements LeadStore {
       paymentSchedules: this.state.paymentSchedules,
       sandboxIntents: this.state.sandboxIntents,
       signingEnvelopes: this.state.signingEnvelopes,
+      capacityWindows: this.state.capacityWindows,
       gardens: this.state.gardens,
       siteIntelligence: this.state.siteIntelligence,
       outbox: this.state.outbox,
@@ -117,6 +122,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.paymentSchedules = snapshot.paymentSchedules;
       this.state.sandboxIntents = snapshot.sandboxIntents;
       this.state.signingEnvelopes = snapshot.signingEnvelopes;
+      this.state.capacityWindows = snapshot.capacityWindows;
       this.state.gardens = snapshot.gardens;
       this.state.siteIntelligence = snapshot.siteIntelligence;
       this.state.outbox = snapshot.outbox;
@@ -483,6 +489,35 @@ class MemoryTx implements LeadTx {
 
   async findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null> {
     return clone(this.state.signingEnvelopes.find(item => item.contractId === contractId) ?? null);
+  }
+
+  async insertCapacityWindow(window: CapacityWindow): Promise<void> {
+    this.state.capacityWindows.push(clone(window));
+  }
+
+  async findCapacityWindow(id: string): Promise<CapacityWindow | null> {
+    return clone(this.state.capacityWindows.find(item => item.id === id) ?? null);
+  }
+
+  async listCapacityWindows(query: CapacityListQuery): Promise<CapacityWindow[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.capacityWindows.filter(
+      window => (!query.kind || window.kind === query.kind)
+        && (!query.actorId || window.actorId === query.actorId),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(window => {
+          const at = stamp(window, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && window.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && window.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
   }
 
   async insertGarden(garden: Garden): Promise<void> {

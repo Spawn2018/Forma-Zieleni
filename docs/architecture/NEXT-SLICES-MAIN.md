@@ -969,6 +969,24 @@ production token field, no document upload.
 Tests: `apps/admin/app/shell.test.mjs`.
 Security: staff session only; portal is not this surface; the UI does
 not send a secret.
+Next: CAPACITY-STAFF.
+
+### CAPACITY-STAFF
+
+Dependencies: CAPACITY-DOMAIN, ADMIN-APP.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff in `apps/admin` can record an owner or designer capacity
+window through Core API and see whether a promised consultation or
+start sits inside it. Empty capacity refuses the promise. No calendar
+SaaS, no customer fields, no public read.
+Tests: `packages/validation/capacity.test.mjs`,
+`apps/api/src/http.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`CAPACITY-STAFF.md`](./CAPACITY-STAFF.md).
+Security: `capacity:read` and `capacity:write` are staff capabilities.
+Portal and anonymous callers receive 401 or 403. Idempotent create.
+The decision route does not write a promise.
 Next: none.
 
 ## Deferred and Owner-gated (visible, not READY)

@@ -452,11 +452,17 @@ row('FZ-REQ-WWW-003', 'Public WWW lead capture posts to Core API POST /leads. No
   executableSlice: 'WWW-LEAD-CAPTURE',
   executableWhenComplete: [],
 });
-row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/capacity.ts', 'packages/domain/capacity.test.mjs', '', 'NONE', 'Evidence: decidePromisedDate / assertPromisedDateInsideCapacity. Staff HTTP UI stays later.', {
+row('FZ-REQ-CRM-CAPACITY-001', 'Owner/designer capacity windows refuse promised dates outside availability. No calendar SaaS.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/capacity.ts', 'packages/domain/capacity.test.mjs', '', 'NONE', 'Evidence: decidePromisedDate / assertPromisedDateInsideCapacity. Staff HTTP UI is FZ-REQ-CRM-CAPACITY-002.', {
   productCapability: 'CAPACITY',
   depth: 'DOMAIN',
   executableSlice: 'CAPACITY-DOMAIN',
   executableWhenComplete: ['WWW-LEAD-CAPTURE'],
+});
+row('FZ-REQ-CRM-CAPACITY-002', 'Staff can record capacity windows and see a refused promised date in apps/admin through Core API. No calendar SaaS and no customer fields.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/api/src/capacity.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Evidence: POST/GET /v1/capacity-windows and POST /v1/capacity-decisions. Admin forms. Portal denied.', {
+  productCapability: 'CAPACITY',
+  depth: 'STAFF_HTTP',
+  executableSlice: 'CAPACITY-STAFF',
+  executableWhenComplete: ['CAPACITY-DOMAIN', 'ADMIN-APP'],
 });
 row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'packages/domain/project-milestone.test.mjs', '', 'NONE', 'Evidence: OpenAPI + HTTP create/list with BOLA. Staff milestones:* capabilities. No payment/signing providers.', {
   productCapability: 'PROJECT',

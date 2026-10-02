@@ -223,6 +223,16 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Kontekst | Oba grafy były COMPLETE. Owner zgodził się otworzyć następną pracę produktową i wrócić do blokad później. |
 | Konsekwencje | SIGN-ADAPTER-1 jest lokalnym sandboxem Documenso bez QES i bez tokenu. ADMIN-SIGN-SANDBOX jest następnym slice'em staff. DANGEROUS bez zmian. |
 
+## ADR-019 — Continue safe product depth past exhausted Owner pauses
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-10-02 |
+| Status | Accepted |
+| Decyzja | Owner: pominąć pauzy OWNER-DECISION i budować dalej do 10:00 Europe/Warsaw w oknie `/noc`. `AUTHORIZE CAPACITY-STAFF`. |
+| Kontekst | Graf AUTO/REVIEW był wyczerpany. Owner nie wybrał dostawcy ani wdrożenia. Polecił kontynuację bezpiecznej głębokości produktu. |
+| Konsekwencje | CAPACITY-STAFF jest panelem dyspozycyjności personelu w Core API i `apps/admin`. Brak kalendarza zewnętrznego, brak danych klienta, brak obietnicy zapisu poza oknem. Cloudflare, DNS, sekrety, spend, prawdziwa wpłata, dane klientów i deploy zostają DANGEROUS. |
+
 ## Szablon kolejnego ADR
 
 ```markdown

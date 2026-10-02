@@ -10,8 +10,12 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  capacityDecisionMessage,
+  createAdminCapacityWindow,
   createAdminPaymentSchedule,
   createAdminProject,
+  decideAdminCapacity,
+  fetchAdminCapacityWindows,
   fetchAdminContracts,
   fetchAdminFiles,
   fetchAdminLeads,
@@ -74,6 +78,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadPaymentSchedules() {
       return fetchAdminPaymentSchedules({ base, cookie });
+    },
+    async loadCapacityWindows() {
+      return fetchAdminCapacityWindows({ base, cookie });
     },
     async loadSigningSandbox() {
       const contractId = new URL(request.url).searchParams.get('contractId') ?? '';
@@ -348,6 +355,58 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect('/');
   }
 
+  if (intent === 'create-capacity-window') {
+    const actorId = form.get('capacityActorId');
+    const kind = form.get('capacityKind');
+    const startsAt = form.get('capacityStartsAt');
+    const endsAt = form.get('capacityEndsAt');
+    if (typeof actorId !== 'string' || !actorId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (kind !== 'consultation' && kind !== 'start') {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof startsAt !== 'string' || !startsAt.trim() || typeof endsAt !== 'string' || !endsAt.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminCapacityWindow({
+      base,
+      actorId: actorId.trim(),
+      kind,
+      startsAt: startsAt.trim(),
+      endsAt: endsAt.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'decide-capacity') {
+    const actorId = form.get('capacityActorId');
+    const kind = form.get('capacityKind');
+    const promisedAt = form.get('capacityPromisedAt');
+    if (kind !== 'consultation' && kind !== 'start') {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof promisedAt !== 'string' || !promisedAt.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await decideAdminCapacity({
+      base,
+      kind,
+      promisedAt: promisedAt.trim(),
+      actorId: typeof actorId === 'string' && actorId.trim() ? actorId.trim() : undefined,
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return data({ ok: true as const, decision: result.decision });
+  }
+
   if (intent === 'upload-file-bytes') {
     const fileId = form.get('fileId');
     const upload = form.get('bytes');
@@ -402,10 +461,15 @@ export default function Home({ loaderData, actionData }: Route.ComponentProps) {
     actionData && actionData.ok === false
       ? createElement('p', { className: 'admin-action-error', role: 'alert' }, actionFailureMessage(actionData.reason))
       : null;
+  const decision =
+    actionData && actionData.ok === true && 'decision' in actionData
+      ? createElement('p', { className: 'admin-capacity-decision', role: 'status' }, capacityDecisionMessage(actionData.decision))
+      : null;
   return createElement(
     'div',
     { className: 'admin-home' },
     failure,
+    decision,
     adminShell(loaderData),
   );
 }

@@ -10,6 +10,7 @@ import {
   assertOpaqueDecisionLogId,
   assertOpaquePaymentScheduleId,
   assertOpaquePaymentInstallmentId,
+  assertOpaqueCapacityWindowId,
   assertOpaqueGardenId,
   assertOpaqueSiteConstraintId,
   assertOpaqueSiteIntelligenceId,
@@ -67,6 +68,10 @@ export function newPaymentInstallmentId(): string {
 
 export function newGardenId(): string {
   return assertOpaqueGardenId(newOpaqueId('g'));
+}
+
+export function newCapacityWindowId(): string {
+  return assertOpaqueCapacityWindowId(newOpaqueId('w'));
 }
 
 export function newSiteIntelligenceId(): string {

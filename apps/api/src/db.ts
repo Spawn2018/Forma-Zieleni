@@ -100,6 +100,15 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  capacity_window: {
+    id: string;
+    actor_id: string;
+    kind: string;
+    starts_at: Date;
+    ends_at: Date;
+    created_at: Date;
+    updated_at: Date;
+  };
   garden: {
     id: string;
     project_id: string;
@@ -1139,6 +1148,79 @@ CREATE TABLE sandbox_signing_envelope (
   },
 };
 
+const CAPACITY_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'payments:read',
+  'payments:write',
+  'gardens:read',
+  'gardens:create',
+  'gardens:portal-read',
+  'siteintel:read',
+  'siteintel:create',
+  'siteintel:portal-read',
+  'capacity:read',
+  'capacity:write',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const capacityWindowMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE capacity_window (
+  id text PRIMARY KEY,
+  actor_id text NOT NULL,
+  kind text NOT NULL,
+  starts_at timestamptz NOT NULL,
+  ends_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT capacity_window_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT capacity_window_actor_opaque CHECK (actor_id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT capacity_window_kind_known CHECK (kind IN ('consultation', 'start')),
+  CONSTRAINT capacity_window_range CHECK (ends_at > starts_at)
+);
+CREATE INDEX capacity_window_list_created ON capacity_window (created_at DESC, id DESC);
+CREATE INDEX capacity_window_list_updated ON capacity_window (updated_at DESC, id DESC);
+CREATE INDEX capacity_window_actor_kind ON capacity_window (actor_id, kind);
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${CAPACITY_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DROP TABLE IF EXISTS capacity_window;
+DELETE FROM actor_capability WHERE capability IN ('capacity:read', 'capacity:write');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${SITEINTEL_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1161,6 +1243,7 @@ const provider: MigrationProvider = {
       '017_site_intelligence': siteIntelligenceMigration,
       '018_przelewy24_sandbox': przelewy24SandboxMigration,
       '019_documenso_sandbox': documensoSandboxMigration,
+      '020_capacity_window': capacityWindowMigration,
     };
   },
 };

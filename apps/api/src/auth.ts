@@ -14,8 +14,9 @@ export type MilestoneCapability = 'milestones:read' | 'milestones:create';
 export type PaymentCapability = 'payments:read' | 'payments:write';
 export type GardenCapability = 'gardens:read' | 'gardens:create' | 'gardens:portal-read';
 export type SiteIntelCapability = 'siteintel:read' | 'siteintel:create' | 'siteintel:portal-read';
+export type CapacityCapability = 'capacity:read' | 'capacity:write';
 export type GrowthCapability = 'growth:plan' | 'semantic:review';
-export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ProjectCapability | FileCapability | MilestoneCapability | PaymentCapability | GardenCapability | SiteIntelCapability | ContentCapability | GrowthCapability;
+export type Capability = LeadCapability | OpportunityCapability | OfferCapability | ContractCapability | ProjectCapability | FileCapability | MilestoneCapability | PaymentCapability | GardenCapability | SiteIntelCapability | CapacityCapability | ContentCapability | GrowthCapability;
 
 export type Actor = {
   actorId: string;
@@ -52,6 +53,7 @@ function isCapability(value: unknown): value is Capability {
     || value === 'payments:read' || value === 'payments:write'
     || value === 'gardens:read' || value === 'gardens:create' || value === 'gardens:portal-read'
     || value === 'siteintel:read' || value === 'siteintel:create' || value === 'siteintel:portal-read'
+    || value === 'capacity:read' || value === 'capacity:write'
     || (typeof value === 'string' && (isContentCapability(value) || isGrowthCapability(value)));
 }
 

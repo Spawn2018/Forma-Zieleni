@@ -1,13 +1,14 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueCapacityWindowId, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
+import { createCapacityWindowRecord, decideCapacityPromise, listVisibleCapacityWindows, parseCapacityListQuery, readCapacityWindow } from './capacity.ts';
 import { createGardenRecord, listPortalGardens, listVisibleGardens, parseGardenListQuery, readGarden, readPortalGarden } from './gardens.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import {
@@ -135,6 +136,14 @@ function pathProjectFileId(value: string): string {
     return assertOpaqueProjectFileId(decodeURIComponent(value));
   } catch {
     throw badRequest('PROJECT_FILE_ID_INVALID', 'Project file id is not valid.');
+  }
+}
+
+function pathCapacityWindowId(value: string): string {
+  try {
+    return assertOpaqueCapacityWindowId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('CAPACITY_WINDOW_ID_INVALID', 'Capacity window id is not valid.');
   }
 }
 
@@ -729,6 +738,47 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.header('Cache-Control', 'private, no-store');
     // c.body keeps middleware X-Request-Id and trusted-origin CORS headers.
     return c.body(new Uint8Array(stored.bytes), 200);
+  });
+
+  app.get('/v1/capacity-windows', async c => {
+    const actor = await requireActor(c, options.authenticator, 'capacity:read');
+    c.set('actorId', actor.actorId);
+    const query = parseCapacityListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      kind: c.req.query('kind'),
+      actorId: c.req.query('actorId'),
+    });
+    const page = await listVisibleCapacityWindows(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.post('/v1/capacity-windows', async c => {
+    const actor = await requireActor(c, options.authenticator, 'capacity:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateCapacityWindowCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'CAPACITY_INVALID', 'Capacity window could not be accepted.', parsed.errors);
+    const window = await createCapacityWindowRecord(options.store, parsed.value, actor, key, now());
+    return c.json(window, 201);
+  });
+
+  app.get('/v1/capacity-windows/:windowId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'capacity:read');
+    c.set('actorId', actor.actorId);
+    const window = await readCapacityWindow(options.store, pathCapacityWindowId(c.req.param('windowId')));
+    if (!window) throw new ApiFailure(404, 'CAPACITY_WINDOW_NOT_FOUND', 'Capacity window was not found.');
+    return c.json(window);
+  });
+
+  app.post('/v1/capacity-decisions', async c => {
+    const actor = await requireActor(c, options.authenticator, 'capacity:read');
+    c.set('actorId', actor.actorId);
+    const parsed = validateCapacityDecisionRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'CAPACITY_DECISION_INVALID', 'Capacity decision could not be accepted.', parsed.errors);
+    const decision = await decideCapacityPromise(options.store, parsed.value);
+    return c.json(decision);
   });
 
   app.get('/v1/gardens', async c => {

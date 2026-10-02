@@ -104,6 +104,24 @@ export type AdminPaymentScheduleList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminCapacityWindowRow = {
+  id: string;
+  actorId: string;
+  kind: 'consultation' | 'start';
+  startsAt: string;
+  endsAt: string;
+};
+
+export type AdminCapacityWindowList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminCapacityWindowRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
+export type AdminCapacityDecision =
+  | { ok: true; windowId: string }
+  | { ok: false; reason: 'CAPACITY_EMPTY' | 'CAPACITY_OUTSIDE' | 'CAPACITY_KIND_MISMATCH' };
+
 export type AdminSigningSandbox =
   | { status: 'empty' }
   | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
@@ -122,6 +140,7 @@ export type AdminHome =
       projects: AdminProjectList;
       files: AdminFileList;
       paymentSchedules: AdminPaymentScheduleList;
+      capacityWindows: AdminCapacityWindowList;
       signingSandbox: AdminSigningSandbox;
       proposals: AdminProposalList;
     };
@@ -941,6 +960,7 @@ export async function resolveAdminHome(input: {
   loadProjects?: () => Promise<AdminProjectList>;
   loadFiles?: () => Promise<AdminFileList>;
   loadPaymentSchedules?: () => Promise<AdminPaymentScheduleList>;
+  loadCapacityWindows?: () => Promise<AdminCapacityWindowList>;
   loadSigningSandbox?: () => Promise<AdminSigningSandbox>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
@@ -957,6 +977,9 @@ export async function resolveAdminHome(input: {
     const paymentSchedules = input.loadPaymentSchedules
       ? await input.loadPaymentSchedules()
       : { status: 'empty' as const };
+    const capacityWindows = input.loadCapacityWindows
+      ? await input.loadCapacityWindows()
+      : { status: 'empty' as const };
     const signingSandbox = input.loadSigningSandbox
       ? await input.loadSigningSandbox()
       : { status: 'empty' as const };
@@ -972,6 +995,7 @@ export async function resolveAdminHome(input: {
       projects,
       files,
       paymentSchedules,
+      capacityWindows,
       signingSandbox,
       proposals,
     };
@@ -1485,6 +1509,224 @@ function createFileForm(): ReactNode {
   );
 }
 
+export function mapCapacityWindowPage(body: unknown): AdminCapacityWindowList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminCapacityWindowRow[] = [];
+  for (const item of items) {
+    const window = item as {
+      id?: unknown;
+      actorId?: unknown;
+      kind?: unknown;
+      startsAt?: unknown;
+      endsAt?: unknown;
+    };
+    if (typeof window.id !== 'string' || typeof window.actorId !== 'string') return { status: 'error' };
+    if (window.kind !== 'consultation' && window.kind !== 'start') return { status: 'error' };
+    if (typeof window.startsAt !== 'string' || typeof window.endsAt !== 'string') return { status: 'error' };
+    if ('email' in (item as object) || 'name' in (item as object) || 'phone' in (item as object)) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: window.id,
+      actorId: window.actorId,
+      kind: window.kind,
+      startsAt: window.startsAt,
+      endsAt: window.endsAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminCapacityWindows(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminCapacityWindowList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/capacity-windows', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapCapacityWindowPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminCapacityWindow(input: {
+  base: string;
+  actorId: string;
+  kind: 'consultation' | 'start';
+  startsAt: string;
+  endsAt: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/capacity-windows', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({
+        actorId: input.actorId,
+        kind: input.kind,
+        startsAt: input.startsAt,
+        endsAt: input.endsAt,
+      }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export async function decideAdminCapacity(input: {
+  base: string;
+  kind: 'consultation' | 'start';
+  promisedAt: string;
+  actorId?: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true; decision: AdminCapacityDecision } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const body: { kind: string; promisedAt: string; actorId?: string } = {
+      kind: input.kind,
+      promisedAt: input.promisedAt,
+    };
+    if (input.actorId) body.actorId = input.actorId;
+    const response = await fetchImpl(new URL('/v1/capacity-decisions', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify(body),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    const decision = await response.json() as { ok?: unknown; reason?: unknown; windowId?: unknown };
+    if (decision.ok === true && typeof decision.windowId === 'string') {
+      return { ok: true, decision: { ok: true, windowId: decision.windowId } };
+    }
+    if (
+      decision.ok === false
+      && (decision.reason === 'CAPACITY_EMPTY' || decision.reason === 'CAPACITY_OUTSIDE' || decision.reason === 'CAPACITY_KIND_MISMATCH')
+    ) {
+      return { ok: true, decision: { ok: false, reason: decision.reason } };
+    }
+    return { ok: false, reason: 'error' };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export function capacityDecisionMessage(decision: AdminCapacityDecision): string {
+  if (decision.ok) return 'Termin mieści się w oknie dyspozycyjności.';
+  if (decision.reason === 'CAPACITY_EMPTY') return 'Brak okna dyspozycyjności. Termin nie może być obiecany.';
+  if (decision.reason === 'CAPACITY_OUTSIDE') return 'Termin wypada poza dyspozycyjnością.';
+  return 'Rodzaj terminu nie pasuje do zapisanych okien.';
+}
+
+function capacityWindowListNode(windows: AdminCapacityWindowList): ReactNode {
+  if (windows.status === 'empty') {
+    return createElement('p', null, 'Brak okien dyspozycyjności do pokazania.');
+  }
+  if (windows.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać okien dyspozycyjności.');
+  }
+  if (windows.status === 'error') {
+    return createElement('p', null, 'Okien dyspozycyjności nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-capacity-windows', 'aria-label': 'Okna dyspozycyjności' },
+    createElement('h2', null, 'Dyspozycyjność'),
+    createElement(
+      'ul',
+      { className: 'admin-capacity-window-list' },
+      ...windows.items.map((window) =>
+        createElement(
+          'li',
+          { key: window.id, className: 'admin-capacity-window' },
+          createElement(
+            'p',
+            { className: 'admin-capacity-window-meta' },
+            [window.kind === 'consultation' ? 'konsultacja' : 'start prac', ' · ', window.actorId, ' · ', window.startsAt, ' – ', window.endsAt].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createCapacityWindowForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-capacity-window' },
+    createElement('h2', null, 'Nowe okno dyspozycyjności'),
+    createElement('p', null, 'Bez kalendarza zewnętrznego. Identyfikator osoby, nie imię.'),
+    createElement('label', null, 'Identyfikator osoby personelu',
+      createElement('input', { name: 'capacityActorId', required: true, autoComplete: 'off' }),
+    ),
+    createElement('label', null, 'Rodzaj',
+      createElement('select', { name: 'capacityKind', defaultValue: 'consultation' },
+        createElement('option', { value: 'consultation' }, 'konsultacja'),
+        createElement('option', { value: 'start' }, 'start prac'),
+      ),
+    ),
+    createElement('label', null, 'Początek (UTC)',
+      createElement('input', { name: 'capacityStartsAt', required: true, autoComplete: 'off' }),
+    ),
+    createElement('label', null, 'Koniec (UTC)',
+      createElement('input', { name: 'capacityEndsAt', required: true, autoComplete: 'off' }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-capacity-window' }, 'Zapisz okno'),
+  );
+}
+
+function decideCapacityForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-decide-capacity' },
+    createElement('h2', null, 'Sprawdź obiecany termin'),
+    createElement('label', null, 'Identyfikator osoby personelu',
+      createElement('input', { name: 'capacityActorId', autoComplete: 'off' }),
+    ),
+    createElement('label', null, 'Rodzaj',
+      createElement('select', { name: 'capacityKind', defaultValue: 'consultation' },
+        createElement('option', { value: 'consultation' }, 'konsultacja'),
+        createElement('option', { value: 'start' }, 'start prac'),
+      ),
+    ),
+    createElement('label', null, 'Termin (UTC)',
+      createElement('input', { name: 'capacityPromisedAt', required: true, autoComplete: 'off' }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'decide-capacity' }, 'Sprawdź'),
+  );
+}
+
 function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode {
   if (schedules.status === 'empty') {
     return createElement('p', null, 'Brak harmonogramów płatności do pokazania.');
@@ -1682,6 +1924,9 @@ export function adminShell(home: AdminHome): ReactNode {
     createContractForm(),
     paymentScheduleListNode(home.paymentSchedules),
     createPaymentScheduleForm(),
+    capacityWindowListNode(home.capacityWindows),
+    createCapacityWindowForm(),
+    decideCapacityForm(),
     signingSandboxNode(home.signingSandbox),
     projectListNode(home.projects),
     createProjectForm(),
