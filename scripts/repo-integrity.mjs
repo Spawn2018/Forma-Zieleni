@@ -254,8 +254,11 @@ function checkCanon(errors) {
     '## ADR-014 — Gate A architecture selection',
     '## ADR-015 — Content / media / visual publishing (FZ-CMS-1)',
     '## ADR-016 — Crawl policy, payment provider, production hosting direction',
+    '## ADR-017 — Next slice wave: signing re-read and Przelewy24 sandbox',
     'DECISION FZ-CMS-1: OPTION B',
     'DECISION FZ-SEARCH-CRAWL-1: OPTION A',
+    'AUTHORIZE PAY-ADAPTER-1',
+    'AUTHORIZE FZ-SIGN-1-REREAD',
     'Przelewy24',
   ]);
   mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', [
@@ -278,11 +281,12 @@ function checkCanon(errors) {
     'DECISION FZ-SEARCH-CRAWL-1: OPTION A',
   ]);
   mustContain(errors, 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', [
-    'Provider **UNDECIDED**',
+    'Provider **Documenso Community self-host**',
     '# FZ-SIGN-1 — Contract Lifecycle & Electronic Signature',
   ]);
   mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', [
-    'No engine is selected',
+    'Documenso Community self-host',
+    'No QES',
     'FZ-SIGN-1-CONTRACT-LIFECYCLE.md',
   ]);
   mustContain(errors, 'docs/contracts/FZ-SIGN-1-CURSOR-INSTRUCTIONS.md', [

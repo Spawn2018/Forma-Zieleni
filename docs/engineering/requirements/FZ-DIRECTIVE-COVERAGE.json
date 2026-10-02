@@ -597,7 +597,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing engine is Documenso Community self-host."
     },
     {
       "sourceFamily": "MASTER",
@@ -612,7 +612,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing engine is Documenso Community self-host."
     },
     {
       "sourceFamily": "MASTER",
@@ -627,7 +627,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing engine is Documenso Community self-host."
     },
     {
       "sourceFamily": "MASTER",
@@ -642,7 +642,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing engine is Documenso Community self-host."
     },
     {
       "sourceFamily": "MASTER",

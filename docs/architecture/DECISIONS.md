@@ -201,7 +201,17 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Status | Accepted |
 | Decyzja | `DECISION FZ-SEARCH-CRAWL-1: OPTION A`. `DECISION payment-provider: Przelewy24`. `DECISION production-hosting: 0 PLN until cutover. First remote host is one Hetzner CX23 EU, DEPLOY=compose, not a second VM. No purchase now.` FZ-SIGN-1 provider stays UNDECIDED. |
 | Kontekst | Owner accepted the recorded suggestions. OPTION A disallows `GPTBot`, `ClaudeBot`, and `Google-Extended` in production robots and leaves search-indexing tokens allowed, including the Gemini-grounding opt-out. Przelewy24 is the single payment adapter name. Fakturownia stays invoicing. Hosting stays on this workstation until cutover. The first remote machine is one Hetzner Cloud CX23 in FSN, Nuremberg, or Helsinki. |
-| Konsekwencje | Production `robots.txt` emits those three groups. The live Cloudflare zone is not changed. No payment is captured and no Przelewy24 credential is created. No VM is purchased. DNS, Cloudflare, spend, and deploy stay DANGEROUS. Signing engine stays unselected. |
+| Konsekwencje | Production `robots.txt` emits those three groups. The live Cloudflare zone is not changed. No payment is captured and no Przelewy24 credential is created. No VM is purchased. DNS, Cloudflare, spend, and deploy stay DANGEROUS. Signing engine stays unselected until ADR-017. |
+
+## ADR-017 — Next slice wave: signing re-read and Przelewy24 sandbox
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-10-02 |
+| Status | Accepted |
+| Decyzja | `AUTHORIZE PAY-ADAPTER-1: Przelewy24 sandbox only. Core API adapter, webhooks, schedule status. No live charge, no production keys.` `AUTHORIZE FZ-SIGN-1-REREAD: re-read Documenso Community production API from official docs. Select it only if that API has no per-signature fee. Otherwise stop. No QES.` |
+| Kontekst | The main product graph had no remaining AUTO/REVIEW slice. The Owner authorized the next wave with those two statements. |
+| Konsekwencje | FZ-SIGN-1-REREAD is COMPLETE: Documenso Community self-host is the selected engine because the official self-host plan table shows unlimited documents and no per-signature fee. Documenso Cloud is not selected. No QES and no signing SDK. PAY-ADAPTER-1 is the next OPEN slice. Live charges, production keys, DNS, Cloudflare, and hosting purchase stay outside this wave. |
 
 ## Szablon kolejnego ADR
 

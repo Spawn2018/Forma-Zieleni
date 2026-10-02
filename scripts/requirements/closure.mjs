@@ -46,7 +46,7 @@ function masterMap(n) {
   if (n <= 33) return [['FZ-REQ-ARCH-001'], 'Gate A and the modular monolith.'];
   if (n <= 37) return [['FZ-REQ-WWW-001', 'FZ-REQ-PORTAL-001', 'FZ-REQ-ADMIN-001', 'FZ-REQ-MOBILE-001'], 'Product surfaces at their real depth.'];
   if (n <= 40) return [['FZ-REQ-SITEINTEL-001', 'FZ-REQ-GARDENOS-001', 'FZ-REQ-SKETCHUP-001'], 'Future products are not runtimes.'];
-  if (n <= 44) return [['FZ-REQ-OFFERINTEL-001', 'FZ-REQ-PAY-001', 'FZ-REQ-GOV-002'], 'Commercial truth. Przelewy24 is selected. Signing provider stays undecided.'];
+  if (n <= 44) return [['FZ-REQ-OFFERINTEL-001', 'FZ-REQ-PAY-001', 'FZ-REQ-GOV-002'], 'Commercial truth. Przelewy24 is selected. Signing engine is Documenso Community self-host.'];
   if (n === 45) return [['FZ-REQ-SEC-001'], 'Lead vertical is not security-accepted.'];
   if (n <= 50) return [['FZ-REQ-CMS-001', 'FZ-REQ-CMS-002', 'FZ-REQ-MEDIA-001'], 'CMS decision and media contract.'];
   if (n <= 54) return [['FZ-REQ-SEARCH-001', 'FZ-REQ-SEARCH-002'], 'One search architecture. Production training crawlers are opted out.'];

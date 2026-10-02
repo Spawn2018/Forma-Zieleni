@@ -43,7 +43,7 @@ Podpis elektroniczny nie jest tu uznany za prawnie obowiązkowy dla każdej tran
 ### Contracts
 
 Umowy, wersje, aneksy i change orders. Stan biznesowy, autoryzacja i metadane archiwum należą do Core API.
-Silnik podpisu jest adapterem i pozostaje UNDECIDED (FZ-SIGN-1). Nie jest ACL projektu ani jedynym archiwum.
+Silnik podpisu jest adapterem. Wybrany silnik to Documenso Community self-host (ADR-017). Nie jest ACL projektu ani jedynym archiwum. Nie ma QES. Adapter nie jest zaimplementowany.
 
 ### Payments
 

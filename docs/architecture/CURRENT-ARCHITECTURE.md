@@ -137,7 +137,8 @@ ADR-014). Implementation and security acceptance are not complete.
   (`contracts/openapi.json`); event-driven core + transactional outbox.
 - Contract lifecycle and electronic signature:
   `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. The signing engine is an adapter,
-  not business truth. Provider UNDECIDED.
+  not business truth. Provider is Documenso Community self-host. No QES.
+  The signing adapter is not implemented.
 - Payment provider is Przelewy24 (ADR-016). No transaction is started.
   Fakturownia remains invoicing.
 - Production training-crawler policy is FZ-SEARCH-CRAWL-1 OPTION A.
@@ -147,7 +148,7 @@ ADR-014). Implementation and security acceptance are not complete.
 
 ## Explicitly still undecided
 
-Electronic-signature engine (FZ-SIGN-1); production object storage (Garage is a staging direction only). Payment provider, production training-crawler policy, and the production compute direction are DECIDED in ADR-016. CMS engine selection is DECIDED in ADR-015 and is not CMS-ACCEPT. Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
+Electronic-signature engine is Documenso Community self-host (ADR-017). No QES. The signing adapter is not implemented. Production object storage (Garage is a staging direction only) stays undecided. Payment provider and the production compute direction are DECIDED in ADR-016. PAY-ADAPTER-1 is the authorized sandbox slice. CMS engine selection is DECIDED in ADR-015 and is not CMS-ACCEPT. Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model
 

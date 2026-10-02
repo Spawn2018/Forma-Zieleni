@@ -107,10 +107,7 @@ row('FZ-REQ-CIS-002', 'Reviewer corrections are signals. They do not auto-promot
 row('FZ-REQ-AUTO-001', '/noc uses the next Europe/Warsaw hour. 9 means 09:00.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/cursor-os/CURSOR-OS-2026.md', 'scripts/fz-noc/policy.mjs', 'scripts/fz-noc/policy.test.mjs', '', 'NONE', '');
 row('FZ-REQ-AUTO-002', 'The orchestrator uses one execution loop and does not resolve Owner gates.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', '.cursor/agents/fz-orchestrator.md', '.cursor/agents/fz-orchestrator.md', '.cursor/agents/fz-orchestrator.md', '', 'NONE', 'Agent text is the control. No second loop was added.');
 row('FZ-REQ-GOV-001', 'Owner authority stays above Canon, the orchestrator and tools.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/workflows/DECISION-GATES.md', 'docs/workflows/DECISION-GATES.md', 'docs/workflows/DECISION-GATES.md', '', 'NONE', '');
-row('FZ-REQ-GOV-002', 'FZ-SIGN-1 provider remains undecided.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
-  blockerClass: 'OWNER_GATED',
-  safePreblockerWork: false,
-});
+row('FZ-REQ-GOV-002', 'FZ-SIGN-1 engine is Documenso Community self-host. No per-signature fee on the official self-host plan table. No QES. Cloud plan is not selected.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md', 'Signing adapter is not this decision', 'NONE', 'No QES. Official re-read 2026-10-02.');
 row('FZ-REQ-SEARCH-001', 'FZ-SEARCH-1 remains the search architecture. No universal AI rank or GEO score.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', SEARCH, SEARCH, 'contracts/content-contract.test.mjs', '', 'NONE', 'Connector runtime is a later slice, not this foundation.');
 row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 production robots opt out GPTBot, ClaudeBot, and Google-Extended. Search-indexing tokens stay allowed.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Live Cloudflare zone stays unchanged', 'NONE', 'OPTION A. Gemini grounding is opted out with Google-Extended.');
 row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeline stay the CMS decision. CMS-ACCEPT stays open.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', SLICES, 'scripts/cms-lab-gate.mjs', 'Apostrophe Admin UI and PostgreSQL lab not executed', 'REVIEW', 'CMS-ACCEPT OPEN', {
@@ -575,7 +572,7 @@ row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and 
   executableSlice: 'PAY-DOMAIN-NEUTRAL',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signature request exist without a signing vendor.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'packages/domain/src/signing.ts', 'packages/domain/signing.test.mjs', '', 'NONE', 'Provider-neutral lock + signature request; FZ-REQ-GOV-002 provider stays OWNER-DECISION. No QES claim.', {
+row('FZ-REQ-SIGN-001', 'Contract version locking and a provider-neutral signature request exist without a signing vendor.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', 'packages/domain/src/signing.ts', 'packages/domain/signing.test.mjs', '', 'NONE', 'Provider-neutral lock + signature request. Engine is Documenso Community self-host. No QES claim. Adapter not implemented.', {
   productCapability: 'SIGNING',
   depth: 'DOMAIN',
   executableSlice: 'SIGN-STATE-NEUTRAL',

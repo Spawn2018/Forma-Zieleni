@@ -12,10 +12,10 @@
   "branch": "main",
   "push": false,
   "ownerGates": [
-    "FZ-SIGN-1 UNDECIDED",
+    "FZ-SIGN-1 Documenso Community self-host (ADR-017); no QES; no signing SDK",
     "FZ-SEARCH-CRAWL-1 OPTION A (ADR-016); live Cloudflare zone unchanged",
     "CMS-ACCEPT OPEN",
-    "payment provider Przelewy24 (ADR-016); no transaction",
+    "payment provider Przelewy24 sandbox slice PAY-ADAPTER-1 (ADR-017); no live charge",
     "production hosting one Hetzner CX23 at cutover (ADR-016); no purchase",
     "FZ-CONTINUE-1 AUTHORIZED 2026-09-24: DEFER-OWNER-GATES (signing provider still deferred; DANGEROUS unchanged)"
   ],
@@ -26,7 +26,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "ADR-016 recorded. Production robots emit FZ-SEARCH-CRAWL-1 OPTION A. Przelewy24 is named and no charge exists. Hosting direction is one Hetzner CX23 at cutover and no VM is purchased. FZ-SIGN-1 stays UNDECIDED. Master product READY stays exhausted. DANGEROUS unchanged.",
+  "nextSafeAction": "ADR-017 authorized the next wave. FZ-SIGN-1-REREAD COMPLETE: Documenso Community self-host, no QES. Next READY: PAY-ADAPTER-1 sandbox only. No live charge and no production keys.",
   "learningCheck": "NO MATERIAL LEARNING",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

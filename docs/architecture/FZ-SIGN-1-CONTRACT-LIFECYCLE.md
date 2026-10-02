@@ -1,14 +1,16 @@
 # FZ-SIGN-1 — Contract Lifecycle & Electronic Signature
 
 Status: CURRENT binding definition for contract lifecycle and electronic
-signature. Provider **UNDECIDED**. This is not a Gate A decision. Gate A
-architecture is recorded separately in ADR-014. This file does not
-select a signing provider.
+signature. Provider **Documenso Community self-host** (ADR-017, 2026-10-02).
+This is not a Gate A decision. Gate A architecture is recorded separately
+in ADR-014. This file does not implement the signing adapter. No QES.
 
 Canonical file: this document. Other Canon locations link here. They do
 not restate a second lifecycle.
 
-Research packet (no winner): [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md).
+Research packet: [`OWNER-DECISION-PACKET-FZ-SIGN-1.md`](./OWNER-DECISION-PACKET-FZ-SIGN-1.md).
+Selected engine: Documenso Community self-host. Documenso Cloud is not
+selected. The adapter is not implemented here.
 
 ## Goal
 
@@ -167,20 +169,17 @@ when actually required. Recurring spend is OWNER-ONLY.
 - Active security testing stays on local / lab / staging. Do not scan a
   third-party signing provider outside its permitted scope.
 
-## What may be designed before a provider decision
+## After provider selection
 
-Provider-neutral domain types, lifecycle transitions and OpenAPI shapes
-may be specified. Do not add a provider SDK, database schema, API
-implementation, UI or infrastructure in order to “start signing”.
-
-Provider selection is OWNER-DECISION and happens before the first
-production contract-signing vertical. Gate A architecture is already
-recorded and does not select this provider.
+Provider-neutral domain types stay the business truth. Do not add a
+provider SDK, production credential, or customer contract send in order
+to start signing. A later signing-adapter slice is required before any
+ceremony. No QES claim.
 
 ## Gates
 
 | Class | Examples |
 |---|---|
-| OWNER-DECISION | which engine, if any |
+| OWNER-DECISION | signing adapter scope after ADR-017; the engine name is already Documenso Community self-host |
 | OWNER-ONLY | paid subscription, paid API/embedding, QES/TSP, customer-data processor, recurring spend |
 | DANGEROUS | production DNS, Cloudflare, secrets, cutover — immediately before action |

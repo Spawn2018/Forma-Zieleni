@@ -12,8 +12,9 @@ Binding sources: [`MASTER-PLAN.md`](../vision/MASTER-PLAN.md),
 
 Do not create an endless agent loop. One bounded slice at a time.
 Stop at OWNER-ONLY or DANGEROUS. CMS-ACCEPT and SEARCH-ACCEPT stay
-report-only and are not Lead security acceptance. FZ-SIGN-1 stays
-UNDECIDED. FZ-SEARCH-CRAWL-1 is OPTION A (ADR-016).
+report-only and are not Lead security acceptance. FZ-SIGN-1 engine is
+Documenso Community self-host (ADR-017). No QES. FZ-SEARCH-CRAWL-1 is
+OPTION A (ADR-016).
 
 ## Shared rules for every slice
 
@@ -26,7 +27,8 @@ UNDECIDED. FZ-SEARCH-CRAWL-1 is OPTION A (ADR-016).
 - Synthetic data only until Owner supplies real copy or credentials.
 - No Docker merely to develop on Windows.
 - No Cloudflare/DNS/production mutation.
-- FZ-SIGN-1 stays UNDECIDED.
+- FZ-SIGN-1 engine is Documenso Community self-host. No signing SDK in
+  the current wave.
 - Continuous Improvement, Growth OS, and Connected Ecosystem are not
   a second roadmap.
 
@@ -905,6 +907,38 @@ Tests: `apps/api/src/http.test.mjs` create/list/get + BOLA portal read;
 `packages/validation/site-intelligence.test.mjs`.
 Security: staff-only writes; synthetic observations only; AI cannot invent
 site facts (domain + validation).
+Next: FZ-SIGN-1-REREAD.
+
+### FZ-SIGN-1-REREAD
+
+Dependencies: SIGN-STATE-NEUTRAL, SITEINTEL-HTTP.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: official Documenso docs were re-read. Community self-host has no
+per-signature fee on the published plan table (self-hosted documents/month
+Unlimited). Documenso Community self-host is the selected engine.
+Documenso Cloud is not selected. No QES. No signing SDK.
+Tests: `scripts/fz-noc/policy.test.mjs` holds the recorded sentence.
+Security: no customer contract leaves the repo; no provider credential.
+Next: PAY-ADAPTER-1.
+
+### PAY-ADAPTER-1
+
+Dependencies: FZ-SIGN-1-REREAD, PAY-SCHEDULE-STAFF, PAY-DOMAIN-NEUTRAL.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: Core API sandbox adapter for Przelewy24. A sandbox intent can be
+created for an existing installment, a signed sandbox webhook can confirm
+it, and the schedule status changes only inside that sandbox. No outbound
+call to Przelewy24, no production merchant key, no live charge, no card
+data, no BLIK capture. Fakturownia is not called.
+Tests: domain sandbox tests and Core API HTTP tests. OpenAPI lists the
+sandbox routes.
+Security: webhook signature required; a bad signature does not change
+schedule status; portal callers cannot confirm payment; secrets are not
+logged.
 Next: none.
 
 ## Deferred and Owner-gated (visible, not READY)
@@ -915,8 +949,8 @@ Next: none.
 | Off-site backup / restic-pgBackRest | later staging | Local dump/restore exists; off-site is not this graph’s first READY |
 | OpenObserve / Garage / Compose staging | later | Gate A horizons, not Lead acceptance |
 | Cloudflare Tunnel / DNS / private-origin | DANGEROUS | Owner approval required |
-| FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED; FZ-CONTINUE-1 authorizes neutral lifecycle staff UI only |
-| Payment provider | DECIDED | Przelewy24 (ADR-016). No transaction. Adapter waits for a payment packet |
+| FZ-SIGN-1 provider | DECIDED | Documenso Community self-host (ADR-017). No QES. No signing SDK in this wave |
+| Payment provider | DECIDED | Przelewy24 (ADR-016). Sandbox adapter is PAY-ADAPTER-1. No live charge |
 | FZ-SEARCH-CRAWL-1 | DECIDED | OPTION A in generated production robots. Live Cloudflare zone unchanged |
 | Production hosting | DECIDED | One Hetzner CX23 EU at cutover, DEPLOY=compose. No purchase now. No deploy |
 | CMS-ACCEPT / SEARCH-ACCEPT | report only | Stay on the CMS graph; not a global MAIN product barrier |

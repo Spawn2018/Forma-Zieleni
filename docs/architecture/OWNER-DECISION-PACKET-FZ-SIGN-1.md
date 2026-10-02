@@ -1,7 +1,19 @@
 # FZ-SIGN-1 Owner research packet — signing engine
 
-Status: **OPEN / LATER**. Not a Gate A packet. Gate A architecture is
-DECIDED separately. **No engine is selected.**
+Status: **DECIDED — Documenso Community self-host** (ADR-017, 2026-10-02).
+No QES. Documenso Cloud is not selected. The signing adapter is not
+implemented by this decision.
+
+Owner reply: `AUTHORIZE FZ-SIGN-1-REREAD`.
+
+Official re-read on 2026-10-02:
+
+- [Licenses](https://docs.documenso.com/docs/policies/licenses): Community Edition cost is Free (AGPL-3.0). Enterprise Edition cost is Paid.
+- [Community Edition](https://docs.documenso.com/docs/policies/community-edition): self-host is allowed, including commercial use, with AGPL network-source obligations. API Access is a listed Community feature. The page states no per-signature price.
+- [Rate limits](https://docs.documenso.com/docs/developers/api/rate-limits): Self-hosted documents/month are Unlimited. The Free cloud column is 5 documents/month. The table states no per-signature fee.
+- [Authentication](https://docs.documenso.com/docs/developers/getting-started/authentication): cloud Free accounts include API access with a limit of 5 documents per month. That cap is a quota, not a per-signature fee. The selected path is self-host, not that cloud plan.
+
+The conditional selection passes: the official self-host column has no per-signature fee. DocuSeal and OpenSign stay unselected. Autenti stays a later QES packet only.
 
 Canonical lifecycle: [`FZ-SIGN-1-CONTRACT-LIFECYCLE.md`](./FZ-SIGN-1-CONTRACT-LIFECYCLE.md).
 
@@ -99,12 +111,12 @@ Infrastructure cost is separate for every row. AGPL compliance (source offer if 
 
 No stronger maintained OSS self-host candidate was added, because none was evidenced from official sources as materially better for the Core API adapter requirement.
 
-## Decision still required later
+## Decision recorded
 
-Before the first production signing vertical, Owner replies to a future
-`DECISION FZ-SIGN-1` after any gaps marked UNKNOWN are re-read from
-official docs. Until then, only provider-neutral contract design is in
-scope.
+`AUTHORIZE FZ-SIGN-1-REREAD` selected Documenso Community self-host
+because the official self-host plan table shows unlimited documents and
+no per-signature fee. Cloud Free (5 documents/month) is not the selected
+path. No QES. No signing SDK in this decision.
 
-This packet does not choose Documenso, DocuSeal, OpenSign, Autenti or
-“no engine”.
+This packet previously did not choose an engine. That sentence is
+superseded by the record above.
