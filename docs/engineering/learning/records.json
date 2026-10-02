@@ -2753,6 +2753,32 @@
       "lastSeen": "2026-09-25T00:20:02.979Z",
       "rejectionReason": "Lifecycle advance already runs inside LeadStore.transaction; memory store is single-writer serial, and FOR UPDATE is a postgres-only optimization outside this slice.",
       "effectState": "UNPLANNED"
+    },
+    {
+      "patternKey": "cr-review-comment-at-apps-p-6986b6eb2a",
+      "source": "coderabbit",
+      "scope": "checkpoint-review",
+      "signalType": "review-finding",
+      "severity": "medium",
+      "observation": "Review comment at @apps/portal/app/shell.ts at line 134: Add a non-null, non-array object check in both exported mappers",
+      "evidence": [
+        "cr-occurrence:dc02c56255e3:4710ae0fbbdc:cr-review-comment-at-apps-p-6986b6eb2a",
+        "apps/portal/app/shell.ts",
+        "severity:low",
+        "accepted:cr-review-comment-at-apps-p-6986b6eb2a"
+      ],
+      "generalizability": "LOCAL",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "ANECDOTAL",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "4710ae0fbbdc9c75767d2b4e9fd350b2e928aa2e",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20261002-f24c16f1",
+      "occurrences": 1,
+      "firstSeen": "2026-10-02T15:57:36.886Z",
+      "lastSeen": "2026-10-02T15:58:10.524Z"
     }
   ]
 }
