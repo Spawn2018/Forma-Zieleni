@@ -5,6 +5,12 @@ function apiOrigin(): string | undefined {
   return typeof process !== 'undefined' ? process.env.FZ_API_ORIGIN || process.env.CORE_API_URL : undefined;
 }
 
+function contentDispositionAttachment(fileName: string): string {
+  const safe = fileName.replace(/["\\\r\n]/g, '_');
+  const ascii = safe.replace(/[^\x20-\x7E]/g, '_') || 'file';
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(safe)}`;
+}
+
 /**
  * Staff download proxy for Core API GET /v1/files/{fileId}/content.
  * Forwards the session cookie; never invents bytes or storage keys.
@@ -41,7 +47,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const headers: Record<string, string> = {
     'content-type': result.mimeType,
     'content-length': String(result.sizeBytes),
-    'content-disposition': `attachment; filename="${result.fileName.replace(/["\\]/g, '_')}"`,
+    'content-disposition': contentDispositionAttachment(result.fileName),
     'x-content-type-options': 'nosniff',
     'cache-control': 'private, no-store',
   };
