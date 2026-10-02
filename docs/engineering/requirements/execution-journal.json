@@ -3,9 +3,9 @@
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
   "currentPhase": "product-boundary-contracts",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "e47f3671",
+  "publishedHead": "149cbeed",
   "postPushSafety": "PASS",
-  "codeRabbit": "ADMIN-FILE-BYTES: CODERABBIT_FINDINGS — Content-Disposition UTF-8 + journal nextSafeAction accepted and repaired locally; re-review required.",
+  "codeRabbit": "ADMIN-FILE-BYTES: CODERABBIT_PASS_AFTER_REPAIR on 10545dc; SHA256SUMS LF follow-up 149cbeed authorized after local integrity verify. Local admin tests PASS.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -26,8 +26,8 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "ADMIN-FILE-BYTES committed locally; finish CodeRabbit re-review, pnpm push:main, wait CI_GREEN, then complete. Next READY: SITEINTEL-HTTP.",
-  "learningCheck": null,
+  "nextSafeAction": "ADMIN-FILE-BYTES complete on origin/main (149cbeed, CI_GREEN). Next READY: SITEINTEL-HTTP. FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
+  "learningCheck": "NO MATERIAL LEARNING",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "apps/web/app/portfolio-projection.ts",
