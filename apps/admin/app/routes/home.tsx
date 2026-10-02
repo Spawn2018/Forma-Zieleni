@@ -18,6 +18,7 @@ import {
   createAdminMilestone,
   createAdminPaymentSchedule,
   createAdminProject,
+  deliverAdminProject,
   decideAdminCapacity,
   fetchAdminCapacityWindows,
   fetchAdminContracts,
@@ -414,6 +415,23 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       projectId: projectId.trim(),
       title: title.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'deliver-project') {
+    const projectId = form.get('projectId');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await deliverAdminProject({
+      base,
+      projectId: projectId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

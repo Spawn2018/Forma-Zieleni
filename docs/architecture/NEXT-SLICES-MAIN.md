@@ -1105,6 +1105,20 @@ Security: uses existing `milestones:read` and `milestones:create`.
 The admin does not invent a second decision store.
 Next: none.
 
+### ADMIN-PROJECT-DELIVER
+
+Dependencies: ADMIN-CRM-PROJECT, GARDENOS-HTTP.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a planned project on the admin home can be marked delivered
+through Core API. A delivered project shows no second control. The
+request body is empty. Payment and signing fields are not sent.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PROJECT-DELIVER.md`](./ADMIN-PROJECT-DELIVER.md).
+Security: uses existing `projects:create`. Delivery rules stay in Core API.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

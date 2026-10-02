@@ -23,6 +23,7 @@ import {
   createAdminSiteObservation,
   createAdminMilestone,
   createAdminProject,
+  deliverAdminProject,
   fetchAdminContracts,
   fetchAdminFileBytes,
   fetchAdminFiles,
@@ -873,6 +874,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /fetchAdminDecisionLog/);
   assert.match(home, /createAdminDecisionLogEntry/);
   assert.match(home, /createAdminProject/);
+  assert.match(home, /deliverAdminProject/);
+  assert.match(home, /deliver-project/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
   assert.match(home, /putAdminFileBytes/);
@@ -927,6 +930,41 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
   }
+});
+
+test('staff can mark a planned project delivered and leave a delivered project unchanged', async () => {
+  const planned = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
+    },
+  }));
+  assert.match(planned, /Oznacz jako dostarczony/);
+  assert.match(planned, /name="projectId" value="pr8k2n4p6q8r0s2t"/);
+  const delivered = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [{ id: 'pr8k2n4p6q8r0s2u', contractId: 'ct8k2n4p6q8r0s2t', status: 'delivered' }],
+    },
+  }));
+  assert.equal(delivered.includes('Oznacz jako dostarczony'), false);
+  const result = await deliverAdminProject({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    idempotencyKey: 'deliver-1',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/projects\/pr8k2n4p6q8r0s2t\/deliver$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(init?.headers?.['idempotency-key'], 'deliver-1');
+      assert.equal(init?.body, '{}');
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(result, { ok: true });
 });
 
 test('staff decision log lists a change and refuses a payment field', async () => {
