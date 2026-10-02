@@ -848,14 +848,14 @@ Next: PORTAL-PROJECT-VIEW.
 
 Dependencies: PORTAL-OFFER-VIEW, PORTAL-PROJECT-PROJECTION.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: authenticated portal UI renders the existing client-safe Project
-projection and metadata-only files already exposed. No upload from
-Portal in this slice unless FILE-BYTES-LOCAL already defines a client
-path (default: no).
-Tests: portal route/view tests; BOLA denied for another client.
-Security: clientSubject isolation.
+projection and metadata-only files already exposed. No binary write from
+Portal; FILE-BYTES client path stays out of this slice.
+Tests: `apps/portal/app/shell.test.mjs`.
+Security: clientSubject isolation; no staff tokens; no payment/provider UI;
+metadata-only files (no storageKey/bytes/downloadUrl).
 Next: ADMIN-APPROVAL-SURFACE.
 
 ### ADMIN-APPROVAL-SURFACE

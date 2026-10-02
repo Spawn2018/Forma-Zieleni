@@ -1,13 +1,15 @@
 import type { Route } from './+types/home';
 import {
+  fetchPortalFiles,
   fetchPortalOffers,
+  fetchPortalProjects,
   portalShell,
   resolvePortalHome,
   type PortalHome,
 } from '../shell.ts';
 
 export async function loader({ request }: Route.LoaderArgs): Promise<PortalHome> {
-  // Session + offer projection come from Core API when configured. Forward the
+  // Session + projections come from Core API when configured. Forward the
   // browser session cookie on the SSR hop. Never invents client CRM facts.
   const base = typeof process !== 'undefined' ? process.env.FZ_API_ORIGIN || process.env.CORE_API_URL : undefined;
   if (!base) return resolvePortalHome({});
@@ -28,6 +30,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<PortalHome>
     },
     async loadOffers() {
       return fetchPortalOffers({ base, cookie });
+    },
+    async loadProjects() {
+      return fetchPortalProjects({ base, cookie });
+    },
+    async loadFiles() {
+      return fetchPortalFiles({ base, cookie });
     },
   });
 }

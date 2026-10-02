@@ -495,13 +495,12 @@ row('FZ-REQ-PORTAL-006', 'Authenticated portal UI renders the client-safe Offer 
   executableSlice: 'PORTAL-OFFER-VIEW',
   executableWhenComplete: ['PAY-SCHEDULE-STAFF', 'PORTAL-OFFER-PROJECTION'],
 });
-row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Project projection and metadata-only files.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/portal', 'apps/portal', 'PORTAL-PROJECT-VIEW not executed', 'REVIEW', 'UI over existing projection.', {
+row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Project projection and metadata-only files.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'UI over existing Core API portal project and file projections. No payment/provider or binary write path.', {
   blockerClass: 'INTERNAL',
   productCapability: 'PORTAL',
   depth: 'CLIENT_UI',
   executableSlice: 'PORTAL-PROJECT-VIEW',
   executableWhenComplete: ['PORTAL-OFFER-VIEW', 'PORTAL-PROJECT-PROJECTION'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'ADMIN-APPROVAL-SURFACE not executed', 'REVIEW', 'UI over existing approval domain.', {
   blockerClass: 'INTERNAL',

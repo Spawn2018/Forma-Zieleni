@@ -17,10 +17,43 @@ export type PortalOfferList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalProjectRow = {
+  id: string;
+  contractId: string;
+  status: string;
+  createdAt: string;
+};
+
+export type PortalProjectList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalProjectRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
+export type PortalFileRow = {
+  id: string;
+  projectId: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+};
+
+export type PortalFileList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalFileRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type PortalHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
-  | { state: 'signed-in'; offers: PortalOfferList };
+  | {
+      state: 'signed-in';
+      offers: PortalOfferList;
+      projects: PortalProjectList;
+      files: PortalFileList;
+    };
 
 /**
  * Portal trust-zone session classification.
@@ -81,41 +114,175 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
   return { status: 'ready', items: rows };
 }
 
+type ProjectApiItem = {
+  id?: unknown;
+  contractId?: unknown;
+  status?: unknown;
+  createdAt?: unknown;
+  payment?: unknown;
+  clientSubject?: unknown;
+  provider?: unknown;
+};
+
+export function mapPortalProjectPage(body: unknown): PortalProjectList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalProjectRow[] = [];
+  for (const item of items) {
+    const project = item as ProjectApiItem;
+    if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
+    if (typeof project.status !== 'string' || typeof project.createdAt !== 'string') return { status: 'error' };
+    if (
+      Object.hasOwn(project, 'payment')
+      || Object.hasOwn(project, 'clientSubject')
+      || Object.hasOwn(project, 'provider')
+    ) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: project.id,
+      contractId: project.contractId,
+      status: project.status,
+      createdAt: project.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+type FileApiItem = {
+  id?: unknown;
+  projectId?: unknown;
+  name?: unknown;
+  mimeType?: unknown;
+  sizeBytes?: unknown;
+  createdAt?: unknown;
+  storageKey?: unknown;
+  bytes?: unknown;
+  downloadUrl?: unknown;
+  clientSubject?: unknown;
+};
+
+export function mapPortalFilePage(body: unknown): PortalFileList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalFileRow[] = [];
+  for (const item of items) {
+    const file = item as FileApiItem;
+    if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
+    if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };
+    if (typeof file.sizeBytes !== 'number' || !Number.isFinite(file.sizeBytes)) return { status: 'error' };
+    if (typeof file.createdAt !== 'string') return { status: 'error' };
+    if (
+      Object.hasOwn(file, 'storageKey')
+      || Object.hasOwn(file, 'bytes')
+      || Object.hasOwn(file, 'downloadUrl')
+      || Object.hasOwn(file, 'clientSubject')
+    ) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: file.id,
+      projectId: file.projectId,
+      name: file.name,
+      mimeType: file.mimeType,
+      sizeBytes: file.sizeBytes,
+      createdAt: file.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+async function portalGetJsonList<T>(input: {
+  base: string;
+  path: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+  map: (body: unknown) => T;
+  forbidden: T;
+  error: T;
+}): Promise<T> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL(input.path, input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return input.forbidden;
+    if (!response.ok) return input.error;
+    return input.map(await response.json());
+  } catch {
+    return input.error;
+  }
+}
+
 export async function fetchPortalOffers(input: {
   base: string;
   cookie?: string;
   fetchImpl?: typeof fetch;
 }): Promise<PortalOfferList> {
-  const fetchImpl = input.fetchImpl ?? fetch;
-  try {
-    const headers: Record<string, string> = { accept: 'application/json' };
-    if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/portal/offers?limit=50', input.base), {
-      credentials: 'include',
-      headers,
-    });
-    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
-    if (!response.ok) return { status: 'error' };
-    return mapPortalOfferPage(await response.json());
-  } catch {
-    return { status: 'error' };
-  }
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/offers?limit=50',
+    map: mapPortalOfferPage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
+export async function fetchPortalProjects(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalProjectList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/projects?limit=50',
+    map: mapPortalProjectPage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
+export async function fetchPortalFiles(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalFileList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/files?limit=50',
+    map: mapPortalFilePage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
 }
 
 /**
- * Resolve portal home from optional Core API session probe + offer list.
+ * Resolve portal home from optional Core API session probe + projections.
  * Unconfigured probe → signed-out (truthful). Never invents offers/projects/files.
  */
 export async function resolvePortalHome(input: {
   probe?: () => Promise<PortalSessionActor | null>;
   loadOffers?: () => Promise<PortalOfferList>;
+  loadProjects?: () => Promise<PortalProjectList>;
+  loadFiles?: () => Promise<PortalFileList>;
 }): Promise<PortalHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
     const classified = classifyPortalSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    const offers = input.loadOffers ? await input.loadOffers() : { status: 'empty' as const };
-    return { state: 'signed-in', offers };
+    const [offers, projects, files] = await Promise.all([
+      input.loadOffers ? input.loadOffers() : Promise.resolve({ status: 'empty' as const }),
+      input.loadProjects ? input.loadProjects() : Promise.resolve({ status: 'empty' as const }),
+      input.loadFiles ? input.loadFiles() : Promise.resolve({ status: 'empty' as const }),
+    ]);
+    return { state: 'signed-in', offers, projects, files };
   } catch {
     return { state: 'signed-out' };
   }
@@ -126,15 +293,28 @@ export function portalErrorMessage(status: number | null): string {
   return 'Tej strony nie udało się wyświetlić. Odśwież stronę.';
 }
 
+function listStateNode(
+  list: { status: 'empty' | 'ready' | 'error' | 'forbidden' },
+  emptyText: string,
+  forbiddenText: string,
+  errorText: string,
+  ready: () => ReactNode,
+): ReactNode {
+  if (list.status === 'empty') return createElement('p', null, emptyText);
+  if (list.status === 'forbidden') return createElement('p', null, forbiddenText);
+  if (list.status === 'error') return createElement('p', null, errorText);
+  return ready();
+}
+
 function offerListNode(offers: PortalOfferList): ReactNode {
-  if (offers.status === 'empty') {
-    return createElement('p', null, 'Brak pozycji do pokazania.');
-  }
-  if (offers.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać listy pozycji.');
-  }
-  if (offers.status === 'error') {
-    return createElement('p', null, 'Listy nie udało się pobrać. Odśwież stronę.');
+  if (offers.status !== 'ready') {
+    return listStateNode(
+      offers,
+      'Brak pozycji do pokazania.',
+      'To konto nie może odczytać listy pozycji.',
+      'Listy nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
   }
   return createElement(
     'section',
@@ -158,9 +338,81 @@ function offerListNode(offers: PortalOfferList): ReactNode {
   );
 }
 
+function projectListNode(projects: PortalProjectList): ReactNode {
+  if (projects.status !== 'ready') {
+    return listStateNode(
+      projects,
+      'Brak projektów do pokazania.',
+      'To konto nie może odczytać listy projektów.',
+      'Listy projektów nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-projects', 'aria-label': 'Twoje projekty' },
+    createElement('h2', null, 'Twoje projekty'),
+    createElement(
+      'ul',
+      { className: 'portal-project-list' },
+      ...projects.items.map((project) =>
+        createElement(
+          'li',
+          { key: project.id, className: 'portal-project' },
+          createElement(
+            'p',
+            { className: 'portal-project-meta' },
+            [project.id, ' · ', project.status, ' · ', project.createdAt].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function fileListNode(files: PortalFileList): ReactNode {
+  if (files.status !== 'ready') {
+    return listStateNode(
+      files,
+      'Brak plików do pokazania.',
+      'To konto nie może odczytać listy plików.',
+      'Listy plików nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-files', 'aria-label': 'Twoje pliki' },
+    createElement('h2', null, 'Twoje pliki'),
+    createElement(
+      'ul',
+      { className: 'portal-file-list' },
+      ...files.items.map((file) =>
+        createElement(
+          'li',
+          { key: file.id, className: 'portal-file' },
+          createElement(
+            'p',
+            { className: 'portal-file-meta' },
+            [
+              file.name,
+              ' · ',
+              file.mimeType,
+              ' · ',
+              String(file.sizeBytes),
+              ' B · ',
+              file.createdAt,
+            ].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /**
- * Portal gate UI. Signed-in renders client-safe offer projections only —
- * no price, terms, staff mutation, or invented rows.
+ * Portal gate UI. Signed-in renders client-safe offer/project/file projections —
+ * no price, terms, payment, binary write path, staff mutation, or invented rows.
  */
 export function portalShell(home: PortalHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -188,5 +440,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('h1', null, 'Portal klienta'),
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
+    projectListNode(home.projects),
+    fileListNode(home.files),
   );
 }
