@@ -53,9 +53,10 @@ The context window size is not a reason to read every document.
 `LEAD-SEC-ACCEPT` report is filed
 (`docs/security/LEAD-SEC-ACCEPT-REPORT-2026-09-22.md`). Lead is still
 **not** security-accepted; that stays report-only and does not globally
-block product work. After `ADMIN-CRM-FILE`, binding AUTO/REVIEW Admin CRM
-depths include lead, opportunity, offer, contract, project, and file
-metadata in `apps/admin`. Remaining binding work follows
+block product work. After `ADMIN-CRM-FILE` and `ADMIN-FILE-BYTES`, binding
+AUTO/REVIEW Admin CRM depths include lead, opportunity, offer, contract,
+project, file metadata, and file-byte upload/download in `apps/admin`.
+Remaining binding work follows
 `docs/architecture/NEXT-SLICES-MAIN.md`; do not infer exhaustion from an
 older journal line.
 Remaining work is Owner-gated (sign provider, payment, hosting,

@@ -449,7 +449,7 @@ row('FZ-REQ-DATA-002', 'Core API stores and serves project file bytes through th
   executableWhenComplete: ['ADMIN-CRM-FILE'],
   safePreblockerWork: true,
 });
-row('FZ-REQ-ADMIN-008', 'Staff can upload and download project file bytes in apps/admin through Core API only.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', 'ADMIN-FILE-BYTES not executed', 'REVIEW', 'Depends on FILE-BYTES-LOCAL.', {
+row('FZ-REQ-ADMIN-008', 'Staff can upload and download project file bytes in apps/admin through Core API only.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Evidence: admin put/get via Core API /v1/files/{id}/content; download proxy route; empty/forbidden/conflict states. No second store; no domain import in admin.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
   depth: 'FILE_BYTES_WORKFLOW',

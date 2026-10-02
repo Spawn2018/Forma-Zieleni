@@ -3,6 +3,7 @@ import { createElement } from 'react';
 import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
+  ADMIN_FILE_BYTES_MAX,
   adminShell,
   advanceAdminContractLifecycle,
   createAdminContract,
@@ -18,6 +19,7 @@ import {
   fetchAdminOpportunities,
   fetchAdminPaymentSchedules,
   fetchAdminProjects,
+  putAdminFileBytes,
   qualifyAdminLead,
   resolveAdminHome,
   transitionAdminPaymentInstallment,
@@ -322,6 +324,38 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect('/');
   }
 
+  if (intent === 'upload-file-bytes') {
+    const fileId = form.get('fileId');
+    const upload = form.get('bytes');
+    if (typeof fileId !== 'string' || !fileId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (!(upload instanceof File)) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (upload.size === 0 || upload.size > ADMIN_FILE_BYTES_MAX) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const bytes = new Uint8Array(await upload.arrayBuffer());
+    const result = await putAdminFileBytes({
+      base,
+      fileId: fileId.trim(),
+      bytes,
+      // Transport only — Core API keeps metadata mimeType authoritative.
+      contentType: 'application/octet-stream',
+      cookie,
+    });
+    if (!result.ok) {
+      const status =
+        result.reason === 'forbidden' ? 403
+          : result.reason === 'not_found' ? 404
+            : result.reason === 'conflict' ? 409
+              : 502;
+      return data(result, { status });
+    }
+    return redirect('/');
+  }
+
   return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
 }
 
@@ -332,8 +366,10 @@ export function meta() {
   ];
 }
 
-function actionFailureMessage(reason: 'forbidden' | 'error'): string {
+function actionFailureMessage(reason: 'forbidden' | 'error' | 'not_found' | 'conflict'): string {
   if (reason === 'forbidden') return 'Nie masz uprawnień do tej operacji personelu.';
+  if (reason === 'not_found') return 'Nie znaleziono pliku lub jego bajtów.';
+  if (reason === 'conflict') return 'Bajty tego pliku są już zapisane i nie mogą się zmienić.';
   return 'Operacji nie udało się zapisać. Odśwież stronę i spróbuj ponownie.';
 }
 

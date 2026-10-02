@@ -784,6 +784,140 @@ export async function createAdminFile(input: {
   }
 }
 
+/** Mirrors Core API FILE_BYTES_MAX. Admin does not import API modules. */
+export const ADMIN_FILE_BYTES_MAX = 25 * 1024 * 1024;
+
+export type AdminFileBytesPutResult =
+  | { ok: true; checksum: string; sizeBytes: number }
+  | { ok: false; reason: 'forbidden' | 'error' | 'not_found' | 'conflict' };
+
+export type AdminFileBytesGetResult =
+  | {
+      ok: true;
+      bytes: Uint8Array;
+      mimeType: string;
+      fileName: string;
+      checksum: string | null;
+      sizeBytes: number;
+    }
+  | { ok: false; reason: 'forbidden' | 'error' | 'not_found' };
+
+function staffFileIdOk(fileId: string): boolean {
+  return /^[A-Za-z0-9_-]{8,64}$/.test(fileId);
+}
+
+function dispositionFileName(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const utf = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf?.[1]) {
+    try {
+      return decodeURIComponent(utf[1]).replace(/["\\]/g, '_') || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  const plain = /filename="([^"]+)"/i.exec(header) || /filename=([^;]+)/i.exec(header);
+  if (plain?.[1]) return plain[1].trim().replace(/["\\]/g, '_') || fallback;
+  return fallback;
+}
+
+/**
+ * PUT project-file bytes through Core API only. Bytes must match metadata sizeBytes.
+ * No second store; no public URL; no client MIME trust beyond transport.
+ */
+export async function putAdminFileBytes(input: {
+  base: string;
+  fileId: string;
+  bytes: Uint8Array | ArrayBuffer | Buffer;
+  contentType?: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminFileBytesPutResult> {
+  if (!staffFileIdOk(input.fileId)) return { ok: false, reason: 'error' };
+  const body = Buffer.isBuffer(input.bytes)
+    ? new Uint8Array(input.bytes)
+    : input.bytes instanceof ArrayBuffer
+      ? new Uint8Array(input.bytes)
+      : input.bytes;
+  if (body.byteLength === 0 || body.byteLength > ADMIN_FILE_BYTES_MAX) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': input.contentType?.trim() || 'application/octet-stream',
+      'content-length': String(body.byteLength),
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL(`/v1/files/${encodeURIComponent(input.fileId)}/content`, input.base), {
+      method: 'PUT',
+      credentials: 'include',
+      headers,
+      body: Buffer.from(body),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (response.status === 404) return { ok: false, reason: 'not_found' };
+    if (response.status === 409) return { ok: false, reason: 'conflict' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    const receipt = await response.json() as {
+      id?: unknown;
+      checksum?: unknown;
+      sizeBytes?: unknown;
+      publicUrl?: unknown;
+      storageKey?: unknown;
+      relativePath?: unknown;
+    };
+    if (typeof receipt.checksum !== 'string' || typeof receipt.sizeBytes !== 'number') {
+      return { ok: false, reason: 'error' };
+    }
+    if (!Number.isInteger(receipt.sizeBytes) || receipt.sizeBytes !== body.byteLength) {
+      return { ok: false, reason: 'error' };
+    }
+    if (receipt.publicUrl !== null && receipt.publicUrl !== undefined) return { ok: false, reason: 'error' };
+    if (Object.hasOwn(receipt, 'storageKey') || Object.hasOwn(receipt, 'relativePath')) {
+      return { ok: false, reason: 'error' };
+    }
+    return { ok: true, checksum: receipt.checksum, sizeBytes: receipt.sizeBytes };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+/** GET project-file bytes through Core API only. Empty store → not_found. */
+export async function fetchAdminFileBytes(input: {
+  base: string;
+  fileId: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminFileBytesGetResult> {
+  if (!staffFileIdOk(input.fileId)) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: '*/*' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL(`/v1/files/${encodeURIComponent(input.fileId)}/content`, input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (response.status === 404) return { ok: false, reason: 'not_found' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    const buffer = new Uint8Array(await response.arrayBuffer());
+    if (buffer.length === 0 || buffer.length > ADMIN_FILE_BYTES_MAX) return { ok: false, reason: 'error' };
+    const mimeType = response.headers.get('content-type')?.split(';')[0]?.trim() || 'application/octet-stream';
+    const checksum = response.headers.get('x-content-checksum-sha256');
+    return {
+      ok: true,
+      bytes: buffer,
+      mimeType,
+      fileName: dispositionFileName(response.headers.get('content-disposition'), input.fileId),
+      checksum: checksum && /^[0-9a-f]{64}$/i.test(checksum) ? checksum.toLowerCase() : null,
+      sizeBytes: buffer.length,
+    };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
  * Resolve admin home from optional Core API session probe + CRM lists.
  * Unconfigured probe → signed-out (truthful). Never invents CRM rows.
@@ -1143,6 +1277,51 @@ function createProjectForm(): ReactNode {
   );
 }
 
+function fileBytesControls(file: AdminFileRow): ReactNode {
+  return createElement(
+    'div',
+    { className: 'admin-file-bytes' },
+    createElement(
+      'p',
+      { className: 'admin-download-file-bytes' },
+      createElement(
+        'a',
+        { href: `/files/${encodeURIComponent(file.id)}/content` },
+        'Pobierz bajty',
+      ),
+    ),
+    createElement(
+      'form',
+      {
+        method: 'post',
+        encType: 'multipart/form-data',
+        className: 'admin-upload-file-bytes',
+      },
+      createElement('input', { type: 'hidden', name: 'fileId', value: file.id }),
+      createElement(
+        'label',
+        { className: 'admin-upload-file-bytes-input' },
+        'Bajty pliku',
+        createElement('input', {
+          type: 'file',
+          name: 'bytes',
+          required: true,
+        }),
+      ),
+      createElement(
+        'p',
+        { className: 'admin-upload-file-bytes-hint' },
+        `Wgrywany plik musi mieć dokładnie ${String(file.sizeBytes)} B.`,
+      ),
+      createElement(
+        'button',
+        { type: 'submit', name: 'intent', value: 'upload-file-bytes' },
+        'Wgraj bajty',
+      ),
+    ),
+  );
+}
+
 function fileListNode(files: AdminFileList): ReactNode {
   if (files.status === 'empty') {
     return createElement('p', null, 'Brak plików do pokazania.');
@@ -1169,6 +1348,7 @@ function fileListNode(files: AdminFileList): ReactNode {
             { className: 'admin-file-meta' },
             [file.name, ' · projekt ', file.projectId, ' · ', file.mimeType, ' · ', String(file.sizeBytes), ' B'].join(''),
           ),
+          fileBytesControls(file),
         ),
       ),
     ),

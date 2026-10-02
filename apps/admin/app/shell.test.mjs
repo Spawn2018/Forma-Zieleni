@@ -15,6 +15,7 @@ import {
   createAdminFile,
   createAdminProject,
   fetchAdminContracts,
+  fetchAdminFileBytes,
   fetchAdminFiles,
   fetchAdminLeads,
   fetchAdminOffers,
@@ -27,6 +28,7 @@ import {
   mapOpportunityPage,
   mapProjectPage,
   nextAdminContractLifecycleStatus,
+  putAdminFileBytes,
   qualifyAdminLead,
   resolveAdminHome,
 } from './shell.ts';
@@ -441,6 +443,160 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 });
 
+test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty/forbidden states', async () => {
+  const bytes = new TextEncoder().encode('synthetic-private-bytes');
+  const checksum = 'a'.repeat(64);
+
+  const putOk = await putAdminFileBytes({
+    base: 'http://127.0.0.1:8787',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    bytes,
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/files\/fl8k2n4p6q8r0s2t\/content$/);
+      assert.equal(init?.method, 'PUT');
+      assert.equal(new Headers(init?.headers).get('content-length'), String(bytes.byteLength));
+      assert.equal(Object.hasOwn(Object(init), 'storageKey'), false);
+      return new Response(JSON.stringify({
+        id: 'fl8k2n4p6q8r0s2t',
+        checksum,
+        sizeBytes: bytes.byteLength,
+        publicUrl: null,
+      }), { status: 201 });
+    },
+  });
+  assert.deepEqual(putOk, { ok: true, checksum, sizeBytes: bytes.byteLength });
+
+  assert.deepEqual(
+    await putAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      bytes,
+      async fetchImpl() {
+        return new Response('', { status: 403 });
+      },
+    }),
+    { ok: false, reason: 'forbidden' },
+  );
+  assert.deepEqual(
+    await putAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      bytes,
+      async fetchImpl() {
+        return new Response('', { status: 404 });
+      },
+    }),
+    { ok: false, reason: 'not_found' },
+  );
+  assert.deepEqual(
+    await putAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      bytes,
+      async fetchImpl() {
+        return new Response('', { status: 409 });
+      },
+    }),
+    { ok: false, reason: 'conflict' },
+  );
+  assert.deepEqual(
+    await putAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: '../escape',
+      bytes,
+      async fetchImpl() {
+        assert.fail('invalid file id must not call Core API');
+      },
+    }),
+    { ok: false, reason: 'error' },
+  );
+  assert.deepEqual(
+    await putAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      bytes,
+      async fetchImpl() {
+        return new Response(JSON.stringify({
+          id: 'fl8k2n4p6q8r0s2t',
+          checksum,
+          sizeBytes: bytes.byteLength,
+          publicUrl: null,
+          storageKey: 'secret',
+        }), { status: 201 });
+      },
+    }),
+    { ok: false, reason: 'error' },
+  );
+
+  const getOk = await fetchAdminFileBytes({
+    base: 'http://127.0.0.1:8787',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/files\/fl8k2n4p6q8r0s2t\/content$/);
+      assert.equal(init?.method, undefined);
+      return new Response(bytes, {
+        status: 200,
+        headers: {
+          'content-type': 'application/octet-stream',
+          'content-disposition': 'attachment; filename="notes.bin"',
+          'x-content-checksum-sha256': checksum,
+        },
+      });
+    },
+  });
+  assert.equal(getOk.ok, true);
+  if (getOk.ok) {
+    assert.equal(getOk.fileName, 'notes.bin');
+    assert.equal(getOk.mimeType, 'application/octet-stream');
+    assert.equal(getOk.checksum, checksum);
+    assert.equal(getOk.sizeBytes, bytes.byteLength);
+    assert.equal(Buffer.from(getOk.bytes).equals(Buffer.from(bytes)), true);
+  }
+
+  assert.deepEqual(
+    await fetchAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      async fetchImpl() {
+        return new Response('', { status: 404 });
+      },
+    }),
+    { ok: false, reason: 'not_found' },
+  );
+  assert.deepEqual(
+    await fetchAdminFileBytes({
+      base: 'http://127.0.0.1:8787',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      async fetchImpl() {
+        return new Response('', { status: 403 });
+      },
+    }),
+    { ok: false, reason: 'forbidden' },
+  );
+
+  const markup = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    files: {
+      status: 'ready',
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'notes.bin',
+        mimeType: 'application/octet-stream',
+        sizeBytes: bytes.byteLength,
+      }],
+    },
+  }));
+  assert.match(markup, /Pobierz bajty/);
+  assert.match(markup, /\/files\/fl8k2n4p6q8r0s2t\/content/);
+  assert.match(markup, /upload-file-bytes/);
+  assert.match(markup, /Wgraj bajty/);
+  assert.match(markup, /dokładnie 23 B/);
+  assert.equal(markup.toLowerCase().includes('storagekey'), false);
+  assert.equal(markup.toLowerCase().includes('garage'), false);
+});
+
 test('mapOpportunityPage and Core API opportunity fetch/create stay truthful', async () => {
   assert.deepEqual(mapOpportunityPage({ items: [] }), { status: 'empty' });
   assert.deepEqual(mapOpportunityPage({ items: [{ id: 1 }] }), { status: 'error' });
@@ -651,6 +807,9 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
+  assert.match(home, /putAdminFileBytes/);
+  assert.match(home, /upload-file-bytes/);
+  assert.match(home, /ADMIN_FILE_BYTES_MAX/);
   assert.match(home, /fetchAdminPaymentSchedules/);
   assert.match(home, /createAdminPaymentSchedule/);
   assert.match(home, /transitionAdminPaymentInstallment/);
@@ -661,6 +820,12 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(home, /actionData/);
   assert.match(home, /role: 'alert'/);
+  const routes = readFileSync(new URL('./routes.ts', import.meta.url), 'utf8');
+  const download = readFileSync(new URL('./routes/file-content.ts', import.meta.url), 'utf8');
+  assert.match(routes, /files\/:fileId\/content/);
+  assert.match(download, /fetchAdminFileBytes/);
+  assert.match(download, /Bajtów pliku nie znaleziono/);
+  assert.match(download, /To konto nie może pobrać bajtów/);
   assert.match(root, /export function ErrorBoundary/);
   assert.match(root, /adminErrorMessage/);
   assert.match(root, /noindex/);
@@ -678,6 +843,9 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.equal(shell.includes('projects:create'), false);
   assert.equal(shell.includes('files:read'), false);
   assert.equal(shell.includes('files:create'), false);
+  assert.equal(shell.includes('@forma-zieleni/domain'), false);
+  assert.equal(download.includes('@forma-zieleni/domain'), false);
+  assert.equal(home.includes('@forma-zieleni/domain'), false);
   assert.equal(shell.includes('payments:read'), false);
   assert.equal(shell.includes('payments:write'), false);
   assert.equal(shell.toLowerCase().includes('podpis'), false);

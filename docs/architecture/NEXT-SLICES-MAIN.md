@@ -730,7 +730,9 @@ Next: ADMIN-FILE-BYTES.
 
 Dependencies: FILE-BYTES-LOCAL.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE for staff upload and download of project file bytes in
+`apps/admin` through Core API only. Empty, error, and forbidden states
+are real. No second store and no invented files.
 Autonomous: yes.
 Accept: staff upload and download of project file bytes in `apps/admin`
 through Core API only. Empty, error, and forbidden states are real. No

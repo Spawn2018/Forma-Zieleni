@@ -318,6 +318,50 @@ p {
   font-size: 1rem;
 }
 
+.admin-file-bytes {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-download-file-bytes {
+  margin: 0;
+}
+
+.admin-download-file-bytes a {
+  color: var(--mech);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.admin-upload-file-bytes {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.admin-upload-file-bytes-input {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 1rem;
+}
+
+.admin-upload-file-bytes-hint {
+  margin: 0;
+  color: var(--kreska);
+  font-size: 0.95rem;
+}
+
+.admin-upload-file-bytes button {
+  justify-self: start;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--igliwie);
+  background: var(--igliwie);
+  color: var(--kamien);
+  font: inherit;
+  cursor: pointer;
+}
+
 .admin-create-file {
   margin-top: 1.5rem;
   display: grid;

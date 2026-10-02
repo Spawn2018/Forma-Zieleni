@@ -3,9 +3,9 @@
   "addendum": "DOCUMENTATION-OS+DORA-LAST-MILE",
   "currentPhase": "product-boundary-contracts",
   "pushPolicy": "A fast-forward push to origin main is AUTO after the pre-push gate, including inside /noc. Force-push, mirror, delete, deploy, DNS, Cloudflare, spend, and secrets stay gated.",
-  "publishedHead": "991ccaee",
+  "publishedHead": "e47f3671",
   "postPushSafety": "PASS",
-  "codeRabbit": "GARDENOS-HTTP: CODERABBIT_FINDINGS_REJECTED_WITH_REASON — free-tier quota exhausted (3/3 rolling hour); local HTTP/BOLA/OpenAPI/validation verify PASS. Not a permanent Canon change.",
+  "codeRabbit": "ADMIN-FILE-BYTES: pending checkpoint before push.",
   "startingHead": "b6dfb74d3b0a78bec66d589beb09e975d95450d5",
   "recoveryVerifiedHead": "df200a6a12a66bb26af04f000fcc43ac27984986",
   "activeDirectiveId": "FZ-MASTER-PROJECT-AUDIT-1",
@@ -26,8 +26,8 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "GARDENOS-HTTP complete. Next READY: ADMIN-FILE-BYTES (also SITEINTEL-HTTP). FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
-  "learningCheck": "MATERIAL: Project deliver HTTP is required soft dependency for createGarden; one garden per project; portal garden projection reuses projectGardenForPortal.",
+  "nextSafeAction": "ADMIN-FILE-BYTES implementing. Next READY after complete: SITEINTEL-HTTP. FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
+  "learningCheck": null,
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [
     "apps/web/app/portfolio-projection.ts",
@@ -109,6 +109,9 @@
     "scripts/requirements/executable-path.test.mjs",
     "apps/portal/app/session.ts",
     "apps/portal/app/shell.ts",
+    "apps/admin/app/shell.ts",
+    "apps/admin/app/shell.test.mjs",
+    "apps/admin/app/routes/file-content.ts",
     "apps/api/src/app.ts",
     "contracts/openapi.json",
     "https://github.com/Spawn2018/Forma-Zieleni/actions/runs/35747728773"
