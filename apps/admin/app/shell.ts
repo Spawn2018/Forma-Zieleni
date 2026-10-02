@@ -747,6 +747,9 @@ export async function fetchAdminFiles(input: {
   }
 }
 
+/** Mirrors Core API FILE_BYTES_MAX. Admin does not import API modules. */
+export const ADMIN_FILE_BYTES_MAX = 25 * 1024 * 1024;
+
 export async function createAdminFile(input: {
   base: string;
   projectId: string;
@@ -757,6 +760,9 @@ export async function createAdminFile(input: {
   cookie?: string;
   fetchImpl?: typeof fetch;
 }): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  if (!Number.isInteger(input.sizeBytes) || input.sizeBytes < 1 || input.sizeBytes > ADMIN_FILE_BYTES_MAX) {
+    return { ok: false, reason: 'error' };
+  }
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = {
@@ -783,9 +789,6 @@ export async function createAdminFile(input: {
     return { ok: false, reason: 'error' };
   }
 }
-
-/** Mirrors Core API FILE_BYTES_MAX. Admin does not import API modules. */
-export const ADMIN_FILE_BYTES_MAX = 25 * 1024 * 1024;
 
 export type AdminFileBytesPutResult =
   | { ok: true; checksum: string; sizeBytes: number }
@@ -1403,7 +1406,7 @@ function createFileForm(): ReactNode {
         type: 'number',
         name: 'sizeBytes',
         required: true,
-        min: 0,
+        min: 1,
         step: 1,
       }),
     ),

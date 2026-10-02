@@ -441,6 +441,21 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
     },
   });
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
+
+  assert.deepEqual(
+    await createAdminFile({
+      base: 'http://127.0.0.1:8787',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      name: 'empty.bin',
+      mimeType: 'application/octet-stream',
+      sizeBytes: 0,
+      idempotencyKey: 'admin-file-0003',
+      async fetchImpl() {
+        assert.fail('zero sizeBytes must not call Core API');
+      },
+    }),
+    { ok: false, reason: 'error' },
+  );
 });
 
 test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty/forbidden states', async () => {

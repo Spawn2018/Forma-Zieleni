@@ -306,7 +306,7 @@ export async function action({ request }: Route.ActionArgs) {
       return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
     }
     const sizeBytes = typeof sizeText === 'string' ? Number(sizeText) : NaN;
-    if (!Number.isInteger(sizeBytes) || sizeBytes < 0) {
+    if (!Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > ADMIN_FILE_BYTES_MAX) {
       return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
     }
     const result = await createAdminFile({
