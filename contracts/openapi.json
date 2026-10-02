@@ -33,6 +33,10 @@
       "name": "Gardens"
     },
     {
+      "name": "SiteIntelligence",
+      "description": "RULES-derived site constraints and opportunities. Synthetic observations only; no live Geoportal credentials or AI conclusions."
+    },
+    {
       "name": "Portal"
     },
     {
@@ -2650,6 +2654,245 @@
           }
         }
       }
+    },
+    "/site-intelligence": {
+      "get": {
+        "tags": [
+          "SiteIntelligence"
+        ],
+        "operationId": "listSiteIntelligence",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff list of Site Intelligence domain records produced from RULES over synthetic normalized observations.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/SiteIntelligenceProjectFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of site intelligence records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteIntelligencePage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "SiteIntelligence"
+        ],
+        "operationId": "createSiteIntelligence",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff create Site Intelligence from synthetic normalized observations via RULES. Rejects AI invent, credentials, twin, and live crawl fields.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteIntelligenceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Site intelligence recorded from RULES.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteIntelligenceRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/site-intelligence/{recordId}": {
+      "get": {
+        "tags": [
+          "SiteIntelligence"
+        ],
+        "operationId": "getSiteIntelligence",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SiteIntelligenceId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Site intelligence visible to staff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteIntelligenceRecord"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/portal/site-intelligence": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "listPortalSiteIntelligence",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Client-safe Site Intelligence projection for the authenticated portal subject. BOLA via clientSubject.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/SiteIntelligenceProjectFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of portal site intelligence projections.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalSiteIntelligencePage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/portal/site-intelligence/{recordId}": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "getPortalSiteIntelligence",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SiteIntelligenceId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal site intelligence projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalSiteIntelligenceProjection"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2850,6 +3093,21 @@
         }
       },
       "GardenProjectFilter": {
+        "name": "projectId",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueId"
+        }
+      },
+      "SiteIntelligenceId": {
+        "name": "recordId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueId"
+        }
+      },
+      "SiteIntelligenceProjectFilter": {
         "name": "projectId",
         "in": "query",
         "schema": {
@@ -4568,6 +4826,319 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PortalGardenProjection"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "SiteIntelligenceObservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "observationId",
+          "kind",
+          "normalized",
+          "source",
+          "synthetic"
+        ],
+        "properties": {
+          "observationId": {
+            "type": "string",
+            "minLength": 8
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "slope",
+              "topography",
+              "soil",
+              "sun",
+              "aspect",
+              "surroundings",
+              "climate"
+            ]
+          },
+          "normalized": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "normalized"
+            ]
+          },
+          "synthetic": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        }
+      },
+      "SiteIntelligenceCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "projectId",
+          "observations"
+        ],
+        "properties": {
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "observations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/SiteIntelligenceObservation"
+            }
+          }
+        }
+      },
+      "SiteIntelligenceFinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "projectId",
+          "clientSubject",
+          "code",
+          "observationIds",
+          "sourceStage",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "clientSubject": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 128
+          },
+          "code": {
+            "type": "string"
+          },
+          "observationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceStage": {
+            "type": "string",
+            "enum": [
+              "RULES"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SiteIntelligenceRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "projectId",
+          "clientSubject",
+          "observationIds",
+          "constraints",
+          "opportunities",
+          "sourceStage",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "clientSubject": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 128
+          },
+          "observationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteIntelligenceFinding"
+            }
+          },
+          "opportunities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteIntelligenceFinding"
+            }
+          },
+          "sourceStage": {
+            "type": "string",
+            "enum": [
+              "RULES"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Site Intelligence domain record from RULES. Not an AI conclusion, twin, or live Geoportal payload."
+      },
+      "SiteIntelligencePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteIntelligenceRecord"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "PortalSiteIntelligenceProjection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "projectId",
+          "observationIds",
+          "constraints",
+          "opportunities",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "observationIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "code"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/OpaqueId"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "opportunities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "code"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/OpaqueId"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Client-safe site intelligence projection. Omits clientSubject and any AI/credential invent fields."
+      },
+      "PortalSiteIntelligencePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalSiteIntelligenceProjection"
             }
           },
           "meta": {

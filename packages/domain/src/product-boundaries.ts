@@ -137,6 +137,9 @@ export function applySiteIntelligenceRules(
     if (!item || item.normalized !== true || item.source !== 'normalized') {
       throw new Error('SITEINTEL_OBSERVATION_NOT_NORMALIZED');
     }
+    if (item.synthetic !== true) {
+      throw new Error('SITEINTEL_OBSERVATION_NOT_SYNTHETIC');
+    }
     if (typeof item.observationId !== 'string' || item.observationId.length < 8) {
       throw new Error('SITEINTEL_OBSERVATION_ID_INVALID');
     }

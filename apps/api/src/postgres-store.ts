@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
+import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone, SiteIntelligenceRecord } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -17,6 +17,7 @@ import type {
   PaymentScheduleListQuery,
   ProjectFileListQuery,
   ProjectListQuery,
+  SiteIntelligenceListQuery,
   StoredReply,
 } from './store.ts';
 
@@ -99,6 +100,23 @@ function toGarden(row: Database['garden']): Garden {
     id: row.id,
     projectId: row.project_id,
     clientSubject: row.client_subject ?? null,
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
+function toSiteIntelligence(row: Database['site_intelligence']): SiteIntelligenceRecord {
+  const observationIds = Array.isArray(row.observation_ids) ? row.observation_ids as string[] : [];
+  const constraints = Array.isArray(row.constraints) ? row.constraints as SiteIntelligenceRecord['constraints'] : [];
+  const opportunities = Array.isArray(row.opportunities) ? row.opportunities as SiteIntelligenceRecord['opportunities'] : [];
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    clientSubject: row.client_subject ?? null,
+    observationIds,
+    constraints,
+    opportunities,
+    sourceStage: 'RULES',
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -585,6 +603,47 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toGarden);
+  }
+
+  async insertSiteIntelligence(record: SiteIntelligenceRecord): Promise<void> {
+    await this.trx.insertInto('site_intelligence').values({
+      id: record.id,
+      project_id: record.projectId,
+      client_subject: record.clientSubject,
+      observation_ids: jsonb(record.observationIds),
+      constraints: jsonb(record.constraints),
+      opportunities: jsonb(record.opportunities),
+      source_stage: record.sourceStage,
+      created_at: new Date(record.createdAt),
+      updated_at: new Date(record.updatedAt),
+    }).execute();
+  }
+
+  async findSiteIntelligence(id: string): Promise<SiteIntelligenceRecord | null> {
+    const row = await this.trx.selectFrom('site_intelligence').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toSiteIntelligence(row) : null;
+  }
+
+  async findSiteIntelligenceByProject(projectId: string): Promise<SiteIntelligenceRecord | null> {
+    const row = await this.trx.selectFrom('site_intelligence').selectAll().where('project_id', '=', projectId).executeTakeFirst();
+    return row ? toSiteIntelligence(row) : null;
+  }
+
+  async listSiteIntelligence(query: SiteIntelligenceListQuery): Promise<SiteIntelligenceRecord[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('site_intelligence').selectAll();
+    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.clientSubject) request = request.where('client_subject', '=', query.clientSubject);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toSiteIntelligence);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

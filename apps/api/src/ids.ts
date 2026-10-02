@@ -11,6 +11,9 @@ import {
   assertOpaquePaymentScheduleId,
   assertOpaquePaymentInstallmentId,
   assertOpaqueGardenId,
+  assertOpaqueSiteConstraintId,
+  assertOpaqueSiteIntelligenceId,
+  assertOpaqueSiteOpportunityId,
 } from '@forma-zieleni/domain';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -64,4 +67,16 @@ export function newPaymentInstallmentId(): string {
 
 export function newGardenId(): string {
   return assertOpaqueGardenId(newOpaqueId('g'));
+}
+
+export function newSiteIntelligenceId(): string {
+  return assertOpaqueSiteIntelligenceId(newOpaqueId('n'));
+}
+
+export function newSiteConstraintId(): string {
+  return assertOpaqueSiteConstraintId(newOpaqueId('s'));
+}
+
+export function newSiteOpportunityId(): string {
+  return assertOpaqueSiteOpportunityId(newOpaqueId('o'));
 }

@@ -26,7 +26,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "ADMIN-FILE-BYTES complete on origin/main (149cbeed, CI_GREEN). Next READY: SITEINTEL-HTTP. FZ-CONTINUE-1 remains authorized; provider/hosting gates stay deferred.",
+  "nextSafeAction": "SITEINTEL-HTTP COMPLETE. Master product READY exhausted (no further AUTO/REVIEW product slices on MAIN). Remaining gates are Owner-deferred (FZ-SIGN-1, payment provider, FZ-SEARCH-CRAWL-1, production hosting) or report-only (Lead/CMS security acceptance, ZAP waiting). FZ-CONTINUE-1 remains authorized; DANGEROUS unchanged.",
   "learningCheck": "NO MATERIAL LEARNING",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

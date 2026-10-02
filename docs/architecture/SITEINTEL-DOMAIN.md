@@ -20,10 +20,11 @@ Machine checks: `recordSiteIntelligenceFromRules()`,
 
 ## Out of scope
 
-- HTTP site API.
 - Twin database or live third-party credentials.
 - AI stage conclusions.
-- Persistence tables and operator UI (later product surfaces).
+- Operator UI (later product surfaces).
+
+HTTP exposure is `SITEINTEL-HTTP` / `docs/architecture/SITEINTEL-HTTP.md`.
 
 ## Relation to earlier steps
 

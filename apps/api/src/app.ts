@@ -1,8 +1,8 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
@@ -36,6 +36,14 @@ import {
 } from './payments.ts';
 import { createProjectFromContract, deliverExistingProject, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
+import {
+  createSiteIntelligenceRecord,
+  listPortalSiteIntelligence,
+  listVisibleSiteIntelligence,
+  parseSiteIntelligenceListQuery,
+  readPortalSiteIntelligence,
+  readSiteIntelligence,
+} from './site-intelligence.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
 import type { LeadStore } from './store.ts';
@@ -128,6 +136,14 @@ function pathGardenId(value: string): string {
     return assertOpaqueGardenId(decodeURIComponent(value));
   } catch {
     throw badRequest('GARDEN_ID_INVALID', 'Garden id is not valid.');
+  }
+}
+
+function pathSiteIntelligenceId(value: string): string {
+  try {
+    return assertOpaqueSiteIntelligenceId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('SITEINTEL_ID_INVALID', 'Site intelligence id is not valid.');
   }
 }
 
@@ -359,6 +375,33 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const projection = await readPortalGarden(options.store, pathGardenId(c.req.param('gardenId')), actor.sub);
     if (!projection) throw new ApiFailure(404, 'GARDEN_NOT_FOUND', 'Garden was not found.');
+    return c.json(projection);
+  });
+
+  app.get('/v1/portal/site-intelligence', async c => {
+    const actor = await requireActor(c, options.authenticator, 'siteintel:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseSiteIntelligenceListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listPortalSiteIntelligence(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/site-intelligence/:recordId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'siteintel:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalSiteIntelligence(
+      options.store,
+      pathSiteIntelligenceId(c.req.param('recordId')),
+      actor.sub,
+    );
+    if (!projection) throw new ApiFailure(404, 'SITEINTEL_NOT_FOUND', 'Site intelligence was not found.');
     return c.json(projection);
   });
 
@@ -710,6 +753,39 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const garden = await readGarden(options.store, pathGardenId(c.req.param('gardenId')));
     if (!garden) throw new ApiFailure(404, 'GARDEN_NOT_FOUND', 'Garden was not found.');
     return c.json(garden);
+  });
+
+  app.get('/v1/site-intelligence', async c => {
+    const actor = await requireActor(c, options.authenticator, 'siteintel:read');
+    c.set('actorId', actor.actorId);
+    const query = parseSiteIntelligenceListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listVisibleSiteIntelligence(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.post('/v1/site-intelligence', async c => {
+    const actor = await requireActor(c, options.authenticator, 'siteintel:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateSiteIntelligenceCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) {
+      throw new ApiFailure(400, 'SITEINTEL_INVALID', 'Site intelligence could not be accepted.', parsed.errors);
+    }
+    const record = await createSiteIntelligenceRecord(options.store, parsed.value, actor, key, now());
+    return c.json(record, 201);
+  });
+
+  app.get('/v1/site-intelligence/:recordId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'siteintel:read');
+    c.set('actorId', actor.actorId);
+    const record = await readSiteIntelligence(options.store, pathSiteIntelligenceId(c.req.param('recordId')));
+    if (!record) throw new ApiFailure(404, 'SITEINTEL_NOT_FOUND', 'Site intelligence was not found.');
+    return c.json(record);
   });
 
   app.get('/v1/milestones', async c => {

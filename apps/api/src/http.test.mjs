@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'gardens:read', 'gardens:create', 'semantic:review'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'gardens:read', 'gardens:create', 'siteintel:read', 'siteintel:create', 'semantic:review'],
 };
 
 const portal = {
@@ -26,7 +26,7 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
 };
 
 const portalOther = {
@@ -34,7 +34,7 @@ const portalOther = {
   issuer: 'test-issuer',
   sub: 'portal-other',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
@@ -1389,4 +1389,164 @@ test('garden HTTP create/list/get requires delivered project; rejects twin inven
   }))).json();
   assert.equal(staffGarden.clientSubject, null);
   assert.equal((await app.request(`/v1/portal/gardens/${staffGarden.id}`, { headers: bearer(portal) })).status, 404);
+});
+
+async function createOwnedProject(app, { clientSubject = null, suffix = 'si1' } = {}) {
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': `si-opp-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': `si-offer-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': `si-ctr-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const body = { contractId: contract.id };
+  if (clientSubject) body.clientSubject = clientSubject;
+  return (await app.request('/v1/projects', json(body, {
+    'idempotency-key': `si-prj-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+}
+
+test('site intelligence HTTP create/list/get from synthetic RULES; rejects AI invent; BOLA on portal', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/site-intelligence')).status, 401);
+  assert.equal((await app.request('/v1/site-intelligence', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/portal/site-intelligence')).status, 401);
+  assert.equal((await app.request('/v1/portal/site-intelligence', { headers: bearer(staff) })).status, 403);
+
+  const project = await createOwnedProject(app, { clientSubject: 'portal-ola', suffix: 'a' });
+  const invent = await app.request('/v1/site-intelligence', json({
+    projectId: project.id,
+    observations: [{
+      observationId: 'obs-slope-01',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    }],
+    inventedSiteFacts: true,
+  }, {
+    'idempotency-key': 'si-invent-1',
+    ...bearer(staff),
+  }));
+  assert.equal(invent.status, 400);
+
+  const live = await app.request('/v1/site-intelligence', json({
+    projectId: project.id,
+    observations: [{
+      observationId: 'obs-slope-01',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: false,
+    }],
+  }, {
+    'idempotency-key': 'si-live-1',
+    ...bearer(staff),
+  }));
+  assert.equal(live.status, 400);
+
+  const credentials = await app.request('/v1/site-intelligence', json({
+    projectId: project.id,
+    observations: [{
+      observationId: 'obs-slope-01',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    }],
+    thirdPartyCredentials: true,
+  }, {
+    'idempotency-key': 'si-cred-1',
+    ...bearer(staff),
+  }));
+  assert.equal(credentials.status, 400);
+
+  const created = await app.request('/v1/site-intelligence', json({
+    projectId: project.id,
+    observations: [
+      {
+        observationId: 'obs-slope-01',
+        kind: 'slope',
+        normalized: true,
+        source: 'normalized',
+        synthetic: true,
+      },
+      {
+        observationId: 'obs-sun-0001',
+        kind: 'sun',
+        normalized: true,
+        source: 'normalized',
+        synthetic: true,
+      },
+    ],
+  }, {
+    'idempotency-key': 'si-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const record = await created.json();
+  assert.equal(record.projectId, project.id);
+  assert.equal(record.clientSubject, 'portal-ola');
+  assert.equal(record.sourceStage, 'RULES');
+  assert.equal(record.constraints[0].code, 'slope-constraint');
+  assert.equal(record.opportunities[0].code, 'sun-exposure');
+  assert.equal(Object.hasOwn(record, 'twinDatabase'), false);
+  assert.equal(Object.hasOwn(record, 'aiConclusion'), false);
+
+  const listed = await app.request('/v1/site-intelligence', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).items.length, 1);
+  assert.equal((await app.request(`/v1/site-intelligence/${record.id}`, { headers: bearer(staff) })).status, 200);
+  assert.equal((await app.request(`/v1/site-intelligence/${record.id}`, { headers: bearer(portal) })).status, 403);
+
+  const duplicate = await app.request('/v1/site-intelligence', json({
+    projectId: project.id,
+    observations: [{
+      observationId: 'obs-slope-02',
+      kind: 'slope',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    }],
+  }, {
+    'idempotency-key': 'si-create-2',
+    ...bearer(staff),
+  }));
+  assert.equal(duplicate.status, 409);
+
+  const portalList = await app.request('/v1/portal/site-intelligence', { headers: bearer(portal) });
+  assert.equal(portalList.status, 200);
+  const portalBody = await portalList.json();
+  assert.equal(portalBody.items.length, 1);
+  assert.equal(portalBody.items[0].id, record.id);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'clientSubject'), false);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'aiConclusion'), false);
+  assert.equal((await app.request(`/v1/portal/site-intelligence/${record.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/site-intelligence/${record.id}`, { headers: bearer(portalOther) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/site-intelligence', { headers: bearer(portalOther) })).json();
+  assert.deepEqual(otherList.items, []);
+
+  const staffOnly = await createOwnedProject(app, { suffix: 'b' });
+  const staffRecord = await (await app.request('/v1/site-intelligence', json({
+    projectId: staffOnly.id,
+    observations: [{
+      observationId: 'obs-soil-0001',
+      kind: 'soil',
+      normalized: true,
+      source: 'normalized',
+      synthetic: true,
+    }],
+  }, {
+    'idempotency-key': 'si-staff-only',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(staffRecord.clientSubject, null);
+  assert.equal((await app.request(`/v1/portal/site-intelligence/${staffRecord.id}`, { headers: bearer(portal) })).status, 404);
 });

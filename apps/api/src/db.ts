@@ -90,6 +90,17 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  site_intelligence: {
+    id: string;
+    project_id: string;
+    client_subject: string | null;
+    observation_ids: unknown;
+    constraints: unknown;
+    opportunities: unknown;
+    source_stage: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -997,6 +1008,78 @@ ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
   },
 };
 
+const SITEINTEL_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'payments:read',
+  'payments:write',
+  'gardens:read',
+  'gardens:create',
+  'gardens:portal-read',
+  'siteintel:read',
+  'siteintel:create',
+  'siteintel:portal-read',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const siteIntelligenceMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE site_intelligence (
+  id text PRIMARY KEY,
+  project_id text NOT NULL UNIQUE REFERENCES project (id),
+  client_subject text,
+  observation_ids jsonb NOT NULL,
+  constraints jsonb NOT NULL,
+  opportunities jsonb NOT NULL,
+  source_stage text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT site_intelligence_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT site_intelligence_source_rules CHECK (source_stage = 'RULES')
+);
+CREATE INDEX site_intelligence_list_created ON site_intelligence (created_at DESC, id DESC);
+CREATE INDEX site_intelligence_list_updated ON site_intelligence (updated_at DESC, id DESC);
+CREATE INDEX site_intelligence_project ON site_intelligence (project_id);
+CREATE INDEX site_intelligence_client_subject ON site_intelligence (client_subject) WHERE client_subject IS NOT NULL;
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${SITEINTEL_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DROP TABLE IF EXISTS site_intelligence;
+DELETE FROM actor_capability WHERE capability IN ('siteintel:read', 'siteintel:create', 'siteintel:portal-read');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${GARDEN_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1016,6 +1099,7 @@ const provider: MigrationProvider = {
       '014_contract_lifecycle': contractLifecycleMigration,
       '015_payment_schedule': paymentScheduleMigration,
       '016_garden_domain': gardenMigration,
+      '017_site_intelligence': siteIntelligenceMigration,
     };
   },
 };

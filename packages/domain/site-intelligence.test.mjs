@@ -10,11 +10,13 @@ import {
 } from './src/product-boundaries.ts';
 import {
   assertOpaqueSiteConstraintId,
+  assertOpaqueSiteIntelligenceId,
   assertOpaqueSiteOpportunityId,
   assertSiteIntelligenceAiCannotWrite,
   projectSiteIntelligenceForPortal,
   recordSiteIntelligenceFromRules,
   siteIntelligenceDomainBoundary,
+  toSiteIntelligenceRecord,
 } from './src/site-intelligence.ts';
 
 const at = '2026-09-24T15:00:00.000Z';
@@ -51,8 +53,10 @@ test('Site Intelligence domain boundary forbids AI write, HTTP, twin, and creden
 });
 
 test('opaque site intelligence identifiers reject guessable values', () => {
+  assert.equal(assertOpaqueSiteIntelligenceId('n9k2n4p6q8r0s2t4'), 'n9k2n4p6q8r0s2t4');
   assert.equal(assertOpaqueSiteConstraintId('s9k2n4p6q8r0s2t4'), 's9k2n4p6q8r0s2t4');
   assert.equal(assertOpaqueSiteOpportunityId('o9k2n4p6q8r0s2t4'), 'o9k2n4p6q8r0s2t4');
+  assert.throws(() => assertOpaqueSiteIntelligenceId('siteintel1'), /SITEINTEL_ID_GUESSABLE/);
   assert.throws(() => assertOpaqueSiteConstraintId('constraint1'), /SITEINTEL_CONSTRAINT_ID_GUESSABLE/);
   assert.throws(() => assertOpaqueSiteOpportunityId('opportunity1'), /SITEINTEL_OPPORTUNITY_ID_GUESSABLE/);
 });
@@ -99,12 +103,14 @@ test('domain records constraints and opportunities only from RULES over normaliz
   assert.deepEqual(bundle.opportunities[0].observationIds, ['obs-sun-0001']);
   assert.equal(Object.hasOwn(bundle, 'twinDatabase'), false);
   assert.equal(Object.hasOwn(bundle.constraints[0], 'aiConclusion'), false);
-  const mine = projectSiteIntelligenceForPortal(bundle, 'portal-ola');
+  const record = toSiteIntelligenceRecord('n9k2n4p6q8r0s2t4', bundle, '2026-09-24T15:30:00.000Z');
+  const mine = projectSiteIntelligenceForPortal(record, 'portal-ola');
   assert.ok(mine);
+  assert.equal(mine.id, record.id);
   assert.equal(mine.projectId, project.id);
   assert.equal(mine.constraints[0].code, 'slope-constraint');
   assert.equal(Object.hasOwn(mine, 'clientSubject'), false);
-  assert.equal(projectSiteIntelligenceForPortal(bundle, 'portal-other'), null);
+  assert.equal(projectSiteIntelligenceForPortal(record, 'portal-other'), null);
 });
 
 test('AI, twin, credentials, HTTP, and unbound codes cannot write site domain records', () => {

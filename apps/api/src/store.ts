@@ -14,6 +14,7 @@ import type {
   ProjectFile,
   ProjectMilestone,
   ProjectStatus,
+  SiteIntelligenceRecord,
 } from '@forma-zieleni/domain';
 
 export type SortField = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt';
@@ -83,6 +84,14 @@ export type PaymentScheduleListQuery = {
 };
 
 export type GardenListQuery = {
+  limit: number;
+  sort: SortField;
+  projectId?: string;
+  clientSubject?: string;
+  cursor?: { at: string; id: string };
+};
+
+export type SiteIntelligenceListQuery = {
   limit: number;
   sort: SortField;
   projectId?: string;
@@ -177,6 +186,10 @@ export interface LeadTx {
   findGarden(id: string): Promise<Garden | null>;
   findGardenByProject(projectId: string): Promise<Garden | null>;
   listGardens(query: GardenListQuery): Promise<Garden[]>;
+  insertSiteIntelligence(record: SiteIntelligenceRecord): Promise<void>;
+  findSiteIntelligence(id: string): Promise<SiteIntelligenceRecord | null>;
+  findSiteIntelligenceByProject(projectId: string): Promise<SiteIntelligenceRecord | null>;
+  listSiteIntelligence(query: SiteIntelligenceListQuery): Promise<SiteIntelligenceRecord[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

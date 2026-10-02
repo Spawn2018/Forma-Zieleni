@@ -145,17 +145,20 @@ export type {
 } from './product-boundaries.ts';
 export {
   assertOpaqueSiteConstraintId,
+  assertOpaqueSiteIntelligenceId,
   assertOpaqueSiteOpportunityId,
   assertSiteIntelligenceAiCannotWrite,
   projectSiteIntelligenceForPortal,
   recordSiteIntelligenceFromRules,
   siteIntelligenceDomainBoundary,
+  toSiteIntelligenceRecord,
 } from './site-intelligence.ts';
 export type {
   PortalSiteIntelligenceProjection,
   SiteConstraintRecord,
   SiteIntelligenceDomainBoundary,
   SiteIntelligenceDomainBundle,
+  SiteIntelligenceRecord,
   SiteOpportunityRecord,
 } from './site-intelligence.ts';
 export {

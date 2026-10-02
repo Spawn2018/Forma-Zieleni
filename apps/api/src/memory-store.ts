@@ -14,6 +14,7 @@ import type {
   ProjectFile,
   ProjectMilestone,
   ProjectStatus,
+  SiteIntelligenceRecord,
 } from '@forma-zieleni/domain';
 import type {
   AuditEvent,
@@ -30,6 +31,7 @@ import type {
   PaymentScheduleListQuery,
   ProjectFileListQuery,
   ProjectListQuery,
+  SiteIntelligenceListQuery,
   StoredReply,
 } from './store.ts';
 
@@ -44,6 +46,7 @@ type MemoryState = {
   decisionLog: ProjectDecisionLogEntry[];
   paymentSchedules: PaymentSchedule[];
   gardens: Garden[];
+  siteIntelligence: SiteIntelligenceRecord[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -69,6 +72,7 @@ export class MemoryLeadStore implements LeadStore {
     decisionLog: [],
     paymentSchedules: [],
     gardens: [],
+    siteIntelligence: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -86,6 +90,7 @@ export class MemoryLeadStore implements LeadStore {
       decisionLog: this.state.decisionLog,
       paymentSchedules: this.state.paymentSchedules,
       gardens: this.state.gardens,
+      siteIntelligence: this.state.siteIntelligence,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -103,6 +108,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.decisionLog = snapshot.decisionLog;
       this.state.paymentSchedules = snapshot.paymentSchedules;
       this.state.gardens = snapshot.gardens;
+      this.state.siteIntelligence = snapshot.siteIntelligence;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -463,6 +469,42 @@ class MemoryTx implements LeadTx {
           const at = stamp(garden, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && garden.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && garden.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertSiteIntelligence(record: SiteIntelligenceRecord): Promise<void> {
+    if (this.state.siteIntelligence.some(item => item.projectId === record.projectId)) {
+      throw new Error('SITEINTEL_EXISTS');
+    }
+    this.state.siteIntelligence.push(clone(record));
+  }
+
+  async findSiteIntelligence(id: string): Promise<SiteIntelligenceRecord | null> {
+    return clone(this.state.siteIntelligence.find(item => item.id === id) ?? null);
+  }
+
+  async findSiteIntelligenceByProject(projectId: string): Promise<SiteIntelligenceRecord | null> {
+    return clone(this.state.siteIntelligence.find(item => item.projectId === projectId) ?? null);
+  }
+
+  async listSiteIntelligence(query: SiteIntelligenceListQuery): Promise<SiteIntelligenceRecord[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.siteIntelligence.filter(
+      record => (!query.projectId || record.projectId === query.projectId)
+        && (!query.clientSubject || record.clientSubject === query.clientSubject),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(record => {
+          const at = stamp(record, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && record.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && record.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

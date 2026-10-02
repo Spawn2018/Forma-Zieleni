@@ -517,13 +517,11 @@ row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records wi
   executableWhenComplete: ['ADMIN-APPROVAL-SURFACE', 'GARDENOS-DOMAIN'],
   safePreblockerWork: true,
 });
-row('FZ-REQ-SITEINTEL-004', 'Core API HTTP routes expose Site Intelligence domain records from rules output without live third-party credentials.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, API, HTTP, 'SITEINTEL-HTTP not executed', 'REVIEW', 'HTTP over SITEINTEL-DOMAIN.', {
-  blockerClass: 'INTERNAL',
+row('FZ-REQ-SITEINTEL-004', 'Core API HTTP routes expose Site Intelligence domain records from rules output without live third-party credentials.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/api/src/site-intelligence.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'HTTP over SITEINTEL-DOMAIN. Synthetic observations only; no live Geoportal or AI conclusions.', {
   productCapability: 'SITEINTEL',
   depth: 'HTTP',
   executableSlice: 'SITEINTEL-HTTP',
   executableWhenComplete: ['GARDENOS-HTTP', 'SITEINTEL-DOMAIN'],
-  safePreblockerWork: true,
 });
 row('FZ-REQ-MOBILE-002', 'Android is a Core API client with its own app foundation, not a second business backend.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/mobile-android/foundation.mjs', 'apps/mobile-android/foundation.test.mjs', '', 'NONE', 'Android foundation probes Core API only; no commercial state or Play credentials in tree.', {
   productCapability: 'MOBILE',

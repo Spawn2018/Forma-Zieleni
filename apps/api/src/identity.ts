@@ -22,6 +22,7 @@ function isCapability(value: string): value is Capability {
     || value === 'milestones:read' || value === 'milestones:create'
     || value === 'payments:read' || value === 'payments:write'
     || value === 'gardens:read' || value === 'gardens:create' || value === 'gardens:portal-read'
+    || value === 'siteintel:read' || value === 'siteintel:create' || value === 'siteintel:portal-read'
     || isContentCapability(value) || isGrowthCapability(value);
 }
 

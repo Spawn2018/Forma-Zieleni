@@ -12,8 +12,8 @@ import {
 /**
  * Site Intelligence domain records (FZ-REQ-SITEINTEL-003).
  * Constraints and opportunities come only from RULES output over
- * normalized observations. AI cannot write these records. No HTTP site
- * API, twin database, or third-party credentials.
+ * normalized observations. AI cannot write these records. No twin
+ * database or third-party credentials. HTTP exposure is SITEINTEL-HTTP.
  */
 
 export type SiteConstraintRecord = {
@@ -57,6 +57,12 @@ export type SiteIntelligenceDomainBundle = {
   createdAt: string;
 };
 
+/** Persisted HTTP/staff record wrapping RULES-derived domain findings. */
+export type SiteIntelligenceRecord = SiteIntelligenceDomainBundle & {
+  id: string;
+  updatedAt: string;
+};
+
 const OPAQUE_ID = /^[a-z][a-z0-9]{15,63}$/;
 const CODE = /^[a-z][a-z0-9-]{2,63}$/;
 
@@ -72,6 +78,13 @@ export function siteIntelligenceDomainBoundary(): SiteIntelligenceDomainBoundary
   };
 }
 
+export function assertOpaqueSiteIntelligenceId(id: string): string {
+  if (!OPAQUE_ID.test(id) || /^(?:siteintel|si|sit|id)\d+$/i.test(id)) {
+    throw new Error('SITEINTEL_ID_GUESSABLE');
+  }
+  return id;
+}
+
 export function assertOpaqueSiteConstraintId(id: string): string {
   if (!OPAQUE_ID.test(id) || /^(?:constraint|scn|id)\d+$/i.test(id)) {
     throw new Error('SITEINTEL_CONSTRAINT_ID_GUESSABLE');
@@ -84,6 +97,18 @@ export function assertOpaqueSiteOpportunityId(id: string): string {
     throw new Error('SITEINTEL_OPPORTUNITY_ID_GUESSABLE');
   }
   return id;
+}
+
+export function toSiteIntelligenceRecord(
+  id: string,
+  bundle: SiteIntelligenceDomainBundle,
+  updatedAt: string,
+): SiteIntelligenceRecord {
+  return {
+    id: assertOpaqueSiteIntelligenceId(id),
+    ...bundle,
+    updatedAt,
+  };
 }
 
 function assertCode(code: string): string {
@@ -244,6 +269,7 @@ export function recordSiteIntelligenceFromRules(
 
 /** Fields a portal client may see. No twin, credentials, or AI conclusions. */
 export type PortalSiteIntelligenceProjection = {
+  id: string;
   projectId: string;
   observationIds: readonly string[];
   constraints: readonly { id: string; code: string }[];
@@ -252,15 +278,16 @@ export type PortalSiteIntelligenceProjection = {
 };
 
 export function projectSiteIntelligenceForPortal(
-  bundle: SiteIntelligenceDomainBundle,
+  record: SiteIntelligenceRecord,
   readerSubject: string,
 ): PortalSiteIntelligenceProjection | null {
-  if (!bundle.clientSubject || bundle.clientSubject !== readerSubject) return null;
+  if (!record.clientSubject || record.clientSubject !== readerSubject) return null;
   return {
-    projectId: bundle.projectId,
-    observationIds: [...bundle.observationIds],
-    constraints: bundle.constraints.map((item) => ({ id: item.id, code: item.code })),
-    opportunities: bundle.opportunities.map((item) => ({ id: item.id, code: item.code })),
-    createdAt: bundle.createdAt,
+    id: record.id,
+    projectId: record.projectId,
+    observationIds: [...record.observationIds],
+    constraints: record.constraints.map((item) => ({ id: item.id, code: item.code })),
+    opportunities: record.opportunities.map((item) => ({ id: item.id, code: item.code })),
+    createdAt: record.createdAt,
   };
 }

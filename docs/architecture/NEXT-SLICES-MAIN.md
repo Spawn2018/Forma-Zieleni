@@ -896,13 +896,15 @@ Next: SITEINTEL-HTTP.
 
 Dependencies: GARDENOS-HTTP, SITEINTEL-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: Core API HTTP routes for Site Intelligence domain records from
 rules output. No live Geoportal credentials, no AI conclusion stage, no
 production crawl.
-Tests: HTTP + BOLA; AI cannot invent site facts.
-Security: staff-only writes; synthetic observations only.
+Tests: `apps/api/src/http.test.mjs` create/list/get + BOLA portal read;
+`packages/validation/site-intelligence.test.mjs`.
+Security: staff-only writes; synthetic observations only; AI cannot invent
+site facts (domain + validation).
 Next: none.
 
 ## Deferred and Owner-gated (visible, not READY)
