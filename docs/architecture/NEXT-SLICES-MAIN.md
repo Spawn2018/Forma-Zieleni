@@ -961,7 +961,7 @@ Next: ADMIN-SIGN-SANDBOX.
 
 Dependencies: SIGN-ADAPTER-1, ADMIN-APP.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: staff in `apps/admin` can open a Documenso sandbox envelope for
 a sent contract and see pending versus completed. No QES label, no

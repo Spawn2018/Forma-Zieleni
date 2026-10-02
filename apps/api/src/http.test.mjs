@@ -1307,6 +1307,10 @@ test('documenso sandbox envelope completes only with a signed webhook and never 
   assert.equal(envelope.provider, 'documenso-sandbox');
   assert.equal(envelope.status, 'pending');
   assert.equal(envelope.qesClaimed, false);
+  const read = await app.request(path, { headers: bearer(staff) });
+  assert.equal(read.status, 200);
+  assert.equal((await read.json()).status, 'pending');
+  assert.equal((await app.request(path, { headers: bearer(portal) })).status, 403);
   const raw = JSON.stringify({
     envelopeId: envelope.id,
     contractId: envelope.contractId,

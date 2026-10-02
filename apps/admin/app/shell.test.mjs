@@ -30,6 +30,8 @@ import {
   nextAdminContractLifecycleStatus,
   putAdminFileBytes,
   qualifyAdminLead,
+  fetchAdminSigningSandbox,
+  openAdminSigningSandbox,
   resolveAdminHome,
 } from './shell.ts';
 
@@ -41,7 +43,7 @@ const emptyCrm = {
   projects: { status: 'empty' },
   files: { status: 'empty' },
   paymentSchedules: { status: 'empty' },
-      proposals: { status: 'empty' },
+  signingSandbox: { status: 'empty' },
   proposals: { status: 'empty' },
 };
 
@@ -111,11 +113,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, signingSandbox: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -187,6 +189,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           },
         ],
       },
+      signingSandbox: { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'pending' },
       proposals: { status: 'empty' },
     }),
   );
@@ -207,6 +210,9 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Do przeglądu/);
   assert.match(ready, /advance-contract-lifecycle/);
   assert.match(ready, /Harmonogramy płatności/);
+  assert.match(ready, /Koperta sandbox oczekuje/);
+  assert.match(ready, /Otwórz kopertę sandbox/);
+  assert.equal(ready.includes('QES'), false);
   assert.match(ready, /ps8k2n4p6q8r0s2t/);
   assert.match(ready, /create-payment-schedule/);
   assert.match(ready, /transition-payment-installment/);
@@ -830,6 +836,9 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /upload-file-bytes/);
   assert.match(home, /ADMIN_FILE_BYTES_MAX/);
   assert.match(home, /fetchAdminPaymentSchedules/);
+  assert.match(home, /open-signing-sandbox/);
+  assert.match(home, /fetchAdminSigningSandbox/);
+  assert.match(home, /openAdminSigningSandbox/);
   assert.match(home, /createAdminPaymentSchedule/);
   assert.match(home, /transitionAdminPaymentInstallment/);
   assert.match(home, /fetchAdminProposals/);
@@ -953,4 +962,36 @@ test('staff approval UI reviews synthetic proposals without Owner or spend gates
     fetchImpl: async () => new Response('', { status: 403 }),
   });
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
+});
+
+test('staff open a documenso sandbox envelope without sending a secret', async () => {
+  let sentSecret = false;
+  const opened = await openAdminSigningSandbox({
+    base: 'http://admin.test',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    idempotencyKey: 'admin-sign-0001',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/contracts\/ct8k2n4p6q8r0s2t\/signing-sandbox-envelope$/);
+      assert.equal(init?.method, 'POST');
+      sentSecret = JSON.stringify(init?.headers).toLowerCase().includes('secret');
+      return new Response(JSON.stringify({
+        provider: 'documenso-sandbox',
+        status: 'pending',
+        qesClaimed: false,
+      }), { status: 201 });
+    },
+  });
+  assert.equal(sentSecret, false);
+  assert.deepEqual(opened, { ok: true, envelopeStatus: 'pending' });
+  const read = await fetchAdminSigningSandbox({
+    base: 'http://admin.test',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    fetchImpl: async () => new Response(JSON.stringify({
+      contractId: 'ct8k2n4p6q8r0s2t',
+      status: 'completed',
+      qesClaimed: false,
+    }), { status: 200 }),
+  });
+  assert.deepEqual(read, { status: 'ready', contractId: 'ct8k2n4p6q8r0s2t', envelopeStatus: 'completed' });
 });

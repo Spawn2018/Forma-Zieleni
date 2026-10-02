@@ -44,6 +44,13 @@ function mapDomainError(error: unknown): never {
   }
 }
 
+export async function readSigningSandboxEnvelope(
+  store: LeadStore,
+  contractId: string,
+): Promise<SigningSandboxEnvelope | null> {
+  return store.transaction(tx => tx.findSigningEnvelopeByContract(contractId));
+}
+
 export async function createSigningSandboxEnvelopeRecord(
   store: LeadStore,
   contractId: string,

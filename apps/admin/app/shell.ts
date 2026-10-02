@@ -104,6 +104,12 @@ export type AdminPaymentScheduleList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type AdminSigningSandbox =
+  | { status: 'empty' }
+  | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -116,6 +122,7 @@ export type AdminHome =
       projects: AdminProjectList;
       files: AdminFileList;
       paymentSchedules: AdminPaymentScheduleList;
+      signingSandbox: AdminSigningSandbox;
       proposals: AdminProposalList;
     };
 
@@ -934,6 +941,7 @@ export async function resolveAdminHome(input: {
   loadProjects?: () => Promise<AdminProjectList>;
   loadFiles?: () => Promise<AdminFileList>;
   loadPaymentSchedules?: () => Promise<AdminPaymentScheduleList>;
+  loadSigningSandbox?: () => Promise<AdminSigningSandbox>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
@@ -949,6 +957,9 @@ export async function resolveAdminHome(input: {
     const paymentSchedules = input.loadPaymentSchedules
       ? await input.loadPaymentSchedules()
       : { status: 'empty' as const };
+    const signingSandbox = input.loadSigningSandbox
+      ? await input.loadSigningSandbox()
+      : { status: 'empty' as const };
     const proposals = input.loadProposals
       ? await input.loadProposals()
       : { status: 'empty' as const };
@@ -961,10 +972,68 @@ export async function resolveAdminHome(input: {
       projects,
       files,
       paymentSchedules,
+      signingSandbox,
       proposals,
     };
   } catch {
     return { state: 'signed-out' };
+  }
+}
+
+export async function fetchAdminSigningSandbox(input: {
+  base: string;
+  contractId: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminSigningSandbox> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/contracts/${encodeURIComponent(input.contractId)}/signing-sandbox-envelope`, input.base),
+      { credentials: 'include', headers },
+    );
+    if (response.status === 404) return { status: 'empty' };
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    const body = await response.json() as { contractId?: unknown; status?: unknown; qesClaimed?: unknown };
+    if (body.contractId !== input.contractId) return { status: 'error' };
+    if (body.status !== 'pending' && body.status !== 'completed') return { status: 'error' };
+    if (body.qesClaimed !== false) return { status: 'error' };
+    return { status: 'ready', contractId: input.contractId, envelopeStatus: body.status };
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function openAdminSigningSandbox(input: {
+  base: string;
+  contractId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true; envelopeStatus: 'pending' | 'completed' } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/contracts/${encodeURIComponent(input.contractId)}/signing-sandbox-envelope`, input.base),
+      { method: 'POST', credentials: 'include', headers, body: '{}' },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    const body = await response.json() as { status?: unknown; qesClaimed?: unknown };
+    if (body.qesClaimed !== false) return { ok: false, reason: 'error' };
+    if (body.status !== 'pending' && body.status !== 'completed') return { ok: false, reason: 'error' };
+    return { ok: true, envelopeStatus: body.status };
+  } catch {
+    return { ok: false, reason: 'error' };
   }
 }
 
@@ -1540,9 +1609,42 @@ function createPaymentScheduleForm(): ReactNode {
   );
 }
 
+function signingSandboxNode(sandbox: AdminSigningSandbox): ReactNode {
+  const statusText = sandbox.status === 'ready'
+    ? (sandbox.envelopeStatus === 'completed' ? 'Koperta sandbox zakończona' : 'Koperta sandbox oczekuje')
+    : sandbox.status === 'empty'
+      ? 'Brak koperty sandbox dla tej umowy.'
+      : sandbox.status === 'forbidden'
+        ? 'To konto nie może odczytać koperty sandbox.'
+        : 'Koperty sandbox nie udało się pobrać. Odśwież stronę.';
+  return createElement(
+    'section',
+    { className: 'admin-signing-sandbox', 'aria-label': 'Koperta sandbox' },
+    createElement('h2', null, 'Koperta sandbox'),
+    createElement('p', { className: 'admin-signing-sandbox-status' }, statusText),
+    createElement(
+      'form',
+      { method: 'post', className: 'admin-open-signing-sandbox' },
+      createElement(
+        'label',
+        { className: 'admin-signing-contract' },
+        'Id umowy wysłanej',
+        createElement('input', {
+          type: 'text',
+          name: 'contractId',
+          required: true,
+          autoComplete: 'off',
+          spellCheck: false,
+        }),
+      ),
+      createElement('button', { type: 'submit', name: 'intent', value: 'open-signing-sandbox' }, 'Otwórz kopertę sandbox'),
+    ),
+  );
+}
+
 /**
  * Staff shell. Signed-in shows real Core API CRM states — never invented rows.
- * Payment schedule is provider-neutral; no signing ceremony and no money movement.
+ * Payment schedule is provider-neutral. Signing sandbox is local Documenso only.
  * Proposals are synthetic Agnieszka review actions over the domain Fabric.
  */
 export function adminShell(home: AdminHome): ReactNode {
@@ -1580,6 +1682,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createContractForm(),
     paymentScheduleListNode(home.paymentSchedules),
     createPaymentScheduleForm(),
+    signingSandboxNode(home.signingSandbox),
     projectListNode(home.projects),
     createProjectForm(),
     fileListNode(home.files),

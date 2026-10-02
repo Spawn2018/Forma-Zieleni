@@ -36,7 +36,7 @@ import {
   transitionPaymentInstallmentRecord,
   acceptSandboxWebhookRecord,
 } from './payments.ts';
-import { acceptSigningSandboxWebhookRecord, createSigningSandboxEnvelopeRecord } from './signing-sandbox.ts';
+import { acceptSigningSandboxWebhookRecord, createSigningSandboxEnvelopeRecord, readSigningSandboxEnvelope } from './signing-sandbox.ts';
 import { createProjectFromContract, deliverExistingProject, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
 import {
@@ -947,6 +947,14 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const signature = c.req.header('x-fz-sandbox-signature') ?? '';
     const schedule = await acceptSandboxWebhookRecord(options.store, raw, signature, secret, now());
     return c.json(schedule);
+  });
+
+  app.get('/v1/contracts/:contractId/signing-sandbox-envelope', async c => {
+    const actor = await requireActor(c, options.authenticator, 'contracts:read');
+    c.set('actorId', actor.actorId);
+    const envelope = await readSigningSandboxEnvelope(options.store, pathContractId(c.req.param('contractId')));
+    if (!envelope) throw new ApiFailure(404, 'SIGNING_ENVELOPE_NOT_FOUND', 'Signing sandbox envelope was not found.');
+    return c.json(envelope);
   });
 
   app.post('/v1/contracts/:contractId/signing-sandbox-envelope', async c => {

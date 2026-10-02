@@ -18,6 +18,8 @@ import {
   fetchAdminOffers,
   fetchAdminOpportunities,
   fetchAdminPaymentSchedules,
+  fetchAdminSigningSandbox,
+  openAdminSigningSandbox,
   fetchAdminProjects,
   putAdminFileBytes,
   qualifyAdminLead,
@@ -72,6 +74,11 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadPaymentSchedules() {
       return fetchAdminPaymentSchedules({ base, cookie });
+    },
+    async loadSigningSandbox() {
+      const contractId = new URL(request.url).searchParams.get('contractId') ?? '';
+      if (!contractId) return { status: 'empty' };
+      return fetchAdminSigningSandbox({ base, cookie, contractId });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -215,6 +222,23 @@ export async function action({ request }: Route.ActionArgs) {
       return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
     }
     return redirect('/');
+  }
+
+  if (intent === 'open-signing-sandbox') {
+    const contractId = form.get('contractId');
+    if (typeof contractId !== 'string' || !contractId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await openAdminSigningSandbox({
+      base,
+      contractId: contractId.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect(`/?contractId=${encodeURIComponent(contractId.trim())}`);
   }
 
   if (intent === 'create-payment-schedule') {
