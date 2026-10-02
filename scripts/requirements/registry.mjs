@@ -540,6 +540,12 @@ row('FZ-REQ-ADMIN-013', 'Staff can list and create a garden for a delivered proj
   executableSlice: 'ADMIN-GARDEN-STAFF',
   executableWhenComplete: ['GARDENOS-HTTP', 'ADMIN-CRM-PROJECT'],
 });
+row('FZ-REQ-ADMIN-014', 'Staff can list site findings and record one synthetic normalized observation in apps/admin through the existing Core API. Codes stay RULES output. No AI conclusion, credentials, or client subject on the list.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists GET /v1/site-intelligence and posts one synthetic observation to POST /v1/site-intelligence. Constraint and opportunity codes are shown. Client subject is not rendered.', {
+  productCapability: 'ADMIN',
+  depth: 'SITE_STAFF',
+  executableSlice: 'ADMIN-SITE-STAFF',
+  executableWhenComplete: ['SITEINTEL-HTTP', 'ADMIN-CRM-PROJECT'],
+});
 row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', 'Evidence: OpenAPI + HTTP create/list/get with BOLA portal projection. gardens:* capabilities. Project deliver unlocks linkage. No twin/XR/plant advice.', {
   blockerClass: 'INTERNAL',
   productCapability: 'GARDENOS',

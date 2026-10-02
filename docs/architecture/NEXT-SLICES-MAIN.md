@@ -1071,6 +1071,23 @@ Security: uses existing `gardens:read` and `gardens:create`.
 The admin does not invent a second garden store.
 Next: none.
 
+### ADMIN-SITE-STAFF
+
+Dependencies: SITEINTEL-HTTP, ADMIN-CRM-PROJECT.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in admin lists site findings that Core API already
+stores and can record one synthetic normalized observation. A row shows
+the record, project, source stage RULES, constraint codes, and
+opportunity codes. The client subject stays off the list. An AI
+conclusion, twin, credential, or invented-fact field is refused.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-SITE-STAFF.md`](./ADMIN-SITE-STAFF.md).
+Security: uses existing `siteintel:read` and `siteintel:create`.
+The admin does not invent codes or a second site store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

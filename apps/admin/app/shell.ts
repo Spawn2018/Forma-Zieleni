@@ -148,6 +148,37 @@ export type AdminGardenList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const SITE_OBSERVATION_KINDS = [
+  'slope',
+  'topography',
+  'soil',
+  'sun',
+  'aspect',
+  'surroundings',
+  'climate',
+] as const;
+
+export type SiteObservationKind = (typeof SITE_OBSERVATION_KINDS)[number];
+
+export type AdminSiteFinding = {
+  id: string;
+  code: string;
+};
+
+export type AdminSiteRow = {
+  id: string;
+  projectId: string;
+  sourceStage: 'RULES';
+  constraints: readonly AdminSiteFinding[];
+  opportunities: readonly AdminSiteFinding[];
+};
+
+export type AdminSiteList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminSiteRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminSigningSandbox =
   | { status: 'empty' }
   | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
@@ -170,6 +201,7 @@ export type AdminHome =
       signingSandbox: AdminSigningSandbox;
       milestones: AdminMilestoneList;
       gardens: AdminGardenList;
+      siteIntelligence: AdminSiteList;
       proposals: AdminProposalList;
     };
 
@@ -904,6 +936,129 @@ export async function createAdminGarden(input: {
   }
 }
 
+const SITE_FORBIDDEN = [
+  'twinDatabase',
+  'aiConclusion',
+  'thirdPartyCredentials',
+  'geoportal',
+  'inventedSiteFacts',
+  'credentials',
+] as const;
+
+function mapSiteFindings(value: unknown): AdminSiteFinding[] | null {
+  if (!Array.isArray(value)) return null;
+  const rows: AdminSiteFinding[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+    const finding = item as { id?: unknown; code?: unknown; clientSubject?: unknown };
+    if (typeof finding.id !== 'string' || typeof finding.code !== 'string') return null;
+    if (finding.clientSubject !== undefined && finding.clientSubject !== null && typeof finding.clientSubject !== 'string') {
+      return null;
+    }
+    if (SITE_FORBIDDEN.some((key) => Object.hasOwn(finding, key))) return null;
+    rows.push({ id: finding.id, code: finding.code });
+  }
+  return rows;
+}
+
+export function mapAdminSitePage(body: unknown): AdminSiteList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminSiteRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const record = item as {
+      id?: unknown;
+      projectId?: unknown;
+      clientSubject?: unknown;
+      sourceStage?: unknown;
+      constraints?: unknown;
+      opportunities?: unknown;
+    };
+    if (typeof record.id !== 'string' || typeof record.projectId !== 'string') return { status: 'error' };
+    if (record.sourceStage !== 'RULES') return { status: 'error' };
+    if (record.clientSubject !== null && typeof record.clientSubject !== 'string') return { status: 'error' };
+    if (SITE_FORBIDDEN.some((key) => Object.hasOwn(record, key))) return { status: 'error' };
+    const constraints = mapSiteFindings(record.constraints);
+    const opportunities = mapSiteFindings(record.opportunities);
+    if (!constraints || !opportunities) return { status: 'error' };
+    rows.push({
+      id: record.id,
+      projectId: record.projectId,
+      sourceStage: 'RULES',
+      constraints,
+      opportunities,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminSiteIntelligence(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminSiteList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/site-intelligence?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapAdminSitePage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminSiteObservation(input: {
+  base: string;
+  projectId: string;
+  observationId: string;
+  kind: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  if (!(SITE_OBSERVATION_KINDS as readonly string[]).includes(input.kind)) {
+    return { ok: false, reason: 'error' };
+  }
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/site-intelligence', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify({
+        projectId: input.projectId,
+        observations: [{
+          observationId: input.observationId,
+          kind: input.kind,
+          normalized: true,
+          source: 'normalized',
+          synthetic: true,
+        }],
+      }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export async function createAdminProject(input: {
   base: string;
   contractId: string;
@@ -1182,6 +1337,7 @@ export async function resolveAdminHome(input: {
   loadSigningSandbox?: () => Promise<AdminSigningSandbox>;
   loadMilestones?: () => Promise<AdminMilestoneList>;
   loadGardens?: () => Promise<AdminGardenList>;
+  loadSiteIntelligence?: () => Promise<AdminSiteList>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
@@ -1209,6 +1365,9 @@ export async function resolveAdminHome(input: {
     const gardens = input.loadGardens
       ? await input.loadGardens()
       : { status: 'empty' as const };
+    const siteIntelligence = input.loadSiteIntelligence
+      ? await input.loadSiteIntelligence()
+      : { status: 'empty' as const };
     const proposals = input.loadProposals
       ? await input.loadProposals()
       : { status: 'empty' as const };
@@ -1225,6 +1384,7 @@ export async function resolveAdminHome(input: {
       signingSandbox,
       milestones,
       gardens,
+      siteIntelligence,
       proposals,
     };
   } catch {
@@ -1703,6 +1863,98 @@ function createGardenForm(): ReactNode {
       }),
     ),
     createElement('button', { type: 'submit', name: 'intent', value: 'create-garden' }, 'Utwórz ogród'),
+  );
+}
+
+function siteCodes(label: string, findings: readonly AdminSiteFinding[]): string {
+  if (findings.length === 0) return `${label}: brak`;
+  return `${label}: ${findings.map((item) => item.code).join(', ')}`;
+}
+
+function siteListNode(records: AdminSiteList): ReactNode {
+  if (records.status === 'empty') {
+    return createElement('p', null, 'Brak ustaleń o terenie do pokazania.');
+  }
+  if (records.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać ustaleń o terenie.');
+  }
+  if (records.status === 'error') {
+    return createElement('p', null, 'Ustaleń o terenie nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-site', 'aria-label': 'Ustalenia o terenie' },
+    createElement('h2', null, 'Ustalenia o terenie'),
+    createElement(
+      'ul',
+      { className: 'admin-site-list' },
+      ...records.items.map((record) =>
+        createElement(
+          'li',
+          { key: record.id, className: 'admin-site-record' },
+          createElement(
+            'p',
+            { className: 'admin-site-meta' },
+            [record.id, ' · projekt ', record.projectId, ' · ', record.sourceStage].join(''),
+          ),
+          createElement('p', { className: 'admin-site-constraints' }, siteCodes('Ograniczenia', record.constraints)),
+          createElement('p', { className: 'admin-site-opportunities' }, siteCodes('Możliwości', record.opportunities)),
+        ),
+      ),
+    ),
+  );
+}
+
+function createSiteObservationForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-site' },
+    createElement('h2', null, 'Syntetyczna obserwacja'),
+    createElement(
+      'p',
+      null,
+      'Zapisuje jedną znormalizowaną obserwację syntetyczną. Kody liczy Core API. Nie zapisuje wniosku, bliźniaka ani danych logowania.',
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-site-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'projectId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-site-observation' },
+      'Id obserwacji',
+      createElement('input', {
+        type: 'text',
+        name: 'observationId',
+        required: true,
+        minLength: 8,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-site-kind' },
+      'Rodzaj',
+      createElement(
+        'select',
+        { name: 'kind', required: true, defaultValue: 'slope' },
+        ...SITE_OBSERVATION_KINDS.map((kind) => createElement('option', { key: kind, value: kind }, kind)),
+      ),
+    ),
+    createElement(
+      'button',
+      { type: 'submit', name: 'intent', value: 'create-site-observation' },
+      'Zapisz obserwację',
+    ),
   );
 }
 
@@ -2288,6 +2540,8 @@ export function adminShell(home: AdminHome): ReactNode {
     createMilestoneForm(),
     gardenListNode(home.gardens),
     createGardenForm(),
+    siteListNode(home.siteIntelligence),
+    createSiteObservationForm(),
     fileListNode(home.files),
     createFileForm(),
   );

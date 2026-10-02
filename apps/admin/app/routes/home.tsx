@@ -13,6 +13,7 @@ import {
   capacityDecisionMessage,
   createAdminCapacityWindow,
   createAdminGarden,
+  createAdminSiteObservation,
   createAdminMilestone,
   createAdminPaymentSchedule,
   createAdminProject,
@@ -21,6 +22,7 @@ import {
   fetchAdminContracts,
   fetchAdminFiles,
   fetchAdminGardens,
+  fetchAdminSiteIntelligence,
   fetchAdminLeads,
   fetchAdminMilestones,
   fetchAdminOffers,
@@ -31,6 +33,7 @@ import {
   fetchAdminProjects,
   putAdminFileBytes,
   qualifyAdminLead,
+  SITE_OBSERVATION_KINDS,
   resolveAdminHome,
   transitionAdminPaymentInstallment,
   type AdminHome,
@@ -96,6 +99,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadGardens() {
       return fetchAdminGardens({ base, cookie });
+    },
+    async loadSiteIntelligence() {
+      return fetchAdminSiteIntelligence({ base, cookie });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -306,6 +312,33 @@ export async function action({ request }: Route.ActionArgs) {
       scheduleId: scheduleId.trim(),
       installmentId: installmentId.trim(),
       status: status.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-site-observation') {
+    const projectId = form.get('projectId');
+    const observationId = form.get('observationId');
+    const kind = form.get('kind');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof observationId !== 'string' || observationId.trim().length < 8) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof kind !== 'string' || !(SITE_OBSERVATION_KINDS as readonly string[]).includes(kind)) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await createAdminSiteObservation({
+      base,
+      projectId: projectId.trim(),
+      observationId: observationId.trim(),
+      kind,
       idempotencyKey: randomUUID(),
       cookie,
     });
