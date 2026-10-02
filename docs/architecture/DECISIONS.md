@@ -231,7 +231,7 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Status | Accepted |
 | Decyzja | Owner: pominąć pauzy OWNER-DECISION i budować dalej do 10:00 Europe/Warsaw w oknie `/noc`. `AUTHORIZE CAPACITY-STAFF`. |
 | Kontekst | Graf AUTO/REVIEW był wyczerpany. Owner nie wybrał dostawcy ani wdrożenia. Polecił kontynuację bezpiecznej głębokości produktu. |
-| Konsekwencje | CAPACITY-STAFF jest panelem dyspozycyjności personelu w Core API i `apps/admin`. Brak kalendarza zewnętrznego, brak danych klienta, brak obietnicy zapisu poza oknem. Cloudflare, DNS, sekrety, spend, prawdziwa wpłata, dane klientów i deploy zostają DANGEROUS. |
+| Konsekwencje | CAPACITY-STAFF jest panelem dyspozycyjności personelu w Core API i `apps/admin`. PORTAL-CONTRACT-VIEW pokazuje klientowi status własnej umowy, bez ceny, podpisu i płatności. Brak kalendarza zewnętrznego, brak obietnicy zapisu poza oknem. Cloudflare, DNS, sekrety, spend, prawdziwa wpłata, dane klientów i deploy zostają DANGEROUS. |
 
 ## Szablon kolejnego ADR
 

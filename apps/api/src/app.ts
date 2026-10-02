@@ -5,7 +5,7 @@ import { assertNoClientSuppliedAuthority, assertOpaqueCapacityWindowId, assertOp
 import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
-import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
+import { advanceContractLifecycleStatus, createContractFromOffer, listPortalContracts, listVisibleContracts, parseContractListQuery, readContract, readPortalContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
 import { createCapacityWindowRecord, decideCapacityPromise, listVisibleCapacityWindows, parseCapacityListQuery, readCapacityWindow } from './capacity.ts';
@@ -322,6 +322,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const projection = await readPortalOffer(options.store, pathOfferId(c.req.param('offerId')), actor.sub);
     if (!projection) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    return c.json(projection);
+  });
+
+  app.get('/v1/portal/contracts', async c => {
+    const actor = await requireActor(c, options.authenticator, 'contracts:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseContractListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      status: c.req.query('status'),
+    });
+    const page = await listPortalContracts(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/contracts/:contractId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'contracts:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalContract(options.store, pathContractId(c.req.param('contractId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
     return c.json(projection);
   });
 

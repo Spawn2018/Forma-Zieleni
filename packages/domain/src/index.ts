@@ -174,8 +174,9 @@ export {
   assertOpaqueContractId,
   createContract,
   nextContractLifecycleStatus,
+  projectContractForPortal,
 } from './contract.ts';
-export type { Contract, ContractStatus } from './contract.ts';
+export type { Contract, ContractStatus, PortalContractProjection } from './contract.ts';
 export {
   PAYMENT_INSTALLMENT_STATUSES,
   assertOpaquePaymentInstallmentId,

@@ -989,6 +989,24 @@ Portal and anonymous callers receive 401 or 403. Idempotent create.
 The decision route does not write a promise.
 Next: none.
 
+### PORTAL-CONTRACT-VIEW
+
+Dependencies: PORTAL-PROJECT-VIEW, CRM-CONTRACT-DOMAIN.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: an authenticated portal client can list and read the status of
+their own contract. Visibility follows the linked offer client subject.
+Another client receives 404. Staff and anonymous callers cannot use the
+portal route. The projection is id, offer id, status, and createdAt.
+No price, signing, QES, payment, or provider.
+Tests: `packages/domain/contract.test.mjs`,
+`apps/api/src/http.test.mjs`, `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-CONTRACT-VIEW.md`](./PORTAL-CONTRACT-VIEW.md).
+Security: `contracts:portal-read` is a portal capability. The decision
+does not write a promise and does not advance lifecycle.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

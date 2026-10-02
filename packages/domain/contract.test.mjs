@@ -8,6 +8,7 @@ import {
   assertOpaqueContractId,
   createContract,
   nextContractLifecycleStatus,
+  projectContractForPortal,
 } from './src/contract.ts';
 import { createSignatureRequest, lockContractVersion } from './src/signing.ts';
 
@@ -31,6 +32,28 @@ test('opaque contract identifiers reject sequential or prefixed guessable values
   for (const id of ['1', 'contract1', 'CONTRACT99', 'short']) {
     assert.throws(() => assertOpaqueContractId(id), /CONTRACT_ID_GUESSABLE/);
   }
+});
+
+test('portal contract projection follows the offer subject and omits commercial fields', () => {
+  const lead = qualifyLead(createLead('ld8k2n4p6q8r0s2t', 'www', capture, at), false, '2026-09-22T12:05:00.000Z');
+  const opportunity = createOpportunity('p9k2n4p6q8r0s2t4', lead, '2026-09-22T12:10:00.000Z');
+  const offer = createOffer('f9k2n4p6q8r0s2t4', opportunity, '2026-09-22T12:15:00.000Z', 'portal-ola');
+  const contract = createContract('c9k2n4p6q8r0s2t4', offer, '2026-09-22T12:20:00.000Z');
+  const mine = projectContractForPortal(contract, offer, 'portal-ola');
+  assert.deepEqual(mine, {
+    id: contract.id,
+    offerId: offer.id,
+    status: 'draft',
+    createdAt: contract.createdAt,
+  });
+  assert.equal(Object.hasOwn(mine, 'updatedAt'), false);
+  assert.equal(Object.hasOwn(mine, 'amount'), false);
+  assert.equal(Object.hasOwn(mine, 'signing'), false);
+  assert.equal(projectContractForPortal(contract, offer, 'portal-other'), null);
+  assert.equal(projectContractForPortal(contract, null, 'portal-ola'), null);
+  const staffOffer = createOffer('g9k2n4p6q8r0s2t5', opportunity, '2026-09-22T12:16:00.000Z');
+  const hidden = createContract('d9k2n4p6q8r0s2t5', staffOffer, '2026-09-22T12:21:00.000Z');
+  assert.equal(projectContractForPortal(hidden, staffOffer, 'portal-ola'), null);
 });
 
 test('contract is created only from a draft offer and owns its status', () => {

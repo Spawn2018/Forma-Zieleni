@@ -4,9 +4,11 @@ import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
   classifyPortalSession,
+  fetchPortalContracts,
   fetchPortalFiles,
   fetchPortalOffers,
   fetchPortalProjects,
+  mapPortalContractPage,
   mapPortalFilePage,
   mapPortalOfferPage,
   mapPortalProjectPage,
@@ -46,6 +48,7 @@ const commercialLeak = [
 const emptySignedIn = {
   state: 'signed-in',
   offers: { status: 'empty' },
+  contracts: { status: 'empty' },
   projects: { status: 'empty' },
   files: { status: 'empty' },
 };
@@ -81,6 +84,7 @@ test('portal session classification enforces the portal trust zone', async () =>
   const signedIn = renderToStaticMarkup(portalShell(emptySignedIn));
   assert.match(signedIn, /Jesteś zalogowany/);
   assert.match(signedIn, /Brak pozycji do pokazania/);
+  assert.match(signedIn, /Brak umów do pokazania/);
   assert.match(signedIn, /Brak projektów do pokazania/);
   assert.match(signedIn, /Brak plików do pokazania/);
   for (const phrase of commercialLeak) {
@@ -107,6 +111,7 @@ test('signed-in portal renders client-safe offer projection without price or ter
   const ready = renderToStaticMarkup(portalShell({
     state: 'signed-in',
     offers: mapped,
+    contracts: { status: 'empty' },
     projects: { status: 'empty' },
     files: { status: 'empty' },
   }));
@@ -224,6 +229,7 @@ test('signed-in portal renders client-safe project and file projections without 
   const html = renderToStaticMarkup(portalShell({
     state: 'signed-in',
     offers: { status: 'empty' },
+    contracts: { status: 'empty' },
     projects,
     files,
   }));
@@ -307,6 +313,60 @@ test('signed-in portal renders client-safe project and file projections without 
   }
 });
 
+test('signed-in portal renders client-safe contract status without price or signing', async () => {
+  assert.deepEqual(mapPortalContractPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapPortalContractPage({ items: [{ id: 'x', amount: 1 }] }), { status: 'error' });
+  assert.deepEqual(mapPortalContractPage({ items: [{ id: 'x', offerId: 'y', status: 'draft', createdAt: 't', signing: true }] }), { status: 'error' });
+  const mapped = mapPortalContractPage({
+    items: [{
+      id: 'ct8k2n4p6q8r0s2t',
+      offerId: 'of8k2n4p6q8r0s2t',
+      status: 'sent',
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const ready = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    contracts: mapped,
+  }));
+  assert.match(ready, /Twoje umowy/);
+  assert.match(ready, /ct8k2n4p6q8r0s2t/);
+  assert.match(ready, /sent/);
+  for (const phrase of commercialLeak) {
+    assert.equal(ready.toLowerCase().includes(phrase), false, phrase);
+  }
+  assert.equal(ready.toLowerCase().includes('qes'), false);
+  assert.equal(ready.toLowerCase().includes('signing'), false);
+
+  const fetched = await fetchPortalContracts({
+    base: 'http://portal.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/portal\/contracts\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      assert.equal(init?.headers?.cookie, 'better-auth.session_token=abc');
+      return new Response(JSON.stringify({
+        items: [{
+          id: 'ct8k2n4p6q8r0s2u',
+          offerId: 'of8k2n4p6q8r0s2u',
+          status: 'draft',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        }],
+        nextCursor: null,
+      }), { status: 200 });
+    },
+  });
+  assert.equal(fetched.status, 'ready');
+  if (fetched.status === 'ready') assert.equal(fetched.items[0].id, 'ct8k2n4p6q8r0s2u');
+
+  const denied = await fetchPortalContracts({
+    base: 'http://portal.test',
+    fetchImpl: async () => new Response('', { status: 403 }),
+  });
+  assert.deepEqual(denied, { status: 'forbidden' });
+});
+
 test('the route module keeps an error boundary and does not invent CRM facts', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
@@ -314,6 +374,7 @@ test('the route module keeps an error boundary and does not invent CRM facts', (
   assert.match(home, /portalShell/);
   assert.match(home, /resolvePortalHome/);
   assert.match(home, /fetchPortalOffers/);
+  assert.match(home, /fetchPortalContracts/);
   assert.match(home, /fetchPortalProjects/);
   assert.match(home, /fetchPortalFiles/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);

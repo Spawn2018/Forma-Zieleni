@@ -17,6 +17,19 @@ export type PortalOfferList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalContractRow = {
+  id: string;
+  offerId: string;
+  status: string;
+  createdAt: string;
+};
+
+export type PortalContractList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalContractRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type PortalProjectRow = {
   id: string;
   contractId: string;
@@ -51,6 +64,7 @@ export type PortalHome =
   | {
       state: 'signed-in';
       offers: PortalOfferList;
+      contracts: PortalContractList;
       projects: PortalProjectList;
       files: PortalFileList;
     };
@@ -110,6 +124,52 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
       opportunityId: offer.opportunityId,
       status: offer.status,
       createdAt: offer.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+type ContractApiItem = {
+  id?: unknown;
+  offerId?: unknown;
+  status?: unknown;
+  createdAt?: unknown;
+  amount?: unknown;
+  payment?: unknown;
+  signing?: unknown;
+  qes?: unknown;
+  provider?: unknown;
+  clientSubject?: unknown;
+  updatedAt?: unknown;
+};
+
+export function mapPortalContractPage(body: unknown): PortalContractList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalContractRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const contract = item as ContractApiItem;
+    if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
+    if (typeof contract.status !== 'string' || typeof contract.createdAt !== 'string') return { status: 'error' };
+    if (
+      Object.hasOwn(contract, 'amount')
+      || Object.hasOwn(contract, 'payment')
+      || Object.hasOwn(contract, 'signing')
+      || Object.hasOwn(contract, 'qes')
+      || Object.hasOwn(contract, 'provider')
+      || Object.hasOwn(contract, 'clientSubject')
+      || Object.hasOwn(contract, 'updatedAt')
+    ) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: contract.id,
+      offerId: contract.offerId,
+      status: contract.status,
+      createdAt: contract.createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -238,6 +298,20 @@ export async function fetchPortalOffers(input: {
   });
 }
 
+export async function fetchPortalContracts(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalContractList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/contracts?limit=50',
+    map: mapPortalContractPage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
 export async function fetchPortalProjects(input: {
   base: string;
   cookie?: string;
@@ -268,11 +342,12 @@ export async function fetchPortalFiles(input: {
 
 /**
  * Resolve portal home from optional Core API session probe + projections.
- * Unconfigured probe → signed-out (truthful). Never invents offers/projects/files.
+ * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, or files.
  */
 export async function resolvePortalHome(input: {
   probe?: () => Promise<PortalSessionActor | null>;
   loadOffers?: () => Promise<PortalOfferList>;
+  loadContracts?: () => Promise<PortalContractList>;
   loadProjects?: () => Promise<PortalProjectList>;
   loadFiles?: () => Promise<PortalFileList>;
 }): Promise<PortalHome> {
@@ -280,12 +355,13 @@ export async function resolvePortalHome(input: {
   try {
     const classified = classifyPortalSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    const [offers, projects, files] = await Promise.all([
+    const [offers, contracts, projects, files] = await Promise.all([
       input.loadOffers ? input.loadOffers() : Promise.resolve({ status: 'empty' as const }),
+      input.loadContracts ? input.loadContracts() : Promise.resolve({ status: 'empty' as const }),
       input.loadProjects ? input.loadProjects() : Promise.resolve({ status: 'empty' as const }),
       input.loadFiles ? input.loadFiles() : Promise.resolve({ status: 'empty' as const }),
     ]);
-    return { state: 'signed-in', offers, projects, files };
+    return { state: 'signed-in', offers, contracts, projects, files };
   } catch {
     return { state: 'signed-out' };
   }
@@ -334,6 +410,38 @@ function offerListNode(offers: PortalOfferList): ReactNode {
             'p',
             { className: 'portal-offer-meta' },
             [offer.id, ' · ', offer.status, ' · ', offer.createdAt].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function contractListNode(contracts: PortalContractList): ReactNode {
+  if (contracts.status !== 'ready') {
+    return listStateNode(
+      contracts,
+      'Brak umów do pokazania.',
+      'To konto nie może odczytać listy umów.',
+      'Listy umów nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-contracts', 'aria-label': 'Twoje umowy' },
+    createElement('h2', null, 'Twoje umowy'),
+    createElement(
+      'ul',
+      { className: 'portal-contract-list' },
+      ...contracts.items.map((contract) =>
+        createElement(
+          'li',
+          { key: contract.id, className: 'portal-contract' },
+          createElement(
+            'p',
+            { className: 'portal-contract-meta' },
+            [contract.id, ' · ', contract.status, ' · ', contract.createdAt].join(''),
           ),
         ),
       ),
@@ -414,8 +522,8 @@ function fileListNode(files: PortalFileList): ReactNode {
 }
 
 /**
- * Portal gate UI. Signed-in renders client-safe offer/project/file projections —
- * no price, terms, payment, binary write path, staff mutation, or invented rows.
+ * Portal gate UI. Signed-in renders client-safe offer, contract, project, and file
+ * projections — no price, terms, payment, signing, binary write path, staff mutation, or invented rows.
  */
 export function portalShell(home: PortalHome): ReactNode {
   if (home.state === 'signed-out') {
@@ -443,6 +551,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('h1', null, 'Portal klienta'),
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
+    contractListNode(home.contracts),
     projectListNode(home.projects),
     fileListNode(home.files),
   );

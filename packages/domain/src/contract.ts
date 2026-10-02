@@ -13,6 +13,14 @@ export type Contract = {
   updatedAt: string;
 };
 
+/** Fields a portal client may see. No price, signing, payment, or staff timestamps. */
+export type PortalContractProjection = {
+  id: string;
+  offerId: string;
+  status: ContractStatus;
+  createdAt: string;
+};
+
 const OPAQUE_ID = /^[a-z][a-z0-9]{15,63}$/;
 
 const LIFECYCLE_TRANSITIONS: Readonly<Partial<Record<ContractStatus, ContractStatus>>> = {
@@ -53,6 +61,25 @@ function assertNoForbiddenSurface(input: object): void {
       throw new Error('CONTRACT_SURFACE_FORBIDDEN');
     }
   }
+}
+
+/**
+ * Client-safe contract view. Visibility follows the linked offer's client subject.
+ * A missing offer or a different subject is absence, not a partial record.
+ */
+export function projectContractForPortal(
+  contract: Contract,
+  offer: Offer | null,
+  readerSubject: string,
+): PortalContractProjection | null {
+  if (!offer || offer.id !== contract.offerId) return null;
+  if (!offer.clientSubject || offer.clientSubject !== readerSubject) return null;
+  return {
+    id: contract.id,
+    offerId: contract.offerId,
+    status: contract.status,
+    createdAt: contract.createdAt,
+  };
 }
 
 export function createContract(id: string, offer: Offer, at: string): Contract {

@@ -1,5 +1,6 @@
 import type { Route } from './+types/home';
 import {
+  fetchPortalContracts,
   fetchPortalFiles,
   fetchPortalOffers,
   fetchPortalProjects,
@@ -30,6 +31,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<PortalHome>
     },
     async loadOffers() {
       return fetchPortalOffers({ base, cookie });
+    },
+    async loadContracts() {
+      return fetchPortalContracts({ base, cookie });
     },
     async loadProjects() {
       return fetchPortalProjects({ base, cookie });

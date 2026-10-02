@@ -122,7 +122,7 @@ export const EXPERIENCE_CONTRACTS = Object.freeze([
     userJob: 'See what is happening and complete the action that is actually available',
     workflowId: 'client-visibility',
     entryConditions: 'authenticated client session',
-    upstream: 'OFFER, PROJECT',
+    upstream: 'OFFER, CONTRACT, PROJECT',
     authz: 'client reads only their subject; staff use Admin',
     businessOutcome: 'client decisions are recorded once on Core API',
     uxOutcome: 'status, next action, and refusal of other clients files are visible',
@@ -131,7 +131,7 @@ export const EXPERIENCE_CONTRACTS = Object.freeze([
     pxi: { replay: 'OFF', pii: false, minimization: true, classes: ['human', 'technical'] },
     actions: [action('open-own-project', 'project.read', 'project state or an unauthorized empty state')],
     events: ['portal.projection.read'],
-    downstream: [down('PROJECT', 'read'), down('FILES', 'authorized read')],
+    downstream: [down('CONTRACT', 'status read'), down('PROJECT', 'read'), down('FILES', 'authorized read')],
   }),
   ux({
     id: 'ADMIN',

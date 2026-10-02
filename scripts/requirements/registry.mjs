@@ -497,6 +497,14 @@ row('FZ-REQ-PORTAL-007', 'Authenticated portal UI renders the client-safe Projec
   executableSlice: 'PORTAL-PROJECT-VIEW',
   executableWhenComplete: ['PORTAL-OFFER-VIEW', 'PORTAL-PROJECT-PROJECTION'],
 });
+row('FZ-REQ-PORTAL-008', 'An authenticated client can see the status of their own contract. Visibility follows the linked offer subject. No price, signing, or payment.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/contract.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Evidence: projectContractForPortal, GET /v1/portal/contracts, portal list. BOLA is 404. Staff routes stay forbidden.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-CONTRACT-VIEW',
+  executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'CRM-CONTRACT-DOMAIN'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

@@ -12,5 +12,6 @@ export type {
   ContractCreateBody,
   ContractLifecycleAdvanceBody,
   ContractRecord,
+  PortalContractProjection,
 } from './contract.ts';
 export type { ProjectCreateBody, ProjectRecord } from './project.ts';

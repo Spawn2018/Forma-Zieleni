@@ -22,4 +22,7 @@ test('shared ContractRecord fields stay aligned with the OpenAPI Contract schema
   assert.equal(Object.hasOwn(spec.components.schemas.ContractCreate.properties, 'status'), false);
   assert.deepEqual(spec.components.schemas.ContractLifecycleAdvance.required, ['status']);
   assert.equal(Object.hasOwn(spec.components.schemas.ContractLifecycleAdvance.properties, 'provider'), false);
+  assert.deepEqual(spec.components.schemas.PortalContractProjection.required, ['id', 'offerId', 'status', 'createdAt']);
+  assert.equal(Object.hasOwn(spec.components.schemas.PortalContractProjection.properties, 'updatedAt'), false);
+  assert.equal(Object.hasOwn(spec.components.schemas.PortalContractProjection.properties, 'amount'), false);
 });

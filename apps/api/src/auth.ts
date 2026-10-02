@@ -7,7 +7,7 @@ export type ClientId = (typeof CLIENTS)[number];
 export type LeadCapability = 'leads:read' | 'leads:qualify';
 export type OpportunityCapability = 'opportunities:read' | 'opportunities:create';
 export type OfferCapability = 'offers:read' | 'offers:create' | 'offers:portal-read';
-export type ContractCapability = 'contracts:read' | 'contracts:create' | 'contracts:lifecycle';
+export type ContractCapability = 'contracts:read' | 'contracts:create' | 'contracts:lifecycle' | 'contracts:portal-read';
 export type ProjectCapability = 'projects:read' | 'projects:create' | 'projects:portal-read';
 export type FileCapability = 'files:read' | 'files:create' | 'files:portal-read';
 export type MilestoneCapability = 'milestones:read' | 'milestones:create';
@@ -46,7 +46,7 @@ function isCapability(value: unknown): value is Capability {
   return value === 'leads:read' || value === 'leads:qualify'
     || value === 'opportunities:read' || value === 'opportunities:create'
     || value === 'offers:read' || value === 'offers:create' || value === 'offers:portal-read'
-    || value === 'contracts:read' || value === 'contracts:create' || value === 'contracts:lifecycle'
+    || value === 'contracts:read' || value === 'contracts:create' || value === 'contracts:lifecycle' || value === 'contracts:portal-read'
     || value === 'projects:read' || value === 'projects:create' || value === 'projects:portal-read'
     || value === 'files:read' || value === 'files:create' || value === 'files:portal-read'
     || value === 'milestones:read' || value === 'milestones:create'

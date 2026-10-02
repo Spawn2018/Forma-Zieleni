@@ -13,3 +13,11 @@ export type ContractCreateBody = {
 export type ContractLifecycleAdvanceBody = {
   status: ContractRecord['status'];
 };
+
+/** Client-safe contract view. No price, signing, payment, or staff timestamps. */
+export type PortalContractProjection = {
+  id: string;
+  offerId: string;
+  status: ContractRecord['status'];
+  createdAt: string;
+};

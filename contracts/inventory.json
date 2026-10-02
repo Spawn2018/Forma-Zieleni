@@ -26,6 +26,8 @@
     "GET /opportunities/{opportunityId}",
     "GET /payment-schedules",
     "GET /payment-schedules/{scheduleId}",
+    "GET /portal/contracts",
+    "GET /portal/contracts/{contractId}",
     "GET /portal/files",
     "GET /portal/files/{fileId}",
     "GET /portal/gardens",
@@ -171,6 +173,21 @@
     "offerId",
     "status",
     "createdAt",
+    "updatedAt"
+  ],
+  "requiredPortalContractFields": [
+    "id",
+    "offerId",
+    "status",
+    "createdAt"
+  ],
+  "forbiddenPortalContractFields": [
+    "amount",
+    "payment",
+    "signing",
+    "qes",
+    "provider",
+    "clientSubject",
     "updatedAt"
   ],
   "forbiddenContractFields": [

@@ -275,7 +275,7 @@ function journey(id, capability, requirement, workflow, activation) {
 export const BUSINESS_RULES = Object.freeze([
   { id: 'authz', owner: 'packages/domain', markers: ['decideDraftRead', 'canSee'] },
   { id: 'offer-lifecycle', owner: 'packages/domain', markers: ['createOffer'] },
-  { id: 'portal-visibility', owner: 'packages/domain', markers: ['projectOfferForPortal'] },
+  { id: 'portal-visibility', owner: 'packages/domain', markers: ['projectOfferForPortal', 'projectContractForPortal'] },
   { id: 'lead-qualify', owner: 'packages/domain', markers: ['qualifyLead'] },
   { id: 'contract-lifecycle', owner: 'packages/domain', markers: ['createContract'] },
   { id: 'project-activation', owner: 'packages/domain', markers: ['createProject'] },

@@ -40,6 +40,10 @@ test('breaking-change inventory of lead paths and required fields remains exact'
     assert.equal(Object.hasOwn(spec.components.schemas.OfferCreate.properties, field), false);
   }
   assert.deepEqual(spec.components.schemas.Contract.required, inventory.requiredContractFields);
+  assert.deepEqual(spec.components.schemas.PortalContractProjection.required, inventory.requiredPortalContractFields);
+  for (const field of inventory.forbiddenPortalContractFields) {
+    assert.equal(Object.hasOwn(spec.components.schemas.PortalContractProjection.properties, field), false);
+  }
   for (const field of inventory.forbiddenContractFields) {
     assert.equal(Object.hasOwn(spec.components.schemas.Contract.properties, field), false);
     assert.equal(Object.hasOwn(spec.components.schemas.ContractCreate.properties, field), false);
@@ -109,6 +113,8 @@ test('mutations require idempotency and public capture has no bearer requirement
     '#/components/parameters/IdempotencyKey',
     '#/components/parameters/RequestId',
   ]);
+  assert.deepEqual(spec.paths['/portal/contracts'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/portal/contracts/{contractId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/projects'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/projects/{projectId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/files'].get.security, [{ bearerAuth: [] }]);

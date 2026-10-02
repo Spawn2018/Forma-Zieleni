@@ -1,4 +1,4 @@
-import { advanceContractLifecycle, createContract, type Contract, type ContractStatus } from '@forma-zieleni/domain';
+import { advanceContractLifecycle, createContract, projectContractForPortal, type Contract, type ContractStatus, type PortalContractProjection } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
 import { newContractId, newOpaqueId } from './ids.ts';
@@ -176,6 +176,53 @@ export async function advanceContractLifecycleStatus(
 
 export async function readContract(store: LeadStore, id: string): Promise<Contract | null> {
   return store.transaction(tx => tx.findContract(id));
+}
+
+const PORTAL_LIST_CAP = 100;
+
+/**
+ * Portal list loads at most 100 contracts, then projects each through its offer.
+ * The cap keeps the offer lookup bounded. Visibility is the offer client subject.
+ */
+export async function listPortalContracts(
+  store: LeadStore,
+  readerSubject: string,
+  query: ContractListQuery,
+): Promise<{ items: PortalContractProjection[]; nextCursor: string | null }> {
+  const rows = await store.transaction(async tx => {
+    const contracts = await tx.listContracts({ ...query, limit: PORTAL_LIST_CAP });
+    const projected: { view: PortalContractProjection; stamp: string }[] = [];
+    for (const contract of contracts) {
+      const offer = await tx.findOffer(contract.offerId);
+      const view = projectContractForPortal(contract, offer, readerSubject);
+      if (!view) continue;
+      projected.push({
+        view,
+        stamp: query.sort.includes('updatedAt') ? contract.updatedAt : contract.createdAt,
+      });
+    }
+    return projected;
+  });
+  const window = rows.slice(0, query.limit + 1);
+  const page = window.slice(0, query.limit);
+  const last = page.at(-1);
+  const nextCursor = window.length > query.limit && last
+    ? encodeCursor(query.sort, last.stamp, last.view.id)
+    : null;
+  return { items: page.map(item => item.view), nextCursor };
+}
+
+export async function readPortalContract(
+  store: LeadStore,
+  id: string,
+  readerSubject: string,
+): Promise<PortalContractProjection | null> {
+  return store.transaction(async tx => {
+    const contract = await tx.findContract(id);
+    if (!contract) return null;
+    const offer = await tx.findOffer(contract.offerId);
+    return projectContractForPortal(contract, offer, readerSubject);
+  });
 }
 
 export async function listVisibleContracts(
