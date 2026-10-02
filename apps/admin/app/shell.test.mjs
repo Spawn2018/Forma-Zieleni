@@ -19,6 +19,7 @@ import {
   createAdminOpportunity,
   createAdminFile,
   createAdminGarden,
+  createAdminDecisionLogEntry,
   createAdminSiteObservation,
   createAdminMilestone,
   createAdminProject,
@@ -27,6 +28,7 @@ import {
   fetchAdminFiles,
   fetchAdminLeads,
   fetchAdminGardens,
+  fetchAdminDecisionLog,
   fetchAdminSiteIntelligence,
   fetchAdminMilestones,
   fetchAdminOffers,
@@ -35,6 +37,7 @@ import {
   mapContractPage,
   mapFilePage,
   mapLeadPage,
+  mapDecisionLogPage,
   mapAdminSitePage,
   mapGardenPage,
   mapMilestonePage,
@@ -62,6 +65,7 @@ const emptyCrm = {
   milestones: { status: 'empty' },
   gardens: { status: 'empty' },
   siteIntelligence: { status: 'empty' },
+  decisionLog: { status: 'empty' },
   proposals: { status: 'empty' },
 };
 
@@ -127,6 +131,8 @@ test('admin session classification enforces the admin trust zone', async () => {
   assert.match(signedIn, /Utwórz ogród/);
   assert.match(signedIn, /Brak ustaleń o terenie do pokazania/);
   assert.match(signedIn, /Zapisz obserwację/);
+  assert.match(signedIn, /Brak wpisów w dzienniku decyzji/);
+  assert.match(signedIn, /Zapisz wpis/);
   assert.match(signedIn, /Utwórz plik/);
   for (const phrase of crmLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
@@ -137,11 +143,11 @@ test('admin session classification enforces the admin trust zone', async () => {
 
 test('signed-in lead list renders empty, error, forbidden, and real rows without inventing customers', () => {
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, siteIntelligence: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'error' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, siteIntelligence: { status: 'empty' }, decisionLog: { status: 'empty' }, proposals: { status: 'empty' } })),
     /Listy leadów nie udało się pobrać/,
   );
   assert.match(
-    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, siteIntelligence: { status: 'empty' }, proposals: { status: 'empty' } })),
+    renderToStaticMarkup(adminShell({ state: 'signed-in', leads: { status: 'forbidden' }, opportunities: { status: 'empty' }, offers: { status: 'empty' }, contracts: { status: 'empty' }, projects: { status: 'empty' }, files: { status: 'empty' }, paymentSchedules: { status: 'empty' }, capacityWindows: { status: 'empty' }, signingSandbox: { status: 'empty' }, milestones: { status: 'empty' }, gardens: { status: 'empty' }, siteIntelligence: { status: 'empty' }, decisionLog: { status: 'empty' }, proposals: { status: 'empty' } })),
     /nie może odczytać listy leadów/,
   );
   const ready = renderToStaticMarkup(
@@ -218,6 +224,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       milestones: { status: 'empty' },
       gardens: { status: 'empty' },
       siteIntelligence: { status: 'empty' },
+      decisionLog: { status: 'empty' },
       proposals: { status: 'empty' },
     }),
   );
@@ -863,6 +870,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /createAdminGarden/);
   assert.match(home, /fetchAdminSiteIntelligence/);
   assert.match(home, /createAdminSiteObservation/);
+  assert.match(home, /fetchAdminDecisionLog/);
+  assert.match(home, /createAdminDecisionLogEntry/);
   assert.match(home, /createAdminProject/);
   assert.match(home, /fetchAdminFiles/);
   assert.match(home, /createAdminFile/);
@@ -918,6 +927,86 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
     assert.equal(home.toLowerCase().includes(phrase), false, phrase);
     assert.equal(root.toLowerCase().includes(phrase), false, phrase);
   }
+});
+
+test('staff decision log lists a change and refuses a payment field', async () => {
+  assert.deepEqual(mapDecisionLogPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapDecisionLogPage({
+    items: [{
+      id: 'dl8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      kind: 'decision',
+      summary: 'Sadzimy żywopłot wzdłuż granicy.',
+      recordedByActorId: 'ac8k2n4p6q8r0s2t',
+      relatedMilestoneId: null,
+      createdAt: '2026-09-24T12:00:00.000Z',
+      payment: 1,
+    }],
+  }), { status: 'error' });
+  const mapped = mapDecisionLogPage({
+    items: [{
+      id: 'dl8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      kind: 'change_order',
+      summary: 'Sadzimy żywopłot wzdłuż granicy.',
+      recordedByActorId: 'ac8k2n4p6q8r0s2t',
+      relatedMilestoneId: null,
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: mapped,
+  }));
+  assert.match(html, /Dziennik decyzji/);
+  assert.match(html, /Sadzimy żywopłot wzdłuż granicy/);
+  assert.match(html, /zmiana zakresu/);
+  assert.match(html, /bez kamienia milowego/);
+  assert.match(html, /Zapisz wpis/);
+  assert.equal(html.includes('ac8k2n4p6q8r0s2t'), false);
+  const fetched = await fetchAdminDecisionLog({
+    base: 'http://admin.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/decision-log\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      return new Response(JSON.stringify({ items: [], nextCursor: null }), { status: 200 });
+    },
+  });
+  assert.deepEqual(fetched, { status: 'empty' });
+  const created = await createAdminDecisionLogEntry({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    kind: 'decision',
+    summary: 'Sadzimy żywopłot wzdłuż granicy.',
+    idempotencyKey: 'dl-1',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/decision-log$/);
+      assert.equal(init?.method, 'POST');
+      const body = JSON.parse(String(init?.body));
+      assert.deepEqual(body, {
+        projectId: 'pr8k2n4p6q8r0s2t',
+        kind: 'decision',
+        summary: 'Sadzimy żywopłot wzdłuż granicy.',
+      });
+      return new Response('{}', { status: 201 });
+    },
+  });
+  assert.deepEqual(created, { ok: true });
+  const rejected = await createAdminDecisionLogEntry({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    kind: 'payment',
+    summary: 'nie',
+    idempotencyKey: 'dl-2',
+    fetchImpl: async () => {
+      assert.fail('unknown kind must not call Core API');
+      return new Response('{}', { status: 500 });
+    },
+  });
+  assert.deepEqual(rejected, { ok: false, reason: 'error' });
 });
 
 test('staff site UI lists rules codes and records one synthetic observation', async () => {

@@ -546,6 +546,12 @@ row('FZ-REQ-ADMIN-014', 'Staff can list site findings and record one synthetic n
   executableSlice: 'ADMIN-SITE-STAFF',
   executableWhenComplete: ['SITEINTEL-HTTP', 'ADMIN-CRM-PROJECT'],
 });
+row('FZ-REQ-ADMIN-015', 'Staff can list and create decision-log entries in apps/admin through the existing Core API. No payment, signing, price, or contact fields. The recording actor id stays off the list.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI lists GET /v1/decision-log and posts project, kind, and summary to POST /v1/decision-log. Optional related milestone id. Actor id is not rendered.', {
+  productCapability: 'ADMIN',
+  depth: 'DECISION_LOG_STAFF',
+  executableSlice: 'ADMIN-DECISION-LOG',
+  executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PROJECT-MILESTONE-DOMAIN'],
+});
 row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', 'Evidence: OpenAPI + HTTP create/list/get with BOLA portal projection. gardens:* capabilities. Project deliver unlocks linkage. No twin/XR/plant advice.', {
   blockerClass: 'INTERNAL',
   productCapability: 'GARDENOS',

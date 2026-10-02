@@ -179,6 +179,24 @@ export type AdminSiteList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const DECISION_LOG_KINDS = ['decision', 'change_order'] as const;
+
+export type DecisionLogKind = (typeof DECISION_LOG_KINDS)[number];
+
+export type AdminDecisionLogRow = {
+  id: string;
+  projectId: string;
+  kind: DecisionLogKind;
+  summary: string;
+  relatedMilestoneId: string | null;
+};
+
+export type AdminDecisionLogList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly AdminDecisionLogRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type AdminSigningSandbox =
   | { status: 'empty' }
   | { status: 'ready'; contractId: string; envelopeStatus: 'pending' | 'completed' }
@@ -202,6 +220,7 @@ export type AdminHome =
       milestones: AdminMilestoneList;
       gardens: AdminGardenList;
       siteIntelligence: AdminSiteList;
+      decisionLog: AdminDecisionLogList;
       proposals: AdminProposalList;
     };
 
@@ -1059,6 +1078,111 @@ export async function createAdminSiteObservation(input: {
   }
 }
 
+const DECISION_LOG_FORBIDDEN = ['payment', 'provider', 'signing', 'price', 'email', 'phone'] as const;
+
+function decisionLogKind(value: unknown): DecisionLogKind | null {
+  if (value === 'decision' || value === 'change_order') return value;
+  return null;
+}
+
+export function mapDecisionLogPage(body: unknown): AdminDecisionLogList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: AdminDecisionLogRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const entry = item as {
+      id?: unknown;
+      projectId?: unknown;
+      kind?: unknown;
+      summary?: unknown;
+      recordedByActorId?: unknown;
+      relatedMilestoneId?: unknown;
+    };
+    const kind = decisionLogKind(entry.kind);
+    if (typeof entry.id !== 'string' || typeof entry.projectId !== 'string' || !kind) return { status: 'error' };
+    if (typeof entry.summary !== 'string' || entry.summary.trim().length === 0) return { status: 'error' };
+    if (typeof entry.recordedByActorId !== 'string') return { status: 'error' };
+    if (entry.relatedMilestoneId !== null && typeof entry.relatedMilestoneId !== 'string') return { status: 'error' };
+    if (DECISION_LOG_FORBIDDEN.some((key) => Object.hasOwn(entry, key))) return { status: 'error' };
+    rows.push({
+      id: entry.id,
+      projectId: entry.projectId,
+      kind,
+      summary: entry.summary,
+      relatedMilestoneId: entry.relatedMilestoneId,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+export async function fetchAdminDecisionLog(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<AdminDecisionLogList> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL('/v1/decision-log?limit=50', input.base), {
+      credentials: 'include',
+      headers,
+    });
+    if (response.status === 401 || response.status === 403) return { status: 'forbidden' };
+    if (!response.ok) return { status: 'error' };
+    return mapDecisionLogPage(await response.json());
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export async function createAdminDecisionLogEntry(input: {
+  base: string;
+  projectId: string;
+  kind: string;
+  summary: string;
+  relatedMilestoneId?: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  if (!decisionLogKind(input.kind)) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const body: {
+      projectId: string;
+      kind: string;
+      summary: string;
+      relatedMilestoneId?: string;
+    } = {
+      projectId: input.projectId,
+      kind: input.kind,
+      summary: input.summary,
+    };
+    if (input.relatedMilestoneId) body.relatedMilestoneId = input.relatedMilestoneId;
+    const response = await fetchImpl(new URL('/v1/decision-log', input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: JSON.stringify(body),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export async function createAdminProject(input: {
   base: string;
   contractId: string;
@@ -1338,6 +1462,7 @@ export async function resolveAdminHome(input: {
   loadMilestones?: () => Promise<AdminMilestoneList>;
   loadGardens?: () => Promise<AdminGardenList>;
   loadSiteIntelligence?: () => Promise<AdminSiteList>;
+  loadDecisionLog?: () => Promise<AdminDecisionLogList>;
   loadProposals?: () => Promise<AdminProposalList>;
 }): Promise<AdminHome> {
   if (!input.probe) return { state: 'signed-out' };
@@ -1368,6 +1493,9 @@ export async function resolveAdminHome(input: {
     const siteIntelligence = input.loadSiteIntelligence
       ? await input.loadSiteIntelligence()
       : { status: 'empty' as const };
+    const decisionLog = input.loadDecisionLog
+      ? await input.loadDecisionLog()
+      : { status: 'empty' as const };
     const proposals = input.loadProposals
       ? await input.loadProposals()
       : { status: 'empty' as const };
@@ -1385,6 +1513,7 @@ export async function resolveAdminHome(input: {
       milestones,
       gardens,
       siteIntelligence,
+      decisionLog,
       proposals,
     };
   } catch {
@@ -1955,6 +2084,106 @@ function createSiteObservationForm(): ReactNode {
       { type: 'submit', name: 'intent', value: 'create-site-observation' },
       'Zapisz obserwację',
     ),
+  );
+}
+
+function decisionKindLabel(kind: DecisionLogKind): string {
+  if (kind === 'decision') return 'decyzja';
+  if (kind === 'change_order') return 'zmiana zakresu';
+  const unreachable: never = kind;
+  return unreachable;
+}
+
+function decisionLogNode(entries: AdminDecisionLogList): ReactNode {
+  if (entries.status === 'empty') {
+    return createElement('p', null, 'Brak wpisów w dzienniku decyzji.');
+  }
+  if (entries.status === 'forbidden') {
+    return createElement('p', null, 'To konto nie może odczytać dziennika decyzji.');
+  }
+  if (entries.status === 'error') {
+    return createElement('p', null, 'Dziennika decyzji nie udało się pobrać. Odśwież stronę.');
+  }
+  return createElement(
+    'section',
+    { className: 'admin-decision-log', 'aria-label': 'Dziennik decyzji' },
+    createElement('h2', null, 'Dziennik decyzji'),
+    createElement(
+      'ul',
+      { className: 'admin-decision-log-list' },
+      ...entries.items.map((entry) =>
+        createElement(
+          'li',
+          { key: entry.id, className: 'admin-decision-log-entry' },
+          createElement('p', { className: 'admin-decision-log-summary' }, entry.summary),
+          createElement(
+            'p',
+            { className: 'admin-decision-log-meta' },
+            [
+              decisionKindLabel(entry.kind),
+              ' · projekt ',
+              entry.projectId,
+              ' · ',
+              entry.relatedMilestoneId ?? 'bez kamienia milowego',
+            ].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function createDecisionLogForm(): ReactNode {
+  return createElement(
+    'form',
+    { method: 'post', className: 'admin-create-decision' },
+    createElement('h2', null, 'Nowy wpis'),
+    createElement(
+      'label',
+      { className: 'admin-create-decision-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'projectId',
+        required: true,
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-decision-kind' },
+      'Rodzaj',
+      createElement(
+        'select',
+        { name: 'kind', required: true, defaultValue: 'decision' },
+        createElement('option', { value: 'decision' }, 'decyzja'),
+        createElement('option', { value: 'change_order' }, 'zmiana zakresu'),
+      ),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-decision-summary' },
+      'Treść',
+      createElement('textarea', {
+        name: 'summary',
+        required: true,
+        maxLength: 2000,
+        rows: 3,
+      }),
+    ),
+    createElement(
+      'label',
+      { className: 'admin-create-decision-milestone' },
+      'Id kamienia milowego',
+      createElement('input', {
+        type: 'text',
+        name: 'relatedMilestoneId',
+        autoComplete: 'off',
+        spellCheck: false,
+      }),
+    ),
+    createElement('button', { type: 'submit', name: 'intent', value: 'create-decision-log' }, 'Zapisz wpis'),
   );
 }
 
@@ -2542,6 +2771,8 @@ export function adminShell(home: AdminHome): ReactNode {
     createGardenForm(),
     siteListNode(home.siteIntelligence),
     createSiteObservationForm(),
+    decisionLogNode(home.decisionLog),
+    createDecisionLogForm(),
     fileListNode(home.files),
     createFileForm(),
   );

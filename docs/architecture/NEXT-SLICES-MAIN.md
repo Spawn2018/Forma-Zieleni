@@ -1088,6 +1088,23 @@ Security: uses existing `siteintel:read` and `siteintel:create`.
 The admin does not invent codes or a second site store.
 Next: none.
 
+### ADMIN-DECISION-LOG
+
+Dependencies: ADMIN-MILESTONE-STAFF, PROJECT-MILESTONE-DOMAIN.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in admin lists decision-log entries that Core API
+already stores and can create one with a project id, a kind, and a
+summary. An optional milestone id can be attached. The recording actor
+id stays off the list. A payment, signing, price, email, or phone field
+is refused.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG.md`](./ADMIN-DECISION-LOG.md).
+Security: uses existing `milestones:read` and `milestones:create`.
+The admin does not invent a second decision store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

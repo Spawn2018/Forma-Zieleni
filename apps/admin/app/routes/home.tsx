@@ -13,6 +13,7 @@ import {
   capacityDecisionMessage,
   createAdminCapacityWindow,
   createAdminGarden,
+  createAdminDecisionLogEntry,
   createAdminSiteObservation,
   createAdminMilestone,
   createAdminPaymentSchedule,
@@ -22,6 +23,8 @@ import {
   fetchAdminContracts,
   fetchAdminFiles,
   fetchAdminGardens,
+  DECISION_LOG_KINDS,
+  fetchAdminDecisionLog,
   fetchAdminSiteIntelligence,
   fetchAdminLeads,
   fetchAdminMilestones,
@@ -102,6 +105,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     },
     async loadSiteIntelligence() {
       return fetchAdminSiteIntelligence({ base, cookie });
+    },
+    async loadDecisionLog() {
+      return fetchAdminDecisionLog({ base, cookie });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -312,6 +318,36 @@ export async function action({ request }: Route.ActionArgs) {
       scheduleId: scheduleId.trim(),
       installmentId: installmentId.trim(),
       status: status.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'create-decision-log') {
+    const projectId = form.get('projectId');
+    const kind = form.get('kind');
+    const summary = form.get('summary');
+    const relatedMilestoneId = form.get('relatedMilestoneId');
+    if (typeof projectId !== 'string' || !projectId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof kind !== 'string' || !(DECISION_LOG_KINDS as readonly string[]).includes(kind)) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof summary !== 'string' || !summary.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const milestone = typeof relatedMilestoneId === 'string' ? relatedMilestoneId.trim() : '';
+    const result = await createAdminDecisionLogEntry({
+      base,
+      projectId: projectId.trim(),
+      kind,
+      summary: summary.trim(),
+      ...(milestone ? { relatedMilestoneId: milestone } : {}),
       idempotencyKey: randomUUID(),
       cookie,
     });
