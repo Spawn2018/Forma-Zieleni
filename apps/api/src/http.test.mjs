@@ -37,7 +37,7 @@ const portalOther = {
   capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
 };
 
-function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
+function appFor(store = new MemoryLeadStore(), logs = [], limit = 100, sandboxWebhookSecret) {
   let tick = 0;
   return {
     store,
@@ -49,6 +49,7 @@ function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
       limiter: new WindowLimiter(limit, 60_000),
       addressOf: () => '198.51.100.10',
       now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
+      ...(sandboxWebhookSecret ? { sandboxWebhookSecret } : {}),
     }),
   };
 }
@@ -1207,6 +1208,72 @@ test('staff create, replace and transition payment schedules; portal cannot (BOL
     `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
     json({ status: 'due', chargeId: 'x' }, { ...bearer(staff), 'idempotency-key': 'pay-due-bad' }),
   )).status, 400);
+});
+
+test('przelewy24 sandbox intent and signed webhook record a due installment without a live charge', async () => {
+  const { createHmac } = await import('node:crypto');
+  const sandboxSecret = 'sandbox-webhook-secret';
+  const logs = [];
+  const { app } = appFor(undefined, logs, 100, sandboxSecret);
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sbx-opp-0001',
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sbx-offer-0001',
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sbx-contract-01',
+  }))).json();
+  const created = await app.request('/v1/payment-schedules', json({
+    contractId: contract.id,
+    currency: 'PLN',
+    installments: [{ sequence: 1, amountMinor: 15000 }],
+  }, { ...bearer(staff), 'idempotency-key': 'sbx-sched-0001' }));
+  const schedule = await created.json();
+  const installmentId = schedule.installments[0].id;
+  assert.equal((await app.request(
+    `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/transition`,
+    json({ status: 'due' }, { ...bearer(staff), 'idempotency-key': 'sbx-due-00001' }),
+  )).status, 200);
+
+  const intentPath = `/v1/payment-schedules/${schedule.id}/installments/${installmentId}/sandbox-intent`;
+  assert.equal((await app.request(intentPath, json({}, { ...bearer(portal), 'idempotency-key': 'sbx-intent-port' }))).status, 403);
+  const intentResponse = await app.request(intentPath, json({}, { ...bearer(staff), 'idempotency-key': 'sbx-intent-0001' }));
+  assert.equal(intentResponse.status, 201);
+  const intent = await intentResponse.json();
+  assert.equal(intent.provider, 'przelewy24-sandbox');
+  assert.equal(intent.status, 'pending');
+  assert.equal(Object.hasOwn(intent, 'secret'), false);
+
+  const raw = JSON.stringify({
+    intentId: intent.id,
+    scheduleId: intent.scheduleId,
+    installmentId: intent.installmentId,
+    status: 'confirmed',
+  });
+  const webhook = '/v1/payments/przelewy24/sandbox-webhook';
+  const forged = await app.request(webhook, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...bearer(portal), 'x-fz-sandbox-signature': 'deadbeef' },
+    body: raw,
+  });
+  assert.equal(forged.status, 401);
+  const stillDue = await (await app.request(`/v1/payment-schedules/${schedule.id}`, { headers: bearer(staff) })).json();
+  assert.equal(stillDue.installments[0].status, 'due');
+
+  const signature = createHmac('sha256', sandboxSecret).update(raw).digest('hex');
+  const confirmed = await app.request(webhook, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-fz-sandbox-signature': signature },
+    body: raw,
+  });
+  assert.equal(confirmed.status, 200);
+  assert.equal((await confirmed.json()).installments[0].status, 'recorded');
+  assert.equal(JSON.stringify(logs).includes(sandboxSecret), false);
 });
 
 test('staff can list and review synthetic approval proposals; portal cannot; spend override refused', async () => {

@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone, SiteIntelligenceRecord } from '@forma-zieleni/domain';
+import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone, SandboxPaymentIntent, SiteIntelligenceRecord } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -156,6 +156,20 @@ function toDecisionLog(row: Database['project_decision_log']): ProjectDecisionLo
     recordedByActorId: row.recorded_by_actor_id,
     relatedMilestoneId: row.related_milestone_id,
     createdAt: iso(row.created_at),
+  };
+}
+
+function toSandboxIntent(row: Database['sandbox_payment_intent']): SandboxPaymentIntent {
+  return {
+    id: row.id,
+    provider: 'przelewy24-sandbox',
+    scheduleId: row.schedule_id,
+    installmentId: row.installment_id,
+    amountMinor: row.amount_minor,
+    currency: row.currency,
+    status: row.status as SandboxPaymentIntent['status'],
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
   };
 }
 
@@ -566,6 +580,36 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toPaymentSchedule);
+  }
+
+  async insertSandboxIntent(intent: SandboxPaymentIntent): Promise<void> {
+    await this.trx.insertInto('sandbox_payment_intent').values({
+      id: intent.id,
+      schedule_id: intent.scheduleId,
+      installment_id: intent.installmentId,
+      amount_minor: intent.amountMinor,
+      currency: intent.currency,
+      status: intent.status,
+      created_at: new Date(intent.createdAt),
+      updated_at: new Date(intent.updatedAt),
+    }).execute();
+  }
+
+  async saveSandboxIntent(intent: SandboxPaymentIntent): Promise<void> {
+    await this.trx.updateTable('sandbox_payment_intent').set({
+      status: intent.status,
+      updated_at: new Date(intent.updatedAt),
+    }).where('id', '=', intent.id).execute();
+  }
+
+  async findSandboxIntent(id: string): Promise<SandboxPaymentIntent | null> {
+    const row = await this.trx.selectFrom('sandbox_payment_intent').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toSandboxIntent(row) : null;
+  }
+
+  async findSandboxIntentByInstallment(installmentId: string): Promise<SandboxPaymentIntent | null> {
+    const row = await this.trx.selectFrom('sandbox_payment_intent').selectAll().where('installment_id', '=', installmentId).executeTakeFirst();
+    return row ? toSandboxIntent(row) : null;
   }
 
   async insertGarden(garden: Garden): Promise<void> {

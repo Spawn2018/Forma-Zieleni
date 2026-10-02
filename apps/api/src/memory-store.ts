@@ -9,6 +9,7 @@ import type {
   Opportunity,
   OpportunityStatus,
   PaymentSchedule,
+  SandboxPaymentIntent,
   Project,
   ProjectDecisionLogEntry,
   ProjectFile,
@@ -45,6 +46,7 @@ type MemoryState = {
   milestones: ProjectMilestone[];
   decisionLog: ProjectDecisionLogEntry[];
   paymentSchedules: PaymentSchedule[];
+  sandboxIntents: SandboxPaymentIntent[];
   gardens: Garden[];
   siteIntelligence: SiteIntelligenceRecord[];
   idempotency: Map<string, StoredReply>;
@@ -71,6 +73,7 @@ export class MemoryLeadStore implements LeadStore {
     milestones: [],
     decisionLog: [],
     paymentSchedules: [],
+    sandboxIntents: [],
     gardens: [],
     siteIntelligence: [],
     idempotency: new Map(),
@@ -89,6 +92,7 @@ export class MemoryLeadStore implements LeadStore {
       milestones: this.state.milestones,
       decisionLog: this.state.decisionLog,
       paymentSchedules: this.state.paymentSchedules,
+      sandboxIntents: this.state.sandboxIntents,
       gardens: this.state.gardens,
       siteIntelligence: this.state.siteIntelligence,
       outbox: this.state.outbox,
@@ -107,6 +111,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.milestones = snapshot.milestones;
       this.state.decisionLog = snapshot.decisionLog;
       this.state.paymentSchedules = snapshot.paymentSchedules;
+      this.state.sandboxIntents = snapshot.sandboxIntents;
       this.state.gardens = snapshot.gardens;
       this.state.siteIntelligence = snapshot.siteIntelligence;
       this.state.outbox = snapshot.outbox;
@@ -437,6 +442,24 @@ class MemoryTx implements LeadTx {
       : 0;
     if (query.cursor && start < 0) return [];
     return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertSandboxIntent(intent: SandboxPaymentIntent): Promise<void> {
+    this.state.sandboxIntents.push(clone(intent));
+  }
+
+  async saveSandboxIntent(intent: SandboxPaymentIntent): Promise<void> {
+    const index = this.state.sandboxIntents.findIndex(item => item.id === intent.id);
+    if (index < 0) throw new Error('SANDBOX_INTENT_MISSING');
+    this.state.sandboxIntents[index] = clone(intent);
+  }
+
+  async findSandboxIntent(id: string): Promise<SandboxPaymentIntent | null> {
+    return clone(this.state.sandboxIntents.find(item => item.id === id) ?? null);
+  }
+
+  async findSandboxIntentByInstallment(installmentId: string): Promise<SandboxPaymentIntent | null> {
+    return clone(this.state.sandboxIntents.find(item => item.installmentId === installmentId) ?? null);
   }
 
   async insertGarden(garden: Garden): Promise<void> {

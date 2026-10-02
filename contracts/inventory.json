@@ -53,7 +53,9 @@
     "POST /offers",
     "POST /opportunities",
     "POST /payment-schedules",
+    "POST /payment-schedules/{scheduleId}/installments/{installmentId}/sandbox-intent",
     "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition",
+    "POST /payments/przelewy24/sandbox-webhook",
     "POST /projects",
     "POST /projects/{projectId}/deliver",
     "POST /site-intelligence",
@@ -95,6 +97,9 @@
       "Idempotency-Key"
     ],
     "PUT /payment-schedules/{scheduleId}": [
+      "Idempotency-Key"
+    ],
+    "POST /payment-schedules/{scheduleId}/installments/{installmentId}/sandbox-intent": [
       "Idempotency-Key"
     ],
     "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition": [

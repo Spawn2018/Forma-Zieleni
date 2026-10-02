@@ -26,7 +26,7 @@
     "Dependency-Check NOT_JUSTIFIED while pnpm audit covers npm (does not block product)",
     "Production security acceptance OPEN"
   ],
-  "nextSafeAction": "ADR-017 authorized the next wave. FZ-SIGN-1-REREAD COMPLETE: Documenso Community self-host, no QES. Next READY: PAY-ADAPTER-1 sandbox only. No live charge and no production keys.",
+  "nextSafeAction": "PAY-ADAPTER-1 COMPLETE. Sandbox Przelewy24 intent and signed webhook only. No live charge. Master product READY exhausted again. FZ-SIGN-1 adapter still not implemented. DANGEROUS unchanged.",
   "learningCheck": "NO MATERIAL LEARNING",
   "grok": "GROK channel=grok-cli INSTALLED AUTHENTICATED REACHABLE CALLABLE. Synthetic probe PASS 2026-09-22T15:07:07Z (GROK_PROBE_OK). Read-only confirmed. Trigger path scripts/fz-noc/policy.mjs + grok-callable.mjs. No repo mutation.",
   "evidencePaths": [

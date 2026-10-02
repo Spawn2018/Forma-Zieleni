@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import {
   assertOpaqueContractId,
   assertOpaquePaymentInstallmentId,
@@ -5,8 +6,12 @@ import {
   createPaymentSchedule,
   replacePaymentScheduleInstallments,
   transitionPaymentInstallment,
+  acceptSandboxWebhook,
+  assertOpaqueSandboxIntentId,
+  openSandboxIntent,
   type PaymentInstallmentStatus,
   type PaymentSchedule,
+  type SandboxPaymentIntent,
 } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
@@ -40,6 +45,15 @@ export function parsePaymentScheduleListQuery(input: {
     contractId,
     cursor: input.cursor ? decodeCursor(sort as SortField, input.cursor) : undefined,
   };
+}
+
+function sandboxSignatureMatches(rawBody: string, signature: string, secret: string): boolean {
+  if (secret.length < 16) throw new Error('SANDBOX_SECRET_UNCONFIGURED');
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
+  const left = Buffer.from(expected);
+  const right = Buffer.from(signature.trim().toLowerCase());
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
 }
 
 async function replayOrReserve(
@@ -82,6 +96,18 @@ function mapDomainError(error: unknown): never {
       throw new ApiFailure(409, 'PAYMENT_TRANSITION_FORBIDDEN', 'Installment transition is not allowed.');
     case 'PAYMENT_STATUS_INVALID':
       throw badRequest('PAYMENT_STATUS_INVALID', 'Installment status is not valid.');
+    case 'SANDBOX_SIGNATURE_INVALID':
+      throw new ApiFailure(401, 'SANDBOX_SIGNATURE_INVALID', 'Sandbox webhook signature is not valid.');
+    case 'SANDBOX_SECRET_UNCONFIGURED':
+      throw new ApiFailure(503, 'SANDBOX_SECRET_UNCONFIGURED', 'Sandbox webhook secret is not configured.');
+    case 'SANDBOX_INTENT_MISMATCH':
+      throw new ApiFailure(409, 'SANDBOX_INTENT_MISMATCH', 'Sandbox webhook does not match the intent.');
+    case 'SANDBOX_WEBHOOK_INVALID':
+      throw badRequest('SANDBOX_WEBHOOK_INVALID', 'Sandbox webhook body is not valid.');
+    case 'SANDBOX_PROVIDER_FORBIDDEN':
+      throw badRequest('SANDBOX_PROVIDER_FORBIDDEN', 'Only the sandbox provider is accepted.');
+    case 'SANDBOX_INTENT_ID_GUESSABLE':
+      throw badRequest('SANDBOX_INTENT_ID_INVALID', 'Sandbox intent id is not valid.');
     default:
       throw error;
   }
@@ -271,6 +297,117 @@ export async function transitionPaymentInstallmentRecord(
       at,
     );
     return schedule;
+  });
+}
+
+export async function createSandboxIntentRecord(
+  store: LeadStore,
+  scheduleId: string,
+  installmentId: string,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<SandboxPaymentIntent> {
+  const hash = requestHash({ scope: 'payment.sandbox-intent', scheduleId, installmentId });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'payment.sandbox-intent', idempotencyKey, hash);
+    if (replay) return replay.responseBody as SandboxPaymentIntent;
+    const schedule = await tx.findPaymentSchedule(scheduleId);
+    if (!schedule) throw new ApiFailure(404, 'PAYMENT_SCHEDULE_NOT_FOUND', 'Payment schedule was not found.');
+    const existing = await tx.findSandboxIntentByInstallment(installmentId);
+    if (existing) throw new ApiFailure(409, 'SANDBOX_INTENT_EXISTS', 'A sandbox intent already exists for this installment.');
+    const contract = await tx.findContract(schedule.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let intent: SandboxPaymentIntent;
+    try {
+      intent = openSandboxIntent(schedule, installmentId, assertOpaqueSandboxIntentId(newOpaqueId('b')), at);
+    } catch (error) {
+      mapDomainError(error);
+    }
+    await tx.insertSandboxIntent(intent);
+    await tx.insertAudit({
+      id: newOpaqueId('a'),
+      action: 'payment.sandbox_intent_created',
+      actorId: actor.actorId,
+      leadId: opportunity.leadId,
+      at,
+      metadata: {
+        status: intent.status,
+        contractId: contract.id,
+        scheduleId: schedule.id,
+        installmentId,
+      },
+    });
+    await tx.saveIdempotency(
+      'payment.sandbox-intent',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 201, responseBody: intent },
+      at,
+    );
+    return intent;
+  });
+}
+
+export async function acceptSandboxWebhookRecord(
+  store: LeadStore,
+  rawBody: string,
+  signature: string,
+  secret: string,
+  at: string,
+): Promise<PaymentSchedule> {
+  let intentId = '';
+  try {
+    const parsed = JSON.parse(rawBody) as { intentId?: unknown };
+    if (typeof parsed.intentId !== 'string') throw new Error('SANDBOX_WEBHOOK_INVALID');
+    intentId = parsed.intentId;
+  } catch (error) {
+    if (error instanceof Error && error.message === 'SANDBOX_WEBHOOK_INVALID') mapDomainError(error);
+    throw badRequest('SANDBOX_WEBHOOK_INVALID', 'Sandbox webhook body is not valid.');
+  }
+  return store.transaction(async tx => {
+    const intent = await tx.findSandboxIntent(intentId);
+    if (!intent) throw new ApiFailure(404, 'SANDBOX_INTENT_NOT_FOUND', 'Sandbox intent was not found.');
+    const schedule = await tx.findPaymentSchedule(intent.scheduleId);
+    if (!schedule) throw new ApiFailure(404, 'PAYMENT_SCHEDULE_NOT_FOUND', 'Payment schedule was not found.');
+    let next: { intent: SandboxPaymentIntent; schedule: PaymentSchedule };
+    try {
+      next = acceptSandboxWebhook(
+        intent,
+        schedule,
+        rawBody,
+        signature,
+        (body) => sandboxSignatureMatches(body, signature, secret),
+        at,
+      );
+    } catch (error) {
+      mapDomainError(error);
+    }
+    if (next.intent.status === 'confirmed' && intent.status === 'pending') {
+      await tx.saveSandboxIntent(next.intent);
+      await tx.savePaymentSchedule(next.schedule);
+      const contract = await tx.findContract(next.schedule.contractId);
+      const offer = contract ? await tx.findOffer(contract.offerId) : null;
+      const opportunity = offer ? await tx.findOpportunity(offer.opportunityId) : null;
+      if (opportunity) {
+        await tx.insertAudit({
+          id: newOpaqueId('a'),
+          action: 'payment.sandbox_webhook_confirmed',
+          actorId: null,
+          leadId: opportunity.leadId,
+          at,
+          metadata: {
+            status: 'confirmed',
+            scheduleId: next.schedule.id,
+            installmentId: next.intent.installmentId,
+          },
+        });
+      }
+    }
+    return next.schedule;
   });
 }
 

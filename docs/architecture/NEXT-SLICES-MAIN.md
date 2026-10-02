@@ -927,7 +927,7 @@ Next: PAY-ADAPTER-1.
 
 Dependencies: FZ-SIGN-1-REREAD, PAY-SCHEDULE-STAFF, PAY-DOMAIN-NEUTRAL.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: Core API sandbox adapter for Przelewy24. A sandbox intent can be
 created for an existing installment, a signed sandbox webhook can confirm

@@ -25,6 +25,7 @@ import {
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
 import {
+  createSandboxIntentRecord,
   createPaymentScheduleRecord,
   listVisiblePaymentSchedules,
   parsePaymentScheduleListQuery,
@@ -33,6 +34,7 @@ import {
   readPaymentSchedule,
   replacePaymentScheduleRecord,
   transitionPaymentInstallmentRecord,
+  acceptSandboxWebhookRecord,
 } from './payments.ts';
 import { createProjectFromContract, deliverExistingProject, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
@@ -66,6 +68,8 @@ export type AppOptions = {
   contentDocuments?: Readonly<Record<string, { title: string; status: 'draft' | 'published' }>>;
   /** Local private root for project file bytes (FZ-A4). Defaults under repo private/. */
   fileBytesRoot?: string;
+  /** Sandbox-only HMAC secret. Never a production merchant key. */
+  sandboxWebhookSecret?: string;
 };
 
 function mintRequestId(): string {
@@ -915,6 +919,30 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
       key,
       now(),
     );
+    return c.json(schedule);
+  });
+
+  app.post('/v1/payment-schedules/:scheduleId/installments/:installmentId/sandbox-intent', async c => {
+    const actor = await requireActor(c, options.authenticator, 'payments:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const intent = await createSandboxIntentRecord(
+      options.store,
+      pathPaymentScheduleId(c.req.param('scheduleId')),
+      pathPaymentInstallmentId(c.req.param('installmentId')),
+      actor,
+      key,
+      now(),
+    );
+    return c.json(intent, 201);
+  });
+
+  app.post('/v1/payments/przelewy24/sandbox-webhook', async c => {
+    const secret = options.sandboxWebhookSecret;
+    if (!secret) throw new ApiFailure(503, 'SANDBOX_SECRET_UNCONFIGURED', 'Sandbox webhook secret is not configured.');
+    const raw = await c.req.text();
+    const signature = c.req.header('x-fz-sandbox-signature') ?? '';
+    const schedule = await acceptSandboxWebhookRecord(options.store, raw, signature, secret, now());
     return c.json(schedule);
   });
 

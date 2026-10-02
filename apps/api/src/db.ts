@@ -83,6 +83,16 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  sandbox_payment_intent: {
+    id: string;
+    schedule_id: string;
+    installment_id: string;
+    amount_minor: number;
+    currency: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   garden: {
     id: string;
     project_id: string;
@@ -1080,6 +1090,29 @@ ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
   },
 };
 
+const przelewy24SandboxMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE sandbox_payment_intent (
+  id text PRIMARY KEY,
+  schedule_id text NOT NULL REFERENCES payment_schedule (id),
+  installment_id text NOT NULL UNIQUE,
+  amount_minor integer NOT NULL,
+  currency text NOT NULL,
+  status text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT sandbox_payment_intent_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT sandbox_payment_intent_status_known CHECK (status IN ('pending', 'confirmed')),
+  CONSTRAINT sandbox_payment_intent_amount_positive CHECK (amount_minor > 0)
+);
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw('DROP TABLE IF EXISTS sandbox_payment_intent;').execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1100,6 +1133,7 @@ const provider: MigrationProvider = {
       '015_payment_schedule': paymentScheduleMigration,
       '016_garden_domain': gardenMigration,
       '017_site_intelligence': siteIntelligenceMigration,
+      '018_przelewy24_sandbox': przelewy24SandboxMigration,
     };
   },
 };

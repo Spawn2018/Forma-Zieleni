@@ -195,6 +195,13 @@ export type {
   PaymentSchedule,
 } from './payment.ts';
 export {
+  SANDBOX_PROVIDER,
+  acceptSandboxWebhook,
+  assertOpaqueSandboxIntentId,
+  openSandboxIntent,
+} from './przelewy24-sandbox.ts';
+export type { SandboxIntentStatus, SandboxPaymentIntent } from './przelewy24-sandbox.ts';
+export {
   CAPACITY_KINDS,
   assertOpaqueCapacityActorId,
   assertOpaqueCapacityWindowId,

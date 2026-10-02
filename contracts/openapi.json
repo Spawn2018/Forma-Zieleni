@@ -2354,6 +2354,83 @@
         }
       }
     },
+    "/payment-schedules/{scheduleId}/installments/{installmentId}/sandbox-intent": {
+      "post": {
+        "tags": ["Payments"],
+        "operationId": "createSandboxPaymentIntent",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Staff create a Przelewy24 sandbox intent for a due installment. No outbound provider call and no production key.",
+        "parameters": [
+          {
+            "name": "scheduleId",
+            "in": "path",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/OpaqueId" }
+          },
+          {
+            "name": "installmentId",
+            "in": "path",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/OpaqueId" }
+          },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sandbox intent created.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SandboxPaymentIntent" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/payments/przelewy24/sandbox-webhook": {
+      "post": {
+        "tags": ["Payments"],
+        "operationId": "acceptSandboxPaymentWebhook",
+        "security": [],
+        "description": "Confirm a sandbox installment from a signed webhook. A bad signature does not change schedule status. No live charge.",
+        "parameters": [
+          {
+            "name": "X-FZ-Sandbox-Signature",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SandboxPaymentWebhook" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schedule after a valid sandbox confirmation.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentSchedule" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "503": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
     "/projects/{projectId}/deliver": {
       "post": {
         "tags": [
@@ -4683,6 +4760,34 @@
           }
         },
         "description": "Provider-neutral payment schedule. No PSP fields."
+      },
+      "SandboxPaymentIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "provider", "scheduleId", "installmentId", "amountMinor", "currency", "status", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "provider": { "type": "string", "enum": ["przelewy24-sandbox"] },
+          "scheduleId": { "$ref": "#/components/schemas/OpaqueId" },
+          "installmentId": { "$ref": "#/components/schemas/OpaqueId" },
+          "amountMinor": { "type": "integer", "minimum": 1 },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "status": { "type": "string", "enum": ["pending", "confirmed"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "description": "Sandbox intent. No secret and no production merchant key."
+      },
+      "SandboxPaymentWebhook": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["intentId", "scheduleId", "installmentId", "status"],
+        "properties": {
+          "intentId": { "$ref": "#/components/schemas/OpaqueId" },
+          "scheduleId": { "$ref": "#/components/schemas/OpaqueId" },
+          "installmentId": { "$ref": "#/components/schemas/OpaqueId" },
+          "status": { "type": "string", "enum": ["confirmed"] }
+        }
       },
       "PaymentSchedulePage": {
         "type": "object",
