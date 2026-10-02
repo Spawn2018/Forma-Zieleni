@@ -131,7 +131,7 @@ export const EXPERIENCE_CONTRACTS = Object.freeze([
     pxi: { replay: 'OFF', pii: false, minimization: true, classes: ['human', 'technical'] },
     actions: [action('open-own-project', 'project.read', 'project state or an unauthorized empty state')],
     events: ['portal.projection.read'],
-    downstream: [down('CONTRACT', 'status read'), down('PROJECT', 'read'), down('FILES', 'authorized read'), down('GARDENOS', 'client garden')],
+    downstream: [down('CONTRACT', 'status read'), down('PROJECT', 'read'), down('FILES', 'authorized read'), down('GARDENOS', 'client garden'), down('SITEINTEL', 'client findings')],
   }),
   ux({
     id: 'ADMIN',

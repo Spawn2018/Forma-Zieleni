@@ -4,6 +4,7 @@ import {
   fetchPortalFiles,
   fetchPortalGardens,
   fetchPortalOffers,
+  fetchPortalSiteIntelligence,
   fetchPortalProjects,
   portalShell,
   resolvePortalHome,
@@ -44,6 +45,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<PortalHome>
     },
     async loadGardens() {
       return fetchPortalGardens({ base, cookie });
+    },
+    async loadSiteIntelligence() {
+      return fetchPortalSiteIntelligence({ base, cookie });
     },
   });
 }

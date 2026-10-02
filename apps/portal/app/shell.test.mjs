@@ -9,11 +9,13 @@ import {
   fetchPortalGardens,
   fetchPortalOffers,
   fetchPortalProjects,
+  fetchPortalSiteIntelligence,
   mapPortalContractPage,
   mapPortalFilePage,
   mapPortalGardenPage,
   mapPortalOfferPage,
   mapPortalProjectPage,
+  mapPortalSitePage,
   portalErrorMessage,
   portalOriginAllowed,
   portalSessionCookiePresent,
@@ -54,6 +56,7 @@ const emptySignedIn = {
   projects: { status: 'empty' },
   files: { status: 'empty' },
   gardens: { status: 'empty' },
+  siteIntelligence: { status: 'empty' },
 };
 
 test('the portal shell is a signed-out gate without client project data', () => {
@@ -91,6 +94,7 @@ test('portal session classification enforces the portal trust zone', async () =>
   assert.match(signedIn, /Brak projektów do pokazania/);
   assert.match(signedIn, /Brak plików do pokazania/);
   assert.match(signedIn, /Brak ogrodów do pokazania/);
+  assert.match(signedIn, /Brak ustaleń o terenie do pokazania/);
   for (const phrase of commercialLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -119,6 +123,7 @@ test('signed-in portal renders client-safe offer projection without price or ter
     projects: { status: 'empty' },
     files: { status: 'empty' },
     gardens: { status: 'empty' },
+    siteIntelligence: { status: 'empty' },
   }));
   assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /Twoje pozycje/);
@@ -238,6 +243,7 @@ test('signed-in portal renders client-safe project and file projections without 
     projects,
     files,
     gardens: { status: 'empty' },
+    siteIntelligence: { status: 'empty' },
   }));
   assert.match(html, /Twoje projekty/);
   assert.match(html, /pj8k2n4p6q8r0s2t/);
@@ -424,6 +430,83 @@ test('signed-in portal renders a client garden without a twin or live invent', a
   );
 });
 
+test('signed-in portal renders site findings without credentials or invented conclusions', async () => {
+  assert.deepEqual(mapPortalSitePage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapPortalSitePage({ items: [{ id: 'x', aiConclusion: 'sunny' }] }), { status: 'error' });
+  assert.deepEqual(mapPortalSitePage({
+    items: [{
+      id: 'si8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      observationIds: ['ob8k2n4p6q8r0s2t'],
+      constraints: [{ id: 'sc8k2n4p6q8r0s2t', code: 'slope', note: 'secret' }],
+      opportunities: [],
+      createdAt: '2026-09-24T15:00:00.000Z',
+    }],
+  }), { status: 'error' });
+  const mapped = mapPortalSitePage({
+    items: [{
+      id: 'si8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      observationIds: ['ob8k2n4p6q8r0s2t'],
+      constraints: [{ id: 'sc8k2n4p6q8r0s2t', code: 'slope' }],
+      opportunities: [{ id: 'so8k2n4p6q8r0s2t', code: 'shade' }],
+      createdAt: '2026-09-24T15:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const ready = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    siteIntelligence: mapped,
+  }));
+  assert.match(ready, /Teren/);
+  assert.match(ready, /si8k2n4p6q8r0s2t/);
+  assert.match(ready, /Ograniczenia: slope/);
+  assert.match(ready, /Możliwości: shade/);
+  assert.equal(ready.toLowerCase().includes('credential'), false);
+  assert.equal(ready.toLowerCase().includes('geoportal'), false);
+  for (const phrase of commercialLeak) {
+    assert.equal(ready.toLowerCase().includes(phrase), false, phrase);
+  }
+
+  const fetched = await fetchPortalSiteIntelligence({
+    base: 'http://portal.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/portal\/site-intelligence\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      assert.equal(init?.headers?.cookie, 'better-auth.session_token=abc');
+      return new Response(JSON.stringify({
+        items: [{
+          id: 'si8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          observationIds: [],
+          constraints: [],
+          opportunities: [],
+          createdAt: '2026-09-24T16:00:00.000Z',
+        }],
+        nextCursor: null,
+      }), { status: 200 });
+    },
+  });
+  assert.equal(fetched.status, 'ready');
+  if (fetched.status === 'ready') {
+    assert.equal(fetched.items[0].id, 'si8k2n4p6q8r0s2u');
+    const emptyCodes = renderToStaticMarkup(portalShell({
+      ...emptySignedIn,
+      siteIntelligence: fetched,
+    }));
+    assert.match(emptyCodes, /Ograniczenia: brak/);
+    assert.match(emptyCodes, /Możliwości: brak/);
+  }
+  assert.deepEqual(
+    await fetchPortalSiteIntelligence({
+      base: 'http://portal.test',
+      fetchImpl: async () => new Response('', { status: 401 }),
+    }),
+    { status: 'forbidden' },
+  );
+});
+
 test('the route module keeps an error boundary and does not invent CRM facts', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
@@ -435,6 +518,7 @@ test('the route module keeps an error boundary and does not invent CRM facts', (
   assert.match(home, /fetchPortalProjects/);
   assert.match(home, /fetchPortalFiles/);
   assert.match(home, /fetchPortalGardens/);
+  assert.match(home, /fetchPortalSiteIntelligence/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(root, /export function ErrorBoundary/);
   assert.match(root, /portalErrorMessage/);

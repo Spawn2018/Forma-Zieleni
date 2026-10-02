@@ -1023,6 +1023,22 @@ Security: uses existing `gardens:portal-read`. The portal does not
 create or mutate a garden.
 Next: none.
 
+### PORTAL-SITE-VIEW
+
+Dependencies: PORTAL-GARDEN-VIEW, SITEINTEL-HTTP.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in portal lists the client site findings that Core
+API already projects. Each row shows the record, project, constraint
+codes, and opportunity codes. Empty, forbidden, and error states are
+visible. Credentials, a twin, and an invented conclusion are refused.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-SITE-VIEW.md`](./PORTAL-SITE-VIEW.md).
+Security: uses existing `siteintel:portal-read`. The portal does not
+create or mutate a finding.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

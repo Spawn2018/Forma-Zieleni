@@ -513,6 +513,14 @@ row('FZ-REQ-PORTAL-009', 'Authenticated portal UI lists the client garden relati
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'GARDENOS-HTTP'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-010', 'Authenticated portal UI lists the client site findings already stored by Core API. No credentials, twin, or invented conclusion.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'UI over existing GET /v1/portal/site-intelligence. Codes only. Extra finding fields are an error.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-SITE-VIEW',
+  executableWhenComplete: ['PORTAL-GARDEN-VIEW', 'SITEINTEL-HTTP'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

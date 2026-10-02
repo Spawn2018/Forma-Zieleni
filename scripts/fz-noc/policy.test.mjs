@@ -477,6 +477,7 @@ test('C: Portal foundation alone is not product-complete; CLIENT_UI closes when 
     'FZ-REQ-PORTAL-007',
     'FZ-REQ-PORTAL-008',
     'FZ-REQ-PORTAL-009',
+    'FZ-REQ-PORTAL-010',
   ]) {
     assert.equal(rows.find((row) => row.id === id).status, 'DONE_AT_MAX_DEPTH');
   }

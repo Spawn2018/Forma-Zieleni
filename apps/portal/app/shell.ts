@@ -70,6 +70,26 @@ export type PortalGardenList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalSiteFinding = {
+  id: string;
+  code: string;
+};
+
+export type PortalSiteRow = {
+  id: string;
+  projectId: string;
+  observationIds: readonly string[];
+  constraints: readonly PortalSiteFinding[];
+  opportunities: readonly PortalSiteFinding[];
+  createdAt: string;
+};
+
+export type PortalSiteList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalSiteRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type PortalHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -80,6 +100,7 @@ export type PortalHome =
       projects: PortalProjectList;
       files: PortalFileList;
       gardens: PortalGardenList;
+      siteIntelligence: PortalSiteList;
     };
 
 /**
@@ -318,6 +339,64 @@ export function mapPortalGardenPage(body: unknown): PortalGardenList {
   return { status: 'ready', items: rows };
 }
 
+const SITE_FORBIDDEN = [
+  'clientSubject',
+  'updatedAt',
+  'twinDatabase',
+  'aiConclusion',
+  'thirdPartyCredentials',
+  'geoportal',
+  'inventedSiteFacts',
+] as const;
+
+function mapSiteFindings(value: unknown): PortalSiteFinding[] | null {
+  if (!Array.isArray(value)) return null;
+  const rows: PortalSiteFinding[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+    const finding = item as { id?: unknown; code?: unknown };
+    if (typeof finding.id !== 'string' || typeof finding.code !== 'string') return null;
+    if (Object.keys(finding).some((key) => key !== 'id' && key !== 'code')) return null;
+    rows.push({ id: finding.id, code: finding.code });
+  }
+  return rows;
+}
+
+export function mapPortalSitePage(body: unknown): PortalSiteList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalSiteRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const record = item as {
+      id?: unknown;
+      projectId?: unknown;
+      observationIds?: unknown;
+      constraints?: unknown;
+      opportunities?: unknown;
+      createdAt?: unknown;
+    };
+    if (typeof record.id !== 'string' || typeof record.projectId !== 'string') return { status: 'error' };
+    if (typeof record.createdAt !== 'string' || !Array.isArray(record.observationIds)) return { status: 'error' };
+    if (!record.observationIds.every((entry) => typeof entry === 'string')) return { status: 'error' };
+    if (SITE_FORBIDDEN.some((key) => Object.hasOwn(record, key))) return { status: 'error' };
+    const constraints = mapSiteFindings(record.constraints);
+    const opportunities = mapSiteFindings(record.opportunities);
+    if (!constraints || !opportunities) return { status: 'error' };
+    rows.push({
+      id: record.id,
+      projectId: record.projectId,
+      observationIds: record.observationIds,
+      constraints,
+      opportunities,
+      createdAt: record.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
 async function portalGetJsonList<T>(input: {
   base: string;
   path: string;
@@ -399,6 +478,20 @@ export async function fetchPortalGardens(input: {
   });
 }
 
+export async function fetchPortalSiteIntelligence(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalSiteList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/site-intelligence?limit=50',
+    map: mapPortalSitePage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
 export async function fetchPortalFiles(input: {
   base: string;
   cookie?: string;
@@ -415,7 +508,7 @@ export async function fetchPortalFiles(input: {
 
 /**
  * Resolve portal home from optional Core API session probe + projections.
- * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, or gardens.
+ * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, gardens, or site findings.
  */
 export async function resolvePortalHome(input: {
   probe?: () => Promise<PortalSessionActor | null>;
@@ -424,19 +517,21 @@ export async function resolvePortalHome(input: {
   loadProjects?: () => Promise<PortalProjectList>;
   loadFiles?: () => Promise<PortalFileList>;
   loadGardens?: () => Promise<PortalGardenList>;
+  loadSiteIntelligence?: () => Promise<PortalSiteList>;
 }): Promise<PortalHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
     const classified = classifyPortalSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    const [offers, contracts, projects, files, gardens] = await Promise.all([
+    const [offers, contracts, projects, files, gardens, siteIntelligence] = await Promise.all([
       input.loadOffers ? input.loadOffers() : Promise.resolve({ status: 'empty' as const }),
       input.loadContracts ? input.loadContracts() : Promise.resolve({ status: 'empty' as const }),
       input.loadProjects ? input.loadProjects() : Promise.resolve({ status: 'empty' as const }),
       input.loadFiles ? input.loadFiles() : Promise.resolve({ status: 'empty' as const }),
       input.loadGardens ? input.loadGardens() : Promise.resolve({ status: 'empty' as const }),
+      input.loadSiteIntelligence ? input.loadSiteIntelligence() : Promise.resolve({ status: 'empty' as const }),
     ]);
-    return { state: 'signed-in', offers, contracts, projects, files, gardens };
+    return { state: 'signed-in', offers, contracts, projects, files, gardens, siteIntelligence };
   } catch {
     return { state: 'signed-out' };
   }
@@ -588,6 +683,52 @@ function gardenListNode(gardens: PortalGardenList): ReactNode {
   );
 }
 
+function siteListNode(sites: PortalSiteList): ReactNode {
+  if (sites.status !== 'ready') {
+    return listStateNode(
+      sites,
+      'Brak ustaleń o terenie do pokazania.',
+      'To konto nie może odczytać ustaleń o terenie.',
+      'Ustaleń o terenie nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-site', 'aria-label': 'Ustalenia o terenie' },
+    createElement('h2', null, 'Teren'),
+    createElement(
+      'ul',
+      { className: 'portal-site-list' },
+      ...sites.items.map((record) =>
+        createElement(
+          'li',
+          { key: record.id, className: 'portal-site-record' },
+          createElement(
+            'p',
+            { className: 'portal-site-meta' },
+            [record.id, ' · ', record.projectId, ' · ', record.createdAt].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-site-constraints' },
+            record.constraints.length === 0
+              ? 'Ograniczenia: brak'
+              : ['Ograniczenia: ', record.constraints.map((item) => item.code).join(', ')].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-site-opportunities' },
+            record.opportunities.length === 0
+              ? 'Możliwości: brak'
+              : ['Możliwości: ', record.opportunities.map((item) => item.code).join(', ')].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function fileListNode(files: PortalFileList): ReactNode {
   if (files.status !== 'ready') {
     return listStateNode(
@@ -662,5 +803,6 @@ export function portalShell(home: PortalHome): ReactNode {
     projectListNode(home.projects),
     fileListNode(home.files),
     gardenListNode(home.gardens),
+    siteListNode(home.siteIntelligence),
   );
 }
