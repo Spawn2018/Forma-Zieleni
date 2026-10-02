@@ -193,6 +193,16 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Kontekst | WWW needs an editor-operated content and media system that is not CRM. Gate A stack stays binding. Research, an isolated native lab, and a 2026-09-21 finalist validation lab are in `OWNER-DECISION-PACKET-FZ-CMS-1.md` and `labs/fz-cms-1`. The Owner reply selected option B with those constraints. The lab did not execute the vendor Admin UI or the PostgreSQL adapter. |
 | Konsekwencje | Execute `NEXT-SLICES-CMS.md`. This ADR is not CMS-ACCEPT. Acceptance items A–Q stay open. Apostrophe must not become CRM, Lead, Contract, Payment, business Project truth, Core API authorization, or private business file authority. Puck is not installed unless a later Owner decision records an evidence-based fallback. Search Intelligence is a separate bounded capability in `FZ-SEARCH-1.md`, not an Apostrophe table. FZ-SIGN-1 stays UNDECIDED. Lead security acceptance is unchanged. |
 
+## ADR-016 — Crawl policy, payment provider, production hosting direction
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-10-02 |
+| Status | Accepted |
+| Decyzja | `DECISION FZ-SEARCH-CRAWL-1: OPTION A`. `DECISION payment-provider: Przelewy24`. `DECISION production-hosting: 0 PLN until cutover. First remote host is one Hetzner CX23 EU, DEPLOY=compose, not a second VM. No purchase now.` FZ-SIGN-1 provider stays UNDECIDED. |
+| Kontekst | Owner accepted the recorded suggestions. OPTION A disallows `GPTBot`, `ClaudeBot`, and `Google-Extended` in production robots and leaves search-indexing tokens allowed, including the Gemini-grounding opt-out. Przelewy24 is the single payment adapter name. Fakturownia stays invoicing. Hosting stays on this workstation until cutover. The first remote machine is one Hetzner Cloud CX23 in FSN, Nuremberg, or Helsinki. |
+| Konsekwencje | Production `robots.txt` emits those three groups. The live Cloudflare zone is not changed. No payment is captured and no Przelewy24 credential is created. No VM is purchased. DNS, Cloudflare, spend, and deploy stay DANGEROUS. Signing engine stays unselected. |
+
 ## Szablon kolejnego ADR
 
 ```markdown

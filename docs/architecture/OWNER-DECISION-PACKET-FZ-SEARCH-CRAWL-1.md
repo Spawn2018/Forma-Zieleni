@@ -1,6 +1,10 @@
 # FZ-SEARCH-CRAWL-1 — Production policy for model-training crawlers
 
-Status: OPEN — OWNER-DECISION. Research date **2026-09-21**.
+Status: **DECIDED — OPTION A** (2026-10-02, ADR-016). Research date **2026-09-21**.
+
+Owner reply: `DECISION FZ-SEARCH-CRAWL-1: OPTION A`.
+
+Production robots.txt emits `Disallow: /` for `GPTBot`, `ClaudeBot`, and `Google-Extended`. Search-indexing tokens stay without a disallow group. Gemini grounding is opted out with `Google-Extended`. The live Cloudflare zone is not changed by this decision.
 
 This packet does not change robots.txt, Cloudflare, DNS, or spend.
 Search Intelligence architecture still proceeds. CMS implementation

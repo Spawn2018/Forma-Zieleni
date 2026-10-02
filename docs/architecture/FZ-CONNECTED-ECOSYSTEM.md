@@ -51,6 +51,6 @@ side document that nothing checks.
 
 Admin, Portal, Android, iOS, Garden OS and SketchUp do not gain a
 runtime in this contract. Their rows say `FUTURE_DEPENDENCY` or
-`LOCAL_BY_DESIGN` with the reason. CMS-ACCEPT, FZ-SIGN-1,
-FZ-SEARCH-CRAWL-1, the payment provider and production hosting stay
-open.
+`LOCAL_BY_DESIGN` with the reason. CMS-ACCEPT and FZ-SIGN-1 stay
+open. FZ-SEARCH-CRAWL-1, the payment provider name, and the production
+hosting direction are decided in ADR-016.

@@ -597,7 +597,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth and undecided providers."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
     },
     {
       "sourceFamily": "MASTER",
@@ -612,7 +612,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth and undecided providers."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
     },
     {
       "sourceFamily": "MASTER",
@@ -627,7 +627,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth and undecided providers."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
     },
     {
       "sourceFamily": "MASTER",
@@ -642,7 +642,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Commercial truth and undecided providers."
+      "notes": "Commercial truth. Przelewy24 is selected. Signing provider stays undecided."
     },
     {
       "sourceFamily": "MASTER",
@@ -744,7 +744,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "One search architecture. Crawler policy is open."
+      "notes": "One search architecture. Production training crawlers are opted out."
     },
     {
       "sourceFamily": "MASTER",
@@ -758,7 +758,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "One search architecture. Crawler policy is open."
+      "notes": "One search architecture. Production training crawlers are opted out."
     },
     {
       "sourceFamily": "MASTER",
@@ -772,7 +772,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "One search architecture. Crawler policy is open."
+      "notes": "One search architecture. Production training crawlers are opted out."
     },
     {
       "sourceFamily": "MASTER",
@@ -786,7 +786,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "One search architecture. Crawler policy is open."
+      "notes": "One search architecture. Production training crawlers are opted out."
     },
     {
       "sourceFamily": "MASTER",
@@ -10241,7 +10241,7 @@
       "evidencePaths": [
         "docs/engineering/requirements/FZ-DIRECTIVE-COVERAGE.json"
       ],
-      "notes": "Training-crawler policy is open."
+      "notes": "Training-crawler policy is OPTION A. Live Cloudflare zone unchanged."
     },
     {
       "sourceFamily": "OPEN_GATES",

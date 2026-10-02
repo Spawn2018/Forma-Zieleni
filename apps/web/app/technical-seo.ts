@@ -54,9 +54,13 @@ export function resolvePublicRequest(url: URL, legacy: Readonly<Record<string, s
   return { status: 200, path };
 }
 
+const TRAINING_OPT_OUT = ['GPTBot', 'ClaudeBot', 'Google-Extended'] as const;
+
 export function robotsTxt(env: SeoEnv, origin?: string): string {
   if (env !== 'production') return 'User-agent: *\nDisallow: /\n';
-  const lines = ['User-agent: *', 'Allow: /'];
+  const lines: string[] = [];
+  for (const token of TRAINING_OPT_OUT) lines.push(`User-agent: ${token}`, 'Disallow: /', '');
+  lines.push('User-agent: *', 'Allow: /');
   const sitemap = canonicalHref(origin, '/sitemap.xml');
   if (sitemap) lines.push(`Sitemap: ${sitemap}`);
   return `${lines.join('\n')}\n`;

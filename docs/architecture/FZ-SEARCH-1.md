@@ -221,21 +221,22 @@ Taxonomy: **A** traditional indexing, **B** AI search/retrieval,
 **C** user-triggered fetch, **D** model training, **E** unknown.
 
 Last verified **2026-09-21** except where a source date is older.
-Desired policy below is **not applied**. Production Cloudflare changes
-are DANGEROUS. Training tokens are OPEN:
+Production robots policy is **applied in the generated file** as
+FZ-SEARCH-CRAWL-1 OPTION A (ADR-016). Production Cloudflare zone
+changes stay DANGEROUS.
 [`OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md`](./OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md).
 
 | Token | Class | Purpose (official) | robots.txt | Verify | Proposed production stance |
 |---|---|---|---|---|---|
 | `Googlebot` (+ Image, Video, News) | A | Google Search and listed product surfaces | Obeys on automatic crawls | IP + reverse DNS; UA is spoofable | Allow. Rules not emitted until SEARCH-SITEMAP-ROBOTS re-reads the token list |
-| `Google-Extended` | D and Gemini grounding | Not a separate UA. Does not affect Google Search inclusion | Token only | n/a | **OPEN** with other training tokens. Disallow would also opt out of Gemini grounding |
+| `Google-Extended` | D and Gemini grounding | Not a separate UA. Does not affect Google Search inclusion | Token only | n/a | **OPTION A.** `Disallow: /` in production robots. Gemini grounding is opted out. Google Search inclusion is unchanged |
 | `Google-CloudVertexBot` | B/special | Vertex AI agent crawls requested for that product. `Googlebot` token also matches | Token | Same Google verification | No rule until re-read. Do not treat as Google Search |
 | `GoogleOther` | E/research | Generic fetch, not a specific product | Own token | Same | No special rule |
 | `OAI-SearchBot` | B | ChatGPT search | Independent of GPTBot | Published IP JSON | Allow is the visibility direction. Not applied yet |
-| `GPTBot` | D | Training | Independent of search | Published IP JSON | **OPEN** |
+| `GPTBot` | D | Training | Independent of search | Published IP JSON | **OPTION A.** `Disallow: /` in production robots |
 | `ChatGPT-User` | C | User-triggered. robots.txt may not apply | Docs say so | Published IP JSON | Do not pretend robots.txt controls it |
 | `OAI-AdsBot` | other | Ads landing pages only | — | Published IP JSON | No FZ ads program. No rule |
-| `ClaudeBot` | D | Training | robots.txt | Anthropic IP list | **OPEN** |
+| `ClaudeBot` | D | Training | robots.txt | Anthropic IP list | **OPTION A.** `Disallow: /` in production robots |
 | `Claude-SearchBot` | B | Search index | robots.txt | Anthropic IP list | Allow is the visibility direction. Not applied yet |
 | `Claude-User` | C | User-triggered | Disabling reduces user-fetch visibility | Anthropic IP list | Do not equate with training |
 | `PerplexityBot` | B | Search, not training | robots.txt | Published IP JSON | Allow is the visibility direction. Not applied yet |
@@ -249,8 +250,9 @@ ingest later, not a second policy language.
 
 Generated from version-controlled policy. Environment-aware.
 Deterministic. Production names the sitemap. Crawler-specific groups
-exist only for tokens in the table above, and training groups are
-omitted until FZ-SEARCH-CRAWL-1 is decided.
+exist only for tokens in the table above. Production emits
+`Disallow: /` for `GPTBot`, `ClaudeBot`, and `Google-Extended`.
+Search-indexing tokens are not given a disallow group.
 
 Tests must fail if production policy is `Disallow: /`, and fail if a
 non-production policy would allow indexing.
@@ -273,7 +275,8 @@ Stop. This section is not authorization.
 
 1. Owner approval immediately before the change, naming the zone and
    the exact allow/block diff.
-2. FZ-SEARCH-CRAWL-1 must be DECIDED before any training-token rule.
+2. FZ-SEARCH-CRAWL-1 is DECIDED (OPTION A). A live-zone change still
+   needs its own approval in the same session.
 3. Read current Cloudflare docs and the live robots.txt in the same
    session.
 4. Change a staging zone first if one exists. Production DNS and

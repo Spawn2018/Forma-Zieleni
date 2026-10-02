@@ -582,7 +582,7 @@ export const LEARNING_SUBJECTS = Object.freeze([
       sig('traffic', 'business', 'PRODUCTION_LATER'),
     ],
     productionDependency: 'search measurement baseline',
-    activationCondition: 'FZ-SEARCH-1 contracts exist; measured change evidence waits for a baseline. FZ-SEARCH-CRAWL-1 stays open',
+    activationCondition: 'FZ-SEARCH-1 contracts exist; measured change evidence waits for a baseline. FZ-SEARCH-CRAWL-1 is OPTION A in generated robots',
     nextActivation: 'WAITING_FOR_PRODUCTION_SIGNAL',
   }),
   subject({

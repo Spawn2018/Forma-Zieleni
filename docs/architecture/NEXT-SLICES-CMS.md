@@ -8,8 +8,9 @@ Search slices below are part of this graph, not a second roadmap.
 Binding search architecture: [`FZ-SEARCH-1.md`](./FZ-SEARCH-1.md).
 
 Do not create an endless agent loop. One bounded slice at a time.
-Stop at OWNER-ONLY or DANGEROUS. FZ-SEARCH-CRAWL-1 is OPEN and does
-not block CMS-DATA.
+Stop at OWNER-ONLY or DANGEROUS. FZ-SEARCH-CRAWL-1 is DECIDED
+(OPTION A, ADR-016) and does not block CMS-DATA. The live Cloudflare
+zone stays unchanged.
 
 ## After the Owner reply
 
@@ -166,10 +167,10 @@ Next: CMS-WWW (with CMS-PUBLISH + CMS-SEO).
 
 Dependencies: CMS-PUBLISH, SEARCH-WWW-TECHNICAL, SEARCH-STRUCTURED-DATA, SEARCH-SITEMAP-ROBOTS.
 Gate: REVIEW.
-Status: COMPLETE as the integration checkpoint. Publishing a new slug writes a redirect. JSON-LD still omits prices. Production robots is not a blanket disallow. Training groups stay absent.
+Status: COMPLETE as the integration checkpoint. Publishing a new slug writes a redirect. JSON-LD still omits prices. Production robots is not a blanket disallow. Production training opt-out is GPTBot, ClaudeBot, and Google-Extended.
 Autonomous: yes.
 Entry: those four are recorded. This id is the integration checkpoint, not a second SEO implementation.
-Accept: WWW output matches FZ-SEARCH-1 sections 6–7 and 9. Training-crawler groups stay absent while FZ-SEARCH-CRAWL-1 is OPEN.
+Accept: WWW output matches FZ-SEARCH-1 sections 6–7 and 9. Production training opt-out follows FZ-SEARCH-CRAWL-1 OPTION A.
 Tests: `apps/web/app/cms-seo.test.mjs`. A slug change redirects. JSON-LD has no placeholder price. Production robots is not `Disallow: /`.
 Security: the redirect target is the new public path, not an external URL.
 Next: CMS-WWW.
@@ -265,7 +266,7 @@ Next: RETURN-ROADMAP.
 Dependencies: none beyond this graph.
 Gate: REVIEW.
 Status: COMPLETE. Canonical text is `FZ-SEARCH-1.md` (research 2026-09-21).
-Accept: measurable vs unmeasurable claims recorded; no paid vendor; training-crawler choice left OPEN.
+Accept: measurable vs unmeasurable claims recorded; no paid vendor; training-crawler policy is OPTION A (ADR-016).
 Next: SEARCH-CONTENT-CONTRACT inside CMS-DATA.
 
 ### SEARCH-WWW-TECHNICAL
@@ -294,9 +295,9 @@ Next: SEARCH-SITEMAP-ROBOTS.
 
 Dependencies: SEARCH-STRUCTURED-DATA. Re-read crawler docs in the same slice.
 Gate: REVIEW.
-Status: COMPLETE for generated fixtures. FZ-SEARCH-1 section 8 and FZ-SEARCH-CRAWL-1 were re-read on 2026-09-22. The crawl packet remains OPEN, so no training-token group is emitted. Cloudflare was not changed.
+Status: COMPLETE for generated fixtures. FZ-SEARCH-1 section 8 and FZ-SEARCH-CRAWL-1 OPTION A are applied in the generator. Cloudflare was not changed.
 Autonomous: yes. Applying the file on Cloudflare is DANGEROUS and is not this slice.
-Accept: generated robots and sitemap from policy. Non-production is non-indexable. Production fixture has no blanket disallow. No training-token group until FZ-SEARCH-CRAWL-1 is DECIDED.
+Accept: generated robots and sitemap from policy. Non-production is non-indexable. Production fixture has no blanket disallow. Production emits Disallow for GPTBot, ClaudeBot, and Google-Extended.
 Tests: `apps/web/app/technical-seo.test.mjs`. Non-production is `Disallow: /` with an empty sitemap. Production names the sitemap and is not `Disallow: /`.
 Security: sitemap locations stay on the configured origin. External paths are dropped.
 Next: CMS-SEO.
@@ -452,7 +453,7 @@ Next: RETURN-ROADMAP. CMS-ACCEPT and SEARCH-ACCEPT are separate checklists.
 
 ### RETURN-ROADMAP
 
-Dependencies: none for implementation. CMS-ACCEPT stays open and is not an implementation blocker. SEARCH-ACCEPT is a separate checklist and does not block the return. Open FZ-SEARCH-CRAWL-1 does not block it either.
+Dependencies: none for implementation. CMS-ACCEPT stays open and is not an implementation blocker. SEARCH-ACCEPT is a separate checklist and does not block the return. FZ-SEARCH-CRAWL-1 OPTION A does not block it either.
 Gate: AUTO.
 Status: COMPLETE. The main product execution graph is [`NEXT-SLICES-MAIN.md`](./NEXT-SLICES-MAIN.md). Lead deferred security stays visible. CMS-ACCEPT is not Lead security-acceptance.
 Autonomous: yes.

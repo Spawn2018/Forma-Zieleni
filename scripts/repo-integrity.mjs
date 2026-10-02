@@ -253,7 +253,10 @@ function checkCanon(errors) {
   mustContain(errors, 'docs/architecture/DECISIONS.md', [
     '## ADR-014 — Gate A architecture selection',
     '## ADR-015 — Content / media / visual publishing (FZ-CMS-1)',
+    '## ADR-016 — Crawl policy, payment provider, production hosting direction',
     'DECISION FZ-CMS-1: OPTION B',
+    'DECISION FZ-SEARCH-CRAWL-1: OPTION A',
+    'Przelewy24',
   ]);
   mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', [
     'Status: DECIDED',
@@ -271,8 +274,8 @@ function checkCanon(errors) {
     'NO RELIABLE MEASUREMENT',
   ]);
   mustContain(errors, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', [
-    'Status: OPEN',
-    'DECISION FZ-SEARCH-CRAWL-1: OPTION',
+    'Status: **DECIDED — OPTION A**',
+    'DECISION FZ-SEARCH-CRAWL-1: OPTION A',
   ]);
   mustContain(errors, 'docs/architecture/FZ-SIGN-1-CONTRACT-LIFECYCLE.md', [
     'Provider **UNDECIDED**',

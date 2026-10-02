@@ -126,7 +126,7 @@ test('activeExecutionGraph stays on CMS until RETURN-ROADMAP is COMPLETE', () =>
   assert.equal(after.some((slice) => slice.id === 'RETURN-ROADMAP'), false);
   const crawl = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md'), 'utf8');
   const sign = readFileSync(path.join(root, 'docs/architecture/OWNER-DECISION-PACKET-FZ-SIGN-1.md'), 'utf8');
-  assert.match(crawl, /Status:\s*OPEN/i);
+  assert.match(crawl, /DECIDED — OPTION A/);
   assert.match(sign, /OPEN/);
 });
 

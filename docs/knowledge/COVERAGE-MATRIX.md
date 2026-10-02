@@ -40,7 +40,7 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 | Cursor autonomy / decision gates | Workflows + Core Rule | COVERED |
 | Current public-main monorepo decisions | POST-V2 + Architecture | COVERED |
 | CMS / public content / media publishing | FZ-CMS-1 DECIDED option B; lab gaps remain; not CMS-ACCEPT | DECIDED / NOT ACCEPTED |
-| Search Intelligence / SEO / AI visibility | FZ-SEARCH-1 architecture 2026-09-21; training-crawler policy OPEN | ARCHITECTURE / NOT IMPLEMENTED |
+| Search Intelligence / SEO / AI visibility | FZ-SEARCH-1 architecture 2026-09-21; training-crawler policy OPTION A (ADR-016) | ARCHITECTURE / ROBOTS POLICY APPLIED |
 | Legacy API/DB/migrations/OpenAPI/client/plugin/code | `legacy/` snapshots | PRESERVED / NOT CURRENT BY DEFAULT |
 | Marketing/copy/ads/research/visual/product details | `legacy/` snapshots + V2 reference | PRESERVED / ACTIVE INPUT WHEN SLICE REQUIRES |
 | GitHub repository/tool candidates | REPOSITORY-CATALOG | INVENTORIED / REVIEW REQUIRED |
@@ -52,7 +52,7 @@ The previous F-RESET V2 already contained a zero-omission audit and explicitly r
 - Old PR/branch-centric workflow: SUPERSEDED by explicit direct-`main` owner decision. Quality gates/commit checkpoints remain applicable without requiring branches.
 - Old statement that Cloudflare Tunnel/private origin is implemented: false if present anywhere; current status is NOT IMPLEMENTED for the new system/legacy CT8.
 - DMARC: configured `p=none`, but PASS not verified. Any stronger statement is superseded.
-- Gate A architecture (compute horizon, Hono, React Router Framework Mode, PostgreSQL + Kysely, Better Auth, local private files, OpenObserve/SOPS/restic/pgBackRest horizons, localhost then Cloudflare Tunnel): DECIDED in ADR-014. CMS engine is DECIDED in ADR-015 and is not CMS-ACCEPT. Payment provider, signing provider, production compute, production object storage, and production training-crawler policy remain UNDECIDED. Legacy implementation does not override that record.
+- Gate A architecture (compute horizon, Hono, React Router Framework Mode, PostgreSQL + Kysely, Better Auth, local private files, OpenObserve/SOPS/restic/pgBackRest horizons, localhost then Cloudflare Tunnel): DECIDED in ADR-014. CMS engine is DECIDED in ADR-015 and is not CMS-ACCEPT. ADR-016 decides FZ-SEARCH-CRAWL-1 OPTION A, Przelewy24 with no charge, and one Hetzner CX23 at cutover with no purchase now. Signing provider and production object storage remain UNDECIDED. Legacy implementation does not override that record.
 - Existing OpenAPI/DB/client/server artifacts: valuable reference/scaffold, not proof that current Gate B/C is implemented.
 - Historical prices/KPIs/budgets/company claims: do not publish or use as current facts without explicit re-verification.
 

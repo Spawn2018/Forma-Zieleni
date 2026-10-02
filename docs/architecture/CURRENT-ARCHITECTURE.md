@@ -127,7 +127,7 @@ ADR-014). Implementation and security acceptance are not complete.
   development prerequisite.
 - LATER Linux staging: Docker Compose.
 - No remote host is purchased or created by the Gate A record.
-- Production compute remains a later Owner decision.
+- Production compute direction (ADR-016, 2026-10-02): one Hetzner Cloud CX23 in FSN, Nuremberg, or Helsinki, `DEPLOY=compose`, at cutover. No second VM. No purchase until that cutover. Production object storage stays undecided.
 
 ## Already decided before Gate A
 
@@ -138,17 +138,20 @@ ADR-014). Implementation and security acceptance are not complete.
 - Contract lifecycle and electronic signature:
   `FZ-SIGN-1-CONTRACT-LIFECYCLE.md`. The signing engine is an adapter,
   not business truth. Provider UNDECIDED.
+- Payment provider is Przelewy24 (ADR-016). No transaction is started.
+  Fakturownia remains invoicing.
+- Production training-crawler policy is FZ-SEARCH-CRAWL-1 OPTION A.
 - dev, staging and production remain required environments.
 - Local development cost target is approximately 0 PLN/month. Gate A
   authorizes no paid subscription and no recurring spend.
 
 ## Explicitly still undecided
 
-Payment provider; electronic-signature engine (FZ-SIGN-1); production compute host; production object storage (Garage is a staging direction only); production training-crawler policy (FZ-SEARCH-CRAWL-1 OPEN). CMS engine selection is DECIDED in ADR-015 and is not CMS-ACCEPT. Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
+Electronic-signature engine (FZ-SIGN-1); production object storage (Garage is a staging direction only). Payment provider, production training-crawler policy, and the production compute direction are DECIDED in ADR-016. CMS engine selection is DECIDED in ADR-015 and is not CMS-ACCEPT. Legacy Astro/Sanity/Workers/D1/R2/wrangler choices do not decide these.
 
 ## Integration model
 
-Google Calendar/Gmail/Drive, Fakturownia, Meta, payment provider,
+Google Calendar/Gmail/Drive, Fakturownia, Meta, Przelewy24,
 Cloudflare and AI providers are reconnectable adapters. Test accounts
 are not production identity. Action tools require authz/approval/audit
 appropriate to risk.

@@ -34,15 +34,19 @@ test('a non-production host cannot be indexed and production is not Disallow all
   const blocked = robotsTxt('non-production');
   assert.match(blocked, /Disallow: \//);
   const production = robotsTxt('production');
-  assert.equal(/^Disallow: \/$/m.test(production), false);
-  assert.match(production, /Allow: \//);
+  assert.match(production, /User-agent: \*\nAllow: \//);
   assert.equal(blocked.includes('GPTBot'), false);
-  assert.equal(production.includes('GPTBot'), false);
+  assert.match(production, /User-agent: GPTBot\nDisallow: \//);
+  assert.match(production, /User-agent: ClaudeBot\nDisallow: \//);
+  assert.match(production, /User-agent: Google-Extended\nDisallow: \//);
+  for (const token of ['Googlebot', 'OAI-SearchBot', 'Claude-SearchBot', 'PerplexityBot']) {
+    assert.equal(production.includes(token), false);
+  }
   assert.equal(blocked.includes('Sitemap:'), false);
   assert.equal(blocked.includes('ClaudeBot'), false);
   const named = robotsTxt('production', 'https://example.test');
   assert.match(named, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
-  assert.equal(/^Disallow: \/$/m.test(named), false);
+  assert.match(named, /User-agent: \*\nAllow: \//);
   const hidden = sitemapXml('non-production', 'https://staging.example.test', ['/galeria']);
   assert.equal(hidden.includes('<loc>'), false);
   const listed = sitemapXml('production', 'https://example.test', ['/galeria', 'https://evil.example/x']);

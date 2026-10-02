@@ -13,7 +13,7 @@ Binding sources: [`MASTER-PLAN.md`](../vision/MASTER-PLAN.md),
 Do not create an endless agent loop. One bounded slice at a time.
 Stop at OWNER-ONLY or DANGEROUS. CMS-ACCEPT and SEARCH-ACCEPT stay
 report-only and are not Lead security acceptance. FZ-SIGN-1 stays
-UNDECIDED. FZ-SEARCH-CRAWL-1 stays OPEN.
+UNDECIDED. FZ-SEARCH-CRAWL-1 is OPTION A (ADR-016).
 
 ## Shared rules for every slice
 
@@ -916,9 +916,9 @@ Next: none.
 | OpenObserve / Garage / Compose staging | later | Gate A horizons, not Lead acceptance |
 | Cloudflare Tunnel / DNS / private-origin | DANGEROUS | Owner approval required |
 | FZ-SIGN-1 provider | OWNER-DECISION | UNDECIDED; FZ-CONTINUE-1 authorizes neutral lifecycle staff UI only |
-| Payment provider | OWNER-DECISION | FZ-REQ-PAY-001; no transactions; schedule staff UI only |
-| FZ-SEARCH-CRAWL-1 | OWNER-DECISION | OPEN; continue does not invent crawl policy |
-| Production hosting | OWNER-DECISION | UNDECIDED; no deploy |
+| Payment provider | DECIDED | Przelewy24 (ADR-016). No transaction. Adapter waits for a payment packet |
+| FZ-SEARCH-CRAWL-1 | DECIDED | OPTION A in generated production robots. Live Cloudflare zone unchanged |
+| Production hosting | DECIDED | One Hetzner CX23 EU at cutover, DEPLOY=compose. No purchase now. No deploy |
 | CMS-ACCEPT / SEARCH-ACCEPT | report only | Stay on the CMS graph; not a global MAIN product barrier |
 | Lead security acceptance | OPEN | Blocks only claims of Lead security-accepted; does **not** block Offer/Admin/Portal |
 | ZAP ARMED_WAITING_FOR_TARGET | DEFERRED | Truthful; does **not** block unrelated product slices |

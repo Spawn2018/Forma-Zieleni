@@ -112,10 +112,7 @@ row('FZ-REQ-GOV-002', 'FZ-SIGN-1 provider remains undecided.', 'OWNER_GATED', 'D
   safePreblockerWork: false,
 });
 row('FZ-REQ-SEARCH-001', 'FZ-SEARCH-1 remains the search architecture. No universal AI rank or GEO score.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', SEARCH, SEARCH, 'contracts/content-contract.test.mjs', '', 'NONE', 'Connector runtime is a later slice, not this foundation.');
-row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 training-crawler policy stays open.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'Owner policy', 'OWNER-DECISION', 'OPEN', {
-  blockerClass: 'OWNER_GATED',
-  safePreblockerWork: false,
-});
+row('FZ-REQ-SEARCH-002', 'FZ-SEARCH-CRAWL-1 production robots opt out GPTBot, ClaudeBot, and Google-Extended. Search-indexing tokens stay allowed.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-SEARCH-CRAWL-1.md', 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Live Cloudflare zone stays unchanged', 'NONE', 'OPTION A. Gemini grounding is opted out with Google-Extended.');
 row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeline stay the CMS decision. CMS-ACCEPT stays open.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', 'docs/architecture/OWNER-DECISION-PACKET-FZ-CMS-1.md', SLICES, 'scripts/cms-lab-gate.mjs', 'Apostrophe Admin UI and PostgreSQL lab not executed', 'REVIEW', 'CMS-ACCEPT OPEN', {
   blockerClass: 'VENDOR_ACCEPTANCE',
   executableSlice: 'CMS-ACCEPT',
@@ -123,7 +120,7 @@ row('FZ-REQ-CMS-001', 'Apostrophe, vendor-native editing and the FZ media pipeli
 });
 row('FZ-REQ-CMS-002', 'Published content stays a projection. Drafts stay private.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/content-publish.ts', 'packages/domain/content-publish.test.mjs', '', 'NONE', '');
 row('FZ-REQ-MEDIA-001', 'Private checksummed masters and public derivatives without GPS stay the media contract.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/media/src/derivatives.mjs', 'packages/media/derivatives.test.mjs', '', 'NONE', 'The public gallery route exists and stays empty until a published collection.');
-row('FZ-REQ-ARCH-001', 'Gate A stays Hono, PostgreSQL, Kysely, outbox, Better Auth, local files, later Garage, OpenObserve, SOPS+age, restic, pgBackRest, Cloudflare Tunnel, Compose later, no overlay.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, '', 'NONE', 'Production hosting and object storage remain undecided.');
+row('FZ-REQ-ARCH-001', 'Gate A stays Hono, PostgreSQL, Kysely, outbox, Better Auth, local files, later Garage, OpenObserve, SOPS+age, restic, pgBackRest, Cloudflare Tunnel, Compose later, no overlay.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, '', 'NONE', 'Production compute direction is one Hetzner CX23 at cutover. Object storage remains undecided. No purchase now.');
 row('FZ-REQ-ARCH-002', 'No graph database, Prisma, Drizzle or Kafka is introduced by this foundation.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CONNECTED, 'package.json', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 row('FZ-REQ-API-001', 'Core API remains the business authority.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', '');
 row('FZ-REQ-DATA-001', 'PostgreSQL and Kysely remain persistence. New unused tables were not added.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'apps/api/src/db.ts', 'apps/api/src/postgres.integration.test.mjs', 'A shared fabric table waits for a product consumer', 'NONE', 'Domain contract is in memory, matching the content-publish precedent.');
@@ -188,15 +185,10 @@ row('FZ-REQ-PROJECT-002', 'Project domain foundations may be contracted after Co
   executableSlice: 'CRM-PROJECT-DOMAIN',
   executableWhenComplete: ['CRM-CONTRACT-DOMAIN'],
 });
-row('FZ-REQ-PAY-001', 'Payment provider remains undecided. No transaction is started.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
-  blockerClass: 'OWNER_GATED',
+row('FZ-REQ-PAY-001', 'Payment provider is Przelewy24. No transaction is started.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/DECISIONS.md', 'docs/architecture/DECISIONS.md', 'Adapter and charges wait for a payment packet', 'NONE', 'Fakturownia remains invoicing only.', {
   productCapability: 'PAYMENT',
-  safePreblockerWork: false,
 });
-row('FZ-REQ-HOST-001', 'Production hosting remains undecided. No deploy, DNS or Cloudflare mutation.', 'OWNER_GATED', 'DOCUMENTED', 'DOCUMENTED', CURRENT, CURRENT, CURRENT, 'Owner selection', 'OWNER-DECISION', 'UNDECIDED', {
-  blockerClass: 'OWNER_GATED',
-  safePreblockerWork: false,
-});
+row('FZ-REQ-HOST-001', 'Production hosting is one Hetzner CX23 in the EU at cutover, DEPLOY=compose. No purchase now. No deploy, DNS or Cloudflare mutation.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', CURRENT, 'docs/architecture/DECISIONS.md', 'docs/architecture/DECISIONS.md', 'No VM purchased', 'NONE', 'One machine. No second production VM.');
 row('FZ-REQ-GOV-003', 'Project code stays all rights reserved. No repository OSS license is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
 row('FZ-REQ-GOV-004', 'Legal facts, font files and the legacy CT8 site are not changed or invented here.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'docs/engineering/requirements/RESEARCH-2026-09-21.md', 'Re-verify before public use', 'NONE', 'NIP and font delivery were not re-fetched.');
 row('FZ-REQ-EXECINTEGRITY-001', 'Material claims in this registry name an artifact. Synthetic plans are labeled synthetic.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/requirements/FZ-MASTER-TRACEABILITY.md', 'scripts/requirements/registry.mjs', 'scripts/requirements/registry.test.mjs', '', 'NONE', '');
@@ -217,7 +209,7 @@ row('FZ-REQ-DOCQA-001', 'pnpm docs:check fails on broken pointers, drifted event
 row('FZ-REQ-PLATFORM-001', 'Golden paths reuse Cursor OS. One writer. No internal developer portal app.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/GOLDEN-PATHS.md', 'docs/cursor-os/CURSOR-OS-2026.md', DOCS_CHECK, '', 'NONE', '');
 row('FZ-REQ-DORA-003', 'DORA capability coverage is evidenced per capability. There is no combined score.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', 'docs/engineering/DORA-CAPABILITY-COVERAGE.md', DOCS_CHECK, 'No production deployment series', 'NONE', 'Several capabilities stay DESIGNED or NOT MEASURABLE.');
 row('FZ-REQ-DORA-004', 'AI use is classified. Customer data and secrets are prohibited in external tools. Token count is not productivity.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/FZ-AI-USAGE-POLICY.md', 'docs/engineering/FZ-AI-USAGE-POLICY.md', DOCS_CHECK, '', 'NONE', 'Vendor privacy promises were not re-verified.');
-row('FZ-REQ-DORA-005', 'Release readiness is local and reproducible. Deploy, hosting, and alert thresholds stay gated or unmeasured.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/RELEASE-READINESS.md', 'docs/engineering/RELEASE-READINESS.md', DOCS_CHECK, 'production hosting UNDECIDED', 'OWNER-DECISION', '');
+row('FZ-REQ-DORA-005', 'Release readiness is local and reproducible. Deploy and alert thresholds stay gated or unmeasured. Hosting direction is ADR-016.', 'DONE_AT_MAX_DEPTH', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/RELEASE-READINESS.md', 'docs/engineering/RELEASE-READINESS.md', DOCS_CHECK, 'deploy stays DANGEROUS', 'NONE', '');
 row('FZ-REQ-DORA-006', 'Value stream stages are named. Durations stay not measurable until a release clock exists.', 'NOT_MEASURABLE_YET', 'DOCUMENTED', 'DOCUMENTED', 'docs/engineering/VALUE-STREAM.md', 'docs/engineering/VALUE-STREAM.md', 'scripts/requirements/closure.test.mjs', 'no production release clock', 'NONE', 'NOT MEASURABLE', {
   blockerClass: 'PRODUCTION_ONLY',
   safePreblockerWork: false,
@@ -265,7 +257,7 @@ for (const slice of OPEN_SLICES) {
     continue;
   }
   if (slice === 'CMS-SEO') {
-    row('FZ-REQ-CMS-SLICE-CMS-SEO', 'A published slug change writes a redirect. JSON-LD has no placeholder price. Production robots is not a blanket disallow.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/domain/src/content-publish.ts', 'apps/web/app/cms-seo.test.mjs', '', 'NONE', 'Training-crawler groups stay absent while FZ-SEARCH-CRAWL-1 is OPEN.');
+    row('FZ-REQ-CMS-SLICE-CMS-SEO', 'A published slug change writes a redirect. JSON-LD has no placeholder price. Production robots is not a blanket disallow.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'packages/domain/src/content-publish.ts', 'apps/web/app/cms-seo.test.mjs', '', 'NONE', 'Production training opt-out is GPTBot, ClaudeBot, and Google-Extended.');
     continue;
   }
   if (slice === 'CMS-WWW') {
@@ -281,7 +273,7 @@ for (const slice of OPEN_SLICES) {
     continue;
   }
   if (slice === 'SEARCH-SITEMAP-ROBOTS') {
-    row('FZ-REQ-CMS-SLICE-SEARCH-SITEMAP-ROBOTS', 'Robots and sitemap are generated from policy. Non-production disallows indexing. Production is not a blanket disallow. Training groups stay absent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Cloudflare apply stays DANGEROUS', 'NONE', 'FZ-SEARCH-CRAWL-1 remains OPEN.');
+    row('FZ-REQ-CMS-SLICE-SEARCH-SITEMAP-ROBOTS', 'Robots and sitemap are generated from policy. Non-production disallows indexing. Production is not a blanket disallow. Production opts out GPTBot, ClaudeBot, and Google-Extended.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', SLICES, 'apps/web/app/technical-seo.ts', 'apps/web/app/technical-seo.test.mjs', 'Cloudflare apply stays DANGEROUS', 'NONE', 'FZ-SEARCH-CRAWL-1 OPTION A. Live zone unchanged.');
     continue;
   }
   if (slice === 'SEARCH-ATTRIBUTION') {
@@ -317,7 +309,7 @@ for (const slice of OPEN_SLICES) {
     continue;
   }
   if (slice === 'SEARCH-CRAWLER-INTELLIGENCE') {
-    row('FZ-REQ-CMS-SLICE-SEARCH-CRAWLER-INTELLIGENCE', 'Crawler taxonomy A–E is encoded; free-plan Cloudflare referrals stay absent; live zone mutation is refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-crawler-intelligence.ts', 'packages/domain/search-crawler-intelligence.test.mjs', 'Cloudflare mutation stays DANGEROUS', 'NONE', 'Training tokens remain OPEN under FZ-SEARCH-CRAWL-1.');
+    row('FZ-REQ-CMS-SLICE-SEARCH-CRAWLER-INTELLIGENCE', 'Crawler taxonomy A–E is encoded; free-plan Cloudflare referrals stay absent; live zone mutation is refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', 'docs/architecture/FZ-SEARCH-1.md', 'packages/domain/src/search-crawler-intelligence.ts', 'packages/domain/search-crawler-intelligence.test.mjs', 'Cloudflare mutation stays DANGEROUS', 'NONE', 'Production robots apply FZ-SEARCH-CRAWL-1 OPTION A. Live zone mutation stays refused.');
     continue;
   }
   if (slice === 'SEARCH-RECOVERY') {
@@ -577,7 +569,7 @@ row('FZ-REQ-SKETCHUP-002', 'SketchUp project mapping uses Core API project ids a
   executableSlice: 'SKETCHUP-PROJECT-MAP',
   executableWhenComplete: ['SKETCHUP-ADAPTER-BOUNDARY'],
 });
-row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and without moving money.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/payment.ts', 'packages/domain/payment.test.mjs', '', 'NONE', 'Provider-neutral schedule on Contract; FZ-REQ-PAY-001 provider stays OWNER-DECISION.', {
+row('FZ-REQ-PAY-002', 'Payment schedule and states exist without a provider and without moving money.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/payment.ts', 'packages/domain/payment.test.mjs', '', 'NONE', 'Provider-neutral schedule on Contract. Provider is Przelewy24. No transaction is started.', {
   productCapability: 'PAYMENT',
   depth: 'DOMAIN',
   executableSlice: 'PAY-DOMAIN-NEUTRAL',

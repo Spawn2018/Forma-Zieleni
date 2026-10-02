@@ -40,6 +40,8 @@ test('a published slug change writes a redirect and the search fixtures stay cle
   assert.equal(json.includes('999'), false);
   assert.equal(json.includes('price'), false);
   const robots = robotsTxt('production', 'https://example.test');
-  assert.equal(/^Disallow: \/$/m.test(robots), false);
-  assert.equal(robots.includes('GPTBot'), false);
+  assert.match(robots, /User-agent: \*\nAllow: \//);
+  assert.match(robots, /User-agent: GPTBot\nDisallow: \//);
+  assert.match(robots, /User-agent: ClaudeBot\nDisallow: \//);
+  assert.match(robots, /User-agent: Google-Extended\nDisallow: \//);
 });

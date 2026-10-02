@@ -46,10 +46,10 @@ function masterMap(n) {
   if (n <= 33) return [['FZ-REQ-ARCH-001'], 'Gate A and the modular monolith.'];
   if (n <= 37) return [['FZ-REQ-WWW-001', 'FZ-REQ-PORTAL-001', 'FZ-REQ-ADMIN-001', 'FZ-REQ-MOBILE-001'], 'Product surfaces at their real depth.'];
   if (n <= 40) return [['FZ-REQ-SITEINTEL-001', 'FZ-REQ-GARDENOS-001', 'FZ-REQ-SKETCHUP-001'], 'Future products are not runtimes.'];
-  if (n <= 44) return [['FZ-REQ-OFFERINTEL-001', 'FZ-REQ-PAY-001', 'FZ-REQ-GOV-002'], 'Commercial truth and undecided providers.'];
+  if (n <= 44) return [['FZ-REQ-OFFERINTEL-001', 'FZ-REQ-PAY-001', 'FZ-REQ-GOV-002'], 'Commercial truth. Przelewy24 is selected. Signing provider stays undecided.'];
   if (n === 45) return [['FZ-REQ-SEC-001'], 'Lead vertical is not security-accepted.'];
   if (n <= 50) return [['FZ-REQ-CMS-001', 'FZ-REQ-CMS-002', 'FZ-REQ-MEDIA-001'], 'CMS decision and media contract.'];
-  if (n <= 54) return [['FZ-REQ-SEARCH-001', 'FZ-REQ-SEARCH-002'], 'One search architecture. Crawler policy is open.'];
+  if (n <= 54) return [['FZ-REQ-SEARCH-001', 'FZ-REQ-SEARCH-002'], 'One search architecture. Production training crawlers are opted out.'];
   if (n <= 76) return [['FZ-REQ-CONNECT-001', 'FZ-REQ-APPROVAL-001'], 'Connected facts and human approval.'];
   if (n <= 84) return [['FZ-REQ-PROJECT-001', 'FZ-REQ-ATLAS-001', 'FZ-REQ-PROJECTGROWTH-001'], 'Projects, atlas, portfolio.'];
   if (n <= 109) return [['FZ-REQ-GROWTH-001', 'FZ-REQ-MKTEXEC-001', 'FZ-REQ-MARKETING-001'], 'Growth plan and execution graph.'];
@@ -141,7 +141,7 @@ function buildDirectiveSections() {
   for (const slice of OPEN_SLICES.filter(item => item.startsWith('SEARCH-'))) {
     rows.push(section('SEARCH', `SEARCH:${slice}`, true, [`FZ-REQ-CMS-SLICE-${slice}`], 'Open search slice. Not executed.'));
   }
-  rows.push(section('SEARCH', 'SEARCH:FZ-SEARCH-CRAWL-1', true, ['FZ-REQ-SEARCH-002'], 'Training-crawler policy is open.'));
+  rows.push(section('SEARCH', 'SEARCH:FZ-SEARCH-CRAWL-1', true, ['FZ-REQ-SEARCH-002'], 'Training-crawler policy is OPTION A. Live Cloudflare zone unchanged.'));
   const gates = [
     ['OPEN_GATES:FZ-SIGN-1', ['FZ-REQ-GOV-002']],
     ['OPEN_GATES:FZ-SEARCH-CRAWL-1', ['FZ-REQ-SEARCH-002']],
