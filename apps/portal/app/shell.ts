@@ -98,6 +98,7 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
   if (items.length === 0) return { status: 'empty' };
   const rows: PortalOfferRow[] = [];
   for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const offer = item as OfferApiItem;
     if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
     if (typeof offer.status !== 'string' || typeof offer.createdAt !== 'string') return { status: 'error' };
@@ -131,6 +132,7 @@ export function mapPortalProjectPage(body: unknown): PortalProjectList {
   if (items.length === 0) return { status: 'empty' };
   const rows: PortalProjectRow[] = [];
   for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const project = item as ProjectApiItem;
     if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
     if (typeof project.status !== 'string' || typeof project.createdAt !== 'string') return { status: 'error' };
@@ -171,6 +173,7 @@ export function mapPortalFilePage(body: unknown): PortalFileList {
   if (items.length === 0) return { status: 'empty' };
   const rows: PortalFileRow[] = [];
   for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const file = item as FileApiItem;
     if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
     if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };

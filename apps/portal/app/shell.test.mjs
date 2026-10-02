@@ -93,6 +93,8 @@ test('portal session classification enforces the portal trust zone', async () =>
 test('signed-in portal renders client-safe offer projection without price or terms', async () => {
   assert.deepEqual(mapPortalOfferPage({ items: [] }), { status: 'empty' });
   assert.deepEqual(mapPortalOfferPage({ items: [{ id: 'x', price: 1 }] }), { status: 'error' });
+  assert.deepEqual(mapPortalOfferPage({ items: [null] }), { status: 'error' });
+  assert.deepEqual(mapPortalOfferPage({ items: [['nested']] }), { status: 'error' });
   const mapped = mapPortalOfferPage({
     items: [{
       id: 'of8k2n4p6q8r0s2t',
@@ -162,6 +164,7 @@ test('signed-in portal renders client-safe project and file projections without 
       provider: 'x',
     }],
   }), { status: 'error' });
+  assert.deepEqual(mapPortalProjectPage({ items: [null] }), { status: 'error' });
   assert.deepEqual(mapPortalFilePage({ items: [] }), { status: 'empty' });
   assert.deepEqual(mapPortalFilePage({
     items: [{
