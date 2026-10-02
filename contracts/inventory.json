@@ -43,6 +43,7 @@
     "POST /approvals/proposals/{changeSetId}/review",
     "POST /contracts",
     "POST /contracts/{contractId}/lifecycle",
+    "POST /contracts/{contractId}/signing-sandbox-envelope",
     "POST /decision-log",
     "POST /files",
     "POST /gardens",
@@ -58,6 +59,7 @@
     "POST /payments/przelewy24/sandbox-webhook",
     "POST /projects",
     "POST /projects/{projectId}/deliver",
+    "POST /signing/documenso/sandbox-webhook",
     "POST /site-intelligence",
     "PUT /files/{fileId}/content",
     "PUT /payment-schedules/{scheduleId}"
@@ -79,6 +81,9 @@
       "Idempotency-Key"
     ],
     "POST /contracts/{contractId}/lifecycle": [
+      "Idempotency-Key"
+    ],
+    "POST /contracts/{contractId}/signing-sandbox-envelope": [
       "Idempotency-Key"
     ],
     "POST /projects": [

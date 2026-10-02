@@ -93,6 +93,13 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  sandbox_signing_envelope: {
+    id: string;
+    contract_id: string;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+  };
   garden: {
     id: string;
     project_id: string;
@@ -1113,6 +1120,25 @@ CREATE TABLE sandbox_payment_intent (
   },
 };
 
+const documensoSandboxMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE sandbox_signing_envelope (
+  id text PRIMARY KEY,
+  contract_id text NOT NULL UNIQUE REFERENCES contract (id),
+  status text NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT sandbox_signing_envelope_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$'),
+  CONSTRAINT sandbox_signing_envelope_status_known CHECK (status IN ('pending', 'completed'))
+);
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw('DROP TABLE IF EXISTS sandbox_signing_envelope;').execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1134,6 +1160,7 @@ const provider: MigrationProvider = {
       '016_garden_domain': gardenMigration,
       '017_site_intelligence': siteIntelligenceMigration,
       '018_przelewy24_sandbox': przelewy24SandboxMigration,
+      '019_documenso_sandbox': documensoSandboxMigration,
     };
   },
 };

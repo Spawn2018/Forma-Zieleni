@@ -10,6 +10,7 @@ import type {
   OpportunityStatus,
   PaymentSchedule,
   SandboxPaymentIntent,
+  SigningSandboxEnvelope,
   Project,
   ProjectDecisionLogEntry,
   ProjectFile,
@@ -125,7 +126,7 @@ export type OutboxMessage = {
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -187,6 +188,10 @@ export interface LeadTx {
   saveSandboxIntent(intent: SandboxPaymentIntent): Promise<void>;
   findSandboxIntent(id: string): Promise<SandboxPaymentIntent | null>;
   findSandboxIntentByInstallment(installmentId: string): Promise<SandboxPaymentIntent | null>;
+  insertSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void>;
+  saveSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void>;
+  findSigningEnvelope(id: string): Promise<SigningSandboxEnvelope | null>;
+  findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null>;
   insertGarden(garden: Garden): Promise<void>;
   findGarden(id: string): Promise<Garden | null>;
   findGardenByProject(projectId: string): Promise<Garden | null>;

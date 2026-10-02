@@ -255,6 +255,8 @@ function checkCanon(errors) {
     '## ADR-015 — Content / media / visual publishing (FZ-CMS-1)',
     '## ADR-016 — Crawl policy, payment provider, production hosting direction',
     '## ADR-017 — Next slice wave: signing re-read and Przelewy24 sandbox',
+    '## ADR-018 — Safe slices after the blockers are deferred',
+    'AUTHORIZE SIGN-ADAPTER-1',
     'DECISION FZ-CMS-1: OPTION B',
     'DECISION FZ-SEARCH-CRAWL-1: OPTION A',
     'AUTHORIZE PAY-ADAPTER-1',

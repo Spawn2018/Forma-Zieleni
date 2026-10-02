@@ -10,6 +10,7 @@ import type {
   OpportunityStatus,
   PaymentSchedule,
   SandboxPaymentIntent,
+  SigningSandboxEnvelope,
   Project,
   ProjectDecisionLogEntry,
   ProjectFile,
@@ -47,6 +48,7 @@ type MemoryState = {
   decisionLog: ProjectDecisionLogEntry[];
   paymentSchedules: PaymentSchedule[];
   sandboxIntents: SandboxPaymentIntent[];
+  signingEnvelopes: SigningSandboxEnvelope[];
   gardens: Garden[];
   siteIntelligence: SiteIntelligenceRecord[];
   idempotency: Map<string, StoredReply>;
@@ -74,6 +76,7 @@ export class MemoryLeadStore implements LeadStore {
     decisionLog: [],
     paymentSchedules: [],
     sandboxIntents: [],
+    signingEnvelopes: [],
     gardens: [],
     siteIntelligence: [],
     idempotency: new Map(),
@@ -93,6 +96,7 @@ export class MemoryLeadStore implements LeadStore {
       decisionLog: this.state.decisionLog,
       paymentSchedules: this.state.paymentSchedules,
       sandboxIntents: this.state.sandboxIntents,
+      signingEnvelopes: this.state.signingEnvelopes,
       gardens: this.state.gardens,
       siteIntelligence: this.state.siteIntelligence,
       outbox: this.state.outbox,
@@ -112,6 +116,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.decisionLog = snapshot.decisionLog;
       this.state.paymentSchedules = snapshot.paymentSchedules;
       this.state.sandboxIntents = snapshot.sandboxIntents;
+      this.state.signingEnvelopes = snapshot.signingEnvelopes;
       this.state.gardens = snapshot.gardens;
       this.state.siteIntelligence = snapshot.siteIntelligence;
       this.state.outbox = snapshot.outbox;
@@ -460,6 +465,24 @@ class MemoryTx implements LeadTx {
 
   async findSandboxIntentByInstallment(installmentId: string): Promise<SandboxPaymentIntent | null> {
     return clone(this.state.sandboxIntents.find(item => item.installmentId === installmentId) ?? null);
+  }
+
+  async insertSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void> {
+    this.state.signingEnvelopes.push(clone(envelope));
+  }
+
+  async saveSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void> {
+    const index = this.state.signingEnvelopes.findIndex(item => item.id === envelope.id);
+    if (index < 0) throw new Error('SIGNING_ENVELOPE_MISSING');
+    this.state.signingEnvelopes[index] = clone(envelope);
+  }
+
+  async findSigningEnvelope(id: string): Promise<SigningSandboxEnvelope | null> {
+    return clone(this.state.signingEnvelopes.find(item => item.id === id) ?? null);
+  }
+
+  async findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null> {
+    return clone(this.state.signingEnvelopes.find(item => item.contractId === contractId) ?? null);
   }
 
   async insertGarden(garden: Garden): Promise<void> {

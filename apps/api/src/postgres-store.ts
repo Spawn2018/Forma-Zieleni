@@ -1,5 +1,5 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone, SandboxPaymentIntent, SiteIntelligenceRecord } from '@forma-zieleni/domain';
+import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone, SandboxPaymentIntent, SigningSandboxEnvelope, SiteIntelligenceRecord } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
@@ -156,6 +156,18 @@ function toDecisionLog(row: Database['project_decision_log']): ProjectDecisionLo
     recordedByActorId: row.recorded_by_actor_id,
     relatedMilestoneId: row.related_milestone_id,
     createdAt: iso(row.created_at),
+  };
+}
+
+function toSigningEnvelope(row: Database['sandbox_signing_envelope']): SigningSandboxEnvelope {
+  return {
+    id: row.id,
+    provider: 'documenso-sandbox',
+    contractId: row.contract_id,
+    status: row.status as SigningSandboxEnvelope['status'],
+    qesClaimed: false,
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
   };
 }
 
@@ -610,6 +622,33 @@ class PostgresTx implements LeadTx {
   async findSandboxIntentByInstallment(installmentId: string): Promise<SandboxPaymentIntent | null> {
     const row = await this.trx.selectFrom('sandbox_payment_intent').selectAll().where('installment_id', '=', installmentId).executeTakeFirst();
     return row ? toSandboxIntent(row) : null;
+  }
+
+  async insertSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void> {
+    await this.trx.insertInto('sandbox_signing_envelope').values({
+      id: envelope.id,
+      contract_id: envelope.contractId,
+      status: envelope.status,
+      created_at: new Date(envelope.createdAt),
+      updated_at: new Date(envelope.updatedAt),
+    }).execute();
+  }
+
+  async saveSigningEnvelope(envelope: SigningSandboxEnvelope): Promise<void> {
+    await this.trx.updateTable('sandbox_signing_envelope').set({
+      status: envelope.status,
+      updated_at: new Date(envelope.updatedAt),
+    }).where('id', '=', envelope.id).execute();
+  }
+
+  async findSigningEnvelope(id: string): Promise<SigningSandboxEnvelope | null> {
+    const row = await this.trx.selectFrom('sandbox_signing_envelope').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toSigningEnvelope(row) : null;
+  }
+
+  async findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null> {
+    const row = await this.trx.selectFrom('sandbox_signing_envelope').selectAll().where('contract_id', '=', contractId).executeTakeFirst();
+    return row ? toSigningEnvelope(row) : null;
   }
 
   async insertGarden(garden: Garden): Promise<void> {

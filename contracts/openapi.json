@@ -2431,6 +2431,59 @@
         }
       }
     },
+    "/contracts/{contractId}/signing-sandbox-envelope": {
+      "post": {
+        "tags": ["Contracts"],
+        "operationId": "createSigningSandboxEnvelope",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Staff open a Documenso sandbox envelope for a sent contract. No outbound call, no API token, and no QES.",
+        "parameters": [
+          { "$ref": "#/components/parameters/ContractId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sandbox envelope created.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SigningSandboxEnvelope" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/signing/documenso/sandbox-webhook": {
+      "post": {
+        "tags": ["Contracts"],
+        "operationId": "acceptSigningSandboxWebhook",
+        "security": [],
+        "description": "Complete a Documenso sandbox envelope from a signed webhook. A bad signature does not change status. No QES.",
+        "parameters": [
+          {
+            "name": "X-FZ-Signing-Sandbox-Signature",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SigningSandboxWebhook" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope after a valid sandbox completion.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SigningSandboxEnvelope" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
     "/projects/{projectId}/deliver": {
       "post": {
         "tags": [
@@ -4777,6 +4830,31 @@
           "updatedAt": { "type": "string", "format": "date-time" }
         },
         "description": "Sandbox intent. No secret and no production merchant key."
+      },
+      "SigningSandboxEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "provider", "contractId", "status", "qesClaimed", "createdAt", "updatedAt"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/OpaqueId" },
+          "provider": { "type": "string", "enum": ["documenso-sandbox"] },
+          "contractId": { "$ref": "#/components/schemas/OpaqueId" },
+          "status": { "type": "string", "enum": ["pending", "completed"] },
+          "qesClaimed": { "type": "boolean", "enum": [false] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "description": "Local Documenso sandbox envelope. No token and no QES."
+      },
+      "SigningSandboxWebhook": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["envelopeId", "contractId", "status"],
+        "properties": {
+          "envelopeId": { "$ref": "#/components/schemas/OpaqueId" },
+          "contractId": { "$ref": "#/components/schemas/OpaqueId" },
+          "status": { "type": "string", "enum": ["completed"] }
+        }
       },
       "SandboxPaymentWebhook": {
         "type": "object",

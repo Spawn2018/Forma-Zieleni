@@ -36,6 +36,7 @@ import {
   transitionPaymentInstallmentRecord,
   acceptSandboxWebhookRecord,
 } from './payments.ts';
+import { acceptSigningSandboxWebhookRecord, createSigningSandboxEnvelopeRecord } from './signing-sandbox.ts';
 import { createProjectFromContract, deliverExistingProject, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
 import {
@@ -70,6 +71,8 @@ export type AppOptions = {
   fileBytesRoot?: string;
   /** Sandbox-only HMAC secret. Never a production merchant key. */
   sandboxWebhookSecret?: string;
+  /** Documenso sandbox HMAC secret. Never a production API token. */
+  signingSandboxSecret?: string;
 };
 
 function mintRequestId(): string {
@@ -944,6 +947,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     const signature = c.req.header('x-fz-sandbox-signature') ?? '';
     const schedule = await acceptSandboxWebhookRecord(options.store, raw, signature, secret, now());
     return c.json(schedule);
+  });
+
+  app.post('/v1/contracts/:contractId/signing-sandbox-envelope', async c => {
+    const actor = await requireActor(c, options.authenticator, 'contracts:lifecycle');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const envelope = await createSigningSandboxEnvelopeRecord(
+      options.store,
+      pathContractId(c.req.param('contractId')),
+      actor,
+      key,
+      now(),
+    );
+    return c.json(envelope, 201);
+  });
+
+  app.post('/v1/signing/documenso/sandbox-webhook', async c => {
+    const secret = options.signingSandboxSecret;
+    if (!secret) throw new ApiFailure(503, 'SIGNING_SECRET_UNCONFIGURED', 'Signing sandbox secret is not configured.');
+    const raw = await c.req.text();
+    const signature = c.req.header('x-fz-signing-sandbox-signature') ?? '';
+    const envelope = await acceptSigningSandboxWebhookRecord(options.store, raw, signature, secret, now());
+    return c.json(envelope);
   });
 
   app.get('/v1/approvals/proposals', async c => {

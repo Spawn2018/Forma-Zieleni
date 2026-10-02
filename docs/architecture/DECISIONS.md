@@ -211,7 +211,17 @@ Binding architecture shape: [`CURRENT-ARCHITECTURE.md`](./CURRENT-ARCHITECTURE.m
 | Status | Accepted |
 | Decyzja | `AUTHORIZE PAY-ADAPTER-1: Przelewy24 sandbox only. Core API adapter, webhooks, schedule status. No live charge, no production keys.` `AUTHORIZE FZ-SIGN-1-REREAD: re-read Documenso Community production API from official docs. Select it only if that API has no per-signature fee. Otherwise stop. No QES.` |
 | Kontekst | The main product graph had no remaining AUTO/REVIEW slice. The Owner authorized the next wave with those two statements. |
-| Konsekwencje | FZ-SIGN-1-REREAD is COMPLETE: Documenso Community self-host is the selected engine because the official self-host plan table shows unlimited documents and no per-signature fee. Documenso Cloud is not selected. No QES and no signing SDK. PAY-ADAPTER-1 is the next OPEN slice. Live charges, production keys, DNS, Cloudflare, and hosting purchase stay outside this wave. |
+| Konsekwencje | FZ-SIGN-1-REREAD is COMPLETE: Documenso Community self-host is the selected engine because the official self-host plan table shows unlimited documents and no per-signature fee. Documenso Cloud is not selected. No QES. PAY-ADAPTER-1 followed. Live charges, production keys, DNS, Cloudflare, and hosting purchase stay outside this wave. |
+
+## ADR-018 — Safe slices after the blockers are deferred
+
+| Pole | Wartość |
+|------|---------|
+| Data | 2026-10-02 |
+| Status | Accepted |
+| Decyzja | Owner: otworzyć kolejne bezpieczne slice'e. Blokady (Cloudflare, DNS, zakup hostingu, prawdziwa wpłata, security-accept bez ZAP) zostają na później. `AUTHORIZE SIGN-ADAPTER-1` i `AUTHORIZE ADMIN-SIGN-SANDBOX`. |
+| Kontekst | Oba grafy były COMPLETE. Owner zgodził się otworzyć następną pracę produktową i wrócić do blokad później. |
+| Konsekwencje | SIGN-ADAPTER-1 jest lokalnym sandboxem Documenso bez QES i bez tokenu. ADMIN-SIGN-SANDBOX jest następnym slice'em staff. DANGEROUS bez zmian. |
 
 ## Szablon kolejnego ADR
 

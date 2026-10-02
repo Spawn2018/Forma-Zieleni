@@ -202,6 +202,13 @@ export {
 } from './przelewy24-sandbox.ts';
 export type { SandboxIntentStatus, SandboxPaymentIntent } from './przelewy24-sandbox.ts';
 export {
+  SIGNING_SANDBOX_PROVIDER,
+  acceptSigningSandboxWebhook,
+  assertOpaqueSigningEnvelopeId,
+  openSigningSandboxEnvelope,
+} from './documenso-sandbox.ts';
+export type { SigningSandboxEnvelope, SigningSandboxStatus } from './documenso-sandbox.ts';
+export {
   CAPACITY_KINDS,
   assertOpaqueCapacityActorId,
   assertOpaqueCapacityWindowId,

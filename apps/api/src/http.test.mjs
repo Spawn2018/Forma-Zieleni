@@ -37,7 +37,7 @@ const portalOther = {
   capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
 };
 
-function appFor(store = new MemoryLeadStore(), logs = [], limit = 100, sandboxWebhookSecret) {
+function appFor(store = new MemoryLeadStore(), logs = [], limit = 100, sandboxWebhookSecret, signingSandboxSecret) {
   let tick = 0;
   return {
     store,
@@ -50,6 +50,7 @@ function appFor(store = new MemoryLeadStore(), logs = [], limit = 100, sandboxWe
       addressOf: () => '198.51.100.10',
       now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
       ...(sandboxWebhookSecret ? { sandboxWebhookSecret } : {}),
+      ...(signingSandboxSecret ? { signingSandboxSecret } : {}),
     }),
   };
 }
@@ -1274,6 +1275,61 @@ test('przelewy24 sandbox intent and signed webhook record a due installment with
   assert.equal(confirmed.status, 200);
   assert.equal((await confirmed.json()).installments[0].status, 'recorded');
   assert.equal(JSON.stringify(logs).includes(sandboxSecret), false);
+});
+
+test('documenso sandbox envelope completes only with a signed webhook and never claims QES', async () => {
+  const { createHmac } = await import('node:crypto');
+  const signingSecret = 'signing-sandbox-secret';
+  const logs = [];
+  const { app } = appFor(undefined, logs, 100, undefined, signingSecret);
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sgn-opp-0001',
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sgn-offer-0001',
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    ...bearer(staff),
+    'idempotency-key': 'sgn-ctr-00001',
+  }))).json();
+  const lifecycle = `/v1/contracts/${contract.id}/lifecycle`;
+  for (const [status, key] of [['internal_review', 'sgn-life-0001'], ['approved', 'sgn-life-0002'], ['sent', 'sgn-life-0003']]) {
+    assert.equal((await app.request(lifecycle, json({ status }, { ...bearer(staff), 'idempotency-key': key }))).status, 200);
+  }
+  const path = `/v1/contracts/${contract.id}/signing-sandbox-envelope`;
+  assert.equal((await app.request(path, json({}, { ...bearer(portal), 'idempotency-key': 'sgn-env-portal' }))).status, 403);
+  const created = await app.request(path, json({}, { ...bearer(staff), 'idempotency-key': 'sgn-env-00001' }));
+  assert.equal(created.status, 201);
+  const envelope = await created.json();
+  assert.equal(envelope.provider, 'documenso-sandbox');
+  assert.equal(envelope.status, 'pending');
+  assert.equal(envelope.qesClaimed, false);
+  const raw = JSON.stringify({
+    envelopeId: envelope.id,
+    contractId: envelope.contractId,
+    status: 'completed',
+  });
+  const webhook = '/v1/signing/documenso/sandbox-webhook';
+  const forged = await app.request(webhook, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...bearer(portal), 'x-fz-signing-sandbox-signature': 'deadbeef' },
+    body: raw,
+  });
+  assert.equal(forged.status, 401);
+  const signature = createHmac('sha256', signingSecret).update(raw).digest('hex');
+  const completed = await app.request(webhook, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-fz-signing-sandbox-signature': signature },
+    body: raw,
+  });
+  assert.equal(completed.status, 200);
+  const body = await completed.json();
+  assert.equal(body.status, 'completed');
+  assert.equal(body.qesClaimed, false);
+  assert.equal(JSON.stringify(logs).includes(signingSecret), false);
 });
 
 test('staff can list and review synthetic approval proposals; portal cannot; spend override refused', async () => {

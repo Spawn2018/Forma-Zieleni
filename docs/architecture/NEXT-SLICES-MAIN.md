@@ -939,6 +939,36 @@ sandbox routes.
 Security: webhook signature required; a bad signature does not change
 schedule status; portal callers cannot confirm payment; secrets are not
 logged.
+Next: SIGN-ADAPTER-1.
+
+### SIGN-ADAPTER-1
+
+Dependencies: PAY-ADAPTER-1, FZ-SIGN-1-REREAD, SIGN-LIFECYCLE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: Core API sandbox envelope for Documenso Community self-host on a
+contract in `sent`. A signed sandbox webhook completes it. No outbound
+call, no API token, no customer document bytes, and `qesClaimed` stays
+false.
+Tests: `packages/domain/documenso-sandbox.test.mjs` and
+`apps/api/src/http.test.mjs`. OpenAPI lists the sandbox routes.
+Security: webhook signature required; a bad signature does not complete
+the envelope; portal callers cannot open it; secrets are not logged.
+Next: ADMIN-SIGN-SANDBOX.
+
+### ADMIN-SIGN-SANDBOX
+
+Dependencies: SIGN-ADAPTER-1, ADMIN-APP.
+Gate: REVIEW.
+Status: OPEN.
+Autonomous: yes.
+Accept: staff in `apps/admin` can open a Documenso sandbox envelope for
+a sent contract and see pending versus completed. No QES label, no
+production token field, no document upload.
+Tests: `apps/admin/app/shell.test.mjs`.
+Security: staff session only; portal is not this surface; the UI does
+not send a secret.
 Next: none.
 
 ## Deferred and Owner-gated (visible, not READY)
@@ -949,7 +979,7 @@ Next: none.
 | Off-site backup / restic-pgBackRest | later staging | Local dump/restore exists; off-site is not this graph’s first READY |
 | OpenObserve / Garage / Compose staging | later | Gate A horizons, not Lead acceptance |
 | Cloudflare Tunnel / DNS / private-origin | DANGEROUS | Owner approval required |
-| FZ-SIGN-1 provider | DECIDED | Documenso Community self-host (ADR-017). No QES. No signing SDK in this wave |
+| FZ-SIGN-1 provider | DECIDED | Documenso Community self-host. SIGN-ADAPTER-1 is the local sandbox. No QES. ADMIN-SIGN-SANDBOX is next |
 | Payment provider | DECIDED | Przelewy24 (ADR-016). Sandbox adapter is PAY-ADAPTER-1. No live charge |
 | FZ-SEARCH-CRAWL-1 | DECIDED | OPTION A in generated production robots. Live Cloudflare zone unchanged |
 | Production hosting | DECIDED | One Hetzner CX23 EU at cutover, DEPLOY=compose. No purchase now. No deploy |
