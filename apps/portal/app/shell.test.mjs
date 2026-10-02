@@ -6,10 +6,12 @@ import {
   classifyPortalSession,
   fetchPortalContracts,
   fetchPortalFiles,
+  fetchPortalGardens,
   fetchPortalOffers,
   fetchPortalProjects,
   mapPortalContractPage,
   mapPortalFilePage,
+  mapPortalGardenPage,
   mapPortalOfferPage,
   mapPortalProjectPage,
   portalErrorMessage,
@@ -51,6 +53,7 @@ const emptySignedIn = {
   contracts: { status: 'empty' },
   projects: { status: 'empty' },
   files: { status: 'empty' },
+  gardens: { status: 'empty' },
 };
 
 test('the portal shell is a signed-out gate without client project data', () => {
@@ -87,6 +90,7 @@ test('portal session classification enforces the portal trust zone', async () =>
   assert.match(signedIn, /Brak umów do pokazania/);
   assert.match(signedIn, /Brak projektów do pokazania/);
   assert.match(signedIn, /Brak plików do pokazania/);
+  assert.match(signedIn, /Brak ogrodów do pokazania/);
   for (const phrase of commercialLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -114,6 +118,7 @@ test('signed-in portal renders client-safe offer projection without price or ter
     contracts: { status: 'empty' },
     projects: { status: 'empty' },
     files: { status: 'empty' },
+    gardens: { status: 'empty' },
   }));
   assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /Twoje pozycje/);
@@ -232,6 +237,7 @@ test('signed-in portal renders client-safe project and file projections without 
     contracts: { status: 'empty' },
     projects,
     files,
+    gardens: { status: 'empty' },
   }));
   assert.match(html, /Twoje projekty/);
   assert.match(html, /pj8k2n4p6q8r0s2t/);
@@ -367,6 +373,57 @@ test('signed-in portal renders client-safe contract status without price or sign
   assert.deepEqual(denied, { status: 'forbidden' });
 });
 
+test('signed-in portal renders a client garden without a twin or live invent', async () => {
+  assert.deepEqual(mapPortalGardenPage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapPortalGardenPage({ items: [{ id: 'x', liveGarden: true }] }), { status: 'error' });
+  const mapped = mapPortalGardenPage({
+    items: [{
+      id: 'gd8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      createdAt: '2026-09-24T15:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const ready = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    gardens: mapped,
+  }));
+  assert.match(ready, /Twoje ogrody/);
+  assert.match(ready, /gd8k2n4p6q8r0s2t/);
+  assert.equal(ready.toLowerCase().includes('twin'), false);
+  assert.equal(ready.toLowerCase().includes('sensor'), false);
+  for (const phrase of commercialLeak) {
+    assert.equal(ready.toLowerCase().includes(phrase), false, phrase);
+  }
+
+  const fetched = await fetchPortalGardens({
+    base: 'http://portal.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/portal\/gardens\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      assert.equal(init?.headers?.cookie, 'better-auth.session_token=abc');
+      return new Response(JSON.stringify({
+        items: [{
+          id: 'gd8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          createdAt: '2026-09-24T16:00:00.000Z',
+        }],
+        nextCursor: null,
+      }), { status: 200 });
+    },
+  });
+  assert.equal(fetched.status, 'ready');
+  if (fetched.status === 'ready') assert.equal(fetched.items[0].id, 'gd8k2n4p6q8r0s2u');
+  assert.deepEqual(
+    await fetchPortalGardens({
+      base: 'http://portal.test',
+      fetchImpl: async () => new Response('', { status: 403 }),
+    }),
+    { status: 'forbidden' },
+  );
+});
+
 test('the route module keeps an error boundary and does not invent CRM facts', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
@@ -377,6 +434,7 @@ test('the route module keeps an error boundary and does not invent CRM facts', (
   assert.match(home, /fetchPortalContracts/);
   assert.match(home, /fetchPortalProjects/);
   assert.match(home, /fetchPortalFiles/);
+  assert.match(home, /fetchPortalGardens/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(root, /export function ErrorBoundary/);
   assert.match(root, /portalErrorMessage/);

@@ -505,6 +505,14 @@ row('FZ-REQ-PORTAL-008', 'An authenticated client can see the status of their ow
   executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'CRM-CONTRACT-DOMAIN'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-009', 'Authenticated portal UI lists the client garden relation already stored by Core API. No twin, sensor, or live garden.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'UI over existing GET /v1/portal/gardens. Empty, forbidden, and error states. No second garden store.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-GARDEN-VIEW',
+  executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'GARDENOS-HTTP'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

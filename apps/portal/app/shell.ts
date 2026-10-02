@@ -58,6 +58,18 @@ export type PortalFileList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalGardenRow = {
+  id: string;
+  projectId: string;
+  createdAt: string;
+};
+
+export type PortalGardenList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalGardenRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type PortalHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -67,6 +79,7 @@ export type PortalHome =
       contracts: PortalContractList;
       projects: PortalProjectList;
       files: PortalFileList;
+      gardens: PortalGardenList;
     };
 
 /**
@@ -259,6 +272,52 @@ export function mapPortalFilePage(body: unknown): PortalFileList {
   return { status: 'ready', items: rows };
 }
 
+type GardenApiItem = {
+  id?: unknown;
+  projectId?: unknown;
+  createdAt?: unknown;
+  clientSubject?: unknown;
+  updatedAt?: unknown;
+  twinDatabase?: unknown;
+  liveGarden?: unknown;
+  sensorFeed?: unknown;
+  plants?: unknown;
+  xr?: unknown;
+  advice?: unknown;
+};
+
+export function mapPortalGardenPage(body: unknown): PortalGardenList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalGardenRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const garden = item as GardenApiItem;
+    if (typeof garden.id !== 'string' || typeof garden.projectId !== 'string') return { status: 'error' };
+    if (typeof garden.createdAt !== 'string') return { status: 'error' };
+    if (
+      Object.hasOwn(garden, 'clientSubject')
+      || Object.hasOwn(garden, 'updatedAt')
+      || Object.hasOwn(garden, 'twinDatabase')
+      || Object.hasOwn(garden, 'liveGarden')
+      || Object.hasOwn(garden, 'sensorFeed')
+      || Object.hasOwn(garden, 'plants')
+      || Object.hasOwn(garden, 'xr')
+      || Object.hasOwn(garden, 'advice')
+    ) {
+      return { status: 'error' };
+    }
+    rows.push({
+      id: garden.id,
+      projectId: garden.projectId,
+      createdAt: garden.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
 async function portalGetJsonList<T>(input: {
   base: string;
   path: string;
@@ -326,6 +385,20 @@ export async function fetchPortalProjects(input: {
   });
 }
 
+export async function fetchPortalGardens(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalGardenList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/gardens?limit=50',
+    map: mapPortalGardenPage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
 export async function fetchPortalFiles(input: {
   base: string;
   cookie?: string;
@@ -342,7 +415,7 @@ export async function fetchPortalFiles(input: {
 
 /**
  * Resolve portal home from optional Core API session probe + projections.
- * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, or files.
+ * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, or gardens.
  */
 export async function resolvePortalHome(input: {
   probe?: () => Promise<PortalSessionActor | null>;
@@ -350,18 +423,20 @@ export async function resolvePortalHome(input: {
   loadContracts?: () => Promise<PortalContractList>;
   loadProjects?: () => Promise<PortalProjectList>;
   loadFiles?: () => Promise<PortalFileList>;
+  loadGardens?: () => Promise<PortalGardenList>;
 }): Promise<PortalHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
     const classified = classifyPortalSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    const [offers, contracts, projects, files] = await Promise.all([
+    const [offers, contracts, projects, files, gardens] = await Promise.all([
       input.loadOffers ? input.loadOffers() : Promise.resolve({ status: 'empty' as const }),
       input.loadContracts ? input.loadContracts() : Promise.resolve({ status: 'empty' as const }),
       input.loadProjects ? input.loadProjects() : Promise.resolve({ status: 'empty' as const }),
       input.loadFiles ? input.loadFiles() : Promise.resolve({ status: 'empty' as const }),
+      input.loadGardens ? input.loadGardens() : Promise.resolve({ status: 'empty' as const }),
     ]);
-    return { state: 'signed-in', offers, contracts, projects, files };
+    return { state: 'signed-in', offers, contracts, projects, files, gardens };
   } catch {
     return { state: 'signed-out' };
   }
@@ -481,6 +556,38 @@ function projectListNode(projects: PortalProjectList): ReactNode {
   );
 }
 
+function gardenListNode(gardens: PortalGardenList): ReactNode {
+  if (gardens.status !== 'ready') {
+    return listStateNode(
+      gardens,
+      'Brak ogrodów do pokazania.',
+      'To konto nie może odczytać listy ogrodów.',
+      'Listy ogrodów nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-gardens', 'aria-label': 'Twoje ogrody' },
+    createElement('h2', null, 'Twoje ogrody'),
+    createElement(
+      'ul',
+      { className: 'portal-garden-list' },
+      ...gardens.items.map((garden) =>
+        createElement(
+          'li',
+          { key: garden.id, className: 'portal-garden' },
+          createElement(
+            'p',
+            { className: 'portal-garden-meta' },
+            [garden.id, ' · ', garden.projectId, ' · ', garden.createdAt].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function fileListNode(files: PortalFileList): ReactNode {
   if (files.status !== 'ready') {
     return listStateNode(
@@ -554,5 +661,6 @@ export function portalShell(home: PortalHome): ReactNode {
     contractListNode(home.contracts),
     projectListNode(home.projects),
     fileListNode(home.files),
+    gardenListNode(home.gardens),
   );
 }

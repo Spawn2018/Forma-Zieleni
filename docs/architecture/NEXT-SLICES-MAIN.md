@@ -1007,6 +1007,22 @@ Security: `contracts:portal-read` is a portal capability. The decision
 does not write a promise and does not advance lifecycle.
 Next: none.
 
+### PORTAL-GARDEN-VIEW
+
+Dependencies: PORTAL-CONTRACT-VIEW, GARDENOS-HTTP.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in portal lists the client garden relation that
+Core API already projects. Empty, forbidden, and error states are
+visible. The row is id, project id, and createdAt. No twin, sensor,
+live garden, plant advice, or second store.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-GARDEN-VIEW.md`](./PORTAL-GARDEN-VIEW.md).
+Security: uses existing `gardens:portal-read`. The portal does not
+create or mutate a garden.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
