@@ -2779,6 +2779,33 @@
       "occurrences": 1,
       "firstSeen": "2026-10-02T15:57:36.886Z",
       "lastSeen": "2026-10-02T15:58:10.524Z"
+    },
+    {
+      "patternKey": "ci-ci-verify-install",
+      "source": "agent",
+      "scope": "independent-ci",
+      "signalType": "failure",
+      "severity": "critical",
+      "observation": "Mandatory CI regressed after a green baseline for signature ci-ci-verify-install",
+      "evidence": [
+        "ci-run:37033833439",
+        "https://github.com/Spawn2018/Forma-Zieleni/actions/runs/37033833439",
+        "sha:8b8b4cf94686a1a83f212df58f6be9ed0e862a8c",
+        "signature:ci-ci-verify-install",
+        "step:Verify/Install:failure"
+      ],
+      "generalizability": "RECURRING",
+      "privacyClassification": "INTERNAL",
+      "status": "OBSERVED",
+      "evidenceStrength": "TESTED",
+      "validatedLocally": false,
+      "locallyVerified": true,
+      "relatedCommit": "8b8b4cf94686a1a83f212df58f6be9ed0e862a8c",
+      "horizon": "FOUNDATION_NOW",
+      "id": "LR-20261002-f07f9ff2",
+      "occurrences": 1,
+      "firstSeen": "2026-10-02T16:26:20.442Z",
+      "lastSeen": "2026-10-02T16:26:20.442Z"
     }
   ]
 }
