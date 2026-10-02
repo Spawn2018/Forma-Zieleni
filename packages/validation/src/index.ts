@@ -38,3 +38,8 @@ export type {
   PaymentScheduleCreateRequest,
   PaymentScheduleReplaceRequest,
 } from './payment.ts';
+export {
+  validateGardenCreateRequest,
+  validateProjectDeliverRequest,
+} from './garden.ts';
+export type { GardenCreateRequest } from './garden.ts';

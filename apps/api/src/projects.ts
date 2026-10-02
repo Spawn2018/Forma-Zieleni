@@ -1,4 +1,4 @@
-import { createProject, projectProjectForPortal, type PortalProjectProjection, type Project, type ProjectStatus } from '@forma-zieleni/domain';
+import { createProject, deliverProject, projectProjectForPortal, type PortalProjectProjection, type Project, type ProjectStatus } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
 import { newOpaqueId, newProjectId } from './ids.ts';
@@ -104,6 +104,73 @@ export async function createProjectFromContract(
       'project.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: project },
+      at,
+    );
+    return project;
+  });
+}
+
+export async function deliverExistingProject(
+  store: LeadStore,
+  projectId: string,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<Project> {
+  const hash = requestHash({ scope: 'project.deliver', projectId });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'project.deliver', idempotencyKey, hash);
+    if (replay) return replay.responseBody as Project;
+    const current = await tx.findProject(projectId);
+    if (!current) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    const contract = await tx.findContract(current.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let project: Project;
+    try {
+      project = deliverProject(current, at);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'PROJECT_NOT_DELIVERABLE') {
+        throw new ApiFailure(409, 'PROJECT_NOT_DELIVERABLE', 'Project cannot be delivered.');
+      }
+      throw error;
+    }
+    await tx.saveProject(project);
+    await tx.insertOutbox({
+      id: newOpaqueId('o'),
+      eventType: 'project.delivered',
+      leadId: opportunity.leadId,
+      payload: {
+        leadId: opportunity.leadId,
+        opportunityId: offer.opportunityId,
+        offerId: contract.offerId,
+        contractId: project.contractId,
+        projectId: project.id,
+        fromStatus: current.status,
+        status: project.status,
+      },
+      at,
+    });
+    await tx.insertAudit({
+      id: newOpaqueId('a'),
+      action: 'project.delivered',
+      actorId: actor.actorId,
+      leadId: opportunity.leadId,
+      at,
+      metadata: {
+        status: project.status,
+        contractId: project.contractId,
+        projectId: project.id,
+        fromStatus: current.status,
+      },
+    });
+    await tx.saveIdempotency(
+      'project.deliver',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: project },
       at,
     );
     return project;

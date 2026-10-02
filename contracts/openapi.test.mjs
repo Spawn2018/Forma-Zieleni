@@ -49,6 +49,11 @@ test('breaking-change inventory of lead paths and required fields remains exact'
     assert.equal(Object.hasOwn(spec.components.schemas.Project.properties, field), false);
     assert.equal(Object.hasOwn(spec.components.schemas.ProjectCreate.properties, field), false);
   }
+  assert.deepEqual(spec.components.schemas.Garden.required, inventory.requiredGardenFields);
+  for (const field of inventory.forbiddenGardenFields) {
+    assert.equal(Object.hasOwn(spec.components.schemas.Garden.properties, field), false);
+    assert.equal(Object.hasOwn(spec.components.schemas.GardenCreate.properties, field), false);
+  }
 });
 
 test('mutations require idempotency and public capture has no bearer requirement', () => {
@@ -93,12 +98,27 @@ test('mutations require idempotency and public capture has no bearer requirement
   ]);
   assert.deepEqual(spec.paths['/projects'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/projects/{projectId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/projects/{projectId}/deliver'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/projects/{projectId}/deliver'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/ProjectId',
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
   assert.deepEqual(spec.paths['/portal/projects'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/projects/{projectId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/files'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/portal/files/{fileId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/portal/gardens'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/portal/gardens/{gardenId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/files'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/files'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/gardens'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/gardens'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/gardens'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
+  assert.deepEqual(spec.paths['/gardens/{gardenId}'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/milestones'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/milestones'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/milestones'].post.parameters.map(p => p.$ref), [

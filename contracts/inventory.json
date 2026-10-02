@@ -8,6 +8,11 @@
     "GET /contracts/{contractId}",
     "GET /decision-log",
     "GET /decision-log/{entryId}",
+    "GET /files",
+    "GET /files/{fileId}",
+    "GET /files/{fileId}/content",
+    "GET /gardens",
+    "GET /gardens/{gardenId}",
     "GET /health",
     "GET /leads",
     "GET /leads/{leadId}",
@@ -19,24 +24,24 @@
     "GET /opportunities/{opportunityId}",
     "GET /payment-schedules",
     "GET /payment-schedules/{scheduleId}",
+    "GET /portal/files",
+    "GET /portal/files/{fileId}",
+    "GET /portal/gardens",
+    "GET /portal/gardens/{gardenId}",
     "GET /portal/offers",
     "GET /portal/offers/{offerId}",
     "GET /portal/projects",
     "GET /portal/projects/{projectId}",
-    "GET /portal/files",
-    "GET /portal/files/{fileId}",
     "GET /portal/session",
     "GET /projects",
     "GET /projects/{projectId}",
-    "GET /files",
-    "GET /files/{fileId}",
-    "GET /files/{fileId}/content",
     "GET /ready",
     "POST /approvals/proposals/{changeSetId}/review",
     "POST /contracts",
     "POST /contracts/{contractId}/lifecycle",
     "POST /decision-log",
     "POST /files",
+    "POST /gardens",
     "POST /growth/plans",
     "POST /leads",
     "POST /leads/{leadId}/qualify",
@@ -46,6 +51,7 @@
     "POST /payment-schedules",
     "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition",
     "POST /projects",
+    "POST /projects/{projectId}/deliver",
     "PUT /files/{fileId}/content",
     "PUT /payment-schedules/{scheduleId}"
   ],
@@ -87,6 +93,12 @@
       "Idempotency-Key"
     ],
     "POST /payment-schedules/{scheduleId}/installments/{installmentId}/transition": [
+      "Idempotency-Key"
+    ],
+    "POST /projects/{projectId}/deliver": [
+      "Idempotency-Key"
+    ],
+    "POST /gardens": [
       "Idempotency-Key"
     ]
   },
@@ -160,5 +172,20 @@
     "provider",
     "deposit",
     "price"
+  ],
+  "requiredGardenFields": [
+    "id",
+    "projectId",
+    "clientSubject",
+    "createdAt",
+    "updatedAt"
+  ],
+  "forbiddenGardenFields": [
+    "twinDatabase",
+    "liveGarden",
+    "sensorFeed",
+    "plants",
+    "xr",
+    "advice"
   ]
 }

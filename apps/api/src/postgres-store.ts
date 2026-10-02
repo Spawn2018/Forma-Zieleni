@@ -1,11 +1,12 @@
 import { sql, type Kysely, type Transaction } from 'kysely';
-import type { Contract, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
+import type { Contract, Garden, Lead, Offer, Opportunity, PaymentSchedule, Project, ProjectDecisionLogEntry, ProjectFile, ProjectMilestone } from '@forma-zieleni/domain';
 import { ApiFailure, PersistenceFailure } from './errors.ts';
 import type { Database } from './db.ts';
 import type {
   AuditEvent,
   ContractListQuery,
   DecisionLogListQuery,
+  GardenListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
@@ -87,6 +88,16 @@ function toProject(row: Database['project']): Project {
     id: row.id,
     contractId: row.contract_id,
     status: row.status as Project['status'],
+    clientSubject: row.client_subject ?? null,
+    createdAt: iso(row.created_at),
+    updatedAt: iso(row.updated_at),
+  };
+}
+
+function toGarden(row: Database['garden']): Garden {
+  return {
+    id: row.id,
+    projectId: row.project_id,
     clientSubject: row.client_subject ?? null,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
@@ -359,6 +370,15 @@ class PostgresTx implements LeadTx {
     }).execute();
   }
 
+  async saveProject(project: Project): Promise<void> {
+    const result = await this.trx.updateTable('project').set({
+      status: project.status,
+      client_subject: project.clientSubject,
+      updated_at: new Date(project.updatedAt),
+    }).where('id', '=', project.id).executeTakeFirst();
+    if (Number(result.numUpdatedRows ?? 0) === 0) throw new Error('PROJECT_MISSING');
+  }
+
   async findProject(id: string): Promise<Project | null> {
     const row = await this.trx.selectFrom('project').selectAll().where('id', '=', id).executeTakeFirst();
     return row ? toProject(row) : null;
@@ -528,6 +548,43 @@ class PostgresTx implements LeadTx {
     }
     const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
     return rows.map(toPaymentSchedule);
+  }
+
+  async insertGarden(garden: Garden): Promise<void> {
+    await this.trx.insertInto('garden').values({
+      id: garden.id,
+      project_id: garden.projectId,
+      client_subject: garden.clientSubject,
+      created_at: new Date(garden.createdAt),
+      updated_at: new Date(garden.updatedAt),
+    }).execute();
+  }
+
+  async findGarden(id: string): Promise<Garden | null> {
+    const row = await this.trx.selectFrom('garden').selectAll().where('id', '=', id).executeTakeFirst();
+    return row ? toGarden(row) : null;
+  }
+
+  async findGardenByProject(projectId: string): Promise<Garden | null> {
+    const row = await this.trx.selectFrom('garden').selectAll().where('project_id', '=', projectId).executeTakeFirst();
+    return row ? toGarden(row) : null;
+  }
+
+  async listGardens(query: GardenListQuery): Promise<Garden[]> {
+    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
+    let request = this.trx.selectFrom('garden').selectAll();
+    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (query.clientSubject) request = request.where('client_subject', '=', query.clientSubject);
+    if (query.cursor) {
+      const at = new Date(query.cursor.at);
+      const id = query.cursor.id;
+      request = request.where(eb => direction === 'desc'
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+    }
+    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    return rows.map(toGarden);
   }
 
   async insertOutbox(message: OutboxMessage): Promise<void> {

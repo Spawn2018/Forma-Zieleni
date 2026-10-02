@@ -83,6 +83,13 @@ export interface Database {
     created_at: Date;
     updated_at: Date;
   };
+  garden: {
+    id: string;
+    project_id: string;
+    client_subject: string | null;
+    created_at: Date;
+    updated_at: Date;
+  };
   idempotency_record: {
     scope: string;
     idempotency_key: string;
@@ -926,6 +933,70 @@ ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
   },
 };
 
+const GARDEN_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'payments:read',
+  'payments:write',
+  'gardens:read',
+  'gardens:create',
+  'gardens:portal-read',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const gardenMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+CREATE TABLE garden (
+  id text PRIMARY KEY,
+  project_id text NOT NULL UNIQUE REFERENCES project (id),
+  client_subject text,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT garden_id_opaque CHECK (id ~ '^[a-z][a-z0-9]{15,63}$')
+);
+CREATE INDEX garden_list_created ON garden (created_at DESC, id DESC);
+CREATE INDEX garden_list_updated ON garden (updated_at DESC, id DESC);
+CREATE INDEX garden_project ON garden (project_id);
+CREATE INDEX garden_client_subject ON garden (client_subject) WHERE client_subject IS NOT NULL;
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${GARDEN_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DROP TABLE IF EXISTS garden;
+DELETE FROM actor_capability WHERE capability IN ('gardens:read', 'gardens:create', 'gardens:portal-read');
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PAYMENT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -944,6 +1015,7 @@ const provider: MigrationProvider = {
       '013_project_milestone_domain': projectMilestoneMigration,
       '014_contract_lifecycle': contractLifecycleMigration,
       '015_payment_schedule': paymentScheduleMigration,
+      '016_garden_domain': gardenMigration,
     };
   },
 };

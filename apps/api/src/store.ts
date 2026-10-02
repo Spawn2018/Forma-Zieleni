@@ -1,6 +1,7 @@
 import type {
   Contract,
   ContractStatus,
+  Garden,
   Lead,
   LeadStatus,
   Offer,
@@ -81,6 +82,14 @@ export type PaymentScheduleListQuery = {
   cursor?: { at: string; id: string };
 };
 
+export type GardenListQuery = {
+  limit: number;
+  sort: SortField;
+  projectId?: string;
+  clientSubject?: string;
+  cursor?: { at: string; id: string };
+};
+
 export type StoredReply = {
   requestHash: string;
   responseStatus: number;
@@ -89,7 +98,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered';
   leadId: string;
   payload: {
     leadId: string;
@@ -106,7 +115,7 @@ export type OutboxMessage = {
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -146,6 +155,7 @@ export interface LeadTx {
   findContractByOffer(offerId: string): Promise<Contract | null>;
   listContracts(query: ContractListQuery): Promise<Contract[]>;
   insertProject(project: Project): Promise<void>;
+  saveProject(project: Project): Promise<void>;
   findProject(id: string): Promise<Project | null>;
   findProjectByContract(contractId: string): Promise<Project | null>;
   listProjects(query: ProjectListQuery): Promise<Project[]>;
@@ -163,6 +173,10 @@ export interface LeadTx {
   findPaymentSchedule(id: string): Promise<PaymentSchedule | null>;
   findPaymentScheduleByContract(contractId: string): Promise<PaymentSchedule | null>;
   listPaymentSchedules(query: PaymentScheduleListQuery): Promise<PaymentSchedule[]>;
+  insertGarden(garden: Garden): Promise<void>;
+  findGarden(id: string): Promise<Garden | null>;
+  findGardenByProject(projectId: string): Promise<Garden | null>;
+  listGardens(query: GardenListQuery): Promise<Garden[]>;
   insertOutbox(message: OutboxMessage): Promise<void>;
   insertAudit(event: AuditEvent): Promise<void>;
 }

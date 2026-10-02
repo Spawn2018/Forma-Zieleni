@@ -877,13 +877,17 @@ Next: GARDENOS-HTTP.
 
 Dependencies: ADMIN-APPROVAL-SURFACE, GARDENOS-DOMAIN.
 Gate: REVIEW.
-Status: OPEN.
+Status: COMPLETE.
 Autonomous: yes.
 Accept: Core API HTTP routes for Garden records already modeled in
 domain. No digital-twin runtime, no XR, no invented plant advice.
-Tests: HTTP create/list/get with BOLA; portal read only if a safe
-projection already exists (otherwise staff-only).
-Security: authorization in Core API; no twin claim.
+Staff `POST /v1/projects/{projectId}/deliver` unlocks linkage;
+`gardens:read` / `gardens:create` / `gardens:portal-read` gate staff and
+portal reads. OpenAPI + migration `016_garden_domain`.
+Tests: `apps/api/src/http.test.mjs` create/list/get + BOLA portal read;
+`packages/validation/garden.test.mjs`.
+Security: authorization in Core API; no twin claim; portal projection
+omits clientSubject and live invent fields.
 Next: SITEINTEL-HTTP.
 
 ### SITEINTEL-HTTP

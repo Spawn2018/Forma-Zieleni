@@ -10,6 +10,7 @@ import {
   assertOpaqueDecisionLogId,
   assertOpaquePaymentScheduleId,
   assertOpaquePaymentInstallmentId,
+  assertOpaqueGardenId,
 } from '@forma-zieleni/domain';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -59,4 +60,8 @@ export function newPaymentScheduleId(): string {
 
 export function newPaymentInstallmentId(): string {
   return assertOpaquePaymentInstallmentId(newOpaqueId('i'));
+}
+
+export function newGardenId(): string {
+  return assertOpaqueGardenId(newOpaqueId('g'));
 }

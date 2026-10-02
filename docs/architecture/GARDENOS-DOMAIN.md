@@ -17,10 +17,10 @@ Machine checks: `createGarden()`, `deliverProject()`,
 ## Out of scope
 
 - Twin database, sensor ingestion, live garden invent, or Garden OS UI.
-- HTTP garden routes and persistence tables (later when a product surface
-  needs them).
 - Globalizing one customer's garden into product-wide rules
   (`SCOPE_PROMOTION_REFUSED` in FZ-CIS).
+
+HTTP garden routes: see `GARDENOS-HTTP.md` / `FZ-REQ-GARDENOS-003`.
 
 ## Relation to the boundary slice
 

@@ -1,13 +1,14 @@
 import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
-import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
+import { assertNoClientSuppliedAuthority, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
+import { problem, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listVisibleContracts, parseContractListQuery, readContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
+import { createGardenRecord, listPortalGardens, listVisibleGardens, parseGardenListQuery, readGarden, readPortalGarden } from './gardens.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import {
   createDecisionLogRecord,
@@ -33,7 +34,7 @@ import {
   replacePaymentScheduleRecord,
   transitionPaymentInstallmentRecord,
 } from './payments.ts';
-import { createProjectFromContract, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
+import { createProjectFromContract, deliverExistingProject, listPortalProjects, listVisibleProjects, parseProjectListQuery, readPortalProject, readProject } from './projects.ts';
 import { getApprovalFabric, listApprovalProposals, reviewApprovalProposal } from './approvals.ts';
 import { noopTracer, writeLog, type LogRecord, type Tracer } from './log.ts';
 import { captureKey, WindowLimiter } from './rate-limit.ts';
@@ -119,6 +120,14 @@ function pathProjectFileId(value: string): string {
     return assertOpaqueProjectFileId(decodeURIComponent(value));
   } catch {
     throw badRequest('PROJECT_FILE_ID_INVALID', 'Project file id is not valid.');
+  }
+}
+
+function pathGardenId(value: string): string {
+  try {
+    return assertOpaqueGardenId(decodeURIComponent(value));
+  } catch {
+    throw badRequest('GARDEN_ID_INVALID', 'Garden id is not valid.');
   }
 }
 
@@ -330,6 +339,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json(projection);
   });
 
+  app.get('/v1/portal/gardens', async c => {
+    const actor = await requireActor(c, options.authenticator, 'gardens:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseGardenListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listPortalGardens(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/gardens/:gardenId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'gardens:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalGarden(options.store, pathGardenId(c.req.param('gardenId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'GARDEN_NOT_FOUND', 'Garden was not found.');
+    return c.json(projection);
+  });
+
   app.options('*', c => c.body(null, trustedOrigins.includes(c.req.header('origin') ?? '') ? 204 : 403));
 
   if (options.authHandler) {
@@ -537,6 +569,22 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json(project);
   });
 
+  app.post('/v1/projects/:projectId/deliver', async c => {
+    const actor = await requireActor(c, options.authenticator, 'projects:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateProjectDeliverRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'PROJECT_INVALID', 'Project delivery could not be accepted.', parsed.errors);
+    const project = await deliverExistingProject(
+      options.store,
+      pathProjectId(c.req.param('projectId')),
+      actor,
+      key,
+      now(),
+    );
+    return c.json(project);
+  });
+
   app.get('/v1/files', async c => {
     const actor = await requireActor(c, options.authenticator, 'files:read');
     c.set('actorId', actor.actorId);
@@ -631,6 +679,37 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.header('Cache-Control', 'private, no-store');
     // c.body keeps middleware X-Request-Id and trusted-origin CORS headers.
     return c.body(new Uint8Array(stored.bytes), 200);
+  });
+
+  app.get('/v1/gardens', async c => {
+    const actor = await requireActor(c, options.authenticator, 'gardens:read');
+    c.set('actorId', actor.actorId);
+    const query = parseGardenListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listVisibleGardens(options.store, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.post('/v1/gardens', async c => {
+    const actor = await requireActor(c, options.authenticator, 'gardens:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateGardenCreateRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'GARDEN_INVALID', 'Garden could not be accepted.', parsed.errors);
+    const garden = await createGardenRecord(options.store, parsed.value.projectId, actor, key, now());
+    return c.json(garden, 201);
+  });
+
+  app.get('/v1/gardens/:gardenId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'gardens:read');
+    c.set('actorId', actor.actorId);
+    const garden = await readGarden(options.store, pathGardenId(c.req.param('gardenId')));
+    if (!garden) throw new ApiFailure(404, 'GARDEN_NOT_FOUND', 'Garden was not found.');
+    return c.json(garden);
   });
 
   app.get('/v1/milestones', async c => {

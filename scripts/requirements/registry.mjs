@@ -509,7 +509,7 @@ row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain a
   executableSlice: 'ADMIN-APPROVAL-SURFACE',
   executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'ADMIN-APP'],
 });
-row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'BLOCKED_BY_DEPENDENCY', 'DOCUMENTED', 'DOCUMENTED', CURRENT, API, HTTP, 'GARDENOS-HTTP not executed', 'REVIEW', 'HTTP over GARDENOS-DOMAIN.', {
+row('FZ-REQ-GARDENOS-003', 'Core API HTTP routes expose Garden domain records without claiming a digital-twin runtime.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, API, HTTP, '', 'NONE', 'Evidence: OpenAPI + HTTP create/list/get with BOLA portal projection. gardens:* capabilities. Project deliver unlocks linkage. No twin/XR/plant advice.', {
   blockerClass: 'INTERNAL',
   productCapability: 'GARDENOS',
   depth: 'HTTP',

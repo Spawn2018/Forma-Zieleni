@@ -1,6 +1,7 @@
 import type {
   Contract,
   ContractStatus,
+  Garden,
   Lead,
   LeadStatus,
   Offer,
@@ -18,6 +19,7 @@ import type {
   AuditEvent,
   ContractListQuery,
   DecisionLogListQuery,
+  GardenListQuery,
   LeadStore,
   LeadTx,
   ListQuery,
@@ -41,6 +43,7 @@ type MemoryState = {
   milestones: ProjectMilestone[];
   decisionLog: ProjectDecisionLogEntry[];
   paymentSchedules: PaymentSchedule[];
+  gardens: Garden[];
   idempotency: Map<string, StoredReply>;
   outbox: OutboxMessage[];
   audits: AuditEvent[];
@@ -65,6 +68,7 @@ export class MemoryLeadStore implements LeadStore {
     milestones: [],
     decisionLog: [],
     paymentSchedules: [],
+    gardens: [],
     idempotency: new Map(),
     outbox: [],
     audits: [],
@@ -81,6 +85,7 @@ export class MemoryLeadStore implements LeadStore {
       milestones: this.state.milestones,
       decisionLog: this.state.decisionLog,
       paymentSchedules: this.state.paymentSchedules,
+      gardens: this.state.gardens,
       outbox: this.state.outbox,
       audits: this.state.audits,
       idempotency: [...this.state.idempotency.entries()],
@@ -97,6 +102,7 @@ export class MemoryLeadStore implements LeadStore {
       this.state.milestones = snapshot.milestones;
       this.state.decisionLog = snapshot.decisionLog;
       this.state.paymentSchedules = snapshot.paymentSchedules;
+      this.state.gardens = snapshot.gardens;
       this.state.outbox = snapshot.outbox;
       this.state.audits = snapshot.audits;
       this.state.idempotency = new Map(snapshot.idempotency);
@@ -270,6 +276,12 @@ class MemoryTx implements LeadTx {
     this.state.projects.push(clone(project));
   }
 
+  async saveProject(project: Project): Promise<void> {
+    const index = this.state.projects.findIndex(item => item.id === project.id);
+    if (index < 0) throw new Error('PROJECT_MISSING');
+    this.state.projects[index] = clone(project);
+  }
+
   async findProject(id: string): Promise<Project | null> {
     return clone(this.state.projects.find(item => item.id === id) ?? null);
   }
@@ -415,6 +427,42 @@ class MemoryTx implements LeadTx {
           const at = stamp(schedule, query.sort);
           if (descending) return at < query.cursor!.at || (at === query.cursor!.at && schedule.id < query.cursor!.id);
           return at > query.cursor!.at || (at === query.cursor!.at && schedule.id > query.cursor!.id);
+        })
+      : 0;
+    if (query.cursor && start < 0) return [];
+    return clone(rows.slice(start, start + query.limit));
+  }
+
+  async insertGarden(garden: Garden): Promise<void> {
+    if (this.state.gardens.some(item => item.projectId === garden.projectId)) {
+      throw new Error('GARDEN_EXISTS');
+    }
+    this.state.gardens.push(clone(garden));
+  }
+
+  async findGarden(id: string): Promise<Garden | null> {
+    return clone(this.state.gardens.find(item => item.id === id) ?? null);
+  }
+
+  async findGardenByProject(projectId: string): Promise<Garden | null> {
+    return clone(this.state.gardens.find(item => item.projectId === projectId) ?? null);
+  }
+
+  async listGardens(query: GardenListQuery): Promise<Garden[]> {
+    const descending = query.sort.startsWith('-');
+    const rows = this.state.gardens.filter(
+      garden => (!query.projectId || garden.projectId === query.projectId)
+        && (!query.clientSubject || garden.clientSubject === query.clientSubject),
+    );
+    rows.sort((left, right) => {
+      const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
+      return descending ? -compared : compared;
+    });
+    const start = query.cursor
+      ? rows.findIndex(garden => {
+          const at = stamp(garden, query.sort);
+          if (descending) return at < query.cursor!.at || (at === query.cursor!.at && garden.id < query.cursor!.id);
+          return at > query.cursor!.at || (at === query.cursor!.at && garden.id > query.cursor!.id);
         })
       : 0;
     if (query.cursor && start < 0) return [];

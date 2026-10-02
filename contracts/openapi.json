@@ -30,6 +30,9 @@
       "name": "Files"
     },
     {
+      "name": "Gardens"
+    },
+    {
       "name": "Portal"
     },
     {
@@ -337,9 +340,15 @@
     },
     "/approvals/proposals": {
       "get": {
-        "tags": ["Approvals"],
+        "tags": [
+          "Approvals"
+        ],
         "operationId": "listApprovalProposals",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "Lists synthetic Agnieszka approval proposals. Requires semantic:review. Does not authorize spend, price, or live publication.",
         "responses": {
           "200": {
@@ -348,35 +357,56 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["items"],
+                  "required": [
+                    "items"
+                  ],
                   "properties": {
                     "items": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/ApprovalProposal" }
+                      "items": {
+                        "$ref": "#/components/schemas/ApprovalProposal"
+                      }
                     },
-                    "nextCursor": { "type": ["string", "null"] }
+                    "nextCursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
                   }
                 }
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         }
       }
     },
     "/approvals/proposals/{changeSetId}/review": {
       "post": {
-        "tags": ["Approvals"],
+        "tags": [
+          "Approvals"
+        ],
         "operationId": "reviewApprovalProposal",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "Reviews a synthetic proposal (edit / approve / partial / reject / defer). Cannot override Owner, spend, price, or live publication gates.",
         "parameters": [
           {
             "name": "changeSetId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -385,24 +415,41 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["action"],
+                "required": [
+                  "action"
+                ],
                 "properties": {
                   "action": {
                     "type": "string",
-                    "enum": ["EDIT", "APPROVE_ALL", "PARTIAL_APPROVE", "REJECT", "DEFER"]
+                    "enum": [
+                      "EDIT",
+                      "APPROVE_ALL",
+                      "PARTIAL_APPROVE",
+                      "REJECT",
+                      "DEFER"
+                    ]
                   },
                   "selectedIds": {
                     "type": "array",
-                    "items": { "type": "string" }
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "edits": {
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": ["changeId", "after"],
+                      "required": [
+                        "changeId",
+                        "after"
+                      ],
                       "properties": {
-                        "changeId": { "type": "string" },
-                        "after": { "type": "string" }
+                        "changeId": {
+                          "type": "string"
+                        },
+                        "after": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
@@ -416,13 +463,21 @@
             "description": "Updated synthetic proposal.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ApprovalProposal" }
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalProposal"
+                }
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         }
       }
     },
@@ -2294,6 +2349,307 @@
           }
         }
       }
+    },
+    "/projects/{projectId}/deliver": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "operationId": "deliverProject",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff marks a planned Project delivered so a Garden record may link to it. Empty body only; no payment or provider fields.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectDeliver"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project delivered.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/gardens": {
+      "get": {
+        "tags": [
+          "Gardens"
+        ],
+        "operationId": "listGardens",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff list of Garden domain records. Not a twin, XR, or plant-advice surface.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/GardenProjectFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor page of gardens.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GardenPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Gardens"
+        ],
+        "operationId": "createGarden",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Staff create a Garden linked to a delivered Project. Rejects twin/live/sensor invent fields.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GardenCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Garden recorded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Garden"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/gardens/{gardenId}": {
+      "get": {
+        "tags": [
+          "Gardens"
+        ],
+        "operationId": "getGarden",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GardenId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Garden visible to staff.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Garden"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/portal/gardens": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "listPortalGardens",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Client-safe Garden projection for the authenticated portal subject. BOLA via clientSubject.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/GardenProjectFilter"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal garden page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalGardenPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/portal/gardens/{gardenId}": {
+      "get": {
+        "tags": [
+          "Portal"
+        ],
+        "operationId": "getPortalGarden",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GardenId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal garden projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalGardenProjection"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2484,6 +2840,21 @@
           ],
           "default": "-createdAt"
         }
+      },
+      "GardenId": {
+        "name": "gardenId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueId"
+        }
+      },
+      "GardenProjectFilter": {
+        "name": "projectId",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueId"
+        }
       }
     },
     "schemas": {
@@ -2495,25 +2866,61 @@
       "ApprovalProposal": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "status", "reason", "trigger", "synthetic", "changes"],
+        "required": [
+          "id",
+          "status",
+          "reason",
+          "trigger",
+          "synthetic",
+          "changes"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "status": { "type": "string" },
-          "reason": { "type": "string" },
-          "trigger": { "type": "string" },
-          "synthetic": { "type": "boolean", "enum": [true] },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
           "changes": {
             "type": "array",
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["id", "entityId", "field", "before", "after"],
+              "required": [
+                "id",
+                "entityId",
+                "field",
+                "before",
+                "after"
+              ],
               "properties": {
-                "id": { "type": "string" },
-                "entityId": { "type": "string" },
-                "field": { "type": "string" },
-                "before": { "type": "string" },
-                "after": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "entityId": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "before": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -4038,6 +4445,149 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "ProjectDeliver": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "description": "Empty body. Callers cannot supply status, payment, or provider fields."
+      },
+      "GardenCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "projectId"
+        ],
+        "properties": {
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          }
+        }
+      },
+      "Garden": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "projectId",
+          "clientSubject",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "clientSubject": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 128
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Garden OS domain record. Not a twin database, sensor feed, or live garden invent."
+      },
+      "GardenPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Garden"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "PortalGardenProjection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "projectId",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/OpaqueId"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Client-safe garden projection. Omits clientSubject and any twin/live invent fields."
+      },
+      "PortalGardenPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalGardenProjection"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit",
+              "nextCursor"
+            ],
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nextCursor": {
+                "type": "string",
+                "nullable": true
+              }
+            }
           }
         }
       }

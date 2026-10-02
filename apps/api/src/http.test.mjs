@@ -18,7 +18,7 @@ const staff = {
   issuer: 'test-issuer',
   sub: 'staff-ana',
   clientId: 'admin',
-  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'semantic:review'],
+  capabilities: ['leads:read', 'leads:qualify', 'opportunities:read', 'opportunities:create', 'offers:read', 'offers:create', 'contracts:read', 'contracts:create', 'contracts:lifecycle', 'projects:read', 'projects:create', 'files:read', 'files:create', 'milestones:read', 'milestones:create', 'payments:read', 'payments:write', 'gardens:read', 'gardens:create', 'semantic:review'],
 };
 
 const portal = {
@@ -26,7 +26,7 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read'],
 };
 
 const portalOther = {
@@ -34,7 +34,7 @@ const portalOther = {
   issuer: 'test-issuer',
   sub: 'portal-other',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read'],
+  capabilities: ['offers:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100) {
@@ -1238,4 +1238,155 @@ test('staff can list and review synthetic approval proposals; portal cannot; spe
   assert.equal((await app.request(`/v1/approvals/proposals/${again.items[0].id}/review`, json({
     action: 'REJECT',
   }, bearer(portal)))).status, 403);
+});
+
+async function createDeliveredProject(app, { clientSubject = null, suffix = '1' } = {}) {
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': `gdn-opp-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': `gdn-offer-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': `gdn-ctr-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const body = { contractId: contract.id };
+  if (clientSubject) body.clientSubject = clientSubject;
+  const project = await (await app.request('/v1/projects', json(body, {
+    'idempotency-key': `gdn-prj-${suffix}`,
+    ...bearer(staff),
+  }))).json();
+  const delivered = await app.request(`/v1/projects/${project.id}/deliver`, json({}, {
+    'idempotency-key': `gdn-del-${suffix}`,
+    ...bearer(staff),
+  }));
+  assert.equal(delivered.status, 200);
+  const result = await delivered.json();
+  assert.equal(result.status, 'delivered');
+  return result;
+}
+
+test('staff can deliver a project; portal cannot; already delivered rejected', async () => {
+  const { app } = appFor();
+  const lead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+    'idempotency-key': 'del-opp-1',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'del-offer-1',
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'del-ctr-1',
+    ...bearer(staff),
+  }))).json();
+  const project = await (await app.request('/v1/projects', json({ contractId: contract.id }, {
+    'idempotency-key': 'del-prj-1',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(project.status, 'planned');
+  assert.equal((await app.request(`/v1/projects/${project.id}/deliver`, json({}, bearer(portal)))).status, 403);
+  const first = await app.request(`/v1/projects/${project.id}/deliver`, json({}, {
+    'idempotency-key': 'del-ok-1',
+    ...bearer(staff),
+  }));
+  assert.equal(first.status, 200);
+  assert.equal((await first.json()).status, 'delivered');
+  const again = await app.request(`/v1/projects/${project.id}/deliver`, json({}, {
+    'idempotency-key': 'del-ok-2',
+    ...bearer(staff),
+  }));
+  assert.equal(again.status, 409);
+  const withPayment = await app.request(`/v1/projects/${project.id}/deliver`, json({ payment: true }, {
+    'idempotency-key': 'del-pay-1',
+    ...bearer(staff),
+  }));
+  assert.equal(withPayment.status, 400);
+});
+
+test('garden HTTP create/list/get requires delivered project; rejects twin invent; BOLA on portal', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/gardens')).status, 401);
+  assert.equal((await app.request('/v1/gardens', { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request('/v1/portal/gardens')).status, 401);
+  assert.equal((await app.request('/v1/portal/gardens', { headers: bearer(staff) })).status, 403);
+
+  const plannedLead = await captureAndQualify(app);
+  const opportunity = await (await app.request('/v1/opportunities', json({ leadId: plannedLead.id }, {
+    'idempotency-key': 'gdn-plan-opp',
+    ...bearer(staff),
+  }))).json();
+  const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+    'idempotency-key': 'gdn-plan-offer',
+    ...bearer(staff),
+  }))).json();
+  const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+    'idempotency-key': 'gdn-plan-ctr',
+    ...bearer(staff),
+  }))).json();
+  const planned = await (await app.request('/v1/projects', json({ contractId: contract.id }, {
+    'idempotency-key': 'gdn-plan-prj',
+    ...bearer(staff),
+  }))).json();
+  const notDelivered = await app.request('/v1/gardens', json({ projectId: planned.id }, {
+    'idempotency-key': 'gdn-plan-create',
+    ...bearer(staff),
+  }));
+  assert.equal(notDelivered.status, 409);
+
+  const project = await createDeliveredProject(app, { clientSubject: 'portal-ola', suffix: 'a' });
+  const twin = await app.request('/v1/gardens', json({ projectId: project.id, twinDatabase: true }, {
+    'idempotency-key': 'gdn-twin-1',
+    ...bearer(staff),
+  }));
+  assert.equal(twin.status, 400);
+
+  const created = await app.request('/v1/gardens', json({ projectId: project.id }, {
+    'idempotency-key': 'gdn-create-1',
+    ...bearer(staff),
+  }));
+  assert.equal(created.status, 201);
+  const garden = await created.json();
+  assert.equal(garden.projectId, project.id);
+  assert.equal(garden.clientSubject, 'portal-ola');
+  assert.equal(Object.hasOwn(garden, 'twinDatabase'), false);
+  assert.equal(Object.hasOwn(garden, 'liveGarden'), false);
+  assert.equal(Object.hasOwn(garden, 'sensorFeed'), false);
+
+  const listed = await app.request('/v1/gardens', { headers: bearer(staff) });
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).items.length, 1);
+  assert.equal((await app.request(`/v1/gardens/${garden.id}`, { headers: bearer(staff) })).status, 200);
+  assert.equal((await app.request(`/v1/gardens/${garden.id}`, { headers: bearer(portal) })).status, 403);
+
+  const duplicate = await app.request('/v1/gardens', json({ projectId: project.id }, {
+    'idempotency-key': 'gdn-create-2',
+    ...bearer(staff),
+  }));
+  assert.equal(duplicate.status, 409);
+
+  const portalList = await app.request('/v1/portal/gardens', { headers: bearer(portal) });
+  assert.equal(portalList.status, 200);
+  const portalBody = await portalList.json();
+  assert.equal(portalBody.items.length, 1);
+  assert.equal(portalBody.items[0].id, garden.id);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'clientSubject'), false);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'liveGarden'), false);
+  assert.equal((await app.request(`/v1/portal/gardens/${garden.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/gardens/${garden.id}`, { headers: bearer(portalOther) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/gardens', { headers: bearer(portalOther) })).json();
+  assert.deepEqual(otherList.items, []);
+
+  const staffOnly = await createDeliveredProject(app, { suffix: 'b' });
+  const staffGarden = await (await app.request('/v1/gardens', json({ projectId: staffOnly.id }, {
+    'idempotency-key': 'gdn-staff-only',
+    ...bearer(staff),
+  }))).json();
+  assert.equal(staffGarden.clientSubject, null);
+  assert.equal((await app.request(`/v1/portal/gardens/${staffGarden.id}`, { headers: bearer(portal) })).status, 404);
 });
