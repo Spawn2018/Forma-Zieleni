@@ -1731,6 +1731,21 @@ Contract: [`ADMIN-SITE-ORDER.md`](./ADMIN-SITE-ORDER.md).
 Security: display sort only. Uses site records staff already loaded.
 Next: none.
 
+### ADMIN-LEAD-LABELS
+
+Dependencies: ADMIN-STATUS-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff lead shows its status in Polish. The labels are przyjęty,
+analiza terenu, zakwalifikowany, gotowy do konsultacji, and
+niezakwalifikowany. An unknown status token rejects the list. The raw
+token is not shown. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-LEAD-LABELS.md`](./ADMIN-LEAD-LABELS.md).
+Security: display only. Uses the status already on the loaded lead.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

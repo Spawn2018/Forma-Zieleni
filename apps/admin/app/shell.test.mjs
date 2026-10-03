@@ -20,6 +20,7 @@ import {
   formatByteCount,
   adminDecisionMilestoneLine,
   adminMilestoneDueLabel,
+  adminLeadStatusLabel,
   adminOfferStatusLabel,
   adminOpportunityStatusLabel,
   adminSiteObservationKindLabel,
@@ -266,7 +267,14 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       proposals: { status: 'empty' },
     }),
   );
+  assert.equal(adminLeadStatusLabel('received'), 'przyjęty');
+  assert.equal(adminLeadStatusLabel('site_analysis'), 'analiza terenu');
+  assert.equal(adminLeadStatusLabel('qualified'), 'zakwalifikowany');
+  assert.equal(adminLeadStatusLabel('consultation_ready'), 'gotowy do konsultacji');
+  assert.equal(adminLeadStatusLabel('unqualified'), 'niezakwalifikowany');
   assert.match(ready, /Anna Kowalska/);
+  assert.match(ready, /Kraków · przyjęty · pending/);
+  assert.equal(ready.includes('received'), false);
   assert.match(ready, /Kraków/);
   assert.match(ready, /Kwalifikuj/);
   assert.match(ready, /name="leadId"/);
@@ -1133,6 +1141,13 @@ test('mapOfferPage and Core API offer fetch/create stay truthful', async () => {
 test('mapLeadPage and Core API lead fetch stay truthful', async () => {
   assert.deepEqual(mapLeadPage({ items: [] }), { status: 'empty' });
   assert.deepEqual(mapLeadPage({ items: [{ id: 1 }] }), { status: 'error' });
+  assert.deepEqual(mapLeadPage({
+    items: [{
+      id: 'ld8k2n4p6q8r0s2t',
+      status: 'won',
+      contact: { name: 'Anna Kowalska' },
+    }],
+  }), { status: 'error' });
   assert.deepEqual(
     mapLeadPage({
       items: [

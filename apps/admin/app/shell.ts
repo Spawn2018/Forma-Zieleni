@@ -8,9 +8,18 @@ export type AdminSessionActor = {
   clientId: string;
 };
 
+export const ADMIN_LEAD_STATUSES = [
+  'received',
+  'site_analysis',
+  'qualified',
+  'consultation_ready',
+  'unqualified',
+] as const;
+export type AdminLeadStatus = (typeof ADMIN_LEAD_STATUSES)[number];
+
 export type AdminLeadRow = {
   id: string;
-  status: string;
+  status: AdminLeadStatus;
   contactName: string;
   locality: string | null;
   qualificationResult: string;
@@ -346,7 +355,9 @@ export function mapLeadPage(body: unknown): AdminLeadList {
   const rows: AdminLeadRow[] = [];
   for (const item of items) {
     const lead = item as LeadApiItem;
-    if (typeof lead.id !== 'string' || typeof lead.status !== 'string') return { status: 'error' };
+    if (typeof lead.id !== 'string' || typeof lead.status !== 'string' || !isAdminLeadStatus(lead.status)) {
+      return { status: 'error' };
+    }
     if (!lead.contact || typeof lead.contact.name !== 'string') return { status: 'error' };
     const locality = lead.property && typeof lead.property.locality === 'string' ? lead.property.locality : null;
     const qualificationResult =
@@ -625,6 +636,30 @@ export async function createAdminContract(input: {
     return { ok: true };
   } catch {
     return { ok: false, reason: 'error' };
+  }
+}
+
+function isAdminLeadStatus(status: string): status is AdminLeadStatus {
+  return (ADMIN_LEAD_STATUSES as readonly string[]).includes(status);
+}
+
+/** Polish words for the lead statuses the domain already stores. An unknown token is not a label. */
+export function adminLeadStatusLabel(status: AdminLeadStatus): string {
+  switch (status) {
+    case 'received':
+      return 'przyjęty';
+    case 'site_analysis':
+      return 'analiza terenu';
+    case 'qualified':
+      return 'zakwalifikowany';
+    case 'consultation_ready':
+      return 'gotowy do konsultacji';
+    case 'unqualified':
+      return 'niezakwalifikowany';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
   }
 }
 
@@ -2214,7 +2249,7 @@ function leadListNode(leads: AdminLeadList): ReactNode {
             { className: 'admin-lead-meta' },
             [
               lead.locality ?? 'bez miejscowości',
-              lead.status,
+              adminLeadStatusLabel(lead.status),
               lead.qualificationResult,
             ].join(' · '),
           ),
