@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  adminOfferContractLine,
   adminProjectGardenLine,
   adminProjectSiteLine,
   adminProjectNextMilestoneLine,
@@ -1443,6 +1444,66 @@ test('a staff project names only the garden already loaded for it', () => {
     'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
   );
   assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
+});
+
+test('a staff offer names only the contracts already loaded for it', () => {
+  const contracts = {
+    status: 'ready',
+    items: [
+      {
+        id: 'ct8k2n4p6q8r0s2u',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T12:10:00.000Z',
+      },
+      {
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'internal_review',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      },
+      {
+        id: 'ct8k2n4p6q8r0s2v',
+        offerId: 'of8k2n4p6q8r0s2u',
+        status: 'sent',
+        createdAt: '2026-09-24T12:20:00.000Z',
+      },
+    ],
+  };
+  assert.equal(
+    adminOfferContractLine('of8k2n4p6q8r0s2t', contracts),
+    'Umowy: ct8k2n4p6q8r0s2t, ct8k2n4p6q8r0s2u',
+  );
+  assert.equal(adminOfferContractLine('of8k2n4p6q8r0s2v', contracts), 'Umowa: brak');
+  assert.equal(
+    adminOfferContractLine('of8k2n4p6q8r0s2t', { status: 'error' }),
+    'Umowy nie udało się odczytać.',
+  );
+  assert.equal(
+    adminOfferContractLine('of8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać listy umów.',
+  );
+  assert.equal(adminOfferContractLine('of8k2n4p6q8r0s2t', { status: 'empty' }), 'Umowa: brak');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    offers: {
+      status: 'ready',
+      items: [{
+        id: 'of8k2n4p6q8r0s2t',
+        opportunityId: 'op8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T11:00:00.000Z',
+      }],
+    },
+    contracts,
+  }));
+  const offer = html.slice(html.indexOf('class="admin-offer"'), html.indexOf('admin-create-offer'));
+  assert.equal(
+    offer.match(/admin-offer-contract">([^<]+)/)?.[1],
+    'Umowy: ct8k2n4p6q8r0s2t, ct8k2n4p6q8r0s2u',
+  );
+  assert.equal(offer.includes('ct8k2n4p6q8r0s2v'), false);
 });
 
 test('a staff project counts only that project’s site findings', () => {

@@ -2265,7 +2265,21 @@ function createOpportunityForm(): ReactNode {
   );
 }
 
-function offerListNode(offers: AdminOfferList): ReactNode {
+/** Contracts already loaded for this offer. A failed contract read is not “no contract”. */
+export function adminOfferContractLine(offerId: string, contracts: AdminContractList): string {
+  if (contracts.status === 'error') return 'Umowy nie udało się odczytać.';
+  if (contracts.status === 'forbidden') return 'To konto nie może odczytać listy umów.';
+  if (contracts.status !== 'ready') return 'Umowa: brak';
+  const matched = contracts.items
+    .filter((item) => item.offerId === offerId)
+    .map((item) => item.id)
+    .sort();
+  if (matched.length === 0) return 'Umowa: brak';
+  if (matched.length === 1) return `Umowa: ${matched[0]}`;
+  return `Umowy: ${matched.join(', ')}`;
+}
+
+function offerListNode(offers: AdminOfferList, contracts: AdminContractList): ReactNode {
   if (offers.status === 'empty') {
     return createElement('p', null, 'Brak ofert do pokazania.');
   }
@@ -2298,6 +2312,11 @@ function offerListNode(offers: AdminOfferList): ReactNode {
               ' · ',
               adminCreatedAtLabel(offer.createdAt),
             ].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'admin-offer-contract' },
+            adminOfferContractLine(offer.id, contracts),
           ),
         ),
       ),
@@ -3888,7 +3907,7 @@ export function adminShell(home: AdminHome): ReactNode {
     leadListNode(home.leads),
     opportunityListNode(home.opportunities),
     createOpportunityForm(),
-    offerListNode(home.offers),
+    offerListNode(home.offers, home.contracts),
     createOfferForm(),
     contractListNode(home.contracts),
     createContractForm(),

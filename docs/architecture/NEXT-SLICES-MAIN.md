@@ -1646,6 +1646,20 @@ Contract: [`ADMIN-PROJECT-SITE.md`](./ADMIN-PROJECT-SITE.md).
 Security: display only. Uses the site list staff already loaded.
 Next: none.
 
+### ADMIN-OFFER-CONTRACT
+
+Dependencies: ADMIN-COMMERCIAL-CREATED.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff offer names the contracts already loaded for that offer.
+Another offer’s contract stays off the row. A failed or forbidden contract
+read is not shown as no contract. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-OFFER-CONTRACT.md`](./ADMIN-OFFER-CONTRACT.md).
+Security: display only. Uses the contract list staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
