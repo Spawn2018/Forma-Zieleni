@@ -24,6 +24,7 @@ import {
   comparePortalMilestones,
   formatByteCount,
   portalContractProjectLine,
+  portalOfferContractLine,
   portalMilestoneDueLabel,
   portalOfferStatusLabel,
   portalProjectFiles,
@@ -706,6 +707,70 @@ test('signed-in portal renders client milestones without payment or signing', as
     }),
     { status: 'forbidden' },
   );
+});
+
+test('an offer names only the contracts already loaded for it', () => {
+  const contracts = {
+    status: 'ready',
+    items: [
+      {
+        id: 'ct8k2n4p6q8r0s2u',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T13:00:00.000Z',
+      },
+      {
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'sent',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      },
+      {
+        id: 'ct8k2n4p6q8r0s2v',
+        offerId: 'of8k2n4p6q8r0s2u',
+        status: 'draft',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      },
+    ],
+  };
+  assert.equal(
+    portalOfferContractLine('of8k2n4p6q8r0s2t', contracts),
+    'Umowy: ct8k2n4p6q8r0s2t, ct8k2n4p6q8r0s2u',
+  );
+  assert.equal(portalOfferContractLine('of8k2n4p6q8r0s2v', contracts), 'Umowa: brak');
+  assert.equal(portalOfferContractLine('of8k2n4p6q8r0s2t', { status: 'error' }), 'Umowy nie udało się odczytać.');
+  assert.equal(
+    portalOfferContractLine('of8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać listy umów.',
+  );
+  assert.equal(portalOfferContractLine('of8k2n4p6q8r0s2t', { status: 'empty' }), 'Umowa: brak');
+  assert.equal(mapPortalContractPage({
+    items: [{
+      id: 'ct8k2n4p6q8r0s2t',
+      offerId: '   ',
+      status: 'draft',
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  }).status, 'error');
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    offers: {
+      status: 'ready',
+      items: [{
+        id: 'of8k2n4p6q8r0s2t',
+        opportunityId: 'op8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    contracts,
+  }));
+  assert.equal(
+    html.match(/portal-offer-contract">([^<]+)/)?.[1],
+    'Umowy: ct8k2n4p6q8r0s2t, ct8k2n4p6q8r0s2u',
+  );
+  const offerSlice = html.slice(html.indexOf('portal-offer-contract'), html.indexOf('portal-contracts'));
+  assert.equal(offerSlice.includes('ct8k2n4p6q8r0s2v'), false);
 });
 
 test('a contract names only the projects already loaded for it', () => {

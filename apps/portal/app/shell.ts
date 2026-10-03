@@ -262,7 +262,9 @@ export function mapPortalContractPage(body: unknown): PortalContractList {
   for (const item of items) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const contract = item as ContractApiItem;
-    if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
+    if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string' || !contract.offerId.trim()) {
+      return { status: 'error' };
+    }
     const createdAt = requirePortalCreatedAt(contract.createdAt);
     if (typeof contract.status !== 'string' || !isPortalContractStatus(contract.status) || createdAt === null) {
       return { status: 'error' };
@@ -919,7 +921,21 @@ function listStateNode(
   return ready();
 }
 
-function offerListNode(offers: PortalOfferList): ReactNode {
+/** Contracts already loaded for this offer. A failed contract read is not “no contract”. */
+export function portalOfferContractLine(offerId: string, contracts: PortalContractList): string {
+  if (contracts.status === 'error') return 'Umowy nie udało się odczytać.';
+  if (contracts.status === 'forbidden') return 'To konto nie może odczytać listy umów.';
+  if (contracts.status !== 'ready') return 'Umowa: brak';
+  const matched = contracts.items
+    .filter((item) => item.offerId === offerId)
+    .map((item) => item.id)
+    .sort();
+  if (matched.length === 0) return 'Umowa: brak';
+  if (matched.length === 1) return `Umowa: ${matched[0]}`;
+  return `Umowy: ${matched.join(', ')}`;
+}
+
+function offerListNode(offers: PortalOfferList, contracts: PortalContractList): ReactNode {
   if (offers.status !== 'ready') {
     return listStateNode(
       offers,
@@ -944,6 +960,11 @@ function offerListNode(offers: PortalOfferList): ReactNode {
             'p',
             { className: 'portal-offer-meta' },
             [offer.id, ' · ', portalOfferStatusLabel(offer.status), ' · ', portalCreatedAtLabel(offer.createdAt)].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-offer-contract' },
+            portalOfferContractLine(offer.id, contracts),
           ),
         ),
       ),
@@ -1327,7 +1348,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('p', { className: 'portal-brand' }, 'Forma Zieleni'),
     createElement('h1', null, 'Portal klienta'),
     createElement('p', null, 'Jesteś zalogowany.'),
-    offerListNode(home.offers),
+    offerListNode(home.offers, home.contracts),
     contractListNode(home.contracts, home.projects),
     projectListNode(home.projects, home.milestones, home.files, home.gardens, home.siteIntelligence),
     fileListNode(home.files),

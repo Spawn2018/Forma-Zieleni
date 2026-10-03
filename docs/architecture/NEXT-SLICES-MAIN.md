@@ -1481,6 +1481,22 @@ Contract: [`ADMIN-SITE-PROJECT-FILTER.md`](./ADMIN-SITE-PROJECT-FILTER.md).
 Security: read filter only. Uses the existing site-intelligence list query.
 Next: none.
 
+### PORTAL-OFFER-CONTRACT
+
+Dependencies: PORTAL-CONTRACT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: an offer names the contracts already loaded for that offer.
+Another offer’s contract stays off the row. A failed or forbidden
+contract read is not shown as no contract. More than one contract is
+listed in id order. A blank offer id fails the contract map. No new
+store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-OFFER-CONTRACT.md`](./PORTAL-OFFER-CONTRACT.md).
+Security: display only. Uses the contract list the portal already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
