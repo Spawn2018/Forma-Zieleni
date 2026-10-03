@@ -2960,6 +2960,16 @@ function siteProjectFilterForm(query: string, projectId: string | null): ReactNo
   );
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every record stays. */
+export function compareAdminSites(
+  left: Pick<AdminSiteRow, 'id' | 'createdAt'>,
+  right: Pick<AdminSiteRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function siteListNode(
   records: AdminSiteList,
   filter: { query: string; projectId: string | null; invalid: boolean },
@@ -2981,7 +2991,7 @@ function siteListNode(
     body = createElement(
       'ul',
       { className: 'admin-site-list' },
-      ...records.items.map((record) =>
+      ...[...records.items].sort(compareAdminSites).map((record) =>
         createElement(
           'li',
           { key: record.id, className: 'admin-site-record' },

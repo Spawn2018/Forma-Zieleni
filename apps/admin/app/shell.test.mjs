@@ -13,6 +13,7 @@ import {
   nextOpenAdminMilestone,
   compareAdminDecisionLog,
   compareAdminGardens,
+  compareAdminSites,
   compareAdminCapacityWindows,
   compareAdminFiles,
   compareAdminMilestones,
@@ -1456,6 +1457,51 @@ test('a staff project names only the garden already loaded for it', () => {
     'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
   );
   assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
+});
+
+test('staff site records order by the recorded instant', () => {
+  assert.equal(
+    compareAdminSites(
+      { id: 'si8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'si8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    siteIntelligence: {
+      status: 'ready',
+      items: [
+        {
+          id: 'si8k2n4p6q8r0s2w',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          sourceStage: 'RULES',
+          constraints: [],
+          opportunities: [],
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'si8k2n4p6q8r0s2u',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          sourceStage: 'RULES',
+          constraints: [],
+          opportunities: [],
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'si8k2n4p6q8r0s2t',
+          projectId: 'pr8k2n4p6q8r0s2u',
+          sourceStage: 'RULES',
+          constraints: [],
+          opportunities: [],
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-site-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['si8k2n4p6q8r0s2t', 'si8k2n4p6q8r0s2u', 'si8k2n4p6q8r0s2w']);
 });
 
 test('staff gardens order by the recorded instant', () => {

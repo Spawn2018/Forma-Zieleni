@@ -1717,6 +1717,20 @@ Contract: [`ADMIN-OPPORTUNITY-LABELS.md`](./ADMIN-OPPORTUNITY-LABELS.md).
 Security: display only. Uses the status already on the loaded opportunity.
 Next: none.
 
+### ADMIN-SITE-ORDER
+
+Dependencies: ADMIN-SITE-CREATED, ADMIN-SITE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff site list orders records by the earlier recorded
+instant. The same instant stays in id order. Every record stays. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-SITE-ORDER.md`](./ADMIN-SITE-ORDER.md).
+Security: display sort only. Uses site records staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
