@@ -6,6 +6,7 @@ import {
   ADMIN_FILE_BYTES_MAX,
   adminDecisionLogProjectFilter,
   adminFileProjectFilter,
+  adminGardenProjectFilter,
   adminMilestoneProjectFilter,
   adminShell,
   advanceAdminContractLifecycle,
@@ -71,6 +72,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   const milestoneFilter = adminMilestoneProjectFilter(searchParams.get('milestoneProject'));
   const decisionFilter = adminDecisionLogProjectFilter(searchParams.get('decisionProject'));
   const fileFilter = adminFileProjectFilter(searchParams.get('fileProject'));
+  const gardenFilter = adminGardenProjectFilter(searchParams.get('gardenProject'));
   const home = await resolveAdminHome({
     async probe() {
       const headers: Record<string, string> = { accept: 'application/json' };
@@ -128,7 +130,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       });
     },
     async loadGardens() {
-      return fetchAdminGardens({ base, cookie });
+      if (gardenFilter.state === 'invalid') return { status: 'empty' };
+      return fetchAdminGardens({
+        base,
+        cookie,
+        projectId: gardenFilter.state === 'project' ? gardenFilter.projectId : undefined,
+      });
     },
     async loadSiteIntelligence() {
       return fetchAdminSiteIntelligence({ base, cookie });
@@ -157,6 +164,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     fileProjectQuery: fileFilter.state === 'all' ? '' : searchParams.get('fileProject')?.trim() ?? '',
     fileProjectId: fileFilter.state === 'project' ? fileFilter.projectId : null,
     fileFilterInvalid: fileFilter.state === 'invalid',
+    gardenProjectQuery: gardenFilter.state === 'all' ? '' : searchParams.get('gardenProject')?.trim() ?? '',
+    gardenProjectId: gardenFilter.state === 'project' ? gardenFilter.projectId : null,
+    gardenFilterInvalid: gardenFilter.state === 'invalid',
   };
 }
 

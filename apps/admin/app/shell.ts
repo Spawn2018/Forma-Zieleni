@@ -278,6 +278,9 @@ export type AdminHome =
       fileProjectQuery?: string;
       fileProjectId?: string | null;
       fileFilterInvalid?: boolean;
+      gardenProjectQuery?: string;
+      gardenProjectId?: string | null;
+      gardenFilterInvalid?: boolean;
     };
 
 /**
@@ -1284,13 +1287,18 @@ export function mapGardenPage(body: unknown): AdminGardenList {
 export async function fetchAdminGardens(input: {
   base: string;
   cookie?: string;
+  projectId?: string;
   fetchImpl?: typeof fetch;
 }): Promise<AdminGardenList> {
+  const filter = adminGardenProjectFilter(input.projectId);
+  if (filter.state === 'invalid') return { status: 'error' };
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = { accept: 'application/json' };
     if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/gardens?limit=50', input.base), {
+    const url = new URL('/v1/gardens?limit=50', input.base);
+    if (filter.state === 'project') url.searchParams.set('projectId', filter.projectId);
+    const response = await fetchImpl(url, {
       credentials: 'include',
       headers,
     });
@@ -2391,6 +2399,11 @@ export function adminFileProjectFilter(value: string | null | undefined): AdminM
 }
 
 /** Empty means the full list. A filled id must already be an opaque project id. */
+export function adminGardenProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
+  return adminMilestoneProjectFilter(value);
+}
+
+/** Empty means the full list. A filled id must already be an opaque project id. */
 export function adminMilestoneProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return { state: 'all' };
@@ -2602,21 +2615,46 @@ function createMilestoneForm(): ReactNode {
   );
 }
 
-function gardenListNode(gardens: AdminGardenList): ReactNode {
-  if (gardens.status === 'empty') {
-    return createElement('p', null, 'Brak ogrodów do pokazania.');
-  }
-  if (gardens.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać listy ogrodów.');
-  }
-  if (gardens.status === 'error') {
-    return createElement('p', null, 'Listy ogrodów nie udało się pobrać. Odśwież stronę.');
-  }
+function gardenProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
-    'section',
-    { className: 'admin-gardens', 'aria-label': 'Ogrody' },
-    createElement('h2', null, 'Ogrody'),
+    'form',
+    { method: 'get', className: 'admin-garden-filter' },
     createElement(
+      'label',
+      { className: 'admin-garden-filter-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'gardenProject',
+        autoComplete: 'off',
+        spellCheck: false,
+        defaultValue: query,
+      }),
+    ),
+    createElement('button', { type: 'submit' }, 'Pokaż ogród projektu'),
+    projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
+  );
+}
+
+function gardenListNode(
+  gardens: AdminGardenList,
+  filter: { query: string; projectId: string | null; invalid: boolean },
+): ReactNode {
+  let body: ReactNode;
+  if (filter.invalid) {
+    body = createElement(
+      'p',
+      { className: 'admin-garden-filter-invalid' },
+      'Id projektu jest niepoprawne. Lista ogrodów nie została pobrana.',
+    );
+  } else if (gardens.status === 'empty') {
+    body = createElement('p', null, 'Brak ogrodów do pokazania.');
+  } else if (gardens.status === 'forbidden') {
+    body = createElement('p', null, 'To konto nie może odczytać listy ogrodów.');
+  } else if (gardens.status === 'error') {
+    body = createElement('p', null, 'Listy ogrodów nie udało się pobrać. Odśwież stronę.');
+  } else {
+    body = createElement(
       'ul',
       { className: 'admin-garden-list' },
       ...gardens.items.map((garden) =>
@@ -2630,7 +2668,17 @@ function gardenListNode(gardens: AdminGardenList): ReactNode {
           ),
         ),
       ),
-    ),
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'admin-gardens', 'aria-label': 'Ogrody' },
+    createElement('h2', null, 'Ogrody'),
+    gardenProjectFilterForm(filter.query, filter.projectId),
+    filter.projectId
+      ? createElement('p', { className: 'admin-garden-filter-active' }, `Filtr projektu: ${filter.projectId}`)
+      : null,
+    body,
   );
 }
 
@@ -3642,7 +3690,11 @@ export function adminShell(home: AdminHome): ReactNode {
       invalid: home.milestoneFilterInvalid === true,
     }),
     createMilestoneForm(),
-    gardenListNode(home.gardens),
+    gardenListNode(home.gardens, {
+      query: home.gardenProjectQuery ?? '',
+      projectId: home.gardenProjectId ?? null,
+      invalid: home.gardenFilterInvalid === true,
+    }),
     createGardenForm(),
     siteListNode(home.siteIntelligence),
     createSiteObservationForm(),

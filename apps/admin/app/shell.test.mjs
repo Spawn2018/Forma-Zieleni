@@ -1504,6 +1504,43 @@ test('staff garden UI lists a delivered project garden and refuses a twin field'
     },
   });
   assert.deepEqual(fetched, { status: 'empty' });
+  const filteredGardens = await fetchAdminGardens({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    fetchImpl: async (url) => {
+      assert.match(String(url), /\/v1\/gardens\?limit=50&projectId=pr8k2n4p6q8r0s2t$/);
+      return new Response(JSON.stringify({ items: [] }), { status: 200 });
+    },
+  });
+  assert.deepEqual(filteredGardens, { status: 'empty' });
+  const refusedGardens = await fetchAdminGardens({
+    base: 'http://admin.test',
+    projectId: 'project1',
+    fetchImpl: async () => {
+      assert.fail('an invalid project id must not call Core API');
+      return new Response('', { status: 500 });
+    },
+  });
+  assert.deepEqual(refusedGardens, { status: 'error' });
+  const filteredGardenHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    gardens: mapped,
+    gardenProjectQuery: 'pr8k2n4p6q8r0s2t',
+    gardenProjectId: 'pr8k2n4p6q8r0s2t',
+  }));
+  assert.match(filteredGardenHtml, /Pokaż ogród projektu/);
+  assert.match(filteredGardenHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
+  assert.match(filteredGardenHtml, /gd8k2n4p6q8r0s2t/);
+  const invalidGardenHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    gardens: { status: 'empty' },
+    gardenProjectQuery: 'project1',
+    gardenFilterInvalid: true,
+  }));
+  assert.match(invalidGardenHtml, /Id projektu jest niepoprawne\. Lista ogrodów nie została pobrana\./);
+  assert.equal(invalidGardenHtml.includes('gd8k2n4p6q8r0s2t'), false);
   const created = await createAdminGarden({
     base: 'http://admin.test',
     projectId: 'pr8k2n4p6q8r0s2t',

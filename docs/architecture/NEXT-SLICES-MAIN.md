@@ -1439,6 +1439,20 @@ Contract: [`RECORD-CREATED-LABELS.md`](./RECORD-CREATED-LABELS.md).
 Security: display only. No new record field and no local-zone shift.
 Next: none.
 
+### ADMIN-GARDEN-PROJECT-FILTER
+
+Dependencies: ADMIN-GARDEN-STAFF, ADMIN-FILE-PROJECT-FILTER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff filter the garden list by an opaque project id. An empty
+filter loads the full list. An invalid id does not call Core API and does
+not show a garden row. No new store or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-GARDEN-PROJECT-FILTER.md`](./ADMIN-GARDEN-PROJECT-FILTER.md).
+Security: read filter only. Uses the existing garden list query.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
