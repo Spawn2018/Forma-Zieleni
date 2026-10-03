@@ -529,6 +529,14 @@ row('FZ-REQ-PORTAL-011', 'An authenticated client can see milestones of their ow
   executableWhenComplete: ['PORTAL-SITE-VIEW', 'ADMIN-MILESTONE-STAFF'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-012', 'A portal project card names the earliest open milestone already loaded for that project. Done milestones and other projects are skipped. A failed milestone read is not shown as an empty list.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'nextOpenPortalMilestone picks the earliest due open row. No new store, payment, or signing field.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-PROJECT-NEXT-MILESTONE',
+  executableWhenComplete: ['PORTAL-MILESTONE-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

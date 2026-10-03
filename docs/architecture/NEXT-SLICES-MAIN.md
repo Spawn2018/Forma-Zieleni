@@ -1218,6 +1218,20 @@ Contract: [`ADMIN-FILE-NAME-REVISE.md`](./ADMIN-FILE-NAME-REVISE.md).
 Security: uses existing `files:create`. The portal cannot rename a file.
 Next: none.
 
+### PORTAL-PROJECT-NEXT-MILESTONE
+
+Dependencies: PORTAL-MILESTONE-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a project card names the earliest open milestone of that project.
+Done work and other projects stay off the line. A failed milestone read
+is not shown as an empty list. No new store, payment, or signing field.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-NEXT-MILESTONE.md`](./PORTAL-PROJECT-NEXT-MILESTONE.md).
+Security: uses the milestone list the portal already loaded. No mutation.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

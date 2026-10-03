@@ -18,6 +18,7 @@ import {
   mapPortalOfferPage,
   mapPortalProjectPage,
   mapPortalSitePage,
+  nextOpenPortalMilestone,
   portalErrorMessage,
   portalOriginAllowed,
   portalSessionCookiePresent,
@@ -253,6 +254,7 @@ test('signed-in portal renders client-safe project and file projections without 
   }));
   assert.match(html, /Twoje projekty/);
   assert.match(html, /pj8k2n4p6q8r0s2t/);
+  assert.match(html, /Otwarte kamienie milowe: brak/);
   assert.match(html, /Twoje pliki/);
   assert.match(html, /plan\.pdf/);
   assert.match(html, /application\/pdf/);
@@ -589,6 +591,75 @@ test('signed-in portal renders client milestones without payment or signing', as
     }),
     { status: 'forbidden' },
   );
+});
+
+test('a project card names the earliest open milestone and skips done work', () => {
+  const milestones = [
+    {
+      id: 'ms8k2n4p6q8r0s2v',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Odbiór',
+      status: 'done',
+      dueAt: '2026-10-01T10:00:00.000Z',
+      createdAt: '2026-09-24T18:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2w',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'active',
+      dueAt: '2026-11-02T10:00:00.000Z',
+      createdAt: '2026-09-24T18:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2x',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: '2026-10-15T10:00:00.000Z',
+      createdAt: '2026-09-24T18:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2y',
+      projectId: 'pj8k2n4p6q8r0s2u',
+      title: 'Inny projekt',
+      status: 'planned',
+      dueAt: '2026-10-02T10:00:00.000Z',
+      createdAt: '2026-09-24T18:00:00.000Z',
+    },
+  ];
+  assert.equal(nextOpenPortalMilestone('pj8k2n4p6q8r0s2t', milestones)?.title, 'Koncepcja');
+  assert.equal(nextOpenPortalMilestone('pj8k2n4p6q8r0s2v', milestones), null);
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pj8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'active',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    milestones: { status: 'ready', items: milestones },
+  }));
+  assert.match(html, /portal-project-next">Następny: Koncepcja · zaplanowany · 2026-10-15T10:00:00.000Z/);
+  assert.equal(/portal-project-next">[^<]*Odbiór/.test(html), false);
+  assert.equal(/portal-project-next">[^<]*Inny projekt/.test(html), false);
+  const failed = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pj8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'active',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    milestones: { status: 'error' },
+  }));
+  assert.match(failed, /Kamieni milowych nie udało się odczytać\./);
 });
 
 test('the route module keeps an error boundary and does not invent CRM facts', () => {

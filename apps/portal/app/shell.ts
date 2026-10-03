@@ -107,6 +107,24 @@ export type PortalMilestoneList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+/** Earliest open milestone for one project. Done rows and other projects are skipped. */
+export function nextOpenPortalMilestone(
+  projectId: string,
+  milestones: readonly PortalMilestoneRow[],
+): PortalMilestoneRow | null {
+  const open = milestones.filter((item) => item.projectId === projectId && item.status !== 'done');
+  open.sort((left, right) => {
+    if (left.dueAt === right.dueAt) {
+      if (left.id === right.id) return 0;
+      return left.id < right.id ? -1 : 1;
+    }
+    if (left.dueAt === null) return 1;
+    if (right.dueAt === null) return -1;
+    return left.dueAt < right.dueAt ? -1 : 1;
+  });
+  return open[0] ?? null;
+}
+
 export type PortalHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -715,7 +733,16 @@ function contractListNode(contracts: PortalContractList): ReactNode {
   );
 }
 
-function projectListNode(projects: PortalProjectList): ReactNode {
+function projectNextMilestoneLine(projectId: string, milestones: PortalMilestoneList): string {
+  if (milestones.status === 'error') return 'Kamieni milowych nie udało się odczytać.';
+  if (milestones.status === 'forbidden') return 'To konto nie może odczytać kamieni milowych.';
+  if (milestones.status !== 'ready') return 'Otwarte kamienie milowe: brak';
+  const next = nextOpenPortalMilestone(projectId, milestones.items);
+  if (!next) return 'Otwarte kamienie milowe: brak';
+  return ['Następny: ', next.title, ' · ', milestoneStatusLabel(next.status), ' · ', next.dueAt ?? 'bez terminu'].join('');
+}
+
+function projectListNode(projects: PortalProjectList, milestones: PortalMilestoneList): ReactNode {
   if (projects.status !== 'ready') {
     return listStateNode(
       projects,
@@ -740,6 +767,11 @@ function projectListNode(projects: PortalProjectList): ReactNode {
             'p',
             { className: 'portal-project-meta' },
             [project.id, ' · ', project.status, ' · ', project.createdAt].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-project-next' },
+            projectNextMilestoneLine(project.id, milestones),
           ),
         ),
       ),
@@ -934,7 +966,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
     contractListNode(home.contracts),
-    projectListNode(home.projects),
+    projectListNode(home.projects, home.milestones),
     fileListNode(home.files),
     gardenListNode(home.gardens),
     siteListNode(home.siteIntelligence),
