@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  adminMilestoneDueLabel,
   adminOfferStatusLabel,
   adminSiteObservationKindLabel,
   adminSiteSourceStageLabel,
@@ -1668,6 +1669,19 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   }));
   assert.match(datedHtml, /Usuń termin/);
+  assert.match(datedHtml, /Sadzenie · zaplanowany · 3 października 2026, 08:00 UTC/);
+  assert.equal(datedHtml.includes('Sadzenie · zaplanowany · 2026-10-03T08:00:00.000Z'), false);
+  assert.equal(adminMilestoneDueLabel(null), 'bez terminu');
+  assert.equal(adminMilestoneDueLabel('2026-02-31T00:00:00.000Z'), null);
+  assert.deepEqual(mapMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2u',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: 'jutro',
+    }],
+  }), { status: 'error' });
   const advanced = await advanceAdminMilestoneStatus({
     base: 'http://admin.test',
     milestoneId: 'ms8k2n4p6q8r0s2t',

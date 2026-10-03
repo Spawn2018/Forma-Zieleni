@@ -1335,6 +1335,22 @@ Contract: [`PORTAL-PROJECT-CONTRACT.md`](./PORTAL-PROJECT-CONTRACT.md).
 Security: display only. Uses the project projection the portal already maps.
 Next: none.
 
+### MILESTONE-DUE-LABELS
+
+Dependencies: PORTAL-MILESTONE-VIEW, PORTAL-PROJECT-NEXT-MILESTONE, ADMIN-MILESTONE-DUE-REVISE.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff and the client read a milestone due instant as Polish UTC
+words, including on the project’s next-milestone line. No due stays
+„bez terminu”. An unreadable instant fails the list map and is not
+printed raw. The stored instant is not shifted into a local zone, and
+the revise field still posts the UTC instant.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`MILESTONE-DUE-LABELS.md`](./MILESTONE-DUE-LABELS.md).
+Security: display only. No new due field and no mutation.
+Next: none.
+
 ### ADMIN-FILE-PROJECT-FILTER
 
 Dependencies: ADMIN-FILE-VISIBILITY, ADMIN-MILESTONE-PROJECT-FILTER.

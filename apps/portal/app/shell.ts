@@ -504,7 +504,9 @@ export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
     if (typeof milestone.title !== 'string' || typeof milestone.createdAt !== 'string') return { status: 'error' };
     if (!isPortalMilestoneStatus(milestone.status)) return { status: 'error' };
     if (!Object.hasOwn(milestone, 'dueAt')) return { status: 'error' };
-    if (milestone.dueAt !== null && typeof milestone.dueAt !== 'string') return { status: 'error' };
+    if (milestone.dueAt !== null && (typeof milestone.dueAt !== 'string' || formatUtcInstantPl(milestone.dueAt) === null)) {
+      return { status: 'error' };
+    }
     if (MILESTONE_FORBIDDEN.some((key) => Object.hasOwn(milestone, key))) return { status: 'error' };
     rows.push({
       id: milestone.id,
@@ -573,6 +575,48 @@ export function portalProjectStatusLabel(status: PortalProjectStatus): string {
       return unreachable;
     }
   }
+}
+
+const UTC_INSTANT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?Z$/;
+const POLISH_MONTHS = [
+  'stycznia',
+  'lutego',
+  'marca',
+  'kwietnia',
+  'maja',
+  'czerwca',
+  'lipca',
+  'sierpnia',
+  'września',
+  'października',
+  'listopada',
+  'grudnia',
+] as const;
+
+/** UTC calendar words. The stored instant is not shifted into a local zone. */
+export function formatUtcInstantPl(value: string): string | null {
+  const match = UTC_INSTANT.exec(value);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hour = Number(match[4]);
+  const minute = Number(match[5]);
+  const second = Number(match[6]);
+  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59) return null;
+  const fraction = (match[7] ?? '').padEnd(3, '0');
+  const normalized = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}.${fraction}Z`;
+  const parsed = new Date(normalized);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString() !== normalized) return null;
+  const monthName = POLISH_MONTHS[month - 1];
+  if (!monthName) return null;
+  return `${day} ${monthName} ${year}, ${match[4]}:${match[5]} UTC`;
+}
+
+/** Null means no due instant. An unreadable instant stays null and is not printed raw. */
+export function portalMilestoneDueLabel(dueAt: string | null): string | null {
+  if (dueAt === null) return 'bez terminu';
+  return formatUtcInstantPl(dueAt);
 }
 
 function milestoneStatusLabel(status: PortalMilestoneStatus): string {
@@ -900,7 +944,7 @@ function projectNextMilestoneLine(projectId: string, milestones: PortalMilestone
   if (milestones.status !== 'ready') return 'Otwarte kamienie milowe: brak';
   const next = nextOpenPortalMilestone(projectId, milestones.items);
   if (!next) return 'Otwarte kamienie milowe: brak';
-  return ['Następny: ', next.title, ' · ', milestoneStatusLabel(next.status), ' · ', next.dueAt ?? 'bez terminu'].join('');
+  return ['Następny: ', next.title, ' · ', milestoneStatusLabel(next.status), ' · ', portalMilestoneDueLabel(next.dueAt) ?? 'termin nieczytelny'].join('');
 }
 
 function projectGardenLine(projectId: string, gardens: PortalGardenList): string {
@@ -1128,7 +1172,7 @@ function milestoneListNode(milestones: PortalMilestoneList): ReactNode {
               ' · ',
               milestoneStatusLabel(milestone.status),
               ' · ',
-              milestone.dueAt ?? 'bez terminu',
+              portalMilestoneDueLabel(milestone.dueAt) ?? 'termin nieczytelny',
             ].join(''),
           ),
         ),

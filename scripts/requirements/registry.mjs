@@ -593,6 +593,14 @@ row('FZ-REQ-PORTAL-018', 'A portal project card names the contract id already st
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-019', 'A portal milestone shows its due instant in Polish UTC words. No due stays „bez terminu”. An unreadable instant fails the list map and is not printed raw. The stored instant is not shifted into a local zone.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The milestone list and the project next-milestone line use the same words. The write path still sends the UTC instant.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'MILESTONE_DUE_LABEL',
+  executableSlice: 'MILESTONE-DUE-LABELS',
+  executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'PORTAL-PROJECT-NEXT-MILESTONE'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
@@ -686,6 +694,14 @@ row('FZ-REQ-ADMIN-028', 'Staff see Polish words for the seven site observation k
   depth: 'SITE_LABELS',
   executableSlice: 'ADMIN-SITE-LABELS',
   executableWhenComplete: ['ADMIN-SITE-STAFF', 'ADMIN-STATUS-LABELS'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-029', 'Staff see a milestone due instant in the same Polish UTC words as the portal. No due stays „bez terminu”. An unreadable instant fails the list map and is not printed raw. The revise field still posts the UTC instant.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The staff list uses the same calendar words as the portal. No local-zone shift and no new due field.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_DUE_LABEL',
+  executableSlice: 'MILESTONE-DUE-LABELS',
+  executableWhenComplete: ['ADMIN-MILESTONE-DUE-REVISE', 'PORTAL-MILESTONE-VIEW'],
   safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {

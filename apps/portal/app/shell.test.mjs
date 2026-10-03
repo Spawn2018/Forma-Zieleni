@@ -21,6 +21,7 @@ import {
   mapPortalSitePage,
   nextOpenPortalMilestone,
   portalContractStatusLabel,
+  portalMilestoneDueLabel,
   portalOfferStatusLabel,
   portalProjectFiles,
   portalProjectGarden,
@@ -655,7 +656,9 @@ test('signed-in portal renders client milestones without payment or signing', as
       milestones: fetched,
     }));
     assert.match(html, /w toku/);
-    assert.match(html, /2026-11-01T10:00:00.000Z/);
+    assert.match(html, /1 listopada 2026, 10:00 UTC/);
+    assert.equal(html.includes('2026-11-01T10:00:00.000Z'), false);
+    assert.equal(fetched.items[0].dueAt, '2026-11-01T10:00:00.000Z');
   }
   assert.deepEqual(
     await fetchPortalMilestones({
@@ -716,7 +719,22 @@ test('a project card names the earliest open milestone and skips done work', () 
     },
     milestones: { status: 'ready', items: milestones },
   }));
-  assert.match(html, /portal-project-next">Następny: Koncepcja · zaplanowany · 2026-10-15T10:00:00.000Z/);
+  assert.match(html, /portal-project-next">Następny: Koncepcja · zaplanowany · 15 października 2026, 10:00 UTC/);
+  assert.equal(html.includes('2026-10-15T10:00:00.000Z'), false);
+  assert.equal(portalMilestoneDueLabel(null), 'bez terminu');
+  assert.equal(portalMilestoneDueLabel('2024-02-29T00:00:00.000Z'), '29 lutego 2024, 00:00 UTC');
+  assert.equal(portalMilestoneDueLabel('jutro'), null);
+  assert.equal(portalMilestoneDueLabel('2026-02-31T00:00:00.000Z'), null);
+  assert.deepEqual(mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: 'jutro',
+      createdAt: '2026-09-24T18:00:00.000Z',
+    }],
+  }), { status: 'error' });
   assert.equal(/portal-project-next">[^<]*Odbiór/.test(html), false);
   assert.equal(/portal-project-next">[^<]*Inny projekt/.test(html), false);
   const failed = renderToStaticMarkup(portalShell({
