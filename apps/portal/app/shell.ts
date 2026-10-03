@@ -298,7 +298,9 @@ export function mapPortalProjectPage(body: unknown): PortalProjectList {
   for (const item of items) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const project = item as ProjectApiItem;
-    if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
+    if (typeof project.id !== 'string' || typeof project.contractId !== 'string' || !project.contractId.trim()) {
+      return { status: 'error' };
+    }
     if (typeof project.status !== 'string' || !isPortalProjectStatus(project.status) || typeof project.createdAt !== 'string') {
       return { status: 'error' };
     }
@@ -991,6 +993,11 @@ function projectListNode(
             'p',
             { className: 'portal-project-meta' },
             [project.id, ' · ', portalProjectStatusLabel(project.status), ' · ', project.createdAt].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-project-contract' },
+            `Umowa: ${project.contractId}`,
           ),
           createElement(
             'p',

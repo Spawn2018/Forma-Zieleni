@@ -788,6 +788,42 @@ test('a project card lists only that project’s files', () => {
   assert.equal(failed.includes('Pliki: brak'), false);
 });
 
+test('a project card names its own contract', () => {
+  assert.deepEqual(mapPortalProjectPage({
+    items: [{
+      id: 'pj8k2n4p6q8r0s2t',
+      contractId: '   ',
+      status: 'planned',
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  }), { status: 'error' });
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [
+        {
+          id: 'pj8k2n4p6q8r0s2t',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          status: 'planned',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'pj8k2n4p6q8r0s2u',
+          contractId: 'ct8k2n4p6q8r0s2u',
+          status: 'delivered',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const first = html.slice(html.indexOf('pj8k2n4p6q8r0s2t'), html.indexOf('pj8k2n4p6q8r0s2u'));
+  const second = html.slice(html.indexOf('pj8k2n4p6q8r0s2u'));
+  assert.equal(first.match(/portal-project-contract">([^<]+)/)?.[1], 'Umowa: ct8k2n4p6q8r0s2t');
+  assert.equal(second.match(/portal-project-contract">([^<]+)/)?.[1], 'Umowa: ct8k2n4p6q8r0s2u');
+  assert.equal(first.includes('ct8k2n4p6q8r0s2u'), false);
+});
+
 test('a project card names only that project’s garden', () => {
   const gardens = [
     {

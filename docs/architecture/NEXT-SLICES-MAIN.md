@@ -1321,6 +1321,20 @@ Contract: [`PORTAL-PROJECT-SITE.md`](./PORTAL-PROJECT-SITE.md).
 Security: uses the site list the portal already loaded. No mutation.
 Next: none.
 
+### PORTAL-PROJECT-CONTRACT
+
+Dependencies: PORTAL-CONTRACT-VIEW, PORTAL-PROJECT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a project card names the contract id already stored on that
+project. Another project’s contract stays off the card. A blank contract
+id fails the list map. No new store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-CONTRACT.md`](./PORTAL-PROJECT-CONTRACT.md).
+Security: display only. Uses the project projection the portal already maps.
+Next: none.
+
 ### ADMIN-FILE-PROJECT-FILTER
 
 Dependencies: ADMIN-FILE-VISIBILITY, ADMIN-MILESTONE-PROJECT-FILTER.
