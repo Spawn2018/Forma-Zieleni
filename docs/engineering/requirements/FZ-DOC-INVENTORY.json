@@ -530,6 +530,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/MILESTONE-LIST-ORDER.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/MOBILE-ANDROID-FOUNDATION.md",
       "docType": "DOCUMENT",
       "audience": "developer",
