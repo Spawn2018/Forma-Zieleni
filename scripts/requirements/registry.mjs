@@ -657,6 +657,14 @@ row('FZ-REQ-PORTAL-026', 'A portal offer names the contracts already loaded for 
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-027', 'Portal file lists, including a project card, order files by Polish name. Numbers compare as numbers. The same name stays in id order. No file is dropped. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of files the client already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'FILE_LIST_ORDER',
+  executableSlice: 'FILE-LIST-ORDER',
+  executableWhenComplete: ['PORTAL-FILE-DOWNLOAD', 'PORTAL-PROJECT-FILES'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
@@ -822,6 +830,14 @@ row('FZ-REQ-ADMIN-037', 'A staff offer and a staff contract show the recorded in
   depth: 'COMMERCIAL_CREATED',
   executableSlice: 'ADMIN-COMMERCIAL-CREATED',
   executableWhenComplete: ['RECORD-CREATED-LABELS', 'ADMIN-STATUS-LABELS'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-038', 'The staff file list orders files by Polish name. Numbers compare as numbers. The same name stays in id order. A hidden file stays on the list. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of files staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'FILE_LIST_ORDER',
+  executableSlice: 'FILE-LIST-ORDER',
+  executableWhenComplete: ['ADMIN-FILE-VISIBILITY', 'PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {

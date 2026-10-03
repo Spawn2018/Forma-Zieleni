@@ -21,6 +21,7 @@ import {
   mapPortalSitePage,
   nextOpenPortalMilestone,
   portalContractStatusLabel,
+  comparePortalFiles,
   comparePortalMilestones,
   formatByteCount,
   portalContractProjectLine,
@@ -893,6 +894,54 @@ test('a milestone row names its own project', () => {
     'Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u',
     'Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t',
   ]);
+});
+
+test('portal files sort by Polish name and keep every row', () => {
+  assert.equal(
+    comparePortalFiles(
+      { id: 'fl8k2n4p6q8r0s2u', name: 'plan.pdf' },
+      { id: 'fl8k2n4p6q8r0s2t', name: 'plan.pdf' },
+    ) > 0,
+    true,
+  );
+  const files = [
+    {
+      id: 'fl8k2n4p6q8r0s2v',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      name: 'plan 10.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 10,
+      createdAt: '2026-09-24T12:00:00.000Z',
+    },
+    {
+      id: 'fl8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      name: 'Łąka.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 11,
+      createdAt: '2026-09-24T12:10:00.000Z',
+    },
+    {
+      id: 'fl8k2n4p6q8r0s2u',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      name: 'plan 2.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 12,
+      createdAt: '2026-09-24T12:20:00.000Z',
+    },
+  ];
+  assert.deepEqual(
+    portalProjectFiles('pj8k2n4p6q8r0s2t', files).map((file) => file.name),
+    ['Łąka.pdf', 'plan 2.pdf', 'plan 10.pdf'],
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    files: { status: 'ready', items: files },
+  }));
+  const lines = [...html.matchAll(/portal-file-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(lines[0].startsWith('Łąka.pdf ·'), true);
+  assert.equal(lines[1].startsWith('plan 2.pdf ·'), true);
+  assert.equal(lines[2].startsWith('plan 10.pdf ·'), true);
 });
 
 test('a file row names its own project', () => {

@@ -96,6 +96,17 @@ export type AdminFileList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+/** Name order, Polish collation, numbers in numeric order. Same name stays in id order. Hidden files stay. */
+export function compareAdminFiles(
+  left: Pick<AdminFileRow, 'id' | 'name'>,
+  right: Pick<AdminFileRow, 'id' | 'name'>,
+): number {
+  const byName = left.name.localeCompare(right.name, 'pl', { numeric: true, sensitivity: 'variant' });
+  if (byName !== 0) return byName;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 export type AdminPaymentInstallmentRow = {
   id: string;
   sequence: number;
@@ -3155,7 +3166,7 @@ function fileListNode(
     body = createElement(
       'ul',
       { className: 'admin-file-list' },
-      ...files.items.map((file) =>
+      ...[...files.items].sort(compareAdminFiles).map((file) =>
         createElement(
           'li',
           { key: file.id, className: 'admin-file' },

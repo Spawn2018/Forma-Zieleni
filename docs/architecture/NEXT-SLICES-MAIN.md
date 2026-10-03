@@ -1512,6 +1512,21 @@ Contract: [`ADMIN-COMMERCIAL-CREATED.md`](./ADMIN-COMMERCIAL-CREATED.md).
 Security: display only. Uses createdAt already returned by Core API.
 Next: none.
 
+### FILE-LIST-ORDER
+
+Dependencies: PORTAL-FILE-DOWNLOAD, ADMIN-FILE-VISIBILITY.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: portal and staff file lists order files by Polish name. Numbers
+compare as numbers. The same name stays in id order. A project card uses
+that order. A hidden staff file stays on the list. No file is dropped.
+No new store or payment field.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`FILE-LIST-ORDER.md`](./FILE-LIST-ORDER.md).
+Security: display sort only. Uses files already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

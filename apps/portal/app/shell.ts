@@ -64,12 +64,23 @@ export type PortalFileList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
-/** Files already loaded for one project, in list order. */
+/** Name order, Polish collation, numbers in numeric order. Same name stays in id order. */
+export function comparePortalFiles(
+  left: Pick<PortalFileRow, 'id' | 'name'>,
+  right: Pick<PortalFileRow, 'id' | 'name'>,
+): number {
+  const byName = left.name.localeCompare(right.name, 'pl', { numeric: true, sensitivity: 'variant' });
+  if (byName !== 0) return byName;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
+/** Files already loaded for one project, in name order. */
 export function portalProjectFiles(
   projectId: string,
   files: readonly PortalFileRow[],
 ): PortalFileRow[] {
-  return files.filter((file) => file.projectId === projectId);
+  return files.filter((file) => file.projectId === projectId).sort(comparePortalFiles);
 }
 
 export type PortalGardenRow = {
@@ -1285,7 +1296,7 @@ function fileListNode(files: PortalFileList): ReactNode {
     createElement(
       'ul',
       { className: 'portal-file-list' },
-      ...files.items.map((file) =>
+      ...[...files.items].sort(comparePortalFiles).map((file) =>
         createElement(
           'li',
           { key: file.id, className: 'portal-file' },

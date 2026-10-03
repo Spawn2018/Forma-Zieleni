@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  compareAdminFiles,
   compareAdminMilestones,
   formatByteCount,
   adminDecisionMilestoneLine,
@@ -865,6 +866,54 @@ test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty
   const tokens = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
   assert.match(tokens, /\.admin-upload-file-bytes-hint\s*\{[^}]*color:\s*var\(--mech\)/s);
   assert.equal(/\.admin-upload-file-bytes-hint\s*\{[^}]*color:\s*var\(--kreska\)/s.test(tokens), false);
+});
+
+test('staff files sort by Polish name and keep a hidden file', () => {
+  assert.equal(
+    compareAdminFiles(
+      { id: 'fl8k2n4p6q8r0s2u', name: 'plan.pdf' },
+      { id: 'fl8k2n4p6q8r0s2t', name: 'plan.pdf' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    files: {
+      status: 'ready',
+      items: [
+        {
+          id: 'fl8k2n4p6q8r0s2v',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          name: 'plan 10.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 10,
+          visibleToClient: false,
+        },
+        {
+          id: 'fl8k2n4p6q8r0s2t',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          name: 'Łąka.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 11,
+          visibleToClient: true,
+        },
+        {
+          id: 'fl8k2n4p6q8r0s2u',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          name: 'plan 2.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 12,
+          visibleToClient: true,
+        },
+      ],
+    },
+  }));
+  const lines = [...html.matchAll(/admin-file-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(lines[0].startsWith('Łąka.pdf ·'), true);
+  assert.equal(lines[1].startsWith('plan 2.pdf ·'), true);
+  assert.equal(lines[2].startsWith('plan 10.pdf ·'), true);
+  assert.match(lines[2], /tylko personel/);
 });
 
 test('mapOpportunityPage and Core API opportunity fetch/create stay truthful', async () => {
