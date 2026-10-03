@@ -89,3 +89,47 @@ export function projectFileForPortal(
     createdAt: file.createdAt,
   };
 }
+
+const FORBIDDEN_NAME_KEYS = new Set([
+  'payment',
+  'provider',
+  'signing',
+  'storageKey',
+  'bytes',
+  'url',
+  'path',
+  'bucket',
+  'secret',
+  'email',
+  'phone',
+  'clientSubject',
+]);
+
+function assertFileName(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length > 255) throw new Error('PROJECT_FILE_NAME_INVALID');
+  return trimmed;
+}
+
+/**
+ * Staff corrects the display name. Bytes, mime type, and client subject stay put.
+ * The same name is returned unchanged. No storage or payment fields.
+ */
+export function reviseProjectFileName(
+  file: ProjectFile,
+  name: string,
+  at: string,
+  surface: Record<string, unknown> = {},
+): ProjectFile {
+  for (const key of Object.keys(surface)) {
+    if (FORBIDDEN_NAME_KEYS.has(key)) throw new Error('PROJECT_FILE_SURFACE_FORBIDDEN');
+  }
+  const next = assertFileName(name);
+  if (next === file.name) return file;
+  if (at < file.updatedAt) throw new Error('PROJECT_FILE_AT_INVALID');
+  return {
+    ...file,
+    name: next,
+    updatedAt: at,
+  };
+}

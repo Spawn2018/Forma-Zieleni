@@ -462,6 +462,14 @@ class PostgresTx implements LeadTx {
     return rows.map(toProject);
   }
 
+  async saveProjectFile(file: ProjectFile): Promise<void> {
+    const result = await this.trx.updateTable('project_file').set({
+      name: file.name,
+      updated_at: new Date(file.updatedAt),
+    }).where('id', '=', file.id).executeTakeFirst();
+    if (Number(result.numUpdatedRows ?? 0) === 0) throw new Error('PROJECT_FILE_MISSING');
+  }
+
   async insertProjectFile(file: ProjectFile): Promise<void> {
     await this.trx.insertInto('project_file').values({
       id: file.id,

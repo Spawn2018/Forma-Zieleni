@@ -10,6 +10,7 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  reviseAdminFileName,
   capacityDecisionMessage,
   createAdminCapacityWindow,
   createAdminGarden,
@@ -570,6 +571,28 @@ export async function action({ request }: Route.ActionArgs) {
       name: name.trim(),
       mimeType: mimeType.trim(),
       sizeBytes,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'revise-file-name') {
+    const fileId = form.get('fileId');
+    const name = form.get('name');
+    if (typeof fileId !== 'string' || !fileId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof name !== 'string' || !name.trim() || name.trim().length > 255) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await reviseAdminFileName({
+      base,
+      fileId: fileId.trim(),
+      name: name.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

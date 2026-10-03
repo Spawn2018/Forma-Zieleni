@@ -1498,6 +1498,41 @@ export async function createAdminFile(input: {
   }
 }
 
+export async function reviseAdminFileName(input: {
+  base: string;
+  fileId: string;
+  name: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const name = input.name.trim();
+  if (!name || name.length > 255) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/files/${encodeURIComponent(input.fileId)}/name`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ name }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export type AdminFileBytesPutResult =
   | { ok: true; checksum: string; sizeBytes: number }
   | { ok: false; reason: 'forbidden' | 'error' | 'not_found' | 'conflict' };
@@ -2555,6 +2590,29 @@ function fileListNode(files: AdminFileList): ReactNode {
             'p',
             { className: 'admin-file-meta' },
             [file.name, ' · projekt ', file.projectId, ' · ', file.mimeType, ' · ', String(file.sizeBytes), ' B'].join(''),
+          ),
+          createElement(
+            'form',
+            { method: 'post', className: 'admin-file-name' },
+            createElement('input', { type: 'hidden', name: 'fileId', value: file.id }),
+            createElement(
+              'label',
+              { className: 'admin-file-name-field' },
+              'Nowa nazwa',
+              createElement('input', {
+                type: 'text',
+                name: 'name',
+                required: true,
+                maxLength: 255,
+                autoComplete: 'off',
+                defaultValue: file.name,
+              }),
+            ),
+            createElement(
+              'button',
+              { type: 'submit', name: 'intent', value: 'revise-file-name' },
+              'Popraw nazwę',
+            ),
           ),
           fileBytesControls(file),
         ),

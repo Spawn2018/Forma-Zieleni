@@ -1744,6 +1744,66 @@
         }
       }
     },
+    "/files/{fileId}/name": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "reviseProjectFileName",
+        "summary": "Correct a project file display name",
+        "description": "Staff replaces the display name. Bytes, mime type, and client subject stay unchanged. Storage and payment fields are refused. The portal reads the new name and still omits updatedAt.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectFileId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectFileNameRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project file name revised",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectFile"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/files/{fileId}/content": {
       "put": {
         "tags": [
@@ -4820,6 +4880,21 @@
             "maxLength": 128
           }
         }
+      },
+      "ProjectFileNameRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "description": "A corrected file display name. Bytes, storage, and payment fields are not accepted."
       },
       "ProjectFile": {
         "type": "object",

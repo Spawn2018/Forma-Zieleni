@@ -19,6 +19,7 @@ import {
   createAdminOffer,
   createAdminOpportunity,
   createAdminFile,
+  reviseAdminFileName,
   createAdminGarden,
   createAdminDecisionLogEntry,
   reviseAdminDecisionLogSummary,
@@ -490,6 +491,31 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
   });
   assert.deepEqual(denied, { ok: false, reason: 'forbidden' });
 
+  const renamed = await reviseAdminFileName({
+    base: 'http://127.0.0.1:8787',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    name: '  plan-v2.pdf  ',
+    idempotencyKey: 'admin-file-name',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/files\/fl8k2n4p6q8r0s2t\/name$/);
+      assert.equal(init?.method, 'POST');
+      assert.deepEqual(JSON.parse(String(init?.body)), { name: 'plan-v2.pdf' });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(renamed, { ok: true });
+  const blankName = await reviseAdminFileName({
+    base: 'http://127.0.0.1:8787',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    name: '   ',
+    idempotencyKey: 'admin-file-blank',
+    async fetchImpl() {
+      assert.fail('blank name must not call Core API');
+      return new Response('{}', { status: 500 });
+    },
+  });
+  assert.deepEqual(blankName, { ok: false, reason: 'error' });
+
   assert.deepEqual(
     await createAdminFile({
       base: 'http://127.0.0.1:8787',
@@ -651,6 +677,8 @@ test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty
       }],
     },
   }));
+  assert.match(markup, /Popraw nazwę/);
+  assert.match(markup, /name="fileId" value="fl8k2n4p6q8r0s2t"/);
   assert.match(markup, /Pobierz «notes\.bin»/);
   assert.match(markup, /\/files\/fl8k2n4p6q8r0s2t\/content/);
   assert.match(markup, /upload-file-bytes/);

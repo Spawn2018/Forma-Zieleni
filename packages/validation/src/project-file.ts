@@ -2,6 +2,8 @@ import { assertOpaqueProjectId } from '../../domain/src/project.ts';
 
 export type FieldError = { field: string; reason: string };
 
+export type ProjectFileNameRequest = { name: string };
+
 export type ProjectFileCreateRequest = {
   projectId: string;
   name: string;
@@ -60,4 +62,27 @@ export function validateProjectFileCreateRequest(
   } catch {
     return { ok: false, errors: [{ field: 'projectId', reason: 'PROJECT_ID_INVALID' }] };
   }
+}
+
+export function validateProjectFileNameRequest(
+  value: unknown,
+): { ok: true; value: ProjectFileNameRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  if (Object.hasOwn(body, 'storageKey') || Object.hasOwn(body, 'bytes') || Object.hasOwn(body, 'url') || Object.hasOwn(body, 'path')) {
+    return { ok: false, errors: [{ field: 'storageKey', reason: 'BINARY_PAYLOAD_FORBIDDEN' }] };
+  }
+  for (const key of ['payment', 'provider', 'signing', 'clientSubject']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'name');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.name !== 'string') {
+    return { ok: false, errors: [{ field: 'name', reason: 'STRING_REQUIRED' }] };
+  }
+  return { ok: true, value: { name: body.name } };
 }

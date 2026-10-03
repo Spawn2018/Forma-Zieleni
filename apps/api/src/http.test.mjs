@@ -996,6 +996,39 @@ test('portal file projection is read-only, empty without grant, and BOLA-isolate
   const otherList = await (await app.request('/v1/portal/files', { headers: bearer(portalOther) })).json();
   assert.deepEqual(otherList.items, []);
   assert.equal((await app.request(`/v1/files/${file.id}`, { headers: bearer(portal) })).status, 403);
+
+  const blankFileName = await app.request(`/v1/files/${file.id}/name`, json({ name: '   ' }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-name-blank',
+  }));
+  assert.equal(blankFileName.status, 400);
+  const storedName = await app.request(`/v1/files/${file.id}/name`, json({ name: 'plan.pdf', storageKey: 'secret' }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-name-store',
+  }));
+  assert.equal(storedName.status, 400);
+  assert.equal((await app.request(`/v1/files/${file.id}/name`, json({ name: 'układ.pdf' }, {
+    ...bearer(portal),
+    'idempotency-key': 'file-name-portal',
+  }))).status, 403);
+  const renamedFile = await app.request(`/v1/files/${file.id}/name`, json({ name: 'układ.pdf' }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-name-set',
+  }));
+  assert.equal(renamedFile.status, 200);
+  const renamedBody = await renamedFile.json();
+  assert.equal(renamedBody.name, 'układ.pdf');
+  assert.equal(renamedBody.mimeType, 'application/pdf');
+  assert.equal(renamedBody.sizeBytes, file.sizeBytes);
+  const nameReplay = await app.request(`/v1/files/${file.id}/name`, json({ name: 'układ.pdf' }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-name-set',
+  }));
+  assert.equal(nameReplay.status, 200);
+  const portalNamed = await (await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portal) })).json();
+  assert.equal(portalNamed.name, 'układ.pdf');
+  assert.equal(Object.hasOwn(portalNamed, 'updatedAt'), false);
+  assert.equal(Object.hasOwn(portalNamed, 'storageKey'), false);
 });
 
 test('staff can store and download local private file bytes; portal cannot', async () => {

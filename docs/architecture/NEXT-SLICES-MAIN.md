@@ -1202,6 +1202,22 @@ Security: uses existing `milestones:create`. The portal cannot revise
 a summary.
 Next: none.
 
+### ADMIN-FILE-NAME-REVISE
+
+Dependencies: ADMIN-CRM-FILE, PORTAL-FILE-PROJECTION.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can replace a project file display name. Bytes, mime
+type, size, and client subject stay unchanged. A blank name and a
+storage or payment field are refused. The portal shows the new name
+and still omits updatedAt.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`,
+`packages/domain/project-file.test.mjs`.
+Contract: [`ADMIN-FILE-NAME-REVISE.md`](./ADMIN-FILE-NAME-REVISE.md).
+Security: uses existing `files:create`. The portal cannot rename a file.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

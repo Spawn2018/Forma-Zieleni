@@ -121,7 +121,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'file.name_revised';
   leadId: string;
   payload: {
     leadId: string;
@@ -138,13 +138,16 @@ export type OutboxMessage = {
     summary?: string;
     previousSummary?: string;
     entryId?: string;
+    fileId?: string;
+    name?: string;
+    previousName?: string;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'file.name_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -164,6 +167,9 @@ export type AuditEvent = {
     summary?: string;
     previousSummary?: string;
     entryId?: string;
+    fileId?: string;
+    name?: string;
+    previousName?: string;
     scheduleId?: string;
     installmentId?: string;
   };
@@ -195,6 +201,7 @@ export interface LeadTx {
   findProjectByContract(contractId: string): Promise<Project | null>;
   listProjects(query: ProjectListQuery): Promise<Project[]>;
   insertProjectFile(file: ProjectFile): Promise<void>;
+  saveProjectFile(file: ProjectFile): Promise<void>;
   findProjectFile(id: string): Promise<ProjectFile | null>;
   listProjectFiles(query: ProjectFileListQuery): Promise<ProjectFile[]>;
   insertMilestone(milestone: ProjectMilestone): Promise<void>;

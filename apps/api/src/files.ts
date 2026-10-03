@@ -2,12 +2,13 @@ import {
   assertOpaqueProjectId,
   createProjectFile,
   projectFileForPortal,
+  reviseProjectFileName,
   type PortalProjectFileProjection,
   type ProjectFile,
 } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
-import { newProjectFileId } from './ids.ts';
+import { newOpaqueId, newProjectFileId } from './ids.ts';
 import { decodeCursor, encodeCursor, requestHash } from './leads.ts';
 import type { LeadStore, ProjectFileListQuery, SortField, StoredReply } from './store.ts';
 
@@ -113,6 +114,84 @@ export async function createProjectFileRecord(
       'project-file.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: file },
+      at,
+    );
+    return file;
+  });
+}
+
+export async function reviseProjectFileNameRecord(
+  store: LeadStore,
+  fileId: string,
+  name: string,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<ProjectFile> {
+  const hash = requestHash({ scope: 'project-file.name', fileId, name });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'project-file.name', idempotencyKey, hash);
+    if (replay) return replay.responseBody as ProjectFile;
+    const current = await tx.findProjectFile(fileId);
+    if (!current) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
+    const project = await tx.findProject(current.projectId);
+    if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    const contract = await tx.findContract(project.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let file: ProjectFile;
+    try {
+      file = reviseProjectFileName(current, name, at);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'PROJECT_FILE_NAME_INVALID') {
+        throw badRequest('PROJECT_FILE_NAME_INVALID', 'File name is not valid.');
+      }
+      if (error instanceof Error && error.message === 'PROJECT_FILE_AT_INVALID') {
+        throw badRequest('PROJECT_FILE_AT_INVALID', 'File time is not valid.');
+      }
+      if (error instanceof Error && error.message === 'PROJECT_FILE_SURFACE_FORBIDDEN') {
+        throw badRequest('PROJECT_FILE_SURFACE_FORBIDDEN', 'Forbidden file fields.');
+      }
+      throw error;
+    }
+    if (file !== current) {
+      await tx.saveProjectFile(file);
+      await tx.insertOutbox({
+        id: newOpaqueId('o'),
+        eventType: 'file.name_revised',
+        leadId: opportunity.leadId,
+        payload: {
+          leadId: opportunity.leadId,
+          status: 'metadata',
+          projectId: file.projectId,
+          fileId: file.id,
+          name: file.name,
+          previousName: current.name,
+        },
+        at,
+      });
+      await tx.insertAudit({
+        id: newOpaqueId('a'),
+        action: 'file.name_revised',
+        actorId: actor.actorId,
+        leadId: opportunity.leadId,
+        at,
+        metadata: {
+          status: 'metadata',
+          projectId: file.projectId,
+          fileId: file.id,
+          name: file.name,
+          previousName: current.name,
+        },
+      });
+    }
+    await tx.saveIdempotency(
+      'project-file.name',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: file },
       at,
     );
     return file;

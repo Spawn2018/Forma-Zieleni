@@ -247,6 +247,7 @@ export {
   assertOpaqueProjectFileId,
   createProjectFile,
   projectFileForPortal,
+  reviseProjectFileName,
 } from './project-file.ts';
 export type {
   CreateProjectFileInput,

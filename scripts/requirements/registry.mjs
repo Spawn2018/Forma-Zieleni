@@ -560,6 +560,14 @@ row('FZ-REQ-ADMIN-015', 'Staff can list and create decision-log entries in apps/
   executableSlice: 'ADMIN-DECISION-LOG',
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PROJECT-MILESTONE-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-021', 'Staff can correct a project file display name after create. Bytes, mime type, size, and client subject stay unchanged. A blank name and a storage or payment field are refused. The portal reads the new name and still omits updatedAt.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-file.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts name to POST /v1/files/{fileId}/name. Storage keys and bytes stay off the portal projection.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'FILE_NAME_REVISE',
+  executableSlice: 'ADMIN-FILE-NAME-REVISE',
+  executableWhenComplete: ['ADMIN-CRM-FILE', 'PORTAL-FILE-PROJECTION'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

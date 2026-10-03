@@ -56,6 +56,7 @@
     "POST /decision-log",
     "POST /decision-log/{entryId}/summary",
     "POST /files",
+    "POST /files/{fileId}/name",
     "POST /gardens",
     "POST /growth/plans",
     "POST /leads",
@@ -102,6 +103,9 @@
       "Idempotency-Key"
     ],
     "POST /files": [
+      "Idempotency-Key"
+    ],
+    "POST /files/{fileId}/name": [
       "Idempotency-Key"
     ],
     "POST /milestones": [

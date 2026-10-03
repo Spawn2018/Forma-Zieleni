@@ -336,6 +336,12 @@ class MemoryTx implements LeadTx {
     this.state.projectFiles.push(clone(file));
   }
 
+  async saveProjectFile(file: ProjectFile): Promise<void> {
+    const index = this.state.projectFiles.findIndex(item => item.id === file.id);
+    if (index < 0) throw new Error('PROJECT_FILE_MISSING');
+    this.state.projectFiles[index] = clone(file);
+  }
+
   async findProjectFile(id: string): Promise<ProjectFile | null> {
     return clone(this.state.projectFiles.find(item => item.id === id) ?? null);
   }
