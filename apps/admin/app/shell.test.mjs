@@ -20,6 +20,7 @@ import {
   adminDecisionMilestoneLine,
   adminMilestoneDueLabel,
   adminOfferStatusLabel,
+  adminOpportunityStatusLabel,
   adminSiteObservationKindLabel,
   adminSiteSourceStageLabel,
   adminProjectStatusLabel,
@@ -269,6 +270,9 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Kwalifikuj/);
   assert.match(ready, /name="leadId"/);
   assert.match(ready, /Szanse/);
+  assert.match(ready, /op8k2n4p6q8r0s2t · lead ld8k2n4p6q8r0s2t · otwarta/);
+  assert.equal(ready.includes(' · open'), false);
+  assert.equal(adminOpportunityStatusLabel('open'), 'otwarta');
   assert.match(ready, /op8k2n4p6q8r0s2t/);
   assert.match(ready, /ld8k2n4p6q8r0s2t/);
   assert.match(ready, /Utwórz szansę/);
@@ -989,6 +993,12 @@ test('mapOpportunityPage and Core API opportunity fetch/create stay truthful', a
   assert.deepEqual(
     mapOpportunityPage({
       items: [{ id: 'op8k2n4p6q8r0s2t', leadId: 'ld8k2n4p6q8r0s2t', status: 'open', stage: 'x' }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapOpportunityPage({
+      items: [{ id: 'op8k2n4p6q8r0s2t', leadId: 'ld8k2n4p6q8r0s2t', status: 'won' }],
     }),
     { status: 'error' },
   );

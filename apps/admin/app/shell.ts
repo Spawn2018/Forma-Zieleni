@@ -22,10 +22,13 @@ export type AdminLeadList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const ADMIN_OPPORTUNITY_STATUSES = ['open'] as const;
+export type AdminOpportunityStatus = (typeof ADMIN_OPPORTUNITY_STATUSES)[number];
+
 export type AdminOpportunityRow = {
   id: string;
   leadId: string;
-  status: string;
+  status: AdminOpportunityStatus;
 };
 
 export type AdminOpportunityList =
@@ -398,7 +401,9 @@ export function mapOpportunityPage(body: unknown): AdminOpportunityList {
   for (const item of items) {
     const opportunity = item as OpportunityApiItem;
     if (typeof opportunity.id !== 'string' || typeof opportunity.leadId !== 'string') return { status: 'error' };
-    if (typeof opportunity.status !== 'string') return { status: 'error' };
+    if (typeof opportunity.status !== 'string' || !isAdminOpportunityStatus(opportunity.status)) {
+      return { status: 'error' };
+    }
     if (Object.hasOwn(opportunity, 'stage') || Object.hasOwn(opportunity, 'price') || Object.hasOwn(opportunity, 'probability')) {
       return { status: 'error' };
     }
@@ -620,6 +625,22 @@ export async function createAdminContract(input: {
     return { ok: true };
   } catch {
     return { ok: false, reason: 'error' };
+  }
+}
+
+function isAdminOpportunityStatus(status: string): status is AdminOpportunityStatus {
+  return (ADMIN_OPPORTUNITY_STATUSES as readonly string[]).includes(status);
+}
+
+/** Same words the rest of the staff shell uses. An unknown token is not a label. */
+export function adminOpportunityStatusLabel(status: AdminOpportunityStatus): string {
+  switch (status) {
+    case 'open':
+      return 'otwarta';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
   }
 }
 
@@ -2241,7 +2262,7 @@ function opportunityListNode(opportunities: AdminOpportunityList): ReactNode {
           createElement(
             'p',
             { className: 'admin-opportunity-meta' },
-            [opportunity.id, ' · lead ', opportunity.leadId, ' · ', opportunity.status].join(''),
+            [opportunity.id, ' · lead ', opportunity.leadId, ' · ', adminOpportunityStatusLabel(opportunity.status)].join(''),
           ),
         ),
       ),

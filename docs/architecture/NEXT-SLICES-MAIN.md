@@ -1703,6 +1703,20 @@ Contract: [`ADMIN-SITE-CREATED.md`](./ADMIN-SITE-CREATED.md).
 Security: display only. Uses the instant already on the loaded site record.
 Next: none.
 
+### ADMIN-OPPORTUNITY-LABELS
+
+Dependencies: ADMIN-STATUS-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff opportunity shows its status in Polish. The only status
+is open, labeled otwarta. An unknown status token rejects the list. The
+raw token is not shown. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-OPPORTUNITY-LABELS.md`](./ADMIN-OPPORTUNITY-LABELS.md).
+Security: display only. Uses the status already on the loaded opportunity.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
