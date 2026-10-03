@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-PAYMENT-INSTALLMENT-ORDER
+
+Dependencies: ADMIN-PAYMENT-INSTALLMENT-DUE.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff payment schedule lists installments by the lower sequence
+first. The same sequence stays in id order. Every installment stays. No
+provider, charge, or new amount.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PAYMENT-INSTALLMENT-ORDER.md`](./ADMIN-PAYMENT-INSTALLMENT-ORDER.md).
+Security: display sort only. Uses the sequence already on the loaded installment.
+Next: none.
+
 ### ADMIN-CONTRACT-ORDER
 
 Dependencies: ADMIN-COMMERCIAL-CREATED.

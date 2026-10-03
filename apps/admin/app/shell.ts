@@ -2999,6 +2999,16 @@ function gardenProjectFilterForm(query: string, projectId: string | null): React
   );
 }
 
+/** Lower sequence first. The same sequence stays in id order. Every installment stays. */
+export function compareAdminPaymentInstallments(
+  left: Pick<AdminPaymentInstallmentRow, 'id' | 'sequence'>,
+  right: Pick<AdminPaymentInstallmentRow, 'id' | 'sequence'>,
+): number {
+  if (left.sequence !== right.sequence) return left.sequence < right.sequence ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 /** Earlier recorded instant first. The same instant stays in id order. Every contract stays. */
 export function compareAdminContracts(
   left: Pick<AdminContractRow, 'id' | 'createdAt'>,
@@ -3980,7 +3990,7 @@ function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode
           createElement(
             'ul',
             { className: 'admin-payment-installment-list' },
-            ...schedule.installments.map((line) =>
+            ...[...schedule.installments].sort(compareAdminPaymentInstallments).map((line) =>
               createElement(
                 'li',
                 { key: line.id, className: 'admin-payment-installment' },

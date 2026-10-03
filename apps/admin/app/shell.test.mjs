@@ -14,6 +14,7 @@ import {
   compareAdminDecisionLog,
   compareAdminGardens,
   compareAdminContracts,
+  compareAdminPaymentInstallments,
   compareAdminOffers,
   compareAdminSites,
   compareAdminCapacityWindows,
@@ -1621,6 +1622,38 @@ test('staff gardens order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/admin-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
+});
+
+test('staff installments order by sequence', () => {
+  assert.equal(
+    compareAdminPaymentInstallments(
+      { id: 'pi8k2n4p6q8r0s2b', sequence: 1 },
+      { id: 'pi8k2n4p6q8r0s2a', sequence: 1 },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    paymentSchedules: {
+      status: 'ready',
+      items: [{
+        id: 'ps8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        currency: 'PLN',
+        installments: [
+          { id: 'pi8k2n4p6q8r0s2c', sequence: 3, amountMinor: 30000, status: 'scheduled', dueAt: null },
+          { id: 'pi8k2n4p6q8r0s2b', sequence: 1, amountMinor: 10000, status: 'due', dueAt: null },
+          { id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 20000, status: 'recorded', dueAt: null },
+        ],
+      }],
+    },
+  }));
+  const lines = [...html.matchAll(/admin-payment-installment-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.deepEqual(lines.map((line) => line.slice(0, 2)), ['#1', '#1', '#3']);
+  assert.match(lines[0], /20000 · zapisana/);
+  assert.match(lines[1], /10000 · należna/);
+  assert.match(lines[2], /30000 · zaplanowana/);
 });
 
 test('staff contracts order by the recorded instant', () => {
