@@ -13,6 +13,7 @@ import {
   nextOpenAdminMilestone,
   compareAdminDecisionLog,
   compareAdminGardens,
+  compareAdminContracts,
   compareAdminOffers,
   compareAdminSites,
   compareAdminCapacityWindows,
@@ -1620,6 +1621,45 @@ test('staff gardens order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/admin-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
+});
+
+test('staff contracts order by the recorded instant', () => {
+  assert.equal(
+    compareAdminContracts(
+      { id: 'ct8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'ct8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    contracts: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ct8k2n4p6q8r0s2w',
+          offerId: 'of8k2n4p6q8r0s2t',
+          status: 'draft',
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'ct8k2n4p6q8r0s2u',
+          offerId: 'of8k2n4p6q8r0s2t',
+          status: 'internal_review',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'ct8k2n4p6q8r0s2t',
+          offerId: 'of8k2n4p6q8r0s2u',
+          status: 'sent',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-contract-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['ct8k2n4p6q8r0s2t', 'ct8k2n4p6q8r0s2u', 'ct8k2n4p6q8r0s2w']);
 });
 
 test('staff offers order by the recorded instant', () => {

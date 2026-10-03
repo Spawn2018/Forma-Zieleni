@@ -2542,7 +2542,7 @@ function contractListNode(contracts: AdminContractList, projects: AdminProjectLi
     createElement(
       'ul',
       { className: 'admin-contract-list' },
-      ...contracts.items.map((contract) => {
+      ...[...contracts.items].sort(compareAdminContracts).map((contract) => {
         const nextStatus = nextAdminContractLifecycleStatus(contract.status);
         return createElement(
           'li',
@@ -2997,6 +2997,16 @@ function gardenProjectFilterForm(query: string, projectId: string | null): React
     createElement('button', { type: 'submit' }, 'Pokaż ogród projektu'),
     projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
   );
+}
+
+/** Earlier recorded instant first. The same instant stays in id order. Every contract stays. */
+export function compareAdminContracts(
+  left: Pick<AdminContractRow, 'id' | 'createdAt'>,
+  right: Pick<AdminContractRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
 }
 
 /** Earlier recorded instant first. The same instant stays in id order. Every offer stays. */

@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-CONTRACT-ORDER
+
+Dependencies: ADMIN-COMMERCIAL-CREATED.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff contract list orders contracts by the earlier recorded
+instant. The same instant stays in id order. Every contract stays. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-CONTRACT-ORDER.md`](./ADMIN-CONTRACT-ORDER.md).
+Security: display sort only. Uses contracts staff already loaded.
+Next: none.
+
 ### PORTAL-OFFER-ORDER
 
 Dependencies: PORTAL-OFFER-VIEW, RECORD-CREATED-LABELS.
