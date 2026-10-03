@@ -233,6 +233,7 @@ export type AdminSiteRow = {
   sourceStage: 'RULES';
   constraints: readonly AdminSiteFinding[];
   opportunities: readonly AdminSiteFinding[];
+  createdAt: string;
 };
 
 export type AdminSiteList =
@@ -1413,9 +1414,12 @@ export function mapAdminSitePage(body: unknown): AdminSiteList {
       sourceStage?: unknown;
       constraints?: unknown;
       opportunities?: unknown;
+      createdAt?: unknown;
     };
     if (typeof record.id !== 'string' || typeof record.projectId !== 'string') return { status: 'error' };
     if (record.sourceStage !== 'RULES') return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(record.createdAt);
+    if (createdAt === null) return { status: 'error' };
     if (record.clientSubject !== null && typeof record.clientSubject !== 'string') return { status: 'error' };
     if (SITE_FORBIDDEN.some((key) => Object.hasOwn(record, key))) return { status: 'error' };
     const constraints = mapSiteFindings(record.constraints);
@@ -1427,6 +1431,7 @@ export function mapAdminSitePage(body: unknown): AdminSiteList {
       sourceStage: 'RULES',
       constraints,
       opportunities,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2962,7 +2967,15 @@ function siteListNode(
           createElement(
             'p',
             { className: 'admin-site-meta' },
-            [record.id, ' · projekt ', record.projectId, ' · ', adminSiteSourceStageLabel(record.sourceStage)].join(''),
+            [
+              record.id,
+              ' · projekt ',
+              record.projectId,
+              ' · ',
+              adminSiteSourceStageLabel(record.sourceStage),
+              ' · ',
+              adminCreatedAtLabel(record.createdAt),
+            ].join(''),
           ),
           createElement('p', { className: 'admin-site-constraints' }, siteCodes('Ograniczenia', record.constraints)),
           createElement('p', { className: 'admin-site-opportunities' }, siteCodes('Możliwości', record.opportunities)),

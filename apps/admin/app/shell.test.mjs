@@ -2010,7 +2010,29 @@ test('staff site UI lists rules codes and records one synthetic observation', as
   }));
   assert.match(html, /Ustalenia o terenie/);
   assert.match(html, /slope-steep/);
-  assert.match(html, /si8k2n4p6q8r0s2t · projekt pr8k2n4p6q8r0s2t · reguły/);
+  assert.match(html, /si8k2n4p6q8r0s2t · projekt pr8k2n4p6q8r0s2t · reguły · 24 września 2026, 12:00 UTC/);
+  assert.equal(html.includes('2026-09-24T12:00:00.000Z'), false);
+  assert.deepEqual(mapAdminSitePage({
+    items: [{
+      id: 'si8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      clientSubject: null,
+      constraints: [],
+      opportunities: [],
+      sourceStage: 'RULES',
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapAdminSitePage({
+    items: [{
+      id: 'si8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      clientSubject: null,
+      constraints: [],
+      opportunities: [],
+      sourceStage: 'RULES',
+      createdAt: 'wczoraj',
+    }],
+  }), { status: 'error' });
   assert.equal(html.includes('RULES'), false);
   assert.match(html, /Możliwości: brak/);
   assert.match(html, /Zapisz obserwację/);

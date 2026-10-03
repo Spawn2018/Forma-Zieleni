@@ -1689,6 +1689,20 @@ Contract: [`ADMIN-GARDEN-ORDER.md`](./ADMIN-GARDEN-ORDER.md).
 Security: display sort only. Uses gardens staff already loaded.
 Next: none.
 
+### ADMIN-SITE-CREATED
+
+Dependencies: ADMIN-SITE-STAFF, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff site record shows its recorded instant in Polish UTC
+words. An unreadable instant rejects the list. The raw timestamp is not
+shown. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-SITE-CREATED.md`](./ADMIN-SITE-CREATED.md).
+Security: display only. Uses the instant already on the loaded site record.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
