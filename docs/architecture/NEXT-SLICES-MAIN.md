@@ -1264,6 +1264,20 @@ Contract: [`ADMIN-MILESTONE-TITLE-REVISE.md`](./ADMIN-MILESTONE-TITLE-REVISE.md)
 Security: uses existing `milestones:create`. The portal cannot rename a milestone.
 Next: none.
 
+### ADMIN-STATUS-LABELS
+
+Dependencies: PORTAL-STATUS-LABELS, ADMIN-PROJECT-DELIVER, ADMIN-CONTRACT-LIFECYCLE.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff offer, contract, and project lists use the same Polish status
+words as the portal. An unknown status fails the list map and is not printed.
+No new status, price, signing, or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-STATUS-LABELS.md`](./ADMIN-STATUS-LABELS.md).
+Security: read-only labels. Lifecycle posts still send the machine status.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

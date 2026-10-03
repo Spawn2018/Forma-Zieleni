@@ -632,6 +632,14 @@ row('FZ-REQ-ADMIN-024', 'Staff can correct a milestone title after create. Statu
   executableWhenComplete: ['ADMIN-MILESTONE-DUE-REVISE', 'PORTAL-MILESTONE-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-025', 'Staff see the same Polish offer, contract, and project status words as the portal. An unknown status fails the list map instead of being printed. No new status, price, signing, or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Labels cover draft, internal review, approved, sent, planned, and delivered. Lifecycle posts still send the machine status.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'STATUS_LABELS',
+  executableSlice: 'ADMIN-STATUS-LABELS',
+  executableWhenComplete: ['PORTAL-STATUS-LABELS', 'ADMIN-PROJECT-DELIVER'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

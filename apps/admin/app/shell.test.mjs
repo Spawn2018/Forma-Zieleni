@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
+  adminContractStatusLabel,
   adminErrorMessage,
+  adminOfferStatusLabel,
+  adminProjectStatusLabel,
   adminOriginAllowed,
   adminSessionCookiePresent,
   adminShell,
@@ -213,7 +216,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
           {
             id: 'pr8k2n4p6q8r0s2t',
             contractId: 'ct8k2n4p6q8r0s2t',
-            status: 'draft',
+            status: 'planned',
           },
         ],
       },
@@ -264,7 +267,11 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /create-payment-schedule/);
   assert.match(ready, /transition-payment-installment/);
   assert.match(ready, /Oznacz jako należną/);
+  assert.match(ready, /· szkic/);
+  assert.equal(ready.includes('· draft'), false);
   assert.match(ready, /Projekty/);
+  assert.match(ready, /· zaplanowany/);
+  assert.equal(ready.includes('· planned'), false);
   assert.match(ready, /pr8k2n4p6q8r0s2t/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
   assert.match(ready, /Utwórz projekt/);
@@ -287,6 +294,12 @@ test('mapContractPage and Core API contract fetch/create stay truthful', async (
       status: 'ready',
       items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'draft' }],
     },
+  );
+  assert.deepEqual(
+    mapContractPage({
+      items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'paid' }],
+    }),
+    { status: 'error' },
   );
 
   const empty = await fetchAdminContracts({
@@ -329,6 +342,13 @@ test('mapContractPage and Core API contract fetch/create stay truthful', async (
   assert.equal(nextAdminContractLifecycleStatus('internal_review'), 'approved');
   assert.equal(nextAdminContractLifecycleStatus('approved'), 'sent');
   assert.equal(nextAdminContractLifecycleStatus('sent'), null);
+  assert.equal(adminOfferStatusLabel('draft'), 'szkic');
+  assert.equal(adminContractStatusLabel('draft'), 'szkic');
+  assert.equal(adminContractStatusLabel('internal_review'), 'w przeglądzie');
+  assert.equal(adminContractStatusLabel('approved'), 'zatwierdzona');
+  assert.equal(adminContractStatusLabel('sent'), 'wysłana');
+  assert.equal(adminProjectStatusLabel('planned'), 'zaplanowany');
+  assert.equal(adminProjectStatusLabel('delivered'), 'dostarczony');
 
   const advanced = await advanceAdminContractLifecycle({
     base: 'http://127.0.0.1:8787',
@@ -364,9 +384,15 @@ test('mapProjectPage and Core API project fetch/create stay truthful', async () 
     mapProjectPage({
       items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'draft' }],
     }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapProjectPage({
+      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
+    }),
     {
       status: 'ready',
-      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'draft' }],
+      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
     },
   );
 
@@ -815,6 +841,12 @@ test('mapOfferPage and Core API offer fetch/create stay truthful', async () => {
       status: 'ready',
       items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft' }],
     },
+  );
+  assert.deepEqual(
+    mapOfferPage({
+      items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'sent' }],
+    }),
+    { status: 'error' },
   );
 
   const empty = await fetchAdminOffers({

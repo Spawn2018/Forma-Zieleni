@@ -34,10 +34,13 @@ export type AdminOpportunityList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const ADMIN_OFFER_STATUSES = ['draft'] as const;
+export type AdminOfferStatus = (typeof ADMIN_OFFER_STATUSES)[number];
+
 export type AdminOfferRow = {
   id: string;
   opportunityId: string;
-  status: string;
+  status: AdminOfferStatus;
 };
 
 export type AdminOfferList =
@@ -46,10 +49,13 @@ export type AdminOfferList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const ADMIN_CONTRACT_STATUSES = ['draft', 'internal_review', 'approved', 'sent'] as const;
+export type AdminContractStatus = (typeof ADMIN_CONTRACT_STATUSES)[number];
+
 export type AdminContractRow = {
   id: string;
   offerId: string;
-  status: string;
+  status: AdminContractStatus;
 };
 
 export type AdminContractList =
@@ -58,10 +64,13 @@ export type AdminContractList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export const ADMIN_PROJECT_STATUSES = ['planned', 'delivered'] as const;
+export type AdminProjectStatus = (typeof ADMIN_PROJECT_STATUSES)[number];
+
 export type AdminProjectRow = {
   id: string;
   contractId: string;
-  status: string;
+  status: AdminProjectStatus;
 };
 
 export type AdminProjectList =
@@ -403,7 +412,7 @@ export function mapOfferPage(body: unknown): AdminOfferList {
   for (const item of items) {
     const offer = item as OfferApiItem;
     if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
-    if (typeof offer.status !== 'string') return { status: 'error' };
+    if (typeof offer.status !== 'string' || !isAdminOfferStatus(offer.status)) return { status: 'error' };
     if (Object.hasOwn(offer, 'price')) return { status: 'error' };
     rows.push({
       id: offer.id,
@@ -479,7 +488,7 @@ export function mapContractPage(body: unknown): AdminContractList {
   for (const item of items) {
     const contract = item as ContractApiItem;
     if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
-    if (typeof contract.status !== 'string') return { status: 'error' };
+    if (typeof contract.status !== 'string' || !isAdminContractStatus(contract.status)) return { status: 'error' };
     rows.push({
       id: contract.id,
       offerId: contract.offerId,
@@ -536,6 +545,60 @@ export async function createAdminContract(input: {
     return { ok: true };
   } catch {
     return { ok: false, reason: 'error' };
+  }
+}
+
+function isAdminOfferStatus(status: string): status is AdminOfferStatus {
+  return (ADMIN_OFFER_STATUSES as readonly string[]).includes(status);
+}
+
+function isAdminContractStatus(status: string): status is AdminContractStatus {
+  return (ADMIN_CONTRACT_STATUSES as readonly string[]).includes(status);
+}
+
+function isAdminProjectStatus(status: string): status is AdminProjectStatus {
+  return (ADMIN_PROJECT_STATUSES as readonly string[]).includes(status);
+}
+
+/** Same words the portal shows. An unknown token is not a label. */
+export function adminOfferStatusLabel(status: AdminOfferStatus): string {
+  switch (status) {
+    case 'draft':
+      return 'szkic';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+export function adminContractStatusLabel(status: AdminContractStatus): string {
+  switch (status) {
+    case 'draft':
+      return 'szkic';
+    case 'internal_review':
+      return 'w przeglądzie';
+    case 'approved':
+      return 'zatwierdzona';
+    case 'sent':
+      return 'wysłana';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+export function adminProjectStatusLabel(status: AdminProjectStatus): string {
+  switch (status) {
+    case 'planned':
+      return 'zaplanowany';
+    case 'delivered':
+      return 'dostarczony';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
   }
 }
 
@@ -739,7 +802,7 @@ export function mapProjectPage(body: unknown): AdminProjectList {
   for (const item of items) {
     const project = item as ProjectApiItem;
     if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
-    if (typeof project.status !== 'string') return { status: 'error' };
+    if (typeof project.status !== 'string' || !isAdminProjectStatus(project.status)) return { status: 'error' };
     rows.push({
       id: project.id,
       contractId: project.contractId,
@@ -2045,7 +2108,7 @@ function offerListNode(offers: AdminOfferList): ReactNode {
           createElement(
             'p',
             { className: 'admin-offer-meta' },
-            [offer.id, ' · szansa ', offer.opportunityId, ' · ', offer.status].join(''),
+            [offer.id, ' · szansa ', offer.opportunityId, ' · ', adminOfferStatusLabel(offer.status)].join(''),
           ),
         ),
       ),
@@ -2099,7 +2162,7 @@ function contractListNode(contracts: AdminContractList): ReactNode {
           createElement(
             'p',
             { className: 'admin-contract-meta' },
-            [contract.id, ' · oferta ', contract.offerId, ' · ', contract.status].join(''),
+            [contract.id, ' · oferta ', contract.offerId, ' · ', adminContractStatusLabel(contract.status)].join(''),
           ),
           nextStatus
             ? createElement(
@@ -2165,7 +2228,7 @@ function projectListNode(projects: AdminProjectList): ReactNode {
           createElement(
             'p',
             { className: 'admin-project-meta' },
-            [project.id, ' · umowa ', project.contractId, ' · ', project.status].join(''),
+            [project.id, ' · umowa ', project.contractId, ' · ', adminProjectStatusLabel(project.status)].join(''),
           ),
           project.status === 'planned'
             ? createElement(
