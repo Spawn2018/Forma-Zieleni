@@ -896,6 +896,14 @@ row('FZ-REQ-ADMIN-045', 'The staff decision log orders entries by the earlier re
   executableWhenComplete: ['ADMIN-DECISION-LOG-CREATED', 'ADMIN-DECISION-LOG'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-046', 'A staff project card counts site constraints and opportunities already loaded for that project. Another project’s findings stay off the card. A failed or forbidden site read is not shown as no findings. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The count is a display of site records staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'PROJECT_SITE',
+  executableSlice: 'ADMIN-PROJECT-SITE',
+  executableWhenComplete: ['ADMIN-SITE-STAFF', 'ADMIN-PROJECT-DELIVER'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

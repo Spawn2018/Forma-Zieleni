@@ -1631,6 +1631,21 @@ Contract: [`ADMIN-DECISION-LOG-ORDER.md`](./ADMIN-DECISION-LOG-ORDER.md).
 Security: display sort only. Uses entries staff already loaded.
 Next: none.
 
+### ADMIN-PROJECT-SITE
+
+Dependencies: ADMIN-SITE-STAFF, ADMIN-PROJECT-DELIVER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff project card counts site constraints and opportunities
+already loaded for that project. Another project’s findings stay off the
+card. A failed or forbidden site read is not shown as no findings. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PROJECT-SITE.md`](./ADMIN-PROJECT-SITE.md).
+Security: display only. Uses the site list staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

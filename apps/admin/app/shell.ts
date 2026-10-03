@@ -2422,6 +2422,31 @@ export function adminProjectNextMilestoneLine(projectId: string, milestones: Adm
   return `Następny: ${next.title} · ${milestoneStatusLabel(next.status)} · ${due}`;
 }
 
+function polishCount(count: number, one: string, few: string, many: string): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (count === 1) return `1 ${one}`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} ${few}`;
+  return `${count} ${many}`;
+}
+
+/** Site findings already loaded for this project. A failed site read is not “no findings”. */
+export function adminProjectSiteLine(projectId: string, sites: AdminSiteList): string {
+  if (sites.status === 'error') return 'Ustaleń o terenie nie udało się odczytać.';
+  if (sites.status === 'forbidden') return 'To konto nie może odczytać ustaleń o terenie.';
+  if (sites.status !== 'ready') return 'Teren: brak';
+  const matched = sites.items.filter((item) => item.projectId === projectId);
+  if (matched.length === 0) return 'Teren: brak';
+  const constraints = matched.reduce((sum, item) => sum + item.constraints.length, 0);
+  const opportunities = matched.reduce((sum, item) => sum + item.opportunities.length, 0);
+  return [
+    'Teren: ',
+    polishCount(constraints, 'ograniczenie', 'ograniczenia', 'ograniczeń'),
+    ' · ',
+    polishCount(opportunities, 'możliwość', 'możliwości', 'możliwości'),
+  ].join('');
+}
+
 /** Gardens already loaded for this project. A failed garden read is not “no garden”. */
 export function adminProjectGardenLine(projectId: string, gardens: AdminGardenList): string {
   if (gardens.status === 'error') return 'Ogrodu nie udało się odczytać.';
@@ -2440,6 +2465,7 @@ function projectListNode(
   projects: AdminProjectList,
   milestones: AdminMilestoneList,
   gardens: AdminGardenList,
+  sites: AdminSiteList,
 ): ReactNode {
   if (projects.status === 'empty') {
     return createElement('p', null, 'Brak projektów do pokazania.');
@@ -2483,6 +2509,11 @@ function projectListNode(
             'p',
             { className: 'admin-project-garden' },
             adminProjectGardenLine(project.id, gardens),
+          ),
+          createElement(
+            'p',
+            { className: 'admin-project-site' },
+            adminProjectSiteLine(project.id, sites),
           ),
           project.status === 'planned'
             ? createElement(
@@ -3867,7 +3898,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createCapacityWindowForm(),
     decideCapacityForm(),
     signingSandboxNode(home.signingSandbox),
-    projectListNode(home.projects, home.milestones, home.gardens),
+    projectListNode(home.projects, home.milestones, home.gardens, home.siteIntelligence),
     createProjectForm(),
     milestoneListNode(home.milestones, {
       query: home.milestoneProjectQuery ?? '',

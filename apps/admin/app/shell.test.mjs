@@ -6,6 +6,7 @@ import {
   adminContractStatusLabel,
   adminErrorMessage,
   adminProjectGardenLine,
+  adminProjectSiteLine,
   adminProjectNextMilestoneLine,
   nextOpenAdminMilestone,
   compareAdminDecisionLog,
@@ -1442,6 +1443,93 @@ test('a staff project names only the garden already loaded for it', () => {
     'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
   );
   assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
+});
+
+test('a staff project counts only that project’s site findings', () => {
+  const sites = {
+    status: 'ready',
+    items: [
+      {
+        id: 'si8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        sourceStage: 'RULES',
+        constraints: [
+          { id: 'sc8k2n4p6q8r0s2t', code: 'slope' },
+          { id: 'sc8k2n4p6q8r0s2u', code: 'access' },
+        ],
+        opportunities: [{ id: 'so8k2n4p6q8r0s2t', code: 'sun' }],
+      },
+      {
+        id: 'si8k2n4p6q8r0s2u',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        sourceStage: 'RULES',
+        constraints: Array.from({ length: 10 }, (_, index) => ({
+          id: `sc8k2n4p6q8r0s${index}`,
+          code: `extra-${index}`,
+        })),
+        opportunities: [],
+      },
+      {
+        id: 'si8k2n4p6q8r0s2v',
+        projectId: 'pr8k2n4p6q8r0s2u',
+        sourceStage: 'RULES',
+        constraints: [{ id: 'sc8k2n4p6q8r0s2v', code: 'water' }],
+        opportunities: [],
+      },
+    ],
+  };
+  assert.equal(
+    adminProjectSiteLine('pr8k2n4p6q8r0s2t', sites),
+    'Teren: 12 ograniczeń · 1 możliwość',
+  );
+  assert.equal(adminProjectSiteLine('pr8k2n4p6q8r0s2v', sites), 'Teren: brak');
+  assert.equal(
+    adminProjectSiteLine('pr8k2n4p6q8r0s2t', { status: 'error' }),
+    'Ustaleń o terenie nie udało się odczytać.',
+  );
+  assert.equal(
+    adminProjectSiteLine('pr8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać ustaleń o terenie.',
+  );
+  assert.equal(adminProjectSiteLine('pr8k2n4p6q8r0s2t', { status: 'empty' }), 'Teren: brak');
+  const few = adminProjectSiteLine('pr8k2n4p6q8r0s2t', {
+    status: 'ready',
+    items: [{
+      id: 'si8k2n4p6q8r0s2w',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      sourceStage: 'RULES',
+      constraints: [
+        { id: 'sc8k2n4p6q8r0s2w', code: 'slope' },
+        { id: 'sc8k2n4p6q8r0s2x', code: 'access' },
+      ],
+      opportunities: [
+        { id: 'so8k2n4p6q8r0s2w', code: 'sun' },
+        { id: 'so8k2n4p6q8r0s2x', code: 'shelter' },
+      ],
+    }],
+  });
+  assert.equal(few, 'Teren: 2 ograniczenia · 2 możliwości');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'delivered',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
+    },
+    siteIntelligence: sites,
+  }));
+  const project = html.slice(html.indexOf('class="admin-project"'), html.indexOf('admin-create-project'));
+  assert.equal(
+    project.match(/admin-project-site">([^<]+)/)?.[1],
+    'Teren: 12 ograniczeń · 1 możliwość',
+  );
+  assert.equal(project.includes('water'), false);
+  assert.equal(project.includes('si8k2n4p6q8r0s2v'), false);
 });
 
 test('staff decision log orders entries by the recorded instant', () => {
