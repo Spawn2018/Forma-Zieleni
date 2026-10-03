@@ -3,6 +3,7 @@ import {
   fetchPortalContracts,
   fetchPortalFiles,
   fetchPortalGardens,
+  fetchPortalMilestones,
   fetchPortalOffers,
   fetchPortalSiteIntelligence,
   fetchPortalProjects,
@@ -48,6 +49,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<PortalHome>
     },
     async loadSiteIntelligence() {
       return fetchPortalSiteIntelligence({ base, cookie });
+    },
+    async loadMilestones() {
+      return fetchPortalMilestones({ base, cookie });
     },
   });
 }

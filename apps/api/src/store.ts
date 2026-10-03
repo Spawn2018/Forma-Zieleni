@@ -70,6 +70,8 @@ export type MilestoneListQuery = {
   limit: number;
   sort: SortField;
   projectId?: string;
+  /** Owning project's client subject. Portal lists use this for BOLA. */
+  clientSubject?: string;
   cursor?: { at: string; id: string };
 };
 

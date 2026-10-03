@@ -1278,6 +1278,64 @@ ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
   },
 };
 
+const PORTAL_MILESTONE_CAPABILITY_SQL = [
+  'leads:read',
+  'leads:qualify',
+  'opportunities:read',
+  'opportunities:create',
+  'offers:read',
+  'offers:create',
+  'offers:portal-read',
+  'contracts:read',
+  'contracts:create',
+  'contracts:lifecycle',
+  'contracts:portal-read',
+  'projects:read',
+  'projects:create',
+  'projects:portal-read',
+  'files:read',
+  'files:create',
+  'files:portal-read',
+  'milestones:read',
+  'milestones:create',
+  'milestones:portal-read',
+  'payments:read',
+  'payments:write',
+  'gardens:read',
+  'gardens:create',
+  'gardens:portal-read',
+  'siteintel:read',
+  'siteintel:create',
+  'siteintel:portal-read',
+  'capacity:read',
+  'capacity:write',
+  'content:read-draft',
+  'content:edit',
+  'content:review',
+  'content:publish',
+  'content:admin',
+  'growth:plan',
+  'semantic:review',
+].map(capability => `'${capability}'`).join(', ');
+
+const portalMilestoneMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_MILESTONE_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+DELETE FROM actor_capability WHERE capability = 'milestones:portal-read';
+ALTER TABLE actor_capability DROP CONSTRAINT actor_capability_known;
+ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
+  CHECK (capability IN (${PORTAL_CONTRACT_CAPABILITY_SQL}));
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1302,6 +1360,7 @@ const provider: MigrationProvider = {
       '019_documenso_sandbox': documensoSandboxMigration,
       '020_capacity_window': capacityWindowMigration,
       '021_portal_contract_projection': portalContractMigration,
+      '022_portal_milestone_projection': portalMilestoneMigration,
     };
   },
 };

@@ -371,9 +371,14 @@ class MemoryTx implements LeadTx {
 
   async listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]> {
     const descending = query.sort.startsWith('-');
-    const rows = this.state.milestones.filter(
-      milestone => !query.projectId || milestone.projectId === query.projectId,
-    );
+    const owned = query.clientSubject
+      ? new Set(this.state.projects.filter(project => project.clientSubject === query.clientSubject).map(project => project.id))
+      : null;
+    const rows = this.state.milestones.filter(milestone => {
+      if (query.projectId && milestone.projectId !== query.projectId) return false;
+      if (owned && !owned.has(milestone.projectId)) return false;
+      return true;
+    });
     rows.sort((left, right) => {
       const compared = stamp(left, query.sort).localeCompare(stamp(right, query.sort)) || left.id.localeCompare(right.id);
       return descending ? -compared : compared;

@@ -515,18 +515,36 @@ class PostgresTx implements LeadTx {
   }
 
   async listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]> {
-    const column = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
+    const milestoneColumn = query.sort.includes('updatedAt') ? 'updated_at' : 'created_at';
     const direction = query.sort.startsWith('-') ? 'desc' : 'asc';
-    let request = this.trx.selectFrom('project_milestone').selectAll();
-    if (query.projectId) request = request.where('project_id', '=', query.projectId);
+    if (!query.clientSubject) {
+      let request = this.trx.selectFrom('project_milestone').selectAll();
+      if (query.projectId) request = request.where('project_id', '=', query.projectId);
+      if (query.cursor) {
+        const at = new Date(query.cursor.at);
+        const id = query.cursor.id;
+        request = request.where(eb => direction === 'desc'
+          ? eb.or([eb(milestoneColumn, '<', at), eb.and([eb(milestoneColumn, '=', at), eb('id', '<', id)])])
+          : eb.or([eb(milestoneColumn, '>', at), eb.and([eb(milestoneColumn, '=', at), eb('id', '>', id)])]));
+      }
+      const rows = await request.orderBy(milestoneColumn, direction).orderBy('id', direction).limit(query.limit).execute();
+      return rows.map(toMilestone);
+    }
+    const column = `project_milestone.${milestoneColumn}` as const;
+    let request = this.trx
+      .selectFrom('project_milestone')
+      .innerJoin('project', 'project.id', 'project_milestone.project_id')
+      .selectAll('project_milestone')
+      .where('project.client_subject', '=', query.clientSubject);
+    if (query.projectId) request = request.where('project_milestone.project_id', '=', query.projectId);
     if (query.cursor) {
       const at = new Date(query.cursor.at);
       const id = query.cursor.id;
       request = request.where(eb => direction === 'desc'
-        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('id', '<', id)])])
-        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('id', '>', id)])]));
+        ? eb.or([eb(column, '<', at), eb.and([eb(column, '=', at), eb('project_milestone.id', '<', id)])])
+        : eb.or([eb(column, '>', at), eb.and([eb(column, '=', at), eb('project_milestone.id', '>', id)])]));
     }
-    const rows = await request.orderBy(column, direction).orderBy('id', direction).limit(query.limit).execute();
+    const rows = await request.orderBy(column, direction).orderBy('project_milestone.id', direction).limit(query.limit).execute();
     return rows.map(toMilestone);
   }
 

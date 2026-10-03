@@ -90,6 +90,23 @@ export type PortalSiteList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalMilestoneStatus = 'planned' | 'active' | 'done';
+
+export type PortalMilestoneRow = {
+  id: string;
+  projectId: string;
+  title: string;
+  status: PortalMilestoneStatus;
+  dueAt: string | null;
+  createdAt: string;
+};
+
+export type PortalMilestoneList =
+  | { status: 'empty' }
+  | { status: 'ready'; items: readonly PortalMilestoneRow[] }
+  | { status: 'error' }
+  | { status: 'forbidden' };
+
 export type PortalHome =
   | { state: 'signed-out' }
   | { state: 'unauthorized' }
@@ -101,6 +118,7 @@ export type PortalHome =
       files: PortalFileList;
       gardens: PortalGardenList;
       siteIntelligence: PortalSiteList;
+      milestones: PortalMilestoneList;
     };
 
 /**
@@ -397,6 +415,68 @@ export function mapPortalSitePage(body: unknown): PortalSiteList {
   return { status: 'ready', items: rows };
 }
 
+const MILESTONE_FORBIDDEN = [
+  'clientSubject',
+  'updatedAt',
+  'payment',
+  'signing',
+  'price',
+  'provider',
+] as const;
+
+function isPortalMilestoneStatus(value: unknown): value is PortalMilestoneStatus {
+  return value === 'planned' || value === 'active' || value === 'done';
+}
+
+export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'error' };
+  const items = (body as { items?: unknown }).items;
+  if (!Array.isArray(items)) return { status: 'error' };
+  if (items.length === 0) return { status: 'empty' };
+  const rows: PortalMilestoneRow[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
+    const milestone = item as {
+      id?: unknown;
+      projectId?: unknown;
+      title?: unknown;
+      status?: unknown;
+      dueAt?: unknown;
+      createdAt?: unknown;
+    };
+    if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string') return { status: 'error' };
+    if (typeof milestone.title !== 'string' || typeof milestone.createdAt !== 'string') return { status: 'error' };
+    if (!isPortalMilestoneStatus(milestone.status)) return { status: 'error' };
+    if (!Object.hasOwn(milestone, 'dueAt')) return { status: 'error' };
+    if (milestone.dueAt !== null && typeof milestone.dueAt !== 'string') return { status: 'error' };
+    if (MILESTONE_FORBIDDEN.some((key) => Object.hasOwn(milestone, key))) return { status: 'error' };
+    rows.push({
+      id: milestone.id,
+      projectId: milestone.projectId,
+      title: milestone.title,
+      status: milestone.status,
+      dueAt: milestone.dueAt,
+      createdAt: milestone.createdAt,
+    });
+  }
+  return { status: 'ready', items: rows };
+}
+
+function milestoneStatusLabel(status: PortalMilestoneStatus): string {
+  switch (status) {
+    case 'planned':
+      return 'zaplanowany';
+    case 'active':
+      return 'w toku';
+    case 'done':
+      return 'zrobiony';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
 async function portalGetJsonList<T>(input: {
   base: string;
   path: string;
@@ -492,6 +572,20 @@ export async function fetchPortalSiteIntelligence(input: {
   });
 }
 
+export async function fetchPortalMilestones(input: {
+  base: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalMilestoneList> {
+  return portalGetJsonList({
+    ...input,
+    path: '/v1/portal/milestones?limit=50',
+    map: mapPortalMilestonePage,
+    forbidden: { status: 'forbidden' },
+    error: { status: 'error' },
+  });
+}
+
 export async function fetchPortalFiles(input: {
   base: string;
   cookie?: string;
@@ -508,7 +602,7 @@ export async function fetchPortalFiles(input: {
 
 /**
  * Resolve portal home from optional Core API session probe + projections.
- * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, gardens, or site findings.
+ * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, gardens, site findings, or milestones.
  */
 export async function resolvePortalHome(input: {
   probe?: () => Promise<PortalSessionActor | null>;
@@ -518,20 +612,22 @@ export async function resolvePortalHome(input: {
   loadFiles?: () => Promise<PortalFileList>;
   loadGardens?: () => Promise<PortalGardenList>;
   loadSiteIntelligence?: () => Promise<PortalSiteList>;
+  loadMilestones?: () => Promise<PortalMilestoneList>;
 }): Promise<PortalHome> {
   if (!input.probe) return { state: 'signed-out' };
   try {
     const classified = classifyPortalSession(await input.probe());
     if (classified.state !== 'signed-in') return classified;
-    const [offers, contracts, projects, files, gardens, siteIntelligence] = await Promise.all([
+    const [offers, contracts, projects, files, gardens, siteIntelligence, milestones] = await Promise.all([
       input.loadOffers ? input.loadOffers() : Promise.resolve({ status: 'empty' as const }),
       input.loadContracts ? input.loadContracts() : Promise.resolve({ status: 'empty' as const }),
       input.loadProjects ? input.loadProjects() : Promise.resolve({ status: 'empty' as const }),
       input.loadFiles ? input.loadFiles() : Promise.resolve({ status: 'empty' as const }),
       input.loadGardens ? input.loadGardens() : Promise.resolve({ status: 'empty' as const }),
       input.loadSiteIntelligence ? input.loadSiteIntelligence() : Promise.resolve({ status: 'empty' as const }),
+      input.loadMilestones ? input.loadMilestones() : Promise.resolve({ status: 'empty' as const }),
     ]);
-    return { state: 'signed-in', offers, contracts, projects, files, gardens, siteIntelligence };
+    return { state: 'signed-in', offers, contracts, projects, files, gardens, siteIntelligence, milestones };
   } catch {
     return { state: 'signed-out' };
   }
@@ -729,6 +825,44 @@ function siteListNode(sites: PortalSiteList): ReactNode {
   );
 }
 
+function milestoneListNode(milestones: PortalMilestoneList): ReactNode {
+  if (milestones.status !== 'ready') {
+    return listStateNode(
+      milestones,
+      'Brak kamieni milowych do pokazania.',
+      'To konto nie może odczytać kamieni milowych.',
+      'Listy kamieni milowych nie udało się pobrać. Odśwież stronę.',
+      () => null,
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'portal-milestones', 'aria-label': 'Kamienie milowe' },
+    createElement('h2', null, 'Kamienie milowe'),
+    createElement(
+      'ul',
+      { className: 'portal-milestone-list' },
+      ...milestones.items.map((milestone) =>
+        createElement(
+          'li',
+          { key: milestone.id, className: 'portal-milestone' },
+          createElement(
+            'p',
+            { className: 'portal-milestone-meta' },
+            [
+              milestone.title,
+              ' · ',
+              milestoneStatusLabel(milestone.status),
+              ' · ',
+              milestone.dueAt ?? 'bez terminu',
+            ].join(''),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function fileListNode(files: PortalFileList): ReactNode {
   if (files.status !== 'ready') {
     return listStateNode(
@@ -804,5 +938,6 @@ export function portalShell(home: PortalHome): ReactNode {
     fileListNode(home.files),
     gardenListNode(home.gardens),
     siteListNode(home.siteIntelligence),
+    milestoneListNode(home.milestones),
   );
 }

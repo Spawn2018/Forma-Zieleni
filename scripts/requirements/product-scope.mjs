@@ -5,7 +5,7 @@
 
 export const PRODUCT_SCOPE = Object.freeze([
   { id: 'WWW', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-WWW-001', 'FZ-REQ-WWW-002', 'FZ-REQ-WWW-003'] },
-  { id: 'PORTAL', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-PORTAL-001', 'FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004', 'FZ-REQ-PORTAL-005', 'FZ-REQ-PORTAL-006', 'FZ-REQ-PORTAL-007', 'FZ-REQ-PORTAL-008', 'FZ-REQ-PORTAL-009', 'FZ-REQ-PORTAL-010'] },
+  { id: 'PORTAL', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-PORTAL-001', 'FZ-REQ-PORTAL-002', 'FZ-REQ-PORTAL-003', 'FZ-REQ-PORTAL-004', 'FZ-REQ-PORTAL-005', 'FZ-REQ-PORTAL-006', 'FZ-REQ-PORTAL-007', 'FZ-REQ-PORTAL-008', 'FZ-REQ-PORTAL-009', 'FZ-REQ-PORTAL-010', 'FZ-REQ-PORTAL-011'] },
   { id: 'ADMIN', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-ADMIN-001', 'FZ-REQ-ADMIN-002', 'FZ-REQ-ADMIN-006', 'FZ-REQ-ADMIN-003', 'FZ-REQ-ADMIN-004', 'FZ-REQ-ADMIN-005', 'FZ-REQ-ADMIN-007', 'FZ-REQ-ADMIN-008', 'FZ-REQ-ADMIN-011', 'FZ-REQ-ADMIN-012', 'FZ-REQ-ADMIN-013', 'FZ-REQ-ADMIN-014', 'FZ-REQ-ADMIN-015', 'FZ-REQ-ADMIN-016'] },
   { id: 'LEAD', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-SEC-001'] },
   { id: 'OPPORTUNITY', normative: true, coverageStatus: 'COVERED_BY_REQUIREMENT', requirementIds: ['FZ-REQ-CRM-OPP-001'] },

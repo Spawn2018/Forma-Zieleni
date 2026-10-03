@@ -521,6 +521,14 @@ row('FZ-REQ-PORTAL-010', 'Authenticated portal UI lists the client site findings
   executableWhenComplete: ['PORTAL-GARDEN-VIEW', 'SITEINTEL-HTTP'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-011', 'An authenticated client can see milestones of their own project. Visibility follows the owning project subject. No payment, signing, or decision log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Evidence: projectMilestoneForPortal, GET /v1/portal/milestones, portal list. BOLA is 404. Staff routes stay forbidden.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-MILESTONE-VIEW',
+  executableWhenComplete: ['PORTAL-SITE-VIEW', 'ADMIN-MILESTONE-STAFF'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

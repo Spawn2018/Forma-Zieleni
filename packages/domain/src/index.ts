@@ -261,12 +261,14 @@ export {
   assertOpaqueMilestoneId,
   createDecisionLogEntry,
   createProjectMilestone,
+  projectMilestoneForPortal,
 } from './project-milestone.ts';
 export type {
   CreateDecisionLogEntryInput,
   CreateProjectMilestoneInput,
   DecisionLogKind,
   MilestoneStatus,
+  PortalMilestoneProjection,
   ProjectDecisionLogEntry,
   ProjectMilestone,
 } from './project-milestone.ts';

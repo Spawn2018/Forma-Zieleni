@@ -5,6 +5,8 @@ import {
   assertOpaqueProjectId,
   createDecisionLogEntry,
   createProjectMilestone,
+  projectMilestoneForPortal,
+  type PortalMilestoneProjection,
   type ProjectDecisionLogEntry,
   type ProjectMilestone,
 } from '@forma-zieleni/domain';
@@ -235,6 +237,52 @@ export async function listVisibleMilestones(
     ? encodeCursor(query.sort, query.sort.includes('updatedAt') ? last.updatedAt : last.createdAt, last.id)
     : null;
   return { items: page, nextCursor };
+}
+
+export async function listPortalMilestones(
+  store: LeadStore,
+  readerSubject: string,
+  query: MilestoneListQuery,
+): Promise<{ items: PortalMilestoneProjection[]; nextCursor: string | null }> {
+  const kept = await store.transaction(async tx => {
+    const rows = await tx.listMilestones({
+      ...query,
+      clientSubject: readerSubject,
+      limit: query.limit + 1,
+    });
+    const items: { projection: PortalMilestoneProjection; stamp: string }[] = [];
+    for (const milestone of rows) {
+      const project = await tx.findProject(milestone.projectId);
+      const projection = projectMilestoneForPortal(milestone, project, readerSubject);
+      if (!projection) continue;
+      items.push({
+        projection,
+        stamp: query.sort.includes('updatedAt') ? milestone.updatedAt : milestone.createdAt,
+      });
+    }
+    return items;
+  });
+  const page = kept.slice(0, query.limit);
+  const last = page.at(-1);
+  return {
+    items: page.map(item => item.projection),
+    nextCursor: kept.length > query.limit && last
+      ? encodeCursor(query.sort, last.stamp, last.projection.id)
+      : null,
+  };
+}
+
+export async function readPortalMilestone(
+  store: LeadStore,
+  id: string,
+  readerSubject: string,
+): Promise<PortalMilestoneProjection | null> {
+  return store.transaction(async tx => {
+    const milestone = await tx.findMilestone(id);
+    if (!milestone) return null;
+    const project = await tx.findProject(milestone.projectId);
+    return projectMilestoneForPortal(milestone, project, readerSubject);
+  });
 }
 
 export async function readDecisionLogEntry(store: LeadStore, id: string): Promise<ProjectDecisionLogEntry | null> {

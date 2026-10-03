@@ -10,7 +10,7 @@ export type OfferCapability = 'offers:read' | 'offers:create' | 'offers:portal-r
 export type ContractCapability = 'contracts:read' | 'contracts:create' | 'contracts:lifecycle' | 'contracts:portal-read';
 export type ProjectCapability = 'projects:read' | 'projects:create' | 'projects:portal-read';
 export type FileCapability = 'files:read' | 'files:create' | 'files:portal-read';
-export type MilestoneCapability = 'milestones:read' | 'milestones:create';
+export type MilestoneCapability = 'milestones:read' | 'milestones:create' | 'milestones:portal-read';
 export type PaymentCapability = 'payments:read' | 'payments:write';
 export type GardenCapability = 'gardens:read' | 'gardens:create' | 'gardens:portal-read';
 export type SiteIntelCapability = 'siteintel:read' | 'siteintel:create' | 'siteintel:portal-read';
@@ -49,7 +49,7 @@ function isCapability(value: unknown): value is Capability {
     || value === 'contracts:read' || value === 'contracts:create' || value === 'contracts:lifecycle' || value === 'contracts:portal-read'
     || value === 'projects:read' || value === 'projects:create' || value === 'projects:portal-read'
     || value === 'files:read' || value === 'files:create' || value === 'files:portal-read'
-    || value === 'milestones:read' || value === 'milestones:create'
+    || value === 'milestones:read' || value === 'milestones:create' || value === 'milestones:portal-read'
     || value === 'payments:read' || value === 'payments:write'
     || value === 'gardens:read' || value === 'gardens:create' || value === 'gardens:portal-read'
     || value === 'siteintel:read' || value === 'siteintel:create' || value === 'siteintel:portal-read'

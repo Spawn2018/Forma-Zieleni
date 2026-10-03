@@ -19,7 +19,7 @@ function isCapability(value: string): value is Capability {
     || value === 'contracts:read' || value === 'contracts:create' || value === 'contracts:lifecycle' || value === 'contracts:portal-read'
     || value === 'projects:read' || value === 'projects:create' || value === 'projects:portal-read'
     || value === 'files:read' || value === 'files:create' || value === 'files:portal-read'
-    || value === 'milestones:read' || value === 'milestones:create'
+    || value === 'milestones:read' || value === 'milestones:create' || value === 'milestones:portal-read'
     || value === 'payments:read' || value === 'payments:write'
     || value === 'gardens:read' || value === 'gardens:create' || value === 'gardens:portal-read'
     || value === 'siteintel:read' || value === 'siteintel:create' || value === 'siteintel:portal-read'

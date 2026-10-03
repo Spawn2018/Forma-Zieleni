@@ -26,7 +26,7 @@ const portal = {
   issuer: 'test-issuer',
   sub: 'portal-ola',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'contracts:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
+  capabilities: ['offers:portal-read', 'contracts:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read', 'milestones:portal-read'],
 };
 
 const portalOther = {
@@ -34,7 +34,7 @@ const portalOther = {
   issuer: 'test-issuer',
   sub: 'portal-other',
   clientId: 'portal',
-  capabilities: ['offers:portal-read', 'contracts:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read'],
+  capabilities: ['offers:portal-read', 'contracts:portal-read', 'projects:portal-read', 'files:portal-read', 'gardens:portal-read', 'siteintel:portal-read', 'milestones:portal-read'],
 };
 
 function appFor(store = new MemoryLeadStore(), logs = [], limit = 100, sandboxWebhookSecret, signingSandboxSecret) {
@@ -1825,4 +1825,49 @@ test('capacity windows are staff-only and refuse a promised instant outside the 
   assert.equal(page.items[0].id, window.id);
   assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(staff) })).status, 200);
   assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(portal) })).status, 403);
+});
+
+test('portal milestone projection follows the owning project subject (BOLA)', async () => {
+  const { app } = appFor();
+  assert.equal((await app.request('/v1/portal/milestones')).status, 401);
+  assert.equal((await app.request('/v1/portal/milestones', { headers: bearer(staff) })).status, 403);
+  assert.equal((await app.request('/v1/portal/decision-log', { headers: bearer(portal) })).status, 404);
+
+  const project = await createDeliveredProject(app, { clientSubject: 'portal-ola', suffix: 'pms' });
+  const hidden = await createDeliveredProject(app, { suffix: 'pmh' });
+  const created = await app.request('/v1/milestones', json({
+    projectId: project.id,
+    title: 'Sadzenie',
+    dueAt: '2026-11-01T10:00:00.000Z',
+  }, { ...bearer(staff), 'idempotency-key': 'pms-create-1' }));
+  assert.equal(created.status, 201);
+  const milestone = await created.json();
+  const hiddenCreated = await app.request('/v1/milestones', json({
+    projectId: hidden.id,
+    title: 'Ukryty kamień',
+  }, { ...bearer(staff), 'idempotency-key': 'pms-create-hidden' }));
+  assert.equal(hiddenCreated.status, 201);
+  const hiddenMilestone = await hiddenCreated.json();
+
+  const portalList = await app.request('/v1/portal/milestones', { headers: bearer(portal) });
+  assert.equal(portalList.status, 200);
+  const portalBody = await portalList.json();
+  assert.equal(portalBody.items.length, 1);
+  assert.equal(portalBody.items[0].id, milestone.id);
+  assert.equal(portalBody.items[0].title, 'Sadzenie');
+  assert.equal(portalBody.items[0].status, 'planned');
+  assert.equal(portalBody.items[0].dueAt, '2026-11-01T10:00:00.000Z');
+  assert.equal(Object.hasOwn(portalBody.items[0], 'updatedAt'), false);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'clientSubject'), false);
+  assert.equal(Object.hasOwn(portalBody.items[0], 'payment'), false);
+
+  const own = await app.request(`/v1/portal/milestones/${milestone.id}`, { headers: bearer(portal) });
+  assert.equal(own.status, 200);
+  assert.equal((await own.json()).title, 'Sadzenie');
+  assert.equal((await app.request(`/v1/portal/milestones/${milestone.id}`, { headers: bearer(portalOther) })).status, 404);
+  assert.equal((await app.request(`/v1/portal/milestones/${hiddenMilestone.id}`, { headers: bearer(portal) })).status, 404);
+  const otherList = await (await app.request('/v1/portal/milestones', { headers: bearer(portalOther) })).json();
+  assert.equal(otherList.items.length, 0);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(portal) })).status, 403);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(staff) })).status, 200);
 });

@@ -14,6 +14,7 @@ import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, rea
 import {
   createDecisionLogRecord,
   createMilestoneRecord,
+  listPortalMilestones,
   listVisibleDecisionLog,
   listVisibleMilestones,
   parseDecisionLogListQuery,
@@ -22,6 +23,7 @@ import {
   pathMilestoneId,
   readDecisionLogEntry,
   readMilestone,
+  readPortalMilestone,
 } from './milestones.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
 import { createOpportunityFromLead, listVisibleOpportunities, parseOpportunityListQuery, readOpportunity } from './opportunities.ts';
@@ -414,6 +416,29 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const projection = await readPortalGarden(options.store, pathGardenId(c.req.param('gardenId')), actor.sub);
     if (!projection) throw new ApiFailure(404, 'GARDEN_NOT_FOUND', 'Garden was not found.');
+    return c.json(projection);
+  });
+
+  app.get('/v1/portal/milestones', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const query = parseMilestoneListQuery({
+      limit: c.req.query('limit'),
+      cursor: c.req.query('cursor'),
+      sort: c.req.query('sort'),
+      projectId: c.req.query('projectId'),
+    });
+    const page = await listPortalMilestones(options.store, actor.sub, query);
+    return c.json({ items: page.items, meta: { limit: query.limit, nextCursor: page.nextCursor } });
+  });
+
+  app.get('/v1/portal/milestones/:milestoneId', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const projection = await readPortalMilestone(options.store, pathMilestoneId(c.req.param('milestoneId')), actor.sub);
+    if (!projection) throw new ApiFailure(404, 'MILESTONE_NOT_FOUND', 'Milestone was not found.');
     return c.json(projection);
   });
 

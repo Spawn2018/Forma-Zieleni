@@ -1119,6 +1119,23 @@ Contract: [`ADMIN-PROJECT-DELIVER.md`](./ADMIN-PROJECT-DELIVER.md).
 Security: uses existing `projects:create`. Delivery rules stay in Core API.
 Next: none.
 
+### PORTAL-MILESTONE-VIEW
+
+Dependencies: PORTAL-SITE-VIEW, ADMIN-MILESTONE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the signed-in portal lists milestones whose owning project
+belongs to that client. A row is the title, status, and due date.
+Empty, forbidden, and error states are visible. Payment, signing,
+and the decision log stay off this screen. Another client gets an
+empty list and a not-found read.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/api/src/http.test.mjs`.
+Contract: [`PORTAL-MILESTONE-VIEW.md`](./PORTAL-MILESTONE-VIEW.md).
+Security: capability `milestones:portal-read`. Ownership is the linked
+project's client subject. The portal does not create a milestone.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

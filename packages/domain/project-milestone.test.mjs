@@ -8,6 +8,7 @@ import { createProject } from './src/project.ts';
 import {
   createDecisionLogEntry,
   createProjectMilestone,
+  projectMilestoneForPortal,
 } from './src/project-milestone.ts';
 
 const AT = '2026-09-24T18:00:00.000Z';
@@ -20,12 +21,12 @@ const capture = {
   siteAnalysisRequested: true,
 };
 
-function plannedProject() {
+function plannedProject(clientSubject = null, id = 'j9k2n4p6q8r0s2t4') {
   const lead = qualifyLead(createLead('ld8k2n4p6q8r0s2t', 'www', capture, AT), false, '2026-09-24T18:05:00.000Z');
   const opportunity = createOpportunity('p9k2n4p6q8r0s2t4', lead, '2026-09-24T18:10:00.000Z');
   const offer = createOffer('f9k2n4p6q8r0s2t4', opportunity, '2026-09-24T18:15:00.000Z');
   const contract = createContract('c9k2n4p6q8r0s2t4', offer, '2026-09-24T18:20:00.000Z');
-  return createProject('j9k2n4p6q8r0s2t4', contract, '2026-09-24T18:25:00.000Z');
+  return createProject(id, contract, '2026-09-24T18:25:00.000Z', clientSubject);
 }
 
 test('createProjectMilestone records opaque project-bound milestones without payment/signing', () => {
@@ -125,4 +126,25 @@ test('createDecisionLogEntry records decision and change_order without client PI
     ),
     /DECISION_LOG_ID_GUESSABLE/,
   );
+});
+
+test('portal milestone projection follows the owning project and omits staff fields', () => {
+  const owned = plannedProject('portal-ola', 'j8k2n4p6q8r0s2t4');
+  const milestone = createProjectMilestone(
+    'm8k2n4p6q8r0s2t4',
+    owned,
+    { title: 'Sadzenie', dueAt: null },
+    AT,
+  );
+  const mine = projectMilestoneForPortal(milestone, owned, 'portal-ola');
+  assert.ok(mine);
+  assert.equal(mine.title, 'Sadzenie');
+  assert.equal(mine.status, 'planned');
+  assert.equal(mine.dueAt, null);
+  assert.equal(Object.hasOwn(mine, 'updatedAt'), false);
+  assert.equal(Object.hasOwn(mine, 'clientSubject'), false);
+  assert.equal(Object.hasOwn(mine, 'payment'), false);
+  assert.equal(projectMilestoneForPortal(milestone, owned, 'portal-other'), null);
+  assert.equal(projectMilestoneForPortal(milestone, plannedProject(), 'portal-ola'), null);
+  assert.equal(projectMilestoneForPortal(milestone, null, 'portal-ola'), null);
 });

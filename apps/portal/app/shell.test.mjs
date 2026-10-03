@@ -7,12 +7,14 @@ import {
   fetchPortalContracts,
   fetchPortalFiles,
   fetchPortalGardens,
+  fetchPortalMilestones,
   fetchPortalOffers,
   fetchPortalProjects,
   fetchPortalSiteIntelligence,
   mapPortalContractPage,
   mapPortalFilePage,
   mapPortalGardenPage,
+  mapPortalMilestonePage,
   mapPortalOfferPage,
   mapPortalProjectPage,
   mapPortalSitePage,
@@ -57,6 +59,7 @@ const emptySignedIn = {
   files: { status: 'empty' },
   gardens: { status: 'empty' },
   siteIntelligence: { status: 'empty' },
+  milestones: { status: 'empty' },
 };
 
 test('the portal shell is a signed-out gate without client project data', () => {
@@ -95,6 +98,7 @@ test('portal session classification enforces the portal trust zone', async () =>
   assert.match(signedIn, /Brak plików do pokazania/);
   assert.match(signedIn, /Brak ogrodów do pokazania/);
   assert.match(signedIn, /Brak ustaleń o terenie do pokazania/);
+  assert.match(signedIn, /Brak kamieni milowych do pokazania/);
   for (const phrase of commercialLeak) {
     assert.equal(signedIn.toLowerCase().includes(phrase), false, phrase);
   }
@@ -124,6 +128,7 @@ test('signed-in portal renders client-safe offer projection without price or ter
     files: { status: 'empty' },
     gardens: { status: 'empty' },
     siteIntelligence: { status: 'empty' },
+    milestones: { status: 'empty' },
   }));
   assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /Twoje pozycje/);
@@ -244,6 +249,7 @@ test('signed-in portal renders client-safe project and file projections without 
     files,
     gardens: { status: 'empty' },
     siteIntelligence: { status: 'empty' },
+    milestones: { status: 'empty' },
   }));
   assert.match(html, /Twoje projekty/);
   assert.match(html, /pj8k2n4p6q8r0s2t/);
@@ -507,6 +513,84 @@ test('signed-in portal renders site findings without credentials or invented con
   );
 });
 
+test('signed-in portal renders client milestones without payment or signing', async () => {
+  assert.deepEqual(mapPortalMilestonePage({ items: [] }), { status: 'empty' });
+  assert.deepEqual(mapPortalMilestonePage({ items: [{ id: 'x', payment: true }] }), { status: 'error' });
+  assert.deepEqual(mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: null,
+      createdAt: '2026-09-24T18:00:00.000Z',
+      clientSubject: 'portal-ola',
+    }],
+  }), { status: 'error' });
+  const mapped = mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: null,
+      createdAt: '2026-09-24T18:00:00.000Z',
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const ready = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    milestones: mapped,
+  }));
+  assert.match(ready, /Kamienie milowe/);
+  assert.match(ready, /Sadzenie/);
+  assert.match(ready, /zaplanowany/);
+  assert.match(ready, /bez terminu/);
+  assert.equal(ready.toLowerCase().includes('payment'), false);
+  assert.equal(ready.toLowerCase().includes('signing'), false);
+  for (const phrase of commercialLeak) {
+    assert.equal(ready.toLowerCase().includes(phrase), false, phrase);
+  }
+
+  const fetched = await fetchPortalMilestones({
+    base: 'http://portal.test',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/portal\/milestones\?limit=50$/);
+      assert.equal(init?.credentials, 'include');
+      assert.equal(init?.headers?.cookie, 'better-auth.session_token=abc');
+      return new Response(JSON.stringify({
+        items: [{
+          id: 'ms8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          title: 'Koncepcja',
+          status: 'active',
+          dueAt: '2026-11-01T10:00:00.000Z',
+          createdAt: '2026-09-24T19:00:00.000Z',
+        }],
+        nextCursor: null,
+      }), { status: 200 });
+    },
+  });
+  assert.equal(fetched.status, 'ready');
+  if (fetched.status === 'ready') {
+    assert.equal(fetched.items[0].title, 'Koncepcja');
+    const html = renderToStaticMarkup(portalShell({
+      ...emptySignedIn,
+      milestones: fetched,
+    }));
+    assert.match(html, /w toku/);
+    assert.match(html, /2026-11-01T10:00:00.000Z/);
+  }
+  assert.deepEqual(
+    await fetchPortalMilestones({
+      base: 'http://portal.test',
+      fetchImpl: async () => new Response('', { status: 403 }),
+    }),
+    { status: 'forbidden' },
+  );
+});
+
 test('the route module keeps an error boundary and does not invent CRM facts', () => {
   const home = readFileSync(new URL('./routes/home.tsx', import.meta.url), 'utf8');
   const root = readFileSync(new URL('./root.tsx', import.meta.url), 'utf8');
@@ -519,6 +603,7 @@ test('the route module keeps an error boundary and does not invent CRM facts', (
   assert.match(home, /fetchPortalFiles/);
   assert.match(home, /fetchPortalGardens/);
   assert.match(home, /fetchPortalSiteIntelligence/);
+  assert.match(home, /fetchPortalMilestones/);
   assert.match(home, /request\.headers\.get\('cookie'\)/);
   assert.match(root, /export function ErrorBoundary/);
   assert.match(root, /portalErrorMessage/);

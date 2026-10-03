@@ -24,6 +24,16 @@ export type ProjectMilestone = {
   updatedAt: string;
 };
 
+/** Fields a portal client may see. Visibility follows the owning project. */
+export type PortalMilestoneProjection = {
+  id: string;
+  projectId: string;
+  title: string;
+  status: MilestoneStatus;
+  dueAt: string | null;
+  createdAt: string;
+};
+
 /**
  * Decision or change-order log entry owned by Core API.
  * Staff actor ids only; no customer PII and no signing/payment fields.
@@ -111,6 +121,23 @@ function assertInstant(value: string, code: string): string {
   const normalized = `${match[1]}.${fraction}Z`;
   if (new Date(ms).toISOString() !== normalized) throw new Error(code);
   return value;
+}
+
+export function projectMilestoneForPortal(
+  milestone: ProjectMilestone,
+  project: Project | null,
+  readerSubject: string,
+): PortalMilestoneProjection | null {
+  if (!project || project.id !== milestone.projectId) return null;
+  if (!project.clientSubject || project.clientSubject !== readerSubject) return null;
+  return {
+    id: milestone.id,
+    projectId: milestone.projectId,
+    title: milestone.title,
+    status: milestone.status,
+    dueAt: milestone.dueAt,
+    createdAt: milestone.createdAt,
+  };
 }
 
 function assertTitle(title: string): string {
