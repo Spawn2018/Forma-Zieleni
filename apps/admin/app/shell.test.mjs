@@ -260,6 +260,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             id: 'ps8k2n4p6q8r0s2t',
             contractId: 'ct8k2n4p6q8r0s2t',
             currency: 'PLN',
+            createdAt: '2026-09-24T15:00:00.000Z',
             installments: [
               { id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: null },
             ],
@@ -309,7 +310,8 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Koperta sandbox oczekuje/);
   assert.match(ready, /Otwórz kopertę sandbox/);
   assert.equal(ready.includes('QES'), false);
-  assert.match(ready, /ps8k2n4p6q8r0s2t/);
+  assert.match(ready, /ps8k2n4p6q8r0s2t · umowa ct8k2n4p6q8r0s2t · PLN · 24 września 2026, 15:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T15:00:00.000Z'), false);
   assert.match(ready, /#1 · 40000 · zaplanowana · bez terminu/);
   assert.equal(ready.includes('scheduled'), false);
   assert.match(ready, /create-payment-schedule/);
@@ -361,6 +363,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       id: 'ps8k2n4p6q8r0s2u',
       contractId: 'ct8k2n4p6q8r0s2t',
       currency: 'PLN',
+      createdAt: '2026-09-24T15:00:00.000Z',
       installments: [{
         id: 'pi8k2n4p6q8r0s2b',
         sequence: 1,
@@ -1625,6 +1628,44 @@ test('staff gardens order by the recorded instant', () => {
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
 });
 
+test('a staff payment schedule shows its recorded instant', () => {
+  assert.deepEqual(mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: null }],
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      createdAt: 'wczoraj',
+      installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: null }],
+    }],
+  }), { status: 'error' });
+  const mapped = mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      createdAt: '2026-09-24T15:00:00.000Z',
+      installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: null }],
+    }],
+  });
+  assert.equal(mapped.status, 'ready');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    paymentSchedules: mapped,
+  }));
+  const meta = html.match(/admin-payment-schedule-meta">([^<]+)/)?.[1] ?? '';
+  assert.equal(meta, 'ps8k2n4p6q8r0s2t · umowa ct8k2n4p6q8r0s2t · PLN · 24 września 2026, 15:00 UTC');
+  assert.equal(meta.includes('2026-09-24T15:00:00.000Z'), false);
+});
+
 test('staff installments order by sequence', () => {
   assert.equal(
     compareAdminPaymentInstallments(
@@ -1642,6 +1683,7 @@ test('staff installments order by sequence', () => {
         id: 'ps8k2n4p6q8r0s2t',
         contractId: 'ct8k2n4p6q8r0s2t',
         currency: 'PLN',
+        createdAt: '2026-09-24T15:00:00.000Z',
         installments: [
           { id: 'pi8k2n4p6q8r0s2c', sequence: 3, amountMinor: 30000, status: 'scheduled', dueAt: null },
           { id: 'pi8k2n4p6q8r0s2b', sequence: 1, amountMinor: 10000, status: 'due', dueAt: null },

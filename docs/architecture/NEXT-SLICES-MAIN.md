@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-PAYMENT-SCHEDULE-CREATED
+
+Dependencies: PAY-SCHEDULE-STAFF, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff payment schedule shows its recorded instant in Polish UTC
+words. A missing or unreadable instant rejects the list. The raw timestamp
+is not shown. No provider, charge, or new amount.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PAYMENT-SCHEDULE-CREATED.md`](./ADMIN-PAYMENT-SCHEDULE-CREATED.md).
+Security: display only. Uses the instant already on the loaded schedule.
+Next: none.
+
 ### ADMIN-PROJECT-ORDER
 
 Dependencies: ADMIN-PROJECT-CREATED.

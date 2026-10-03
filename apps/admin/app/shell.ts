@@ -172,6 +172,7 @@ export type AdminPaymentScheduleRow = {
   contractId: string;
   currency: string;
   installments: readonly AdminPaymentInstallmentRow[];
+  createdAt: string;
 };
 
 export type AdminPaymentScheduleList =
@@ -851,6 +852,7 @@ type PaymentScheduleApiItem = {
   contractId?: unknown;
   currency?: unknown;
   installments?: unknown;
+  createdAt?: unknown;
 };
 
 export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList {
@@ -863,6 +865,8 @@ export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList 
     const schedule = item as PaymentScheduleApiItem;
     if (typeof schedule.id !== 'string' || typeof schedule.contractId !== 'string') return { status: 'error' };
     if (typeof schedule.currency !== 'string' || !Array.isArray(schedule.installments)) return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(schedule.createdAt);
+    if (createdAt === null) return { status: 'error' };
     const installments: AdminPaymentInstallmentRow[] = [];
     for (const raw of schedule.installments) {
       if (!raw || typeof raw !== 'object') return { status: 'error' };
@@ -886,6 +890,7 @@ export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList 
       contractId: schedule.contractId,
       currency: schedule.currency,
       installments,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -3995,7 +4000,15 @@ function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode
           createElement(
             'p',
             { className: 'admin-payment-schedule-meta' },
-            [schedule.id, ' · umowa ', schedule.contractId, ' · ', schedule.currency].join(''),
+            [
+              schedule.id,
+              ' · umowa ',
+              schedule.contractId,
+              ' · ',
+              schedule.currency,
+              ' · ',
+              adminCreatedAtLabel(schedule.createdAt),
+            ].join(''),
           ),
           createElement(
             'ul',
