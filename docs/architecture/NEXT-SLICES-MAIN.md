@@ -1248,6 +1248,20 @@ Contract: [`CAPACITY-WINDOW-CLOSE.md`](./CAPACITY-WINDOW-CLOSE.md).
 Security: uses existing `capacity:write`. No calendar provider.
 Next: none.
 
+### PORTAL-FILE-DOWNLOAD
+
+Dependencies: PORTAL-FILE-PROJECTION, FILE-BYTES-LOCAL.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a client can download the bytes of their own project file.
+A foreign file and a staff-only file are not found. The staff content
+route stays forbidden. No storage key or public URL is returned.
+Tests: `apps/api/src/http.test.mjs`, `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-FILE-DOWNLOAD.md`](./PORTAL-FILE-DOWNLOAD.md).
+Security: uses existing `files:portal-read` and the local private byte store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

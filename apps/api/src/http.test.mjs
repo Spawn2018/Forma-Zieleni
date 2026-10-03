@@ -1131,6 +1131,77 @@ test('staff can store and download local private file bytes; portal cannot', asy
   }
 });
 
+test('a portal client downloads only their own file bytes', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'fz-http-portal-file-bytes-'));
+  try {
+    let tick = 0;
+    const app = createApp({
+      store: new MemoryLeadStore(),
+      authenticator: testAuthenticator(SECRET),
+      limiter: new WindowLimiter(100, 60_000),
+      addressOf: () => '198.51.100.10',
+      fileBytesRoot: root,
+      now: () => new Date(Date.UTC(2026, 8, 21, 12, 0, tick++)).toISOString(),
+    });
+    const lead = await captureAndQualify(app);
+    const opportunity = await (await app.request('/v1/opportunities', json({ leadId: lead.id }, {
+      'idempotency-key': 'opp-port-bytes',
+      ...bearer(staff),
+    }))).json();
+    const offer = await (await app.request('/v1/offers', json({ opportunityId: opportunity.id }, {
+      'idempotency-key': 'off-port-bytes',
+      ...bearer(staff),
+    }))).json();
+    const contract = await (await app.request('/v1/contracts', json({ offerId: offer.id }, {
+      'idempotency-key': 'ctr-port-bytes',
+      ...bearer(staff),
+    }))).json();
+    const project = await (await app.request('/v1/projects', json({
+      contractId: contract.id,
+      clientSubject: 'portal-ola',
+    }, {
+      'idempotency-key': 'prj-port-bytes',
+      ...bearer(staff),
+    }))).json();
+    const bytes = Buffer.from('portal-private-bytes');
+    const file = await (await app.request('/v1/files', json({
+      projectId: project.id,
+      name: 'plan.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: bytes.length,
+    }, {
+      'idempotency-key': 'file-port-bytes',
+      ...bearer(staff),
+    }))).json();
+    assert.equal((await app.request(`/v1/portal/files/${file.id}/content`)).status, 401);
+    assert.equal((await app.request(`/v1/portal/files/${file.id}/content`, { headers: bearer(staff) })).status, 403);
+    assert.equal((await app.request(`/v1/portal/files/${file.id}/content`, { headers: bearer(portal) })).status, 404);
+    const put = await app.request(`/v1/files/${file.id}/content`, {
+      method: 'PUT',
+      headers: {
+        ...bearer(staff),
+        'content-type': 'application/octet-stream',
+        'content-length': String(bytes.length),
+      },
+      body: bytes,
+    });
+    assert.equal(put.status, 201);
+    const receipt = await put.json();
+    const got = await app.request(`/v1/portal/files/${file.id}/content`, { headers: bearer(portal) });
+    assert.equal(got.status, 200);
+    assert.equal(got.headers.get('content-type'), 'application/pdf');
+    assert.equal(got.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(got.headers.get('x-content-checksum-sha256'), receipt.checksum);
+    assert.equal(got.headers.get('cache-control'), 'private, no-store');
+    assert.match(got.headers.get('content-disposition') || '', /attachment; filename="plan\.pdf"/);
+    assert.equal(Buffer.from(await got.arrayBuffer()).equals(bytes), true);
+    assert.equal((await app.request(`/v1/files/${file.id}/content`, { headers: bearer(portal) })).status, 403);
+    assert.equal((await app.request(`/v1/portal/files/${file.id}/content`, { headers: bearer(portalOther) })).status, 404);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('staff create and list project milestones and decision log; portal cannot mutate (BOLA)', async () => {
   const { app } = appFor();
   assert.equal((await app.request('/v1/milestones')).status, 401);

@@ -618,6 +618,72 @@ export async function fetchPortalFiles(input: {
   });
 }
 
+export type PortalFileBytesResult =
+  | {
+      ok: true;
+      bytes: Uint8Array;
+      mimeType: string;
+      fileName: string;
+      checksum: string | null;
+      sizeBytes: number;
+    }
+  | { ok: false; reason: 'forbidden' | 'not_found' | 'error' };
+
+function portalFileIdOk(fileId: string): boolean {
+  return /^[a-z][a-z0-9]{15,63}$/.test(fileId);
+}
+
+function portalDispositionFileName(header: string | null, fallback: string): string {
+  if (!header) return fallback;
+  const utf = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf?.[1]) {
+    try {
+      return decodeURIComponent(utf[1]).replace(/["\\]/g, '_') || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  const plain = /filename="([^"]+)"/i.exec(header) || /filename=([^;]+)/i.exec(header);
+  if (plain?.[1]) return plain[1].trim().replace(/["\\]/g, '_') || fallback;
+  return fallback;
+}
+
+/** GET the client's own file bytes. A missing file and a foreign file are not_found. */
+export async function fetchPortalFileBytes(input: {
+  base: string;
+  fileId: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<PortalFileBytesResult> {
+  if (!portalFileIdOk(input.fileId)) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = { accept: '*/*' };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/portal/files/${encodeURIComponent(input.fileId)}/content`, input.base),
+      { credentials: 'include', headers },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (response.status === 404) return { ok: false, reason: 'not_found' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    const buffer = new Uint8Array(await response.arrayBuffer());
+    if (buffer.length === 0) return { ok: false, reason: 'error' };
+    const mimeType = response.headers.get('content-type')?.split(';')[0]?.trim() || 'application/octet-stream';
+    const checksum = response.headers.get('x-content-checksum-sha256');
+    return {
+      ok: true,
+      bytes: buffer,
+      mimeType,
+      fileName: portalDispositionFileName(response.headers.get('content-disposition'), input.fileId),
+      checksum: checksum && /^[0-9a-f]{64}$/i.test(checksum) ? checksum.toLowerCase() : null,
+      sizeBytes: buffer.length,
+    };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 /**
  * Resolve portal home from optional Core API session probe + projections.
  * Unconfigured probe → signed-out (truthful). Never invents offers, contracts, projects, files, gardens, site findings, or milestones.
@@ -928,6 +994,15 @@ function fileListNode(files: PortalFileList): ReactNode {
               ' B · ',
               file.createdAt,
             ].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-download-file' },
+            createElement(
+              'a',
+              { href: `/files/${encodeURIComponent(file.id)}/content` },
+              `Pobierz «${file.name}»`,
+            ),
           ),
         ),
       ),

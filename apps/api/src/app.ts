@@ -399,6 +399,32 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     return c.json(projection);
   });
 
+  app.get('/v1/portal/files/:fileId/content', async c => {
+    const actor = await requireActor(c, options.authenticator, 'files:portal-read');
+    if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');
+    c.set('actorId', actor.actorId);
+    const fileId = pathProjectFileId(c.req.param('fileId'));
+    const projection = await readPortalProjectFile(options.store, fileId, actor.sub);
+    if (!projection) throw new ApiFailure(404, 'PROJECT_FILE_NOT_FOUND', 'Project file was not found.');
+    let stored;
+    try {
+      stored = await readProjectFileBytes({ root: options.fileBytesRoot, fileId });
+    } catch (error) {
+      if (error instanceof Error && (error.message === 'FILE_BYTES_CORRUPT' || error.message === 'FILE_BYTES_INDEX_INVALID')) {
+        throw new ApiFailure(500, 'FILE_BYTES_CORRUPT', 'Stored file bytes are not readable.');
+      }
+      throw error;
+    }
+    if (!stored) throw new ApiFailure(404, 'FILE_BYTES_NOT_FOUND', 'Project file bytes were not found.');
+    c.header('Content-Type', projection.mimeType);
+    c.header('Content-Length', String(stored.sizeBytes));
+    c.header('Content-Disposition', `attachment; filename="${projection.name.replace(/["\\]/g, '_')}"`);
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('X-Content-Checksum-Sha256', stored.checksum);
+    c.header('Cache-Control', 'private, no-store');
+    return c.body(new Uint8Array(stored.bytes), 200);
+  });
+
   app.get('/v1/portal/gardens', async c => {
     const actor = await requireActor(c, options.authenticator, 'gardens:portal-read');
     if (actor.clientId !== 'portal') throw new ApiFailure(403, 'FORBIDDEN', 'This operation is not allowed.');

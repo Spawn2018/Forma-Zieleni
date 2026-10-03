@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   classifyPortalSession,
   fetchPortalContracts,
+  fetchPortalFileBytes,
   fetchPortalFiles,
   fetchPortalGardens,
   fetchPortalMilestones,
@@ -257,6 +258,8 @@ test('signed-in portal renders client-safe project and file projections without 
   assert.match(html, /Otwarte kamienie milowe: brak/);
   assert.match(html, /Twoje pliki/);
   assert.match(html, /plan\.pdf/);
+  assert.match(html, /Pobierz «plan\.pdf»/);
+  assert.match(html, /href="\/files\/fl8k2n4p6q8r0s2t\/content"/);
   assert.match(html, /application\/pdf/);
   assert.match(html, /2048/);
   for (const phrase of commercialLeak) {
@@ -304,6 +307,46 @@ test('signed-in portal renders client-safe project and file projections without 
     },
   });
   assert.equal(fetchedFiles.status, 'ready');
+  const downloaded = await fetchPortalFileBytes({
+    base: 'http://portal.test',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    cookie: 'better-auth.session_token=abc',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/portal\/files\/fl8k2n4p6q8r0s2t\/content$/);
+      assert.equal(init?.credentials, 'include');
+      assert.equal(init?.headers?.cookie, 'better-auth.session_token=abc');
+      return new Response(Uint8Array.from([1, 2, 3]), {
+        status: 200,
+        headers: {
+          'content-type': 'application/pdf',
+          'content-disposition': 'attachment; filename="plan.pdf"',
+          'x-content-checksum-sha256': 'ab'.repeat(32),
+        },
+      });
+    },
+  });
+  assert.equal(downloaded.ok, true);
+  if (downloaded.ok) {
+    assert.equal(downloaded.sizeBytes, 3);
+    assert.equal(downloaded.fileName, 'plan.pdf');
+    assert.equal(downloaded.mimeType, 'application/pdf');
+  }
+  assert.deepEqual(
+    await fetchPortalFileBytes({
+      base: 'http://portal.test',
+      fileId: 'fl8k2n4p6q8r0s2t',
+      fetchImpl: async () => new Response('', { status: 404 }),
+    }),
+    { ok: false, reason: 'not_found' },
+  );
+  assert.deepEqual(
+    await fetchPortalFileBytes({
+      base: 'http://portal.test',
+      fileId: '../secret',
+      fetchImpl: async () => new Response('no', { status: 200 }),
+    }),
+    { ok: false, reason: 'error' },
+  );
 
   assert.deepEqual(
     await fetchPortalProjects({
@@ -672,6 +715,8 @@ test('the route module keeps an error boundary and does not invent CRM facts', (
   assert.match(home, /fetchPortalContracts/);
   assert.match(home, /fetchPortalProjects/);
   assert.match(home, /fetchPortalFiles/);
+  assert.match(readFileSync(new URL('./routes.ts', import.meta.url), 'utf8'), /files\/:fileId\/content/);
+  assert.match(readFileSync(new URL('./routes/file-content.ts', import.meta.url), 'utf8'), /fetchPortalFileBytes/);
   assert.match(home, /fetchPortalGardens/);
   assert.match(home, /fetchPortalSiteIntelligence/);
   assert.match(home, /fetchPortalMilestones/);

@@ -31,6 +31,7 @@
     "GET /portal/contracts/{contractId}",
     "GET /portal/files",
     "GET /portal/files/{fileId}",
+    "GET /portal/files/{fileId}/content",
     "GET /portal/gardens",
     "GET /portal/gardens/{gardenId}",
     "GET /portal/milestones",

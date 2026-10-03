@@ -545,6 +545,14 @@ row('FZ-REQ-PORTAL-012', 'A portal project card names the earliest open mileston
   executableWhenComplete: ['PORTAL-MILESTONE-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-013', 'An authenticated client can download the bytes of their own project file. A foreign file and a staff-only file are not found. The staff content route stays forbidden. No storage key or public URL is returned.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/api/src/app.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'GET /v1/portal/files/{fileId}/content uses the existing private byte store and the portal file projection. The portal link proxies that route.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-FILE-DOWNLOAD',
+  executableWhenComplete: ['PORTAL-FILE-PROJECTION', 'FILE-BYTES-LOCAL'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

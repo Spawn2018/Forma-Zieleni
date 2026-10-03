@@ -1595,6 +1595,37 @@
         }
       }
     },
+    "/portal/files/{fileId}/content": {
+      "get": {
+        "tags": ["Portal"],
+        "operationId": "getPortalFileContent",
+        "summary": "Download one client-owned project file. A foreign file is not found.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/ProjectFileId" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client file bytes",
+            "headers": {
+              "X-Content-Checksum-Sha256": {
+                "required": true,
+                "schema": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
     "/files": {
       "get": {
         "tags": [
