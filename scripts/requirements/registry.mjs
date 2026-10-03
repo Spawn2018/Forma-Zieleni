@@ -1016,6 +1016,14 @@ row('FZ-REQ-ADMIN-057', 'The staff offer list orders offers by the earlier recor
   executableWhenComplete: ['ADMIN-COMMERCIAL-CREATED'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-058', 'A staff installment shows its status in Polish. The labels are zaplanowana, należna, zapisana, zwolniona, and anulowana. An unknown status token rejects the list. The raw token is not shown. No provider, charge, or new amount is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The label is a display of the installment status staff already loaded. The transition post still sends the machine status.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'PAYMENT_INSTALLMENT_LABELS',
+  executableSlice: 'ADMIN-PAYMENT-INSTALLMENT-LABELS',
+  executableWhenComplete: ['PAY-SCHEDULE-STAFF'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

@@ -124,11 +124,46 @@ export function compareAdminFiles(
   return left.id < right.id ? -1 : 1;
 }
 
+export const ADMIN_PAYMENT_INSTALLMENT_STATUSES = [
+  'scheduled',
+  'due',
+  'recorded',
+  'waived',
+  'cancelled',
+] as const;
+
+export type AdminPaymentInstallmentStatus = (typeof ADMIN_PAYMENT_INSTALLMENT_STATUSES)[number];
+
+function isAdminPaymentInstallmentStatus(status: unknown): status is AdminPaymentInstallmentStatus {
+  return typeof status === 'string'
+    && (ADMIN_PAYMENT_INSTALLMENT_STATUSES as readonly string[]).includes(status);
+}
+
+/** Polish words for a provider-neutral installment. An unknown token is not a label. */
+export function adminPaymentInstallmentStatusLabel(status: AdminPaymentInstallmentStatus): string {
+  switch (status) {
+    case 'scheduled':
+      return 'zaplanowana';
+    case 'due':
+      return 'należna';
+    case 'recorded':
+      return 'zapisana';
+    case 'waived':
+      return 'zwolniona';
+    case 'cancelled':
+      return 'anulowana';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
 export type AdminPaymentInstallmentRow = {
   id: string;
   sequence: number;
   amountMinor: number;
-  status: string;
+  status: AdminPaymentInstallmentStatus;
 };
 
 export type AdminPaymentScheduleRow = {
@@ -831,7 +866,7 @@ export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList 
     for (const raw of schedule.installments) {
       if (!raw || typeof raw !== 'object') return { status: 'error' };
       const line = raw as Record<string, unknown>;
-      if (typeof line.id !== 'string' || typeof line.status !== 'string') return { status: 'error' };
+      if (typeof line.id !== 'string' || !isAdminPaymentInstallmentStatus(line.status)) return { status: 'error' };
       if (!Number.isInteger(line.sequence) || !Number.isInteger(line.amountMinor)) return { status: 'error' };
       installments.push({
         id: line.id,
@@ -3936,7 +3971,7 @@ function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode
                 createElement(
                   'p',
                   { className: 'admin-payment-installment-meta' },
-                  ['#', String(line.sequence), ' · ', String(line.amountMinor), ' · ', line.status].join(''),
+                  ['#', String(line.sequence), ' · ', String(line.amountMinor), ' · ', adminPaymentInstallmentStatusLabel(line.status)].join(''),
                 ),
                 line.status === 'scheduled'
                   ? createElement(

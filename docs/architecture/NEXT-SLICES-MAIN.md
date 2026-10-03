@@ -833,6 +833,21 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-PAYMENT-INSTALLMENT-LABELS
+
+Dependencies: PAY-SCHEDULE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff installment shows its status in Polish. The labels are
+zaplanowana, należna, zapisana, zwolniona, and anulowana. An unknown
+status token rejects the list. The raw token is not shown. No provider,
+charge, or new amount.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PAYMENT-INSTALLMENT-LABELS.md`](./ADMIN-PAYMENT-INSTALLMENT-LABELS.md).
+Security: display only. The transition post still sends the machine status.
+Next: none.
+
 ### PORTAL-OFFER-VIEW
 
 Dependencies: PAY-SCHEDULE-STAFF, PORTAL-OFFER-PROJECTION.

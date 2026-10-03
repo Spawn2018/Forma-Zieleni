@@ -24,6 +24,8 @@ import {
   adminLeadQualificationLabel,
   adminLeadStatusLabel,
   adminOfferStatusLabel,
+  adminPaymentInstallmentStatusLabel,
+  mapPaymentSchedulePage,
   adminOpportunityStatusLabel,
   adminSiteObservationKindLabel,
   adminSiteSourceStageLabel,
@@ -305,6 +307,8 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Otwórz kopertę sandbox/);
   assert.equal(ready.includes('QES'), false);
   assert.match(ready, /ps8k2n4p6q8r0s2t/);
+  assert.match(ready, /#1 · 40000 · zaplanowana/);
+  assert.equal(ready.includes('scheduled'), false);
   assert.match(ready, /create-payment-schedule/);
   assert.match(ready, /transition-payment-installment/);
   assert.match(ready, /Oznacz jako należną/);
@@ -328,6 +332,19 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.equal(ready.includes('2026-09-24T13:30:00.000Z'), false);
   assert.match(ready, /24 września 2026, 14:00 UTC/);
   assert.equal(ready.includes('2026-09-24T14:00:00.000Z'), false);
+  assert.equal(adminPaymentInstallmentStatusLabel('scheduled'), 'zaplanowana');
+  assert.equal(adminPaymentInstallmentStatusLabel('due'), 'należna');
+  assert.equal(adminPaymentInstallmentStatusLabel('recorded'), 'zapisana');
+  assert.equal(adminPaymentInstallmentStatusLabel('waived'), 'zwolniona');
+  assert.equal(adminPaymentInstallmentStatusLabel('cancelled'), 'anulowana');
+  assert.deepEqual(mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'charged' }],
+    }],
+  }), { status: 'error' });
 });
 
 test('mapContractPage and Core API contract fetch/create stay truthful', async () => {
