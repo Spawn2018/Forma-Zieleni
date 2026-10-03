@@ -1008,6 +1008,14 @@ row('FZ-REQ-ADMIN-056', 'A staff milestone shows its status in Polish. The label
   executableWhenComplete: ['ADMIN-MILESTONE-STATUS', 'ADMIN-STATUS-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-057', 'The staff offer list orders offers by the earlier recorded instant. The same instant stays in id order. Every offer stays. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of offers staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'OFFER_ORDER',
+  executableSlice: 'ADMIN-OFFER-ORDER',
+  executableWhenComplete: ['ADMIN-COMMERCIAL-CREATED'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

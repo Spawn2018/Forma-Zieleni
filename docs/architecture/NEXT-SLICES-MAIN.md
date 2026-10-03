@@ -1688,6 +1688,20 @@ Contract: [`ADMIN-PROJECT-SITE.md`](./ADMIN-PROJECT-SITE.md).
 Security: display only. Uses the site list staff already loaded.
 Next: none.
 
+### ADMIN-OFFER-ORDER
+
+Dependencies: ADMIN-COMMERCIAL-CREATED.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff offer list orders offers by the earlier recorded
+instant. The same instant stays in id order. Every offer stays. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-OFFER-ORDER.md`](./ADMIN-OFFER-ORDER.md).
+Security: display sort only. Uses offers staff already loaded.
+Next: none.
+
 ### ADMIN-OFFER-CONTRACT
 
 Dependencies: ADMIN-COMMERCIAL-CREATED.

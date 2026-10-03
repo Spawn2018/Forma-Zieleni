@@ -13,6 +13,7 @@ import {
   nextOpenAdminMilestone,
   compareAdminDecisionLog,
   compareAdminGardens,
+  compareAdminOffers,
   compareAdminSites,
   compareAdminCapacityWindows,
   compareAdminFiles,
@@ -1571,6 +1572,47 @@ test('staff gardens order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/admin-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
+});
+
+test('staff offers order by the recorded instant', () => {
+  assert.equal(
+    compareAdminOffers(
+      { id: 'of8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'of8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    offers: {
+      status: 'ready',
+      items: [
+        {
+          id: 'of8k2n4p6q8r0s2w',
+          opportunityId: 'op8k2n4p6q8r0s2t',
+          status: 'draft',
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'of8k2n4p6q8r0s2u',
+          opportunityId: 'op8k2n4p6q8r0s2t',
+          status: 'draft',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'of8k2n4p6q8r0s2t',
+          opportunityId: 'op8k2n4p6q8r0s2u',
+          status: 'draft',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-offer-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['of8k2n4p6q8r0s2t', 'of8k2n4p6q8r0s2u', 'of8k2n4p6q8r0s2w']);
+  assert.match(html, /szkic/);
+  assert.equal(html.includes('2026-09-24T12:00:00.000Z'), false);
 });
 
 test('a staff contract names only the projects already loaded for it', () => {

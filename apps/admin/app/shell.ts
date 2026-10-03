@@ -2421,7 +2421,7 @@ function offerListNode(offers: AdminOfferList, contracts: AdminContractList): Re
     createElement(
       'ul',
       { className: 'admin-offer-list' },
-      ...offers.items.map((offer) =>
+      ...[...offers.items].sort(compareAdminOffers).map((offer) =>
         createElement(
           'li',
           { key: offer.id, className: 'admin-offer' },
@@ -2956,6 +2956,16 @@ function gardenProjectFilterForm(query: string, projectId: string | null): React
     createElement('button', { type: 'submit' }, 'Pokaż ogród projektu'),
     projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
   );
+}
+
+/** Earlier recorded instant first. The same instant stays in id order. Every offer stays. */
+export function compareAdminOffers(
+  left: Pick<AdminOfferRow, 'id' | 'createdAt'>,
+  right: Pick<AdminOfferRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
 }
 
 /** Earlier recorded instant first. The same instant stays in id order. Every garden stays. */
