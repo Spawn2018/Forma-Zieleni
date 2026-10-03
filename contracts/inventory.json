@@ -60,6 +60,7 @@
     "POST /leads",
     "POST /leads/{leadId}/qualify",
     "POST /milestones",
+    "POST /milestones/{milestoneId}/due",
     "POST /milestones/{milestoneId}/status",
     "POST /offers",
     "POST /opportunities",
@@ -103,6 +104,9 @@
       "Idempotency-Key"
     ],
     "POST /milestones": [
+      "Idempotency-Key"
+    ],
+    "POST /milestones/{milestoneId}/due": [
       "Idempotency-Key"
     ],
     "POST /milestones/{milestoneId}/status": [

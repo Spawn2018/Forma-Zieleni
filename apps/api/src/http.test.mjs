@@ -1909,4 +1909,44 @@ test('portal milestone projection follows the owning project subject (BOLA)', as
     ...bearer(staff),
     'idempotency-key': 'pms-status-back',
   }))).status, 409);
+
+  const badDue = await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: 'jutro' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-due-bad',
+  }));
+  assert.equal(badDue.status, 400);
+  const paidDue = await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: '2026-10-03T08:00:00.000Z', payment: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-due-pay',
+  }));
+  assert.equal(paidDue.status, 400);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: '2026-10-03T08:00:00.000Z' }, {
+    ...bearer(portal),
+    'idempotency-key': 'pms-due-portal',
+  }))).status, 403);
+  const dated = await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: '2026-10-03T08:00:00.000Z' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-due-set',
+  }));
+  assert.equal(dated.status, 200);
+  const datedBody = await dated.json();
+  assert.equal(datedBody.dueAt, '2026-10-03T08:00:00.000Z');
+  assert.equal(datedBody.status, 'done');
+  const dueReplay = await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: '2026-10-03T08:00:00.000Z' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-due-set',
+  }));
+  assert.equal(dueReplay.status, 200);
+  const portalDated = await (await app.request('/v1/portal/milestones', { headers: bearer(portal) })).json();
+  assert.equal(portalDated.items[0].dueAt, '2026-10-03T08:00:00.000Z');
+  assert.equal(Object.hasOwn(portalDated.items[0], 'updatedAt'), false);
+  const cleared = await app.request(`/v1/milestones/${milestone.id}/due`, json({ dueAt: null }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-due-clear',
+  }));
+  assert.equal(cleared.status, 200);
+  assert.equal((await cleared.json()).dueAt, null);
+  const portalCleared = await (await app.request(`/v1/portal/milestones/${milestone.id}`, { headers: bearer(portal) })).json();
+  assert.equal(portalCleared.dueAt, null);
+  assert.equal(Object.hasOwn(portalCleared, 'updatedAt'), false);
 });

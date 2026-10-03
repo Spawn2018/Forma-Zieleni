@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import {
   advanceProjectMilestone,
   assertOpaqueMilestoneId,
+  reviseProjectMilestoneDue,
   assertOpaqueDecisionLogId,
   assertOpaqueProjectId,
   createDecisionLogEntry,
@@ -224,6 +225,84 @@ export async function advanceMilestoneStatus(
     });
     await tx.saveIdempotency(
       'milestone.status',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: milestone },
+      at,
+    );
+    return milestone;
+  });
+}
+
+export async function reviseMilestoneDue(
+  store: LeadStore,
+  milestoneId: string,
+  dueAt: string | null,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<ProjectMilestone> {
+  const hash = requestHash({ scope: 'milestone.due', milestoneId, dueAt });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'milestone.due', idempotencyKey, hash);
+    if (replay) return replay.responseBody as ProjectMilestone;
+    const current = await tx.findMilestone(milestoneId);
+    if (!current) throw new ApiFailure(404, 'MILESTONE_NOT_FOUND', 'Milestone was not found.');
+    const project = await tx.findProject(current.projectId);
+    if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    const contract = await tx.findContract(project.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let milestone: ProjectMilestone;
+    try {
+      milestone = reviseProjectMilestoneDue(current, dueAt, at);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'MILESTONE_DUE_INVALID') {
+        throw badRequest('MILESTONE_DUE_INVALID', 'Milestone due date is not valid.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_AT_INVALID') {
+        throw badRequest('MILESTONE_AT_INVALID', 'Milestone time is not valid.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_SURFACE_FORBIDDEN') {
+        throw badRequest('MILESTONE_SURFACE_FORBIDDEN', 'Forbidden milestone fields.');
+      }
+      throw error;
+    }
+    if (milestone !== current) {
+      await tx.saveMilestone(milestone);
+      await tx.insertOutbox({
+        id: newOpaqueId('o'),
+        eventType: 'milestone.due_revised',
+        leadId: opportunity.leadId,
+        payload: {
+          leadId: opportunity.leadId,
+          status: milestone.status,
+          projectId: milestone.projectId,
+          milestoneId: milestone.id,
+          dueAt: milestone.dueAt,
+          previousDueAt: current.dueAt,
+        },
+        at,
+      });
+      await tx.insertAudit({
+        id: newOpaqueId('a'),
+        action: 'milestone.due_revised',
+        actorId: actor.actorId,
+        leadId: opportunity.leadId,
+        at,
+        metadata: {
+          status: milestone.status,
+          dueAt: milestone.dueAt,
+          previousDueAt: current.dueAt,
+          projectId: milestone.projectId,
+          milestoneId: milestone.id,
+        },
+      });
+    }
+    await tx.saveIdempotency(
+      'milestone.due',
       idempotencyKey,
       { requestHash: hash, responseStatus: 200, responseBody: milestone },
       at,

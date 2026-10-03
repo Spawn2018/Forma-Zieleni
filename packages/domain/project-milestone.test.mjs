@@ -7,6 +7,7 @@ import { createContract } from './src/contract.ts';
 import { createProject } from './src/project.ts';
 import {
   advanceProjectMilestone,
+  reviseProjectMilestoneDue,
   createDecisionLogEntry,
   createProjectMilestone,
   nextMilestoneStatus,
@@ -171,5 +172,27 @@ test('milestone status advances one step and refuses a skip or a payment field',
   assert.throws(
     () => advanceProjectMilestone(milestone, 'active', '2026-09-24T17:00:00.000Z'),
     /MILESTONE_AT_INVALID/,
+  );
+});
+
+test('milestone due revision sets or clears the instant and keeps status', () => {
+  const project = plannedProject();
+  const milestone = createProjectMilestone('m7k2n4p6q8r0s2t4', project, { title: 'Koncepcja' }, AT);
+  const dated = reviseProjectMilestoneDue(milestone, '2026-10-03T08:00:00.000Z', '2026-09-24T19:00:00.000Z');
+  assert.equal(dated.status, 'planned');
+  assert.equal(dated.dueAt, '2026-10-03T08:00:00.000Z');
+  assert.equal(dated.createdAt, milestone.createdAt);
+  const same = reviseProjectMilestoneDue(dated, '2026-10-03T08:00:00.000Z', '2026-09-24T20:00:00.000Z');
+  assert.equal(same, dated);
+  const cleared = reviseProjectMilestoneDue(dated, null, '2026-09-24T20:00:00.000Z');
+  assert.equal(cleared.dueAt, null);
+  assert.equal(cleared.status, 'planned');
+  assert.throws(
+    () => reviseProjectMilestoneDue(milestone, 'jutro', '2026-09-24T19:00:00.000Z'),
+    /MILESTONE_DUE_INVALID/,
+  );
+  assert.throws(
+    () => reviseProjectMilestoneDue(milestone, '2026-10-03T08:00:00.000Z', '2026-09-24T19:00:00.000Z', { payment: true }),
+    /MILESTONE_SURFACE_FORBIDDEN/,
   );
 });

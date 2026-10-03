@@ -18,6 +18,8 @@ import {
   advanceAdminMilestoneStatus,
   createAdminMilestone,
   parseAdminMilestoneDueAt,
+  parseAdminMilestoneDueRevision,
+  reviseAdminMilestoneDue,
   createAdminPaymentSchedule,
   createAdminProject,
   deliverAdminProject,
@@ -448,6 +450,36 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       milestoneId: milestoneId.trim(),
       status,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'revise-milestone-due' || intent === 'clear-milestone-due') {
+    const milestoneId = form.get('milestoneId');
+    if (typeof milestoneId !== 'string' || !milestoneId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    let dueAt: string | null = null;
+    if (intent === 'revise-milestone-due') {
+      const rawDue = form.get('dueAt');
+      if (typeof rawDue !== 'string') {
+        return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+      }
+      const parsedDue = parseAdminMilestoneDueRevision(rawDue);
+      if (!parsedDue.ok) {
+        return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+      }
+      dueAt = parsedDue.dueAt;
+    }
+    const result = await reviseAdminMilestoneDue({
+      base,
+      milestoneId: milestoneId.trim(),
+      dueAt,
       idempotencyKey: randomUUID(),
       cookie,
     });

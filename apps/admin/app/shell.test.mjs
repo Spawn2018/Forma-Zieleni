@@ -24,6 +24,8 @@ import {
   createAdminSiteObservation,
   createAdminMilestone,
   parseAdminMilestoneDueAt,
+  parseAdminMilestoneDueRevision,
+  reviseAdminMilestoneDue,
   createAdminProject,
   deliverAdminProject,
   fetchAdminContracts,
@@ -1238,6 +1240,9 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   assert.match(html, /Termin \(UTC\)/);
   assert.match(html, /name="dueAt"/);
   assert.match(html, /Puste pole zostawia kamień bez terminu/);
+  assert.match(html, /Zapisz termin/);
+  assert.match(html, /Nowy termin \(UTC\)/);
+  assert.equal(html.includes('Usuń termin'), false);
   assert.equal(nextAdminMilestoneStatus('planned'), 'active');
   assert.equal(nextAdminMilestoneStatus('active'), 'done');
   assert.equal(nextAdminMilestoneStatus('done'), null);
@@ -1305,6 +1310,50 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   });
   assert.deepEqual(dated, { ok: true });
+  assert.deepEqual(parseAdminMilestoneDueRevision(''), { ok: false });
+  assert.deepEqual(parseAdminMilestoneDueRevision('2026-10-04T08:00:00.000Z'), {
+    ok: true,
+    dueAt: '2026-10-04T08:00:00.000Z',
+  });
+  const revised = await reviseAdminMilestoneDue({
+    base: 'http://admin.test',
+    milestoneId: 'ms8k2n4p6q8r0s2t',
+    dueAt: '2026-10-04T08:00:00.000Z',
+    idempotencyKey: 'ms-due-revise',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/milestones\/ms8k2n4p6q8r0s2t\/due$/);
+      assert.equal(init?.method, 'POST');
+      assert.deepEqual(JSON.parse(String(init?.body)), { dueAt: '2026-10-04T08:00:00.000Z' });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(revised, { ok: true });
+  const clearedDue = await reviseAdminMilestoneDue({
+    base: 'http://admin.test',
+    milestoneId: 'ms8k2n4p6q8r0s2t',
+    dueAt: null,
+    idempotencyKey: 'ms-due-clear',
+    fetchImpl: async (_url, init) => {
+      assert.deepEqual(JSON.parse(String(init?.body)), { dueAt: null });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(clearedDue, { ok: true });
+  const datedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: {
+      status: 'ready',
+      items: [{
+        id: 'ms8k2n4p6q8r0s2u',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        title: 'Sadzenie',
+        status: 'planned',
+        dueAt: '2026-10-03T08:00:00.000Z',
+      }],
+    },
+  }));
+  assert.match(datedHtml, /Usuń termin/);
   const advanced = await advanceAdminMilestoneStatus({
     base: 'http://admin.test',
     milestoneId: 'ms8k2n4p6q8r0s2t',

@@ -210,6 +210,28 @@ export function advanceProjectMilestone(
   };
 }
 
+/**
+ * Staff sets or clears the due instant. Status stays put.
+ * The same instant is returned unchanged. No payment or signing fields.
+ */
+export function reviseProjectMilestoneDue(
+  milestone: ProjectMilestone,
+  dueAt: string | null,
+  at: string,
+  surface: Record<string, unknown> = {},
+): ProjectMilestone {
+  assertNoForbiddenSurface({ dueAt, ...surface });
+  const updated = assertInstant(at, 'MILESTONE_AT_INVALID');
+  if (updated < milestone.updatedAt) throw new Error('MILESTONE_AT_INVALID');
+  const nextDue = dueAt === null ? null : assertInstant(dueAt, 'MILESTONE_DUE_INVALID');
+  if (nextDue === milestone.dueAt) return milestone;
+  return {
+    ...milestone,
+    dueAt: nextDue,
+    updatedAt: updated,
+  };
+}
+
 export function createDecisionLogEntry(
   id: string,
   project: Project,

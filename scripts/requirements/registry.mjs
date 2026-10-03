@@ -560,6 +560,14 @@ row('FZ-REQ-ADMIN-015', 'Staff can list and create decision-log entries in apps/
   executableSlice: 'ADMIN-DECISION-LOG',
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PROJECT-MILESTONE-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-019', 'Staff can set or clear a milestone due instant after create. Status stays unchanged. An empty revision does not clear the term. A non-instant and a payment or signing field are refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts dueAt or null to POST /v1/milestones/{milestoneId}/due. The portal reads the new instant and still omits updatedAt.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_DUE_REVISE',
+  executableSlice: 'ADMIN-MILESTONE-DUE-REVISE',
+  executableWhenComplete: ['ADMIN-MILESTONE-DUE', 'PORTAL-MILESTONE-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-018', 'Staff can set an optional UTC due instant when creating a project milestone in apps/admin. An empty field stays omitted. A non-instant is refused before the request. No payment or signing field is sent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin create posts dueAt only when the staff field is a UTC instant. The portal already shows that instant or bez terminu.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

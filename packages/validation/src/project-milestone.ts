@@ -11,6 +11,8 @@ export type FieldError = { field: string; reason: string };
 
 export type ProjectMilestoneStatusRequest = { status: MilestoneStatus };
 
+export type ProjectMilestoneDueRequest = { dueAt: string | null };
+
 export type ProjectMilestoneCreateRequest = {
   projectId: string;
   title: string;
@@ -96,6 +98,30 @@ export function validateProjectMilestoneStatusRequest(
     return { ok: false, errors: [{ field: 'status', reason: 'MILESTONE_STATUS_INVALID' }] };
   }
   return { ok: true, value: { status: body.status as MilestoneStatus } };
+}
+
+export function validateProjectMilestoneDueRequest(
+  value: unknown,
+): { ok: true; value: ProjectMilestoneDueRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  for (const key of ['payment', 'provider', 'signing', 'price', 'amountPln']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'dueAt');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (!Object.hasOwn(body, 'dueAt')) {
+    return { ok: false, errors: [{ field: 'dueAt', reason: 'STRING_OR_NULL_REQUIRED' }] };
+  }
+  if (body.dueAt === null) return { ok: true, value: { dueAt: null } };
+  if (typeof body.dueAt !== 'string') {
+    return { ok: false, errors: [{ field: 'dueAt', reason: 'STRING_OR_NULL_REQUIRED' }] };
+  }
+  return { ok: true, value: { dueAt: body.dueAt } };
 }
 
 export function validateDecisionLogCreateRequest(

@@ -121,7 +121,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised';
   leadId: string;
   payload: {
     leadId: string;
@@ -133,13 +133,15 @@ export type OutboxMessage = {
     projectId?: string;
     milestoneId?: string;
     fromStatus?: string;
+    dueAt?: string | null;
+    previousDueAt?: string | null;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -154,6 +156,8 @@ export type AuditEvent = {
     projectId?: string;
     milestoneId?: string;
     fromStatus?: string;
+    dueAt?: string | null;
+    previousDueAt?: string | null;
     scheduleId?: string;
     installmentId?: string;
   };

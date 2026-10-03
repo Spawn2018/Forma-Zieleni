@@ -847,6 +847,15 @@ export function parseAdminMilestoneDueAt(
   return { ok: true, dueAt: trimmed };
 }
 
+/** A revision needs a filled UTC instant. Empty does not clear the term. */
+export function parseAdminMilestoneDueRevision(
+  value: string,
+): { ok: true; dueAt: string } | { ok: false } {
+  const parsed = parseAdminMilestoneDueAt(value);
+  if (!parsed.ok || !parsed.dueAt) return { ok: false };
+  return { ok: true, dueAt: parsed.dueAt };
+}
+
 export async function createAdminMilestone(input: {
   base: string;
   projectId: string;
@@ -925,6 +934,39 @@ export async function advanceAdminMilestoneStatus(input: {
         credentials: 'include',
         headers,
         body: JSON.stringify({ status: input.status }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export async function reviseAdminMilestoneDue(input: {
+  base: string;
+  milestoneId: string;
+  dueAt: string | null;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/milestones/${encodeURIComponent(input.milestoneId)}/due`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ dueAt: input.dueAt }),
       },
     );
     if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
@@ -2037,6 +2079,35 @@ function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
                 ),
               )
             : null,
+          createElement(
+            'form',
+            { method: 'post', className: 'admin-milestone-due' },
+            createElement('input', { type: 'hidden', name: 'milestoneId', value: milestone.id }),
+            createElement(
+              'label',
+              { className: 'admin-milestone-due-field' },
+              'Nowy termin (UTC)',
+              createElement('input', {
+                type: 'text',
+                name: 'dueAt',
+                autoComplete: 'off',
+                spellCheck: false,
+                placeholder: '2026-10-03T08:00:00.000Z',
+              }),
+            ),
+            createElement(
+              'button',
+              { type: 'submit', name: 'intent', value: 'revise-milestone-due' },
+              'Zapisz termin',
+            ),
+            milestone.dueAt
+              ? createElement(
+                  'button',
+                  { type: 'submit', name: 'intent', value: 'clear-milestone-due' },
+                  'Usuń termin',
+                )
+              : null,
+          ),
         );
       }),
     ),

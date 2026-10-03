@@ -2066,6 +2066,66 @@
         }
       }
     },
+    "/milestones/{milestoneId}/due": {
+      "post": {
+        "tags": [
+          "Milestones"
+        ],
+        "operationId": "reviseProjectMilestoneDue",
+        "summary": "Set or clear a milestone due instant",
+        "description": "Staff sets a UTC due instant or clears it with null. Status stays unchanged. Payment and signing fields are refused. The portal reads the new instant and still omits updatedAt.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMilestoneDueRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Milestone due instant revised",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMilestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/decision-log": {
       "get": {
         "tags": [
@@ -4927,6 +4987,24 @@
           }
         },
         "description": "One forward milestone status. Payment and signing fields are not accepted."
+      },
+      "ProjectMilestoneDueRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dueAt"
+        ],
+        "properties": {
+          "dueAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "UTC instant, or null to clear the due date."
+          }
+        },
+        "description": "A milestone due revision. Payment and signing fields are not accepted."
       },
       "ProjectMilestone": {
         "type": "object",

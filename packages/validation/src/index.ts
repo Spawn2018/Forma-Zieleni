@@ -23,11 +23,13 @@ export type { ProjectFileCreateRequest } from './project-file.ts';
 export {
   validateDecisionLogCreateRequest,
   validateProjectMilestoneCreateRequest,
+  validateProjectMilestoneDueRequest,
   validateProjectMilestoneStatusRequest,
 } from './project-milestone.ts';
 export type {
   DecisionLogCreateRequest,
   ProjectMilestoneCreateRequest,
+  ProjectMilestoneDueRequest,
   ProjectMilestoneStatusRequest,
 } from './project-milestone.ts';
 export {

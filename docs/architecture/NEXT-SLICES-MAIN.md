@@ -1168,6 +1168,23 @@ Security: uses existing `milestones:create`. The portal cannot set
 the date.
 Next: none.
 
+### ADMIN-MILESTONE-DUE-REVISE
+
+Dependencies: ADMIN-MILESTONE-DUE, PORTAL-MILESTONE-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can replace a milestone due instant or clear it.
+Status stays unchanged. An empty revision field does not clear the
+term. A non-instant and a payment field are refused. The portal shows
+the new instant or `bez terminu` and still omits `updatedAt`.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`,
+`packages/domain/project-milestone.test.mjs`.
+Contract: [`ADMIN-MILESTONE-DUE-REVISE.md`](./ADMIN-MILESTONE-DUE-REVISE.md).
+Security: uses existing `milestones:create`. The portal cannot revise
+the date.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
