@@ -1365,6 +1365,21 @@ Contract: [`PORTAL-MILESTONE-PROJECT.md`](./PORTAL-MILESTONE-PROJECT.md).
 Security: display only. Uses the milestone projection the portal already maps.
 Next: none.
 
+### CAPACITY-WINDOW-LABELS
+
+Dependencies: CAPACITY-WINDOW-CLOSE, MILESTONE-DUE-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff read a capacity window’s start, end, and close instant in
+the same Polish UTC words as a milestone due. An unreadable instant fails
+the list map and is not printed raw. The stored instant is not shifted
+into a local zone. Create and close still post the UTC instant.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`CAPACITY-WINDOW-LABELS.md`](./CAPACITY-WINDOW-LABELS.md).
+Security: display only. No calendar provider and no new window field.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

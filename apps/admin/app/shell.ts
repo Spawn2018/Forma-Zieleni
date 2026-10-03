@@ -3134,8 +3134,11 @@ export function mapCapacityWindowPage(body: unknown): AdminCapacityWindowList {
     };
     if (typeof window.id !== 'string' || typeof window.actorId !== 'string') return { status: 'error' };
     if (window.kind !== 'consultation' && window.kind !== 'start') return { status: 'error' };
-    if (typeof window.startsAt !== 'string' || typeof window.endsAt !== 'string') return { status: 'error' };
-    if (window.closedAt !== null && typeof window.closedAt !== 'string') return { status: 'error' };
+    if (typeof window.startsAt !== 'string' || formatUtcInstantPl(window.startsAt) === null) return { status: 'error' };
+    if (typeof window.endsAt !== 'string' || formatUtcInstantPl(window.endsAt) === null) return { status: 'error' };
+    if (window.closedAt !== null && (typeof window.closedAt !== 'string' || formatUtcInstantPl(window.closedAt) === null)) {
+      return { status: 'error' };
+    }
     if ('email' in (item as object) || 'name' in (item as object) || 'phone' in (item as object)) {
       return { status: 'error' };
     }
@@ -3318,10 +3321,12 @@ function capacityWindowListNode(windows: AdminCapacityWindowList): ReactNode {
               ' · ',
               window.actorId,
               ' · ',
-              window.startsAt,
+              formatUtcInstantPl(window.startsAt) ?? 'termin nieczytelny',
               ' – ',
-              window.endsAt,
-              window.closedAt ? ' · zamknięte' : '',
+              formatUtcInstantPl(window.endsAt) ?? 'termin nieczytelny',
+              window.closedAt
+                ? ` · zamknięte ${formatUtcInstantPl(window.closedAt) ?? 'termin nieczytelny'}`
+                : '',
             ].join(''),
           ),
           window.closedAt

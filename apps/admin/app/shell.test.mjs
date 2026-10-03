@@ -1885,6 +1885,8 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
   assert.match(html, /staffdesignerana1/);
   assert.match(html, /Zapisz okno/);
   assert.match(html, /Zamknij okno/);
+  assert.match(html, /1 czerwca 2026, 08:00 UTC – 1 czerwca 2026, 12:00 UTC/);
+  assert.equal(html.includes('2026-06-01T08:00:00.000Z'), false);
   assert.match(html, /Sprawdź obiecany termin/);
   assert.equal(html.toLowerCase().includes('google'), false);
   assert.equal(html.toLowerCase().includes('calendar'), false);
@@ -1939,8 +1941,19 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
       }],
     },
   }));
-  assert.match(closedHtml, /zamknięte/);
+  assert.match(closedHtml, /zamknięte 2 czerwca 2026, 08:00 UTC/);
+  assert.equal(closedHtml.includes('2026-06-02T08:00:00.000Z'), false);
   assert.equal(closedHtml.includes('Zamknij okno'), false);
+  assert.deepEqual(mapCapacityWindowPage({
+    items: [{
+      id: 'wcapacitywindow01',
+      actorId: 'staffdesignerana1',
+      kind: 'consultation',
+      startsAt: 'jutro',
+      endsAt: '2026-06-01T12:00:00.000Z',
+      closedAt: null,
+    }],
+  }), { status: 'error' });
   assert.deepEqual(
     await decideAdminCapacity({
       base: 'http://admin.test',

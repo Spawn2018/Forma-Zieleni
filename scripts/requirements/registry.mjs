@@ -720,6 +720,14 @@ row('FZ-REQ-ADMIN-030', 'A decision-log entry names the milestone title already 
   executableWhenComplete: ['ADMIN-DECISION-LOG', 'ADMIN-MILESTONE-STAFF'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-031', 'Staff read a capacity window in the same Polish UTC words as a milestone due. A closed window shows when it closed. An unreadable instant fails the list map and is not printed raw. The stored instant is not shifted into a local zone.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The window list uses the existing UTC words. Create and close still post the UTC instant.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'CAPACITY_WINDOW_LABELS',
+  executableSlice: 'CAPACITY-WINDOW-LABELS',
+  executableWhenComplete: ['CAPACITY-WINDOW-CLOSE', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
