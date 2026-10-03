@@ -1602,6 +1602,21 @@ Contract: [`ADMIN-FILE-CREATED.md`](./ADMIN-FILE-CREATED.md).
 Security: display only. Uses createdAt already returned by Core API.
 Next: none.
 
+### ADMIN-PROJECT-GARDEN
+
+Dependencies: ADMIN-GARDEN-STAFF, ADMIN-PROJECT-DELIVER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff project names the gardens already loaded for that project.
+Another project’s garden stays off the row. A failed or forbidden garden
+read is not shown as no garden. More than one garden is listed in id
+order. No new store, twin, or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PROJECT-GARDEN.md`](./ADMIN-PROJECT-GARDEN.md).
+Security: display only. Uses the garden list staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

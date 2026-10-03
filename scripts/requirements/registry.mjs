@@ -880,6 +880,14 @@ row('FZ-REQ-ADMIN-043', 'A staff file shows its recorded instant in Polish UTC w
   executableWhenComplete: ['ADMIN-FILE-VISIBILITY', 'RECORD-CREATED-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-044', 'A staff project names the gardens already loaded for that project. Another project’s garden stays off the row. A failed garden read is not shown as no garden. More than one garden is listed in id order. No new store, twin, or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The project line uses the garden list staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'PROJECT_GARDEN',
+  executableSlice: 'ADMIN-PROJECT-GARDEN',
+  executableWhenComplete: ['ADMIN-GARDEN-STAFF', 'ADMIN-PROJECT-DELIVER'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

@@ -2422,7 +2422,25 @@ export function adminProjectNextMilestoneLine(projectId: string, milestones: Adm
   return `Następny: ${next.title} · ${milestoneStatusLabel(next.status)} · ${due}`;
 }
 
-function projectListNode(projects: AdminProjectList, milestones: AdminMilestoneList): ReactNode {
+/** Gardens already loaded for this project. A failed garden read is not “no garden”. */
+export function adminProjectGardenLine(projectId: string, gardens: AdminGardenList): string {
+  if (gardens.status === 'error') return 'Ogrodu nie udało się odczytać.';
+  if (gardens.status === 'forbidden') return 'To konto nie może odczytać ogrodu.';
+  if (gardens.status !== 'ready') return 'Ogród: brak';
+  const matched = gardens.items
+    .filter((item) => item.projectId === projectId)
+    .map((item) => item.id)
+    .sort();
+  if (matched.length === 0) return 'Ogród: brak';
+  if (matched.length === 1) return `Ogród: ${matched[0]}`;
+  return `Ogrody: ${matched.join(', ')}`;
+}
+
+function projectListNode(
+  projects: AdminProjectList,
+  milestones: AdminMilestoneList,
+  gardens: AdminGardenList,
+): ReactNode {
   if (projects.status === 'empty') {
     return createElement('p', null, 'Brak projektów do pokazania.');
   }
@@ -2460,6 +2478,11 @@ function projectListNode(projects: AdminProjectList, milestones: AdminMilestoneL
             'p',
             { className: 'admin-project-next' },
             adminProjectNextMilestoneLine(project.id, milestones),
+          ),
+          createElement(
+            'p',
+            { className: 'admin-project-garden' },
+            adminProjectGardenLine(project.id, gardens),
           ),
           project.status === 'planned'
             ? createElement(
@@ -3834,7 +3857,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createCapacityWindowForm(),
     decideCapacityForm(),
     signingSandboxNode(home.signingSandbox),
-    projectListNode(home.projects, home.milestones),
+    projectListNode(home.projects, home.milestones, home.gardens),
     createProjectForm(),
     milestoneListNode(home.milestones, {
       query: home.milestoneProjectQuery ?? '',

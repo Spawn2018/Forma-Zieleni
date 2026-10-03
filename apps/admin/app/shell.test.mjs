@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  adminProjectGardenLine,
   adminProjectNextMilestoneLine,
   nextOpenAdminMilestone,
   compareAdminCapacityWindows,
@@ -1386,6 +1387,60 @@ test('a staff project names the earliest open milestone and skips done work', ()
   assert.equal(project.includes('Odbiór'), false);
   assert.equal(project.includes('Inny projekt'), false);
   assert.equal(project.includes('2026-10-15T10:00:00.000Z'), false);
+});
+
+test('a staff project names only the garden already loaded for it', () => {
+  const gardens = {
+    status: 'ready',
+    items: [
+      {
+        id: 'gd8k2n4p6q8r0s2u',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        createdAt: '2026-09-24T13:10:00.000Z',
+      },
+      {
+        id: 'gd8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        createdAt: '2026-09-24T13:00:00.000Z',
+      },
+      {
+        id: 'gd8k2n4p6q8r0s2v',
+        projectId: 'pr8k2n4p6q8r0s2u',
+        createdAt: '2026-09-24T13:20:00.000Z',
+      },
+    ],
+  };
+  assert.equal(
+    adminProjectGardenLine('pr8k2n4p6q8r0s2t', gardens),
+    'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
+  );
+  assert.equal(adminProjectGardenLine('pr8k2n4p6q8r0s2v', gardens), 'Ogród: brak');
+  assert.equal(adminProjectGardenLine('pr8k2n4p6q8r0s2t', { status: 'error' }), 'Ogrodu nie udało się odczytać.');
+  assert.equal(
+    adminProjectGardenLine('pr8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać ogrodu.',
+  );
+  assert.equal(adminProjectGardenLine('pr8k2n4p6q8r0s2t', { status: 'empty' }), 'Ogród: brak');
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'delivered',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
+    },
+    gardens,
+  }));
+  const project = html.slice(html.indexOf('class="admin-project"'), html.indexOf('admin-garden-list'));
+  assert.equal(
+    project.match(/admin-project-garden">([^<]+)/)?.[1],
+    'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
+  );
+  assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
 });
 
 test('staff decision log lists a change and refuses a payment field', async () => {
