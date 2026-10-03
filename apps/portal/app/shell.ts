@@ -4,10 +4,12 @@ export type PortalSessionActor = {
   clientId: string;
 };
 
+export type PortalOfferStatus = 'draft';
+
 export type PortalOfferRow = {
   id: string;
   opportunityId: string;
-  status: string;
+  status: PortalOfferStatus;
   createdAt: string;
 };
 
@@ -17,10 +19,12 @@ export type PortalOfferList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalContractStatus = 'draft' | 'internal_review' | 'approved' | 'sent';
+
 export type PortalContractRow = {
   id: string;
   offerId: string;
-  status: string;
+  status: PortalContractStatus;
   createdAt: string;
 };
 
@@ -30,10 +34,12 @@ export type PortalContractList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+export type PortalProjectStatus = 'planned' | 'delivered';
+
 export type PortalProjectRow = {
   id: string;
   contractId: string;
-  status: string;
+  status: PortalProjectStatus;
   createdAt: string;
 };
 
@@ -193,7 +199,9 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const offer = item as OfferApiItem;
     if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
-    if (typeof offer.status !== 'string' || typeof offer.createdAt !== 'string') return { status: 'error' };
+    if (typeof offer.status !== 'string' || !isPortalOfferStatus(offer.status) || typeof offer.createdAt !== 'string') {
+      return { status: 'error' };
+    }
     if (Object.hasOwn(offer, 'price') || Object.hasOwn(offer, 'terms') || Object.hasOwn(offer, 'amount')) {
       return { status: 'error' };
     }
@@ -231,7 +239,9 @@ export function mapPortalContractPage(body: unknown): PortalContractList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const contract = item as ContractApiItem;
     if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
-    if (typeof contract.status !== 'string' || typeof contract.createdAt !== 'string') return { status: 'error' };
+    if (typeof contract.status !== 'string' || !isPortalContractStatus(contract.status) || typeof contract.createdAt !== 'string') {
+      return { status: 'error' };
+    }
     if (
       Object.hasOwn(contract, 'amount')
       || Object.hasOwn(contract, 'payment')
@@ -273,7 +283,9 @@ export function mapPortalProjectPage(body: unknown): PortalProjectList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const project = item as ProjectApiItem;
     if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
-    if (typeof project.status !== 'string' || typeof project.createdAt !== 'string') return { status: 'error' };
+    if (typeof project.status !== 'string' || !isPortalProjectStatus(project.status) || typeof project.createdAt !== 'string') {
+      return { status: 'error' };
+    }
     if (
       Object.hasOwn(project, 'payment')
       || Object.hasOwn(project, 'clientSubject')
@@ -486,6 +498,63 @@ export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
     });
   }
   return { status: 'ready', items: rows };
+}
+
+const PORTAL_OFFER_STATUSES = ['draft'] as const;
+const PORTAL_CONTRACT_STATUSES = ['draft', 'internal_review', 'approved', 'sent'] as const;
+const PORTAL_PROJECT_STATUSES = ['planned', 'delivered'] as const;
+
+function isPortalOfferStatus(status: string): status is PortalOfferStatus {
+  return (PORTAL_OFFER_STATUSES as readonly string[]).includes(status);
+}
+
+function isPortalContractStatus(status: string): status is PortalContractStatus {
+  return (PORTAL_CONTRACT_STATUSES as readonly string[]).includes(status);
+}
+
+function isPortalProjectStatus(status: string): status is PortalProjectStatus {
+  return (PORTAL_PROJECT_STATUSES as readonly string[]).includes(status);
+}
+
+export function portalOfferStatusLabel(status: PortalOfferStatus): string {
+  switch (status) {
+    case 'draft':
+      return 'szkic';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+export function portalContractStatusLabel(status: PortalContractStatus): string {
+  switch (status) {
+    case 'draft':
+      return 'szkic';
+    case 'internal_review':
+      return 'w przeglądzie';
+    case 'approved':
+      return 'zatwierdzona';
+    case 'sent':
+      return 'wysłana';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+export function portalProjectStatusLabel(status: PortalProjectStatus): string {
+  switch (status) {
+    case 'planned':
+      return 'zaplanowany';
+    case 'delivered':
+      return 'dostarczony';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
 }
 
 function milestoneStatusLabel(status: PortalMilestoneStatus): string {
@@ -767,7 +836,7 @@ function offerListNode(offers: PortalOfferList): ReactNode {
           createElement(
             'p',
             { className: 'portal-offer-meta' },
-            [offer.id, ' · ', offer.status, ' · ', offer.createdAt].join(''),
+            [offer.id, ' · ', portalOfferStatusLabel(offer.status), ' · ', offer.createdAt].join(''),
           ),
         ),
       ),
@@ -799,7 +868,7 @@ function contractListNode(contracts: PortalContractList): ReactNode {
           createElement(
             'p',
             { className: 'portal-contract-meta' },
-            [contract.id, ' · ', contract.status, ' · ', contract.createdAt].join(''),
+            [contract.id, ' · ', portalContractStatusLabel(contract.status), ' · ', contract.createdAt].join(''),
           ),
         ),
       ),
@@ -872,7 +941,7 @@ function projectListNode(
           createElement(
             'p',
             { className: 'portal-project-meta' },
-            [project.id, ' · ', project.status, ' · ', project.createdAt].join(''),
+            [project.id, ' · ', portalProjectStatusLabel(project.status), ' · ', project.createdAt].join(''),
           ),
           createElement(
             'p',

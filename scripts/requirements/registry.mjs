@@ -561,6 +561,14 @@ row('FZ-REQ-PORTAL-014', 'A portal project card lists the files already loaded f
   executableWhenComplete: ['PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-015', 'A portal client sees Polish labels for offer, contract, and project status. Unknown statuses are refused instead of shown as machine tokens. No price, signing, or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'Labels cover draft, internal review, approved, sent, planned, and delivered. An unknown status fails the page map.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-STATUS-LABELS',
+  executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-PROJECTION', 'PORTAL-OFFER-PROJECTION'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

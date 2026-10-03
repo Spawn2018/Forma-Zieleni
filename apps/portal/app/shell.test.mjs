@@ -20,7 +20,10 @@ import {
   mapPortalProjectPage,
   mapPortalSitePage,
   nextOpenPortalMilestone,
+  portalContractStatusLabel,
+  portalOfferStatusLabel,
   portalProjectFiles,
+  portalProjectStatusLabel,
   portalErrorMessage,
   portalOriginAllowed,
   portalSessionCookiePresent,
@@ -135,6 +138,8 @@ test('signed-in portal renders client-safe offer projection without price or ter
   }));
   assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /Twoje pozycje/);
+  assert.match(ready, /szkic/);
+  assert.equal(ready.includes('draft'), false);
   assert.equal(ready.toLowerCase().includes('price'), false);
   assert.equal(ready.toLowerCase().includes('terms'), false);
   assert.equal(ready.toLowerCase().includes('cena'), false);
@@ -398,7 +403,11 @@ test('signed-in portal renders client-safe contract status without price or sign
   }));
   assert.match(ready, /Twoje umowy/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
-  assert.match(ready, /sent/);
+  assert.match(ready, /wysłana/);
+  assert.equal(ready.includes('sent'), false);
+  assert.equal(mapPortalContractPage({
+    items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'signed', createdAt: 't' }],
+  }).status, 'error');
   for (const phrase of commercialLeak) {
     assert.equal(ready.toLowerCase().includes(phrase), false, phrase);
   }
@@ -431,6 +440,22 @@ test('signed-in portal renders client-safe contract status without price or sign
     fetchImpl: async () => new Response('', { status: 403 }),
   });
   assert.deepEqual(denied, { status: 'forbidden' });
+});
+
+test('portal status labels stay in Polish and refuse an unknown status', () => {
+  assert.equal(portalOfferStatusLabel('draft'), 'szkic');
+  assert.equal(portalContractStatusLabel('draft'), 'szkic');
+  assert.equal(portalContractStatusLabel('internal_review'), 'w przeglądzie');
+  assert.equal(portalContractStatusLabel('approved'), 'zatwierdzona');
+  assert.equal(portalContractStatusLabel('sent'), 'wysłana');
+  assert.equal(portalProjectStatusLabel('planned'), 'zaplanowany');
+  assert.equal(portalProjectStatusLabel('delivered'), 'dostarczony');
+  assert.equal(mapPortalOfferPage({
+    items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'sent', createdAt: 't' }],
+  }).status, 'error');
+  assert.equal(mapPortalProjectPage({
+    items: [{ id: 'pj8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'active', createdAt: 't' }],
+  }).status, 'error');
 });
 
 test('signed-in portal renders a client garden without a twin or live invent', async () => {
@@ -653,7 +678,7 @@ test('a project card names the earliest open milestone and skips done work', () 
       id: 'ms8k2n4p6q8r0s2w',
       projectId: 'pj8k2n4p6q8r0s2t',
       title: 'Sadzenie',
-      status: 'active',
+      status: 'planned',
       dueAt: '2026-11-02T10:00:00.000Z',
       createdAt: '2026-09-24T18:00:00.000Z',
     },
@@ -683,7 +708,7 @@ test('a project card names the earliest open milestone and skips done work', () 
       items: [{
         id: 'pj8k2n4p6q8r0s2t',
         contractId: 'ct8k2n4p6q8r0s2t',
-        status: 'active',
+        status: 'planned',
         createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },
@@ -699,7 +724,7 @@ test('a project card names the earliest open milestone and skips done work', () 
       items: [{
         id: 'pj8k2n4p6q8r0s2t',
         contractId: 'ct8k2n4p6q8r0s2t',
-        status: 'active',
+        status: 'planned',
         createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },
@@ -735,7 +760,7 @@ test('a project card lists only that project’s files', () => {
       items: [{
         id: 'pj8k2n4p6q8r0s2t',
         contractId: 'ct8k2n4p6q8r0s2t',
-        status: 'active',
+        status: 'planned',
         createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },
@@ -751,7 +776,7 @@ test('a project card lists only that project’s files', () => {
       items: [{
         id: 'pj8k2n4p6q8r0s2t',
         contractId: 'ct8k2n4p6q8r0s2t',
-        status: 'active',
+        status: 'planned',
         createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },

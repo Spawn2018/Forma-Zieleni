@@ -1307,6 +1307,20 @@ Contract: [`PORTAL-PROJECT-FILES.md`](./PORTAL-PROJECT-FILES.md).
 Security: uses the file list the portal already loaded. No new byte route.
 Next: none.
 
+### PORTAL-STATUS-LABELS
+
+Dependencies: PORTAL-CONTRACT-VIEW, PORTAL-PROJECT-PROJECTION, PORTAL-OFFER-PROJECTION.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the portal shows Polish labels for offer, contract, and project
+status. An unknown status fails the list map and is not printed as a
+machine token.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-STATUS-LABELS.md`](./PORTAL-STATUS-LABELS.md).
+Security: display only. No new route or store.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
