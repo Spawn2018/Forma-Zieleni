@@ -20,6 +20,8 @@ export type ProjectMilestoneCreateRequest = {
   dueAt?: string | null;
 };
 
+export type DecisionLogSummaryRequest = { summary: string };
+
 export type DecisionLogCreateRequest = {
   projectId: string;
   kind: DecisionLogKind;
@@ -176,4 +178,24 @@ export function validateDecisionLogCreateRequest(
   } catch {
     return { ok: false, errors: [{ field: 'projectId', reason: 'PROJECT_ID_INVALID' }] };
   }
+}
+
+export function validateDecisionLogSummaryRequest(
+  value: unknown,
+): { ok: true; value: DecisionLogSummaryRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  for (const key of ['payment', 'provider', 'signing', 'price', 'email', 'phone', 'recordedByActorId', 'kind']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'summary');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.summary !== 'string') {
+    return { ok: false, errors: [{ field: 'summary', reason: 'STRING_REQUIRED' }] };
+  }
+  return { ok: true, value: { summary: body.summary } };
 }

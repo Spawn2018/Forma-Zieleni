@@ -121,7 +121,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised';
   leadId: string;
   payload: {
     leadId: string;
@@ -135,13 +135,16 @@ export type OutboxMessage = {
     fromStatus?: string;
     dueAt?: string | null;
     previousDueAt?: string | null;
+    summary?: string;
+    previousSummary?: string;
+    entryId?: string;
   };
   at: string;
 };
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -158,6 +161,9 @@ export type AuditEvent = {
     fromStatus?: string;
     dueAt?: string | null;
     previousDueAt?: string | null;
+    summary?: string;
+    previousSummary?: string;
+    entryId?: string;
     scheduleId?: string;
     installmentId?: string;
   };
@@ -196,6 +202,7 @@ export interface LeadTx {
   findMilestone(id: string): Promise<ProjectMilestone | null>;
   listMilestones(query: MilestoneListQuery): Promise<ProjectMilestone[]>;
   insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void>;
+  saveDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void>;
   findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null>;
   listDecisionLogEntries(query: DecisionLogListQuery): Promise<ProjectDecisionLogEntry[]>;
   insertPaymentSchedule(schedule: PaymentSchedule): Promise<void>;

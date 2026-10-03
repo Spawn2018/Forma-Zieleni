@@ -262,3 +262,18 @@ export function createDecisionLogEntry(
     createdAt: created,
   };
 }
+
+/**
+ * Staff corrects the summary. Kind, project, actor, and milestone stay put.
+ * The same summary is returned unchanged. No payment or contact fields.
+ */
+export function reviseDecisionLogSummary(
+  entry: ProjectDecisionLogEntry,
+  summary: string,
+  surface: Record<string, unknown> = {},
+): ProjectDecisionLogEntry {
+  assertNoForbiddenSurface({ summary, ...surface });
+  const next = assertSummary(summary);
+  if (next === entry.summary) return entry;
+  return { ...entry, summary: next };
+}

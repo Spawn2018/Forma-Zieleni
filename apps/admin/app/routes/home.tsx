@@ -14,6 +14,7 @@ import {
   createAdminCapacityWindow,
   createAdminGarden,
   createAdminDecisionLogEntry,
+  reviseAdminDecisionLogSummary,
   createAdminSiteObservation,
   advanceAdminMilestoneStatus,
   createAdminMilestone,
@@ -353,6 +354,28 @@ export async function action({ request }: Route.ActionArgs) {
       kind,
       summary: summary.trim(),
       ...(milestone ? { relatedMilestoneId: milestone } : {}),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'revise-decision-summary') {
+    const entryId = form.get('entryId');
+    const summary = form.get('summary');
+    if (typeof entryId !== 'string' || !entryId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof summary !== 'string' || !summary.trim() || summary.trim().length > 2000) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await reviseAdminDecisionLogSummary({
+      base,
+      entryId: entryId.trim(),
+      summary: summary.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

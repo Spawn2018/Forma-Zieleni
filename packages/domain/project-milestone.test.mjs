@@ -10,6 +10,7 @@ import {
   reviseProjectMilestoneDue,
   createDecisionLogEntry,
   createProjectMilestone,
+  reviseDecisionLogSummary,
   nextMilestoneStatus,
   projectMilestoneForPortal,
 } from './src/project-milestone.ts';
@@ -195,4 +196,23 @@ test('milestone due revision sets or clears the instant and keeps status', () =>
     () => reviseProjectMilestoneDue(milestone, '2026-10-03T08:00:00.000Z', '2026-09-24T19:00:00.000Z', { payment: true }),
     /MILESTONE_SURFACE_FORBIDDEN/,
   );
+});
+
+test('decision log summary revision keeps kind and refuses a payment field', () => {
+  const project = plannedProject();
+  const entry = createDecisionLogEntry(
+    'd9k2n4p6q8r0s2t8',
+    project,
+    { kind: 'decision', summary: 'Zatwierdzono układ', recordedByActorId: ACTOR },
+    AT,
+  );
+  const revised = reviseDecisionLogSummary(entry, '  Zatwierdzono układ ścieżek  ');
+  assert.equal(revised.summary, 'Zatwierdzono układ ścieżek');
+  assert.equal(revised.kind, 'decision');
+  assert.equal(revised.createdAt, entry.createdAt);
+  assert.equal(revised.recordedByActorId, entry.recordedByActorId);
+  const same = reviseDecisionLogSummary(revised, 'Zatwierdzono układ ścieżek');
+  assert.equal(same, revised);
+  assert.throws(() => reviseDecisionLogSummary(entry, '   '), /DECISION_LOG_SUMMARY_INVALID/);
+  assert.throws(() => reviseDecisionLogSummary(entry, 'Nowa treść', { email: 'a@b.c' }), /MILESTONE_SURFACE_FORBIDDEN/);
 });

@@ -560,6 +560,14 @@ row('FZ-REQ-ADMIN-015', 'Staff can list and create decision-log entries in apps/
   executableSlice: 'ADMIN-DECISION-LOG',
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PROJECT-MILESTONE-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'DECISION_LOG_REVISE',
+  executableSlice: 'ADMIN-DECISION-LOG-REVISE',
+  executableWhenComplete: ['ADMIN-DECISION-LOG'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-019', 'Staff can set or clear a milestone due instant after create. Status stays unchanged. An empty revision does not clear the term. A non-instant and a payment or signing field are refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts dueAt or null to POST /v1/milestones/{milestoneId}/due. The portal reads the new instant and still omits updatedAt.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

@@ -404,6 +404,12 @@ class MemoryTx implements LeadTx {
     this.state.decisionLog.push(clone(entry));
   }
 
+  async saveDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void> {
+    const index = this.state.decisionLog.findIndex(item => item.id === entry.id);
+    if (index < 0) throw new Error('DECISION_LOG_MISSING');
+    this.state.decisionLog[index] = clone(entry);
+  }
+
   async findDecisionLogEntry(id: string): Promise<ProjectDecisionLogEntry | null> {
     return clone(this.state.decisionLog.find(item => item.id === id) ?? null);
   }

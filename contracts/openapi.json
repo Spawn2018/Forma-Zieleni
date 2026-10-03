@@ -2274,6 +2274,71 @@
         }
       }
     },
+    "/decision-log/{entryId}/summary": {
+      "post": {
+        "tags": [
+          "DecisionLog"
+        ],
+        "operationId": "reviseDecisionLogSummary",
+        "summary": "Correct a decision log summary",
+        "description": "Staff replaces the summary. Kind, project, actor, and related milestone stay unchanged. Payment and contact fields are refused. The portal does not read the decision log.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OpaqueId"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionLogSummaryRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decision log summary revised",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionLogEntry"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/payment-schedules": {
       "get": {
         "tags": [
@@ -5107,6 +5172,21 @@
             "$ref": "#/components/schemas/OpaqueId"
           }
         }
+      },
+      "DecisionLogSummaryRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "summary"
+        ],
+        "properties": {
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "description": "A corrected decision-log summary. Kind, payment, and contact fields are not accepted."
       },
       "DecisionLogEntry": {
         "type": "object",

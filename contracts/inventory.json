@@ -54,6 +54,7 @@
     "GET /contracts/{contractId}/signing-sandbox-envelope",
     "POST /contracts/{contractId}/signing-sandbox-envelope",
     "POST /decision-log",
+    "POST /decision-log/{entryId}/summary",
     "POST /files",
     "POST /gardens",
     "POST /growth/plans",
@@ -113,6 +114,9 @@
       "Idempotency-Key"
     ],
     "POST /decision-log": [
+      "Idempotency-Key"
+    ],
+    "POST /decision-log/{entryId}/summary": [
       "Idempotency-Key"
     ],
     "POST /payment-schedules": [

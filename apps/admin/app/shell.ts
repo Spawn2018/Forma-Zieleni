@@ -977,6 +977,41 @@ export async function reviseAdminMilestoneDue(input: {
   }
 }
 
+export async function reviseAdminDecisionLogSummary(input: {
+  base: string;
+  entryId: string;
+  summary: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const summary = input.summary.trim();
+  if (!summary || summary.length > 2000) return { ok: false, reason: 'error' };
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/decision-log/${encodeURIComponent(input.entryId)}/summary`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ summary }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 const GARDEN_FORBIDDEN = [
   'twinDatabase',
   'liveTwinUi',
@@ -2344,6 +2379,28 @@ function decisionLogNode(entries: AdminDecisionLogList): ReactNode {
               ' · ',
               entry.relatedMilestoneId ?? 'bez kamienia milowego',
             ].join(''),
+          ),
+          createElement(
+            'form',
+            { method: 'post', className: 'admin-decision-log-revise' },
+            createElement('input', { type: 'hidden', name: 'entryId', value: entry.id }),
+            createElement(
+              'label',
+              { className: 'admin-decision-log-revise-summary' },
+              'Poprawiona treść',
+              createElement('textarea', {
+                name: 'summary',
+                required: true,
+                maxLength: 2000,
+                rows: 3,
+                defaultValue: entry.summary,
+              }),
+            ),
+            createElement(
+              'button',
+              { type: 'submit', name: 'intent', value: 'revise-decision-summary' },
+              'Popraw treść',
+            ),
           ),
         ),
       ),

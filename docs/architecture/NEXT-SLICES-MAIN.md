@@ -1185,6 +1185,23 @@ Security: uses existing `milestones:create`. The portal cannot revise
 the date.
 Next: none.
 
+### ADMIN-DECISION-LOG-REVISE
+
+Dependencies: ADMIN-DECISION-LOG.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can replace a decision or change-order summary. Kind,
+project, actor, and related milestone stay unchanged. A blank summary
+and a payment or contact field are refused. The portal still does not
+read the log. The recording actor id stays off the list.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`,
+`packages/domain/project-milestone.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG-REVISE.md`](./ADMIN-DECISION-LOG-REVISE.md).
+Security: uses existing `milestones:create`. The portal cannot revise
+a summary.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

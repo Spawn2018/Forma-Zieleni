@@ -556,6 +556,13 @@ class PostgresTx implements LeadTx {
     return rows.map(toMilestone);
   }
 
+  async saveDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void> {
+    const result = await this.trx.updateTable('project_decision_log').set({
+      summary: entry.summary,
+    }).where('id', '=', entry.id).executeTakeFirst();
+    if (Number(result.numUpdatedRows ?? 0) === 0) throw new Error('DECISION_LOG_MISSING');
+  }
+
   async insertDecisionLogEntry(entry: ProjectDecisionLogEntry): Promise<void> {
     await this.trx.insertInto('project_decision_log').values({
       id: entry.id,

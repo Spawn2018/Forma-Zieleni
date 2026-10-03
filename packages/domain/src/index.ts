@@ -264,6 +264,7 @@ export {
   createProjectMilestone,
   nextMilestoneStatus,
   projectMilestoneForPortal,
+  reviseDecisionLogSummary,
   reviseProjectMilestoneDue,
 } from './project-milestone.ts';
 export type {

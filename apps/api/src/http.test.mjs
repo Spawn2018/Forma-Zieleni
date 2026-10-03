@@ -1175,6 +1175,37 @@ test('staff create and list project milestones and decision log; portal cannot m
   const logPage = await (await app.request(`/v1/decision-log?projectId=${project.id}`, { headers: bearer(staff) })).json();
   assert.equal(logPage.items.length, 2);
 
+  const blankSummary = await app.request(`/v1/decision-log/${entry.id}/summary`, json({ summary: '   ' }, {
+    ...bearer(staff),
+    'idempotency-key': 'dl-summary-blank',
+  }));
+  assert.equal(blankSummary.status, 400);
+  const paidSummary = await app.request(`/v1/decision-log/${entry.id}/summary`, json({ summary: 'Nowa treść', payment: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'dl-summary-pay',
+  }));
+  assert.equal(paidSummary.status, 400);
+  assert.equal((await app.request(`/v1/decision-log/${entry.id}/summary`, json({ summary: 'Nowa treść' }, {
+    ...bearer(portal),
+    'idempotency-key': 'dl-summary-portal',
+  }))).status, 403);
+  const revisedSummary = await app.request(`/v1/decision-log/${entry.id}/summary`, json({ summary: 'Zatwierdzono układ ścieżek' }, {
+    ...bearer(staff),
+    'idempotency-key': 'dl-summary-set',
+  }));
+  assert.equal(revisedSummary.status, 200);
+  const revisedBody = await revisedSummary.json();
+  assert.equal(revisedBody.summary, 'Zatwierdzono układ ścieżek');
+  assert.equal(revisedBody.kind, 'decision');
+  assert.equal(revisedBody.relatedMilestoneId, milestone.id);
+  const summaryReplay = await app.request(`/v1/decision-log/${entry.id}/summary`, json({ summary: 'Zatwierdzono układ ścieżek' }, {
+    ...bearer(staff),
+    'idempotency-key': 'dl-summary-set',
+  }));
+  assert.equal(summaryReplay.status, 200);
+  const revisedList = await (await app.request(`/v1/decision-log?projectId=${project.id}`, { headers: bearer(staff) })).json();
+  assert.equal(revisedList.items.find(item => item.id === entry.id).summary, 'Zatwierdzono układ ścieżek');
+
   const paymentRejected = await app.request('/v1/milestones', json({
     projectId: project.id,
     title: 'X',

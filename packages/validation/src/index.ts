@@ -22,12 +22,14 @@ export { validateProjectFileCreateRequest } from './project-file.ts';
 export type { ProjectFileCreateRequest } from './project-file.ts';
 export {
   validateDecisionLogCreateRequest,
+  validateDecisionLogSummaryRequest,
   validateProjectMilestoneCreateRequest,
   validateProjectMilestoneDueRequest,
   validateProjectMilestoneStatusRequest,
 } from './project-milestone.ts';
 export type {
   DecisionLogCreateRequest,
+  DecisionLogSummaryRequest,
   ProjectMilestoneCreateRequest,
   ProjectMilestoneDueRequest,
   ProjectMilestoneStatusRequest,

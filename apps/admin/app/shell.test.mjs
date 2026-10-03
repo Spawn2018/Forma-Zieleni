@@ -21,6 +21,7 @@ import {
   createAdminFile,
   createAdminGarden,
   createAdminDecisionLogEntry,
+  reviseAdminDecisionLogSummary,
   createAdminSiteObservation,
   createAdminMilestone,
   parseAdminMilestoneDueAt,
@@ -1010,6 +1011,8 @@ test('staff decision log lists a change and refuses a payment field', async () =
   assert.match(html, /zmiana zakresu/);
   assert.match(html, /bez kamienia milowego/);
   assert.match(html, /Zapisz wpis/);
+  assert.match(html, /Popraw treść/);
+  assert.match(html, /name="entryId" value="dl8k2n4p6q8r0s2t"/);
   assert.equal(html.includes('ac8k2n4p6q8r0s2t'), false);
   const fetched = await fetchAdminDecisionLog({
     base: 'http://admin.test',
@@ -1052,6 +1055,30 @@ test('staff decision log lists a change and refuses a payment field', async () =
     },
   });
   assert.deepEqual(rejected, { ok: false, reason: 'error' });
+  const revised = await reviseAdminDecisionLogSummary({
+    base: 'http://admin.test',
+    entryId: 'dl8k2n4p6q8r0s2t',
+    summary: '  Sadzimy żywopłot i bramę.  ',
+    idempotencyKey: 'dl-revise',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/decision-log\/dl8k2n4p6q8r0s2t\/summary$/);
+      assert.equal(init?.method, 'POST');
+      assert.deepEqual(JSON.parse(String(init?.body)), { summary: 'Sadzimy żywopłot i bramę.' });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(revised, { ok: true });
+  const blank = await reviseAdminDecisionLogSummary({
+    base: 'http://admin.test',
+    entryId: 'dl8k2n4p6q8r0s2t',
+    summary: '   ',
+    idempotencyKey: 'dl-blank',
+    fetchImpl: async () => {
+      assert.fail('blank summary must not call Core API');
+      return new Response('{}', { status: 500 });
+    },
+  });
+  assert.deepEqual(blank, { ok: false, reason: 'error' });
 });
 
 test('staff site UI lists rules codes and records one synthetic observation', async () => {

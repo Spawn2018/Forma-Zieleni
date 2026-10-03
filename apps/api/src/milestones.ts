@@ -7,6 +7,7 @@ import {
   assertOpaqueProjectId,
   createDecisionLogEntry,
   createProjectMilestone,
+  reviseDecisionLogSummary,
   projectMilestoneForPortal,
   type MilestoneStatus,
   type PortalMilestoneProjection,
@@ -374,6 +375,81 @@ export async function createDecisionLogRecord(
       'decision-log.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: entry },
+      at,
+    );
+    return entry;
+  });
+}
+
+export async function reviseDecisionLogSummaryRecord(
+  store: LeadStore,
+  entryId: string,
+  summary: string,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<ProjectDecisionLogEntry> {
+  const hash = requestHash({ scope: 'decision-log.summary', entryId, summary });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'decision-log.summary', idempotencyKey, hash);
+    if (replay) return replay.responseBody as ProjectDecisionLogEntry;
+    const current = await tx.findDecisionLogEntry(entryId);
+    if (!current) throw new ApiFailure(404, 'DECISION_LOG_NOT_FOUND', 'Decision log entry was not found.');
+    const project = await tx.findProject(current.projectId);
+    if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    const contract = await tx.findContract(project.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let entry: ProjectDecisionLogEntry;
+    try {
+      entry = reviseDecisionLogSummary(current, summary);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'DECISION_LOG_SUMMARY_INVALID') {
+        throw badRequest('DECISION_LOG_SUMMARY_INVALID', 'Decision log summary is not valid.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_SURFACE_FORBIDDEN') {
+        throw badRequest('MILESTONE_SURFACE_FORBIDDEN', 'Forbidden decision-log fields.');
+      }
+      throw error;
+    }
+    if (entry !== current) {
+      await tx.saveDecisionLogEntry(entry);
+      await tx.insertOutbox({
+        id: newOpaqueId('o'),
+        eventType: 'decision_log.summary_revised',
+        leadId: opportunity.leadId,
+        payload: {
+          leadId: opportunity.leadId,
+          status: entry.kind,
+          projectId: entry.projectId,
+          entryId: entry.id,
+          summary: entry.summary,
+          previousSummary: current.summary,
+        },
+        at,
+      });
+      await tx.insertAudit({
+        id: newOpaqueId('a'),
+        action: 'decision_log.summary_revised',
+        actorId: actor.actorId,
+        leadId: opportunity.leadId,
+        at,
+        metadata: {
+          status: entry.kind,
+          projectId: entry.projectId,
+          entryId: entry.id,
+          summary: entry.summary,
+          previousSummary: current.summary,
+        },
+      });
+    }
+    await tx.saveIdempotency(
+      'decision-log.summary',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: entry },
       at,
     );
     return entry;

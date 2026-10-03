@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueCapacityWindowId, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateProjectMilestoneDueRequest, validateProjectMilestoneStatusRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateDecisionLogSummaryRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateProjectMilestoneDueRequest, validateProjectMilestoneStatusRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listPortalContracts, listVisibleContracts, parseContractListQuery, readContract, readPortalContract } from './contracts.ts';
@@ -25,6 +25,7 @@ import {
   pathMilestoneId,
   readDecisionLogEntry,
   readMilestone,
+  reviseDecisionLogSummaryRecord,
   readPortalMilestone,
 } from './milestones.ts';
 import { createOfferFromOpportunity, listPortalOffers, listVisibleOffers, parseOfferListQuery, readOffer, readPortalOffer } from './offers.ts';
@@ -988,6 +989,23 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const entry = await readDecisionLogEntry(options.store, pathDecisionLogId(c.req.param('entryId')));
     if (!entry) throw new ApiFailure(404, 'DECISION_LOG_NOT_FOUND', 'Decision log entry was not found.');
+    return c.json(entry);
+  });
+
+  app.post('/v1/decision-log/:entryId/summary', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateDecisionLogSummaryRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'DECISION_LOG_INVALID', 'Decision log summary could not be accepted.', parsed.errors);
+    const entry = await reviseDecisionLogSummaryRecord(
+      options.store,
+      pathDecisionLogId(c.req.param('entryId')),
+      parsed.value.summary,
+      actor,
+      key,
+      now(),
+    );
     return c.json(entry);
   });
 
