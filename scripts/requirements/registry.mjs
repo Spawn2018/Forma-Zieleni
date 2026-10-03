@@ -633,6 +633,14 @@ row('FZ-REQ-PORTAL-023', 'A portal file shows its exact byte count with a space 
   executableWhenComplete: ['PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-024', 'A portal offer, contract, project, file, garden, and site record shows its recorded instant in Polish UTC words. An unreadable instant fails the list map and is not printed raw. The stored instant is not shifted into a local zone. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The lists use the existing UTC words. The stored instant stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'RECORD_CREATED_LABELS',
+  executableSlice: 'RECORD-CREATED-LABELS',
+  executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
@@ -766,6 +774,14 @@ row('FZ-REQ-ADMIN-033', 'Staff see a file’s exact byte count with a space ever
   depth: 'FILE_BYTE_LABELS',
   executableSlice: 'FILE-BYTE-LABELS',
   executableWhenComplete: ['ADMIN-FILE-VISIBILITY', 'PORTAL-FILE-DOWNLOAD'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-034', 'Staff read a garden’s recorded instant in the same Polish UTC words as a portal record. An unreadable instant fails the garden list map and is not printed raw. The stored instant is not shifted into a local zone. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The garden line uses the existing UTC words. The stored instant stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'RECORD_CREATED_LABELS',
+  executableSlice: 'RECORD-CREATED-LABELS',
+  executableWhenComplete: ['ADMIN-GARDEN-STAFF', 'MILESTONE-DUE-LABELS'],
   safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {

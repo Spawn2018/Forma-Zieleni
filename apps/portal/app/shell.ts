@@ -222,7 +222,8 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const offer = item as OfferApiItem;
     if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
-    if (typeof offer.status !== 'string' || !isPortalOfferStatus(offer.status) || typeof offer.createdAt !== 'string') {
+    const createdAt = requirePortalCreatedAt(offer.createdAt);
+    if (typeof offer.status !== 'string' || !isPortalOfferStatus(offer.status) || createdAt === null) {
       return { status: 'error' };
     }
     if (Object.hasOwn(offer, 'price') || Object.hasOwn(offer, 'terms') || Object.hasOwn(offer, 'amount')) {
@@ -232,7 +233,7 @@ export function mapPortalOfferPage(body: unknown): PortalOfferList {
       id: offer.id,
       opportunityId: offer.opportunityId,
       status: offer.status,
-      createdAt: offer.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -262,7 +263,8 @@ export function mapPortalContractPage(body: unknown): PortalContractList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const contract = item as ContractApiItem;
     if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
-    if (typeof contract.status !== 'string' || !isPortalContractStatus(contract.status) || typeof contract.createdAt !== 'string') {
+    const createdAt = requirePortalCreatedAt(contract.createdAt);
+    if (typeof contract.status !== 'string' || !isPortalContractStatus(contract.status) || createdAt === null) {
       return { status: 'error' };
     }
     if (
@@ -280,7 +282,7 @@ export function mapPortalContractPage(body: unknown): PortalContractList {
       id: contract.id,
       offerId: contract.offerId,
       status: contract.status,
-      createdAt: contract.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -308,7 +310,8 @@ export function mapPortalProjectPage(body: unknown): PortalProjectList {
     if (typeof project.id !== 'string' || typeof project.contractId !== 'string' || !project.contractId.trim()) {
       return { status: 'error' };
     }
-    if (typeof project.status !== 'string' || !isPortalProjectStatus(project.status) || typeof project.createdAt !== 'string') {
+    const createdAt = requirePortalCreatedAt(project.createdAt);
+    if (typeof project.status !== 'string' || !isPortalProjectStatus(project.status) || createdAt === null) {
       return { status: 'error' };
     }
     if (
@@ -322,7 +325,7 @@ export function mapPortalProjectPage(body: unknown): PortalProjectList {
       id: project.id,
       contractId: project.contractId,
       status: project.status,
-      createdAt: project.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -353,7 +356,8 @@ export function mapPortalFilePage(body: unknown): PortalFileList {
     if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
     if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };
     if (typeof file.sizeBytes !== 'number' || !Number.isFinite(file.sizeBytes)) return { status: 'error' };
-    if (typeof file.createdAt !== 'string') return { status: 'error' };
+    const createdAt = requirePortalCreatedAt(file.createdAt);
+    if (createdAt === null) return { status: 'error' };
     if (
       Object.hasOwn(file, 'storageKey')
       || Object.hasOwn(file, 'bytes')
@@ -368,7 +372,7 @@ export function mapPortalFilePage(body: unknown): PortalFileList {
       name: file.name,
       mimeType: file.mimeType,
       sizeBytes: file.sizeBytes,
-      createdAt: file.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -398,7 +402,8 @@ export function mapPortalGardenPage(body: unknown): PortalGardenList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const garden = item as GardenApiItem;
     if (typeof garden.id !== 'string' || typeof garden.projectId !== 'string') return { status: 'error' };
-    if (typeof garden.createdAt !== 'string') return { status: 'error' };
+    const createdAt = requirePortalCreatedAt(garden.createdAt);
+    if (createdAt === null) return { status: 'error' };
     if (
       Object.hasOwn(garden, 'clientSubject')
       || Object.hasOwn(garden, 'updatedAt')
@@ -414,7 +419,7 @@ export function mapPortalGardenPage(body: unknown): PortalGardenList {
     rows.push({
       id: garden.id,
       projectId: garden.projectId,
-      createdAt: garden.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -460,7 +465,8 @@ export function mapPortalSitePage(body: unknown): PortalSiteList {
       createdAt?: unknown;
     };
     if (typeof record.id !== 'string' || typeof record.projectId !== 'string') return { status: 'error' };
-    if (typeof record.createdAt !== 'string' || !Array.isArray(record.observationIds)) return { status: 'error' };
+    const createdAt = requirePortalCreatedAt(record.createdAt);
+    if (createdAt === null || !Array.isArray(record.observationIds)) return { status: 'error' };
     if (!record.observationIds.every((entry) => typeof entry === 'string')) return { status: 'error' };
     if (SITE_FORBIDDEN.some((key) => Object.hasOwn(record, key))) return { status: 'error' };
     const constraints = mapSiteFindings(record.constraints);
@@ -472,7 +478,7 @@ export function mapPortalSitePage(body: unknown): PortalSiteList {
       observationIds: record.observationIds,
       constraints,
       opportunities,
-      createdAt: record.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -620,6 +626,17 @@ export function formatUtcInstantPl(value: string): string | null {
   const monthName = POLISH_MONTHS[month - 1];
   if (!monthName) return null;
   return `${day} ${monthName} ${year}, ${match[4]}:${match[5]} UTC`;
+}
+
+/** A recorded instant the portal can read. An unreadable value is not stored on the row. */
+export function requirePortalCreatedAt(value: unknown): string | null {
+  if (typeof value !== 'string' || formatUtcInstantPl(value) === null) return null;
+  return value;
+}
+
+/** Polish UTC words for a recorded instant. An unreadable value is not printed raw. */
+export function portalCreatedAtLabel(value: string): string {
+  return formatUtcInstantPl(value) ?? 'data nieczytelna';
 }
 
 /** Null means no due instant. An unreadable instant stays null and is not printed raw. */
@@ -924,7 +941,7 @@ function offerListNode(offers: PortalOfferList): ReactNode {
           createElement(
             'p',
             { className: 'portal-offer-meta' },
-            [offer.id, ' · ', portalOfferStatusLabel(offer.status), ' · ', offer.createdAt].join(''),
+            [offer.id, ' · ', portalOfferStatusLabel(offer.status), ' · ', portalCreatedAtLabel(offer.createdAt)].join(''),
           ),
         ),
       ),
@@ -970,7 +987,7 @@ function contractListNode(contracts: PortalContractList, projects: PortalProject
           createElement(
             'p',
             { className: 'portal-contract-meta' },
-            [contract.id, ' · ', portalContractStatusLabel(contract.status), ' · ', contract.createdAt].join(''),
+            [contract.id, ' · ', portalContractStatusLabel(contract.status), ' · ', portalCreatedAtLabel(contract.createdAt)].join(''),
           ),
           createElement(
             'p',
@@ -1081,7 +1098,7 @@ function projectListNode(
           createElement(
             'p',
             { className: 'portal-project-meta' },
-            [project.id, ' · ', portalProjectStatusLabel(project.status), ' · ', project.createdAt].join(''),
+            [project.id, ' · ', portalProjectStatusLabel(project.status), ' · ', portalCreatedAtLabel(project.createdAt)].join(''),
           ),
           createElement(
             'p',
@@ -1134,7 +1151,7 @@ function gardenListNode(gardens: PortalGardenList): ReactNode {
           createElement(
             'p',
             { className: 'portal-garden-meta' },
-            [garden.id, ' · ', garden.projectId, ' · ', garden.createdAt].join(''),
+            [garden.id, ' · ', garden.projectId, ' · ', portalCreatedAtLabel(garden.createdAt)].join(''),
           ),
         ),
       ),
@@ -1166,7 +1183,7 @@ function siteListNode(sites: PortalSiteList): ReactNode {
           createElement(
             'p',
             { className: 'portal-site-meta' },
-            [record.id, ' · ', record.projectId, ' · ', record.createdAt].join(''),
+            [record.id, ' · ', record.projectId, ' · ', portalCreatedAtLabel(record.createdAt)].join(''),
           ),
           createElement(
             'p',
@@ -1259,7 +1276,7 @@ function fileListNode(files: PortalFileList): ReactNode {
               ' · ',
               byteCountLabel(file.sizeBytes),
               ' · ',
-              file.createdAt,
+              portalCreatedAtLabel(file.createdAt),
             ].join(''),
           ),
           createElement(

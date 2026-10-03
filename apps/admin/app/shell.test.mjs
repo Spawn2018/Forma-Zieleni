@@ -1486,6 +1486,11 @@ test('staff garden UI lists a delivered project garden and refuses a twin field'
   }));
   assert.match(html, /Ogrody/);
   assert.match(html, /gd8k2n4p6q8r0s2t/);
+  assert.match(html, /24 września 2026, 12:00 UTC/);
+  assert.equal(html.includes('2026-09-24T12:00:00.000Z'), false);
+  assert.equal(mapGardenPage({
+    items: [{ id: 'gd8k2n4p6q8r0s2t', projectId: 'pr8k2n4p6q8r0s2t', clientSubject: null, createdAt: 't' }],
+  }).status, 'error');
   assert.match(html, /Utwórz ogród/);
   assert.equal(html.includes('client-subject-opaque'), false);
   assert.equal(html.toLowerCase().includes('twin'), false);

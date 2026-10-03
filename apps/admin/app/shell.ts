@@ -1057,6 +1057,17 @@ export function formatUtcInstantPl(value: string): string | null {
   return `${day} ${monthName} ${year}, ${match[4]}:${match[5]} UTC`;
 }
 
+/** A recorded garden instant staff can read. An unreadable value is not stored on the row. */
+export function requireAdminCreatedAt(value: unknown): string | null {
+  if (typeof value !== 'string' || formatUtcInstantPl(value) === null) return null;
+  return value;
+}
+
+/** Polish UTC words for a recorded instant. An unreadable value is not printed raw. */
+export function adminCreatedAtLabel(value: string): string {
+  return formatUtcInstantPl(value) ?? 'data nieczytelna';
+}
+
 /** Null means no due instant. An unreadable instant stays null and is not printed raw. */
 export function adminMilestoneDueLabel(dueAt: string | null): string | null {
   if (dueAt === null) return 'bez terminu';
@@ -1257,13 +1268,14 @@ export function mapGardenPage(body: unknown): AdminGardenList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const garden = item as GardenApiItem;
     if (typeof garden.id !== 'string' || typeof garden.projectId !== 'string') return { status: 'error' };
-    if (typeof garden.createdAt !== 'string') return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(garden.createdAt);
+    if (createdAt === null) return { status: 'error' };
     if (garden.clientSubject !== null && typeof garden.clientSubject !== 'string') return { status: 'error' };
     if (GARDEN_FORBIDDEN.some((key) => Object.hasOwn(garden, key))) return { status: 'error' };
     rows.push({
       id: garden.id,
       projectId: garden.projectId,
-      createdAt: garden.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2614,7 +2626,7 @@ function gardenListNode(gardens: AdminGardenList): ReactNode {
           createElement(
             'p',
             { className: 'admin-garden-meta' },
-            [garden.id, ' · projekt ', garden.projectId, ' · ', garden.createdAt].join(''),
+            [garden.id, ' · projekt ', garden.projectId, ' · ', adminCreatedAtLabel(garden.createdAt)].join(''),
           ),
         ),
       ),

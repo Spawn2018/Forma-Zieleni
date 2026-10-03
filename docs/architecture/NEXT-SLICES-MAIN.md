@@ -1424,6 +1424,21 @@ Contract: [`FILE-BYTE-LABELS.md`](./FILE-BYTE-LABELS.md).
 Security: display only. No new file field and no byte rewrite.
 Next: none.
 
+### RECORD-CREATED-LABELS
+
+Dependencies: PORTAL-PROJECT-VIEW, ADMIN-GARDEN-STAFF, MILESTONE-DUE-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a portal offer, contract, project, file, garden, and site record,
+and a staff garden, show the recorded instant in Polish UTC words. An
+unreadable instant fails that list map and is not printed raw. The stored
+instant is not shifted into a local zone.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`RECORD-CREATED-LABELS.md`](./RECORD-CREATED-LABELS.md).
+Security: display only. No new record field and no local-zone shift.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

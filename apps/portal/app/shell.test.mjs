@@ -145,7 +145,12 @@ test('signed-in portal renders client-safe offer projection without price or ter
   assert.match(ready, /of8k2n4p6q8r0s2t/);
   assert.match(ready, /Twoje pozycje/);
   assert.match(ready, /szkic/);
+  assert.match(ready, /24 września 2026, 12:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T12:00:00.000Z'), false);
   assert.equal(ready.includes('draft'), false);
+  assert.equal(mapPortalOfferPage({
+    items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft', createdAt: 't' }],
+  }).status, 'error');
   assert.equal(ready.toLowerCase().includes('price'), false);
   assert.equal(ready.toLowerCase().includes('terms'), false);
   assert.equal(ready.toLowerCase().includes('cena'), false);
@@ -276,7 +281,27 @@ test('signed-in portal renders client-safe project and file projections without 
   assert.equal(html.includes('Pliki: brak'), false);
   assert.match(html, /application\/pdf/);
   assert.match(html, /2 048 B/);
+  assert.match(html, /24 września 2026, 12:30 UTC/);
+  assert.equal(html.includes('2026-09-24T12:30:00.000Z'), false);
   assert.equal(html.includes('2048 B'), false);
+  assert.equal(mapPortalFilePage({
+    items: [{
+      id: 'fl8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      name: 'plan.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 2048,
+      createdAt: 't',
+    }],
+  }).status, 'error');
+  assert.equal(mapPortalProjectPage({
+    items: [{
+      id: 'pj8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      status: 'planned',
+      createdAt: 't',
+    }],
+  }).status, 'error');
   assert.equal(html.includes('2 KB'), false);
   for (const phrase of commercialLeak) {
     assert.equal(html.toLowerCase().includes(phrase), false, phrase);
@@ -412,6 +437,8 @@ test('signed-in portal renders client-safe contract status without price or sign
   assert.match(ready, /Twoje umowy/);
   assert.match(ready, /ct8k2n4p6q8r0s2t/);
   assert.match(ready, /wysłana/);
+  assert.match(ready, /24 września 2026, 12:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T12:00:00.000Z'), false);
   assert.equal(ready.includes('sent'), false);
   assert.equal(mapPortalContractPage({
     items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'signed', createdAt: 't' }],
@@ -483,6 +510,11 @@ test('signed-in portal renders a client garden without a twin or live invent', a
   }));
   assert.match(ready, /Twoje ogrody/);
   assert.match(ready, /gd8k2n4p6q8r0s2t/);
+  assert.match(ready, /24 września 2026, 15:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T15:00:00.000Z'), false);
+  assert.equal(mapPortalGardenPage({
+    items: [{ id: 'gd8k2n4p6q8r0s2t', projectId: 'pj8k2n4p6q8r0s2t', createdAt: 't' }],
+  }).status, 'error');
   assert.equal(ready.toLowerCase().includes('twin'), false);
   assert.equal(ready.toLowerCase().includes('sensor'), false);
   for (const phrase of commercialLeak) {
@@ -547,6 +579,8 @@ test('signed-in portal renders site findings without credentials or invented con
   }));
   assert.match(ready, /Teren/);
   assert.match(ready, /si8k2n4p6q8r0s2t/);
+  assert.match(ready, /24 września 2026, 15:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T15:00:00.000Z'), false);
   assert.match(ready, /Ograniczenia: slope/);
   assert.match(ready, /Możliwości: shade/);
   assert.equal(ready.toLowerCase().includes('credential'), false);
