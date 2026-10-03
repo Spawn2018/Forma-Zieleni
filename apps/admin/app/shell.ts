@@ -73,6 +73,7 @@ export type AdminProjectRow = {
   id: string;
   contractId: string;
   status: AdminProjectStatus;
+  createdAt: string;
 };
 
 export type AdminProjectList =
@@ -863,6 +864,7 @@ type ProjectApiItem = {
   id?: unknown;
   contractId?: unknown;
   status?: unknown;
+  createdAt?: unknown;
 };
 
 export function mapProjectPage(body: unknown): AdminProjectList {
@@ -874,11 +876,15 @@ export function mapProjectPage(body: unknown): AdminProjectList {
   for (const item of items) {
     const project = item as ProjectApiItem;
     if (typeof project.id !== 'string' || typeof project.contractId !== 'string') return { status: 'error' };
-    if (typeof project.status !== 'string' || !isAdminProjectStatus(project.status)) return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(project.createdAt);
+    if (typeof project.status !== 'string' || !isAdminProjectStatus(project.status) || createdAt === null) {
+      return { status: 'error' };
+    }
     rows.push({
       id: project.id,
       contractId: project.contractId,
       status: project.status,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2414,7 +2420,15 @@ function projectListNode(projects: AdminProjectList): ReactNode {
           createElement(
             'p',
             { className: 'admin-project-meta' },
-            [project.id, ' · umowa ', project.contractId, ' · ', adminProjectStatusLabel(project.status)].join(''),
+            [
+              project.id,
+              ' · umowa ',
+              project.contractId,
+              ' · ',
+              adminProjectStatusLabel(project.status),
+              ' · ',
+              adminCreatedAtLabel(project.createdAt),
+            ].join(''),
           ),
           project.status === 'planned'
             ? createElement(

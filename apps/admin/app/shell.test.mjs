@@ -229,6 +229,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             id: 'pr8k2n4p6q8r0s2t',
             contractId: 'ct8k2n4p6q8r0s2t',
             status: 'planned',
+            createdAt: '2026-09-24T14:00:00.000Z',
           },
         ],
       },
@@ -297,6 +298,8 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /24 września 2026, 13:30 UTC/);
   assert.equal(ready.includes('2026-09-24T12:00:00.000Z'), false);
   assert.equal(ready.includes('2026-09-24T13:30:00.000Z'), false);
+  assert.match(ready, /24 września 2026, 14:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T14:00:00.000Z'), false);
 });
 
 test('mapContractPage and Core API contract fetch/create stay truthful', async () => {
@@ -435,9 +438,40 @@ test('mapProjectPage and Core API project fetch/create stay truthful', async () 
     mapProjectPage({
       items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
     }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapProjectPage({
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: 'wczoraj',
+        updatedAt: '2026-09-24T14:00:00.000Z',
+        clientSubject: 'client-1',
+      }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapProjectPage({
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: '2026-09-24T14:00:00.000Z',
+        updatedAt: '2026-09-24T15:00:00.000Z',
+        clientSubject: 'client-1',
+      }],
+    }),
     {
       status: 'ready',
-      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
     },
   );
 
@@ -1223,7 +1257,12 @@ test('staff can mark a planned project delivered and leave a delivered project u
     ...emptyCrm,
     projects: {
       status: 'ready',
-      items: [{ id: 'pr8k2n4p6q8r0s2t', contractId: 'ct8k2n4p6q8r0s2t', status: 'planned' }],
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
     },
   }));
   assert.match(planned, /Oznacz jako dostarczony/);
@@ -1233,7 +1272,12 @@ test('staff can mark a planned project delivered and leave a delivered project u
     ...emptyCrm,
     projects: {
       status: 'ready',
-      items: [{ id: 'pr8k2n4p6q8r0s2u', contractId: 'ct8k2n4p6q8r0s2t', status: 'delivered' }],
+      items: [{
+        id: 'pr8k2n4p6q8r0s2u',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'delivered',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
     },
   }));
   assert.equal(delivered.includes('Oznacz jako dostarczony'), false);

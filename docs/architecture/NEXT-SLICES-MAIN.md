@@ -1557,6 +1557,21 @@ Contract: [`CAPACITY-WINDOW-ORDER.md`](./CAPACITY-WINDOW-ORDER.md).
 Security: display sort only. Uses windows staff already loaded.
 Next: none.
 
+### ADMIN-PROJECT-CREATED
+
+Dependencies: ADMIN-PROJECT-DELIVER, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff project shows its recorded instant in Polish UTC words.
+A missing or unreadable instant fails the project list map. The raw
+timestamp stays off the row. Extra staff fields stay off the row. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PROJECT-CREATED.md`](./ADMIN-PROJECT-CREATED.md).
+Security: display only. Uses createdAt already returned by Core API.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
