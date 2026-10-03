@@ -665,6 +665,14 @@ row('FZ-REQ-PORTAL-027', 'Portal file lists, including a project card, order fil
   executableWhenComplete: ['PORTAL-FILE-DOWNLOAD', 'PORTAL-PROJECT-FILES'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-028', 'The client garden list orders gardens by the earlier recorded instant. The same instant stays in id order. Every garden stays. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of gardens the client already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PORTAL_GARDEN_ORDER',
+  executableSlice: 'PORTAL-GARDEN-ORDER',
+  executableWhenComplete: ['PORTAL-GARDEN-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

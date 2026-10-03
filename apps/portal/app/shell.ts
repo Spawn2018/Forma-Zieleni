@@ -1161,6 +1161,16 @@ function projectListNode(
   );
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every garden stays. */
+export function comparePortalGardens(
+  left: Pick<PortalGardenRow, 'id' | 'createdAt'>,
+  right: Pick<PortalGardenRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function gardenListNode(gardens: PortalGardenList): ReactNode {
   if (gardens.status !== 'ready') {
     return listStateNode(
@@ -1178,7 +1188,7 @@ function gardenListNode(gardens: PortalGardenList): ReactNode {
     createElement(
       'ul',
       { className: 'portal-garden-list' },
-      ...gardens.items.map((garden) =>
+      ...[...gardens.items].sort(comparePortalGardens).map((garden) =>
         createElement(
           'li',
           { key: garden.id, className: 'portal-garden' },

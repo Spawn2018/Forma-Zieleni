@@ -1527,6 +1527,20 @@ Contract: [`FILE-LIST-ORDER.md`](./FILE-LIST-ORDER.md).
 Security: display sort only. Uses files already loaded.
 Next: none.
 
+### PORTAL-GARDEN-ORDER
+
+Dependencies: PORTAL-GARDEN-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the client garden list orders gardens by the earlier recorded
+instant. The same instant stays in id order. Every garden stays. No new
+store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-GARDEN-ORDER.md`](./PORTAL-GARDEN-ORDER.md).
+Security: display sort only. Uses gardens the client already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-CREATED
 
 Dependencies: ADMIN-DECISION-LOG, RECORD-CREATED-LABELS.

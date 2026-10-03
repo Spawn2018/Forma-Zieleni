@@ -1,0 +1,14 @@
+# Client garden order
+
+Status: contracted for `PORTAL-GARDEN-ORDER` / `FZ-REQ-PORTAL-028`.
+
+## Surface
+
+The client garden list orders gardens by the earlier recorded instant.
+The same instant stays in id order. Every garden stays on the list.
+
+## Out of scope
+
+- A new timestamp field or a stored sort.
+- Price, payment, signing, and a digital twin.
+- DNS, Cloudflare, deploy, and live customer data.

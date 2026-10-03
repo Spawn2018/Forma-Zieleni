@@ -22,6 +22,7 @@ import {
   nextOpenPortalMilestone,
   portalContractStatusLabel,
   comparePortalFiles,
+  comparePortalGardens,
   comparePortalMilestones,
   formatByteCount,
   portalContractProjectLine,
@@ -942,6 +943,41 @@ test('portal files sort by Polish name and keep every row', () => {
   assert.equal(lines[0].startsWith('Łąka.pdf ·'), true);
   assert.equal(lines[1].startsWith('plan 2.pdf ·'), true);
   assert.equal(lines[2].startsWith('plan 10.pdf ·'), true);
+});
+
+test('portal gardens order by the recorded instant', () => {
+  assert.equal(
+    comparePortalGardens(
+      { id: 'gd8k2n4p6q8r0s2u', createdAt: '2026-09-24T13:00:00.000Z' },
+      { id: 'gd8k2n4p6q8r0s2t', createdAt: '2026-09-24T13:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    gardens: {
+      status: 'ready',
+      items: [
+        {
+          id: 'gd8k2n4p6q8r0s2w',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          createdAt: '2026-09-25T13:00:00.000Z',
+        },
+        {
+          id: 'gd8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+        {
+          id: 'gd8k2n4p6q8r0s2t',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/portal-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
 });
 
 test('a file row names its own project', () => {
