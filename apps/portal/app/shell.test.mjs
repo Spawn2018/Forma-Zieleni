@@ -24,6 +24,7 @@ import {
   comparePortalFiles,
   comparePortalGardens,
   comparePortalContracts,
+  comparePortalProjects,
   comparePortalOffers,
   comparePortalSites,
   comparePortalMilestones,
@@ -1078,6 +1079,44 @@ test('portal contracts order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/portal-contract-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['ct8k2n4p6q8r0s2t', 'ct8k2n4p6q8r0s2u', 'ct8k2n4p6q8r0s2w']);
+});
+
+test('portal projects order by the recorded instant', () => {
+  assert.equal(
+    comparePortalProjects(
+      { id: 'pj8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'pj8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [
+        {
+          id: 'pj8k2n4p6q8r0s2w',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          status: 'planned',
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'pj8k2n4p6q8r0s2u',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          status: 'delivered',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'pj8k2n4p6q8r0s2t',
+          contractId: 'ct8k2n4p6q8r0s2u',
+          status: 'planned',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/portal-project-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['pj8k2n4p6q8r0s2t', 'pj8k2n4p6q8r0s2u', 'pj8k2n4p6q8r0s2w']);
 });
 
 test('portal site records order by the recorded instant', () => {

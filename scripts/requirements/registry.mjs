@@ -705,6 +705,14 @@ row('FZ-REQ-PORTAL-032', 'The client contract list orders contracts by the earli
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'RECORD-CREATED-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-033', 'The client project list orders projects by the earlier recorded instant. The same instant stays in id order. Every project stays. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of projects the client already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PORTAL_PROJECT_ORDER',
+  executableSlice: 'PORTAL-PROJECT-ORDER',
+  executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'RECORD-CREATED-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

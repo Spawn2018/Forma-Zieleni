@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### PORTAL-PROJECT-ORDER
+
+Dependencies: PORTAL-PROJECT-VIEW, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the client project list orders projects by the earlier recorded
+instant. The same instant stays in id order. Every project stays. No new
+store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-ORDER.md`](./PORTAL-PROJECT-ORDER.md).
+Security: display sort only. Uses projects the client already loaded.
+Next: none.
+
 ### ADMIN-PAYMENT-SCHEDULE-CREATED
 
 Dependencies: PAY-SCHEDULE-STAFF, RECORD-CREATED-LABELS.
