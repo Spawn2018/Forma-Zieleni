@@ -1467,6 +1467,20 @@ Contract: [`PORTAL-FILE-PROJECT.md`](./PORTAL-FILE-PROJECT.md).
 Security: display only. Uses the file projection the portal already maps.
 Next: none.
 
+### ADMIN-SITE-PROJECT-FILTER
+
+Dependencies: ADMIN-SITE-STAFF, ADMIN-GARDEN-PROJECT-FILTER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff filter the site-intelligence list by an opaque project id.
+An empty filter loads the full list. An invalid id does not call Core API
+and does not show a site row. No new store or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-SITE-PROJECT-FILTER.md`](./ADMIN-SITE-PROJECT-FILTER.md).
+Security: read filter only. Uses the existing site-intelligence list query.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

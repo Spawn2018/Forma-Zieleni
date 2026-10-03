@@ -800,6 +800,14 @@ row('FZ-REQ-ADMIN-035', 'Staff can filter the garden list by an opaque project i
   executableWhenComplete: ['ADMIN-GARDEN-STAFF', 'ADMIN-FILE-PROJECT-FILTER'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-036', 'Staff can filter the site-intelligence list by an opaque project id. An empty filter loads the full list. An invalid id does not call Core API and does not show a site row. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The site list uses the existing GET /v1/site-intelligence projectId query. The stored record stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'SITE_PROJECT_FILTER',
+  executableSlice: 'ADMIN-SITE-PROJECT-FILTER',
+  executableWhenComplete: ['ADMIN-SITE-STAFF', 'ADMIN-GARDEN-PROJECT-FILTER'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

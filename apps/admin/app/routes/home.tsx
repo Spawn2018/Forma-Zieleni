@@ -7,6 +7,7 @@ import {
   adminDecisionLogProjectFilter,
   adminFileProjectFilter,
   adminGardenProjectFilter,
+  adminSiteProjectFilter,
   adminMilestoneProjectFilter,
   adminShell,
   advanceAdminContractLifecycle,
@@ -73,6 +74,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   const decisionFilter = adminDecisionLogProjectFilter(searchParams.get('decisionProject'));
   const fileFilter = adminFileProjectFilter(searchParams.get('fileProject'));
   const gardenFilter = adminGardenProjectFilter(searchParams.get('gardenProject'));
+  const siteFilter = adminSiteProjectFilter(searchParams.get('siteProject'));
   const home = await resolveAdminHome({
     async probe() {
       const headers: Record<string, string> = { accept: 'application/json' };
@@ -138,7 +140,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       });
     },
     async loadSiteIntelligence() {
-      return fetchAdminSiteIntelligence({ base, cookie });
+      if (siteFilter.state === 'invalid') return { status: 'empty' };
+      return fetchAdminSiteIntelligence({
+        base,
+        cookie,
+        projectId: siteFilter.state === 'project' ? siteFilter.projectId : undefined,
+      });
     },
     async loadDecisionLog() {
       if (decisionFilter.state === 'invalid') return { status: 'empty' };
@@ -167,6 +174,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     gardenProjectQuery: gardenFilter.state === 'all' ? '' : searchParams.get('gardenProject')?.trim() ?? '',
     gardenProjectId: gardenFilter.state === 'project' ? gardenFilter.projectId : null,
     gardenFilterInvalid: gardenFilter.state === 'invalid',
+    siteProjectQuery: siteFilter.state === 'all' ? '' : searchParams.get('siteProject')?.trim() ?? '',
+    siteProjectId: siteFilter.state === 'project' ? siteFilter.projectId : null,
+    siteFilterInvalid: siteFilter.state === 'invalid',
   };
 }
 

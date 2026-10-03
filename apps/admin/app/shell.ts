@@ -281,6 +281,9 @@ export type AdminHome =
       gardenProjectQuery?: string;
       gardenProjectId?: string | null;
       gardenFilterInvalid?: boolean;
+      siteProjectQuery?: string;
+      siteProjectId?: string | null;
+      siteFilterInvalid?: boolean;
     };
 
 /**
@@ -1401,13 +1404,18 @@ export function mapAdminSitePage(body: unknown): AdminSiteList {
 export async function fetchAdminSiteIntelligence(input: {
   base: string;
   cookie?: string;
+  projectId?: string;
   fetchImpl?: typeof fetch;
 }): Promise<AdminSiteList> {
+  const filter = adminSiteProjectFilter(input.projectId);
+  if (filter.state === 'invalid') return { status: 'error' };
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = { accept: 'application/json' };
     if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/site-intelligence?limit=50', input.base), {
+    const url = new URL('/v1/site-intelligence?limit=50', input.base);
+    if (filter.state === 'project') url.searchParams.set('projectId', filter.projectId);
+    const response = await fetchImpl(url, {
       credentials: 'include',
       headers,
     });
@@ -2404,6 +2412,11 @@ export function adminGardenProjectFilter(value: string | null | undefined): Admi
 }
 
 /** Empty means the full list. A filled id must already be an opaque project id. */
+export function adminSiteProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
+  return adminMilestoneProjectFilter(value);
+}
+
+/** Empty means the full list. A filled id must already be an opaque project id. */
 export function adminMilestoneProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return { state: 'all' };
@@ -2708,21 +2721,46 @@ function siteCodes(label: string, findings: readonly AdminSiteFinding[]): string
   return `${label}: ${findings.map((item) => item.code).join(', ')}`;
 }
 
-function siteListNode(records: AdminSiteList): ReactNode {
-  if (records.status === 'empty') {
-    return createElement('p', null, 'Brak ustaleń o terenie do pokazania.');
-  }
-  if (records.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać ustaleń o terenie.');
-  }
-  if (records.status === 'error') {
-    return createElement('p', null, 'Ustaleń o terenie nie udało się pobrać. Odśwież stronę.');
-  }
+function siteProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
-    'section',
-    { className: 'admin-site', 'aria-label': 'Ustalenia o terenie' },
-    createElement('h2', null, 'Ustalenia o terenie'),
+    'form',
+    { method: 'get', className: 'admin-site-filter' },
     createElement(
+      'label',
+      { className: 'admin-site-filter-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'siteProject',
+        autoComplete: 'off',
+        spellCheck: false,
+        defaultValue: query,
+      }),
+    ),
+    createElement('button', { type: 'submit' }, 'Pokaż teren projektu'),
+    projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
+  );
+}
+
+function siteListNode(
+  records: AdminSiteList,
+  filter: { query: string; projectId: string | null; invalid: boolean },
+): ReactNode {
+  let body: ReactNode;
+  if (filter.invalid) {
+    body = createElement(
+      'p',
+      { className: 'admin-site-filter-invalid' },
+      'Id projektu jest niepoprawne. Lista ustaleń o terenie nie została pobrana.',
+    );
+  } else if (records.status === 'empty') {
+    body = createElement('p', null, 'Brak ustaleń o terenie do pokazania.');
+  } else if (records.status === 'forbidden') {
+    body = createElement('p', null, 'To konto nie może odczytać ustaleń o terenie.');
+  } else if (records.status === 'error') {
+    body = createElement('p', null, 'Ustaleń o terenie nie udało się pobrać. Odśwież stronę.');
+  } else {
+    body = createElement(
       'ul',
       { className: 'admin-site-list' },
       ...records.items.map((record) =>
@@ -2738,7 +2776,17 @@ function siteListNode(records: AdminSiteList): ReactNode {
           createElement('p', { className: 'admin-site-opportunities' }, siteCodes('Możliwości', record.opportunities)),
         ),
       ),
-    ),
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'admin-site', 'aria-label': 'Ustalenia o terenie' },
+    createElement('h2', null, 'Ustalenia o terenie'),
+    siteProjectFilterForm(filter.query, filter.projectId),
+    filter.projectId
+      ? createElement('p', { className: 'admin-site-filter-active' }, `Filtr projektu: ${filter.projectId}`)
+      : null,
+    body,
   );
 }
 
@@ -3696,7 +3744,11 @@ export function adminShell(home: AdminHome): ReactNode {
       invalid: home.gardenFilterInvalid === true,
     }),
     createGardenForm(),
-    siteListNode(home.siteIntelligence),
+    siteListNode(home.siteIntelligence, {
+      query: home.siteProjectQuery ?? '',
+      projectId: home.siteProjectId ?? null,
+      invalid: home.siteFilterInvalid === true,
+    }),
     createSiteObservationForm(),
     decisionLogNode(home.decisionLog, home.milestones, {
       query: home.decisionProjectQuery ?? '',

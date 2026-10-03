@@ -1420,6 +1420,43 @@ test('staff site UI lists rules codes and records one synthetic observation', as
     },
   });
   assert.deepEqual(fetched, { status: 'empty' });
+  const filteredSites = await fetchAdminSiteIntelligence({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    fetchImpl: async (url) => {
+      assert.match(String(url), /\/v1\/site-intelligence\?limit=50&projectId=pr8k2n4p6q8r0s2t$/);
+      return new Response(JSON.stringify({ items: [] }), { status: 200 });
+    },
+  });
+  assert.deepEqual(filteredSites, { status: 'empty' });
+  const refusedSites = await fetchAdminSiteIntelligence({
+    base: 'http://admin.test',
+    projectId: 'project1',
+    fetchImpl: async () => {
+      assert.fail('an invalid project id must not call Core API');
+      return new Response('', { status: 500 });
+    },
+  });
+  assert.deepEqual(refusedSites, { status: 'error' });
+  const filteredSiteHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    siteIntelligence: mapped,
+    siteProjectQuery: 'pr8k2n4p6q8r0s2t',
+    siteProjectId: 'pr8k2n4p6q8r0s2t',
+  }));
+  assert.match(filteredSiteHtml, /Pokaż teren projektu/);
+  assert.match(filteredSiteHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
+  assert.match(filteredSiteHtml, /si8k2n4p6q8r0s2t/);
+  const invalidSiteHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    siteIntelligence: { status: 'empty' },
+    siteProjectQuery: 'project1',
+    siteFilterInvalid: true,
+  }));
+  assert.match(invalidSiteHtml, /Id projektu jest niepoprawne\. Lista ustaleń o terenie nie została pobrana\./);
+  assert.equal(invalidSiteHtml.includes('si8k2n4p6q8r0s2t'), false);
   const created = await createAdminSiteObservation({
     base: 'http://admin.test',
     projectId: 'pr8k2n4p6q8r0s2t',
