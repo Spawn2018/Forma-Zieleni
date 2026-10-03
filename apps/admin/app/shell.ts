@@ -164,6 +164,7 @@ export type AdminPaymentInstallmentRow = {
   sequence: number;
   amountMinor: number;
   status: AdminPaymentInstallmentStatus;
+  dueAt: string | null;
 };
 
 export type AdminPaymentScheduleRow = {
@@ -868,11 +869,16 @@ export function mapPaymentSchedulePage(body: unknown): AdminPaymentScheduleList 
       const line = raw as Record<string, unknown>;
       if (typeof line.id !== 'string' || !isAdminPaymentInstallmentStatus(line.status)) return { status: 'error' };
       if (!Number.isInteger(line.sequence) || !Number.isInteger(line.amountMinor)) return { status: 'error' };
+      let dueAt: string | null;
+      if (line.dueAt === null) dueAt = null;
+      else if (typeof line.dueAt === 'string' && formatUtcInstantPl(line.dueAt) !== null) dueAt = line.dueAt;
+      else return { status: 'error' };
       installments.push({
         id: line.id,
         sequence: line.sequence as number,
         amountMinor: line.amountMinor as number,
         status: line.status,
+        dueAt,
       });
     }
     rows.push({
@@ -3971,7 +3977,16 @@ function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode
                 createElement(
                   'p',
                   { className: 'admin-payment-installment-meta' },
-                  ['#', String(line.sequence), ' · ', String(line.amountMinor), ' · ', adminPaymentInstallmentStatusLabel(line.status)].join(''),
+                  [
+                    '#',
+                    String(line.sequence),
+                    ' · ',
+                    String(line.amountMinor),
+                    ' · ',
+                    adminPaymentInstallmentStatusLabel(line.status),
+                    ' · ',
+                    adminMilestoneDueLabel(line.dueAt) ?? 'termin nieczytelny',
+                  ].join(''),
                 ),
                 line.status === 'scheduled'
                   ? createElement(

@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-PAYMENT-INSTALLMENT-DUE
+
+Dependencies: ADMIN-PAYMENT-INSTALLMENT-LABELS, MILESTONE-DUE-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff installment shows its due instant in Polish UTC words.
+No due stays „bez terminu”. An unreadable instant rejects the list. The
+raw timestamp is not shown. No provider, charge, or new amount.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PAYMENT-INSTALLMENT-DUE.md`](./ADMIN-PAYMENT-INSTALLMENT-DUE.md).
+Security: display only. Uses the due instant already on the loaded installment.
+Next: none.
+
 ### ADMIN-PAYMENT-INSTALLMENT-LABELS
 
 Dependencies: PAY-SCHEDULE-STAFF.

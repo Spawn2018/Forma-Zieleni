@@ -1024,6 +1024,14 @@ row('FZ-REQ-ADMIN-058', 'A staff installment shows its status in Polish. The lab
   executableWhenComplete: ['PAY-SCHEDULE-STAFF'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-059', 'A staff installment shows its due instant in Polish UTC words. No due stays „bez terminu”. An unreadable instant rejects the list. The raw timestamp is not shown. No provider, charge, or new amount is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The instant is already on the installment staff loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'PAYMENT_INSTALLMENT_DUE',
+  executableSlice: 'ADMIN-PAYMENT-INSTALLMENT-DUE',
+  executableWhenComplete: ['ADMIN-PAYMENT-INSTALLMENT-LABELS', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

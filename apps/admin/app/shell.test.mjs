@@ -258,7 +258,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             contractId: 'ct8k2n4p6q8r0s2t',
             currency: 'PLN',
             installments: [
-              { id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled' },
+              { id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: null },
             ],
           },
         ],
@@ -307,7 +307,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.match(ready, /Otwórz kopertę sandbox/);
   assert.equal(ready.includes('QES'), false);
   assert.match(ready, /ps8k2n4p6q8r0s2t/);
-  assert.match(ready, /#1 · 40000 · zaplanowana/);
+  assert.match(ready, /#1 · 40000 · zaplanowana · bez terminu/);
   assert.equal(ready.includes('scheduled'), false);
   assert.match(ready, /create-payment-schedule/);
   assert.match(ready, /transition-payment-installment/);
@@ -345,6 +345,37 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
       installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'charged' }],
     }],
   }), { status: 'error' });
+  assert.deepEqual(mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2t',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 40000, status: 'scheduled', dueAt: 'jutro' }],
+    }],
+  }), { status: 'error' });
+  const dated = mapPaymentSchedulePage({
+    items: [{
+      id: 'ps8k2n4p6q8r0s2u',
+      contractId: 'ct8k2n4p6q8r0s2t',
+      currency: 'PLN',
+      installments: [{
+        id: 'pi8k2n4p6q8r0s2b',
+        sequence: 1,
+        amountMinor: 40000,
+        status: 'due',
+        dueAt: '2026-10-03T08:00:00.000Z',
+      }],
+    }],
+  });
+  assert.equal(dated.status, 'ready');
+  const datedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    paymentSchedules: dated,
+  }));
+  const line = datedHtml.match(/admin-payment-installment-meta">([^<]+)/)?.[1] ?? '';
+  assert.match(line, /#1 · 40000 · należna · 3 października 2026, 08:00 UTC/);
+  assert.equal(line.includes('2026-10-03T08:00:00.000Z'), false);
 });
 
 test('mapContractPage and Core API contract fetch/create stay truthful', async () => {
