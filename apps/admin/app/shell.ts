@@ -2712,6 +2712,20 @@ function decisionKindLabel(kind: DecisionLogKind): string {
   return unreachable;
 }
 
+/** Title only when that milestone is already in the loaded list. A failed read is not “no milestone”. */
+export function adminDecisionMilestoneLine(
+  relatedMilestoneId: string | null,
+  milestones: AdminMilestoneList,
+): string {
+  if (relatedMilestoneId === null) return 'bez kamienia milowego';
+  if (milestones.status === 'error') return 'kamienia milowego nie udało się odczytać';
+  if (milestones.status === 'forbidden') return 'to konto nie może odczytać kamieni milowych';
+  if (milestones.status !== 'ready') return `kamień poza wczytaną listą: ${relatedMilestoneId}`;
+  const match = milestones.items.find((item) => item.id === relatedMilestoneId);
+  if (!match) return `kamień poza wczytaną listą: ${relatedMilestoneId}`;
+  return `kamień «${match.title}»`;
+}
+
 function decisionLogProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
     'form',
@@ -2735,6 +2749,7 @@ function decisionLogProjectFilterForm(query: string, projectId: string | null): 
 
 function decisionLogNode(
   entries: AdminDecisionLogList,
+  milestones: AdminMilestoneList,
   filter: { query: string; projectId: string | null; invalid: boolean },
 ): ReactNode {
   let body: ReactNode;
@@ -2767,7 +2782,7 @@ function decisionLogNode(
               ' · projekt ',
               entry.projectId,
               ' · ',
-              entry.relatedMilestoneId ?? 'bez kamienia milowego',
+              adminDecisionMilestoneLine(entry.relatedMilestoneId, milestones),
             ].join(''),
           ),
           createElement(
@@ -3582,7 +3597,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createGardenForm(),
     siteListNode(home.siteIntelligence),
     createSiteObservationForm(),
-    decisionLogNode(home.decisionLog, {
+    decisionLogNode(home.decisionLog, home.milestones, {
       query: home.decisionProjectQuery ?? '',
       projectId: home.decisionProjectId ?? null,
       invalid: home.decisionFilterInvalid === true,

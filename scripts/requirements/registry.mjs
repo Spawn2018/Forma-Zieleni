@@ -704,6 +704,14 @@ row('FZ-REQ-ADMIN-029', 'Staff see a milestone due instant in the same Polish UT
   executableWhenComplete: ['ADMIN-MILESTONE-DUE-REVISE', 'PORTAL-MILESTONE-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-030', 'A decision-log entry names the milestone title already loaded for that related id. Another milestone’s title stays off the entry. A failed milestone read is not shown as no milestone. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The entry uses the milestone list the staff panel already loaded. An id outside that list stays unnamed.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'DECISION_LOG_MILESTONE',
+  executableSlice: 'ADMIN-DECISION-LOG-MILESTONE',
+  executableWhenComplete: ['ADMIN-DECISION-LOG', 'ADMIN-MILESTONE-STAFF'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

@@ -1351,6 +1351,21 @@ Contract: [`MILESTONE-DUE-LABELS.md`](./MILESTONE-DUE-LABELS.md).
 Security: display only. No new due field and no mutation.
 Next: none.
 
+### ADMIN-DECISION-LOG-MILESTONE
+
+Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a decision-log entry names the milestone title already loaded for
+that related id. Another milestone’s title stays off the entry. A failed
+or forbidden milestone read is not shown as no milestone. An id outside
+the loaded list stays unnamed. No new store or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG-MILESTONE.md`](./ADMIN-DECISION-LOG-MILESTONE.md).
+Security: display only. Uses the milestone list the panel already loaded.
+Next: none.
+
 ### ADMIN-FILE-PROJECT-FILTER
 
 Dependencies: ADMIN-FILE-VISIBILITY, ADMIN-MILESTONE-PROJECT-FILTER.

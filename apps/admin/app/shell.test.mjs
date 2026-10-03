@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  adminDecisionMilestoneLine,
   adminMilestoneDueLabel,
   adminOfferStatusLabel,
   adminSiteObservationKindLabel,
@@ -1177,6 +1178,61 @@ test('staff decision log lists a change and refuses a payment field', async () =
   assert.match(html, /Sadzimy żywopłot wzdłuż granicy/);
   assert.match(html, /zmiana zakresu/);
   assert.match(html, /bez kamienia milowego/);
+  const milestones = {
+    status: 'ready',
+    items: [
+      {
+        id: 'ms8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        title: 'Sadzenie',
+        status: 'planned',
+        dueAt: null,
+      },
+      {
+        id: 'ms8k2n4p6q8r0s2u',
+        projectId: 'pr8k2n4p6q8r0s2u',
+        title: 'Inny kamień',
+        status: 'done',
+        dueAt: null,
+      },
+    ],
+  };
+  assert.equal(adminDecisionMilestoneLine(null, milestones), 'bez kamienia milowego');
+  assert.equal(adminDecisionMilestoneLine('ms8k2n4p6q8r0s2t', milestones), 'kamień «Sadzenie»');
+  assert.equal(adminDecisionMilestoneLine('ms8k2n4p6q8r0s2v', milestones), 'kamień poza wczytaną listą: ms8k2n4p6q8r0s2v');
+  assert.equal(adminDecisionMilestoneLine('ms8k2n4p6q8r0s2t', { status: 'error' }), 'kamienia milowego nie udało się odczytać');
+  assert.equal(
+    adminDecisionMilestoneLine('ms8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'to konto nie może odczytać kamieni milowych',
+  );
+  const linked = mapDecisionLogPage({
+    items: [{
+      id: 'dl8k2n4p6q8r0s2u',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      kind: 'decision',
+      summary: 'Termin sadzenia zostaje.',
+      recordedByActorId: 'ac8k2n4p6q8r0s2t',
+      relatedMilestoneId: 'ms8k2n4p6q8r0s2t',
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  });
+  const linkedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: linked,
+    milestones,
+  }));
+  const entry = linkedHtml.slice(linkedHtml.indexOf('admin-decision-log-entry'), linkedHtml.indexOf('admin-create-decision'));
+  assert.match(entry, /kamień «Sadzenie»/);
+  assert.equal(entry.includes('Inny kamień'), false);
+  const failedMilestones = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: linked,
+    milestones: { status: 'error' },
+  }));
+  assert.match(failedMilestones, /kamienia milowego nie udało się odczytać/);
+  assert.equal(failedMilestones.includes('bez kamienia milowego'), false);
   assert.match(html, /Pokaż wpisy projektu/);
   assert.match(html, /Zapisz wpis/);
   assert.match(html, /Popraw treść/);
