@@ -5,6 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  adminProjectNextMilestoneLine,
+  nextOpenAdminMilestone,
   compareAdminCapacityWindows,
   compareAdminFiles,
   compareAdminMilestones,
@@ -1294,6 +1296,72 @@ test('staff can mark a planned project delivered and leave a delivered project u
     },
   });
   assert.deepEqual(result, { ok: true });
+});
+
+test('a staff project names the earliest open milestone and skips done work', () => {
+  const milestones = [
+    {
+      id: 'ms8k2n4p6q8r0s2v',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Odbiór',
+      status: 'done',
+      dueAt: '2026-10-01T10:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2w',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: '2026-11-02T10:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2x',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: '2026-10-15T10:00:00.000Z',
+    },
+    {
+      id: 'ms8k2n4p6q8r0s2y',
+      projectId: 'pr8k2n4p6q8r0s2u',
+      title: 'Inny projekt',
+      status: 'planned',
+      dueAt: '2026-10-02T10:00:00.000Z',
+    },
+  ];
+  assert.equal(nextOpenAdminMilestone('pr8k2n4p6q8r0s2t', milestones)?.title, 'Koncepcja');
+  assert.equal(nextOpenAdminMilestone('pr8k2n4p6q8r0s2v', milestones), null);
+  assert.equal(
+    adminProjectNextMilestoneLine('pr8k2n4p6q8r0s2t', { status: 'error' }),
+    'Kamieni milowych nie udało się odczytać.',
+  );
+  assert.equal(
+    adminProjectNextMilestoneLine('pr8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać kamieni milowych.',
+  );
+  assert.equal(
+    adminProjectNextMilestoneLine('pr8k2n4p6q8r0s2t', { status: 'empty' }),
+    'Otwarte kamienie milowe: brak',
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pr8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      }],
+    },
+    milestones: { status: 'ready', items: milestones },
+  }));
+  const project = html.slice(html.indexOf('admin-project"'), html.indexOf('admin-milestone-list'));
+  assert.match(project, /admin-project-next">Następny: Koncepcja · zaplanowany · 15 października 2026, 10:00 UTC/);
+  assert.equal(project.includes('Odbiór'), false);
+  assert.equal(project.includes('Inny projekt'), false);
+  assert.equal(project.includes('2026-10-15T10:00:00.000Z'), false);
 });
 
 test('staff decision log lists a change and refuses a payment field', async () => {

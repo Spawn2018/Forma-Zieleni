@@ -1572,6 +1572,21 @@ Contract: [`ADMIN-PROJECT-CREATED.md`](./ADMIN-PROJECT-CREATED.md).
 Security: display only. Uses createdAt already returned by Core API.
 Next: none.
 
+### ADMIN-PROJECT-NEXT-MILESTONE
+
+Dependencies: ADMIN-MILESTONE-STAFF, ADMIN-PROJECT-DELIVER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff project names the earliest open milestone already loaded
+for that project. A done milestone and another project’s milestone stay
+off the row. A failed or forbidden milestone read is not shown as no
+milestone. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PROJECT-NEXT-MILESTONE.md`](./ADMIN-PROJECT-NEXT-MILESTONE.md).
+Security: display only. Uses the milestone list staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

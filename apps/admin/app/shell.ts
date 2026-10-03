@@ -2396,7 +2396,28 @@ function createContractForm(): ReactNode {
   );
 }
 
-function projectListNode(projects: AdminProjectList): ReactNode {
+/** Earliest open milestone for one project. Done rows and other projects are skipped. */
+export function nextOpenAdminMilestone(
+  projectId: string,
+  milestones: readonly AdminMilestoneRow[],
+): AdminMilestoneRow | null {
+  const open = milestones.filter((item) => item.projectId === projectId && item.status !== 'done');
+  open.sort(compareAdminMilestones);
+  return open[0] ?? null;
+}
+
+/** Milestones already loaded for this project. A failed milestone read is not “no milestone”. */
+export function adminProjectNextMilestoneLine(projectId: string, milestones: AdminMilestoneList): string {
+  if (milestones.status === 'error') return 'Kamieni milowych nie udało się odczytać.';
+  if (milestones.status === 'forbidden') return 'To konto nie może odczytać kamieni milowych.';
+  if (milestones.status !== 'ready') return 'Otwarte kamienie milowe: brak';
+  const next = nextOpenAdminMilestone(projectId, milestones.items);
+  if (!next) return 'Otwarte kamienie milowe: brak';
+  const due = adminMilestoneDueLabel(next.dueAt) ?? 'termin nieczytelny';
+  return `Następny: ${next.title} · ${milestoneStatusLabel(next.status)} · ${due}`;
+}
+
+function projectListNode(projects: AdminProjectList, milestones: AdminMilestoneList): ReactNode {
   if (projects.status === 'empty') {
     return createElement('p', null, 'Brak projektów do pokazania.');
   }
@@ -2429,6 +2450,11 @@ function projectListNode(projects: AdminProjectList): ReactNode {
               ' · ',
               adminCreatedAtLabel(project.createdAt),
             ].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'admin-project-next' },
+            adminProjectNextMilestoneLine(project.id, milestones),
           ),
           project.status === 'planned'
             ? createElement(
@@ -3801,7 +3827,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createCapacityWindowForm(),
     decideCapacityForm(),
     signingSandboxNode(home.signingSandbox),
-    projectListNode(home.projects),
+    projectListNode(home.projects, home.milestones),
     createProjectForm(),
     milestoneListNode(home.milestones, {
       query: home.milestoneProjectQuery ?? '',
