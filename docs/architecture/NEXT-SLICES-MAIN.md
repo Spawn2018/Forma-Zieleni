@@ -1587,6 +1587,21 @@ Contract: [`ADMIN-PROJECT-NEXT-MILESTONE.md`](./ADMIN-PROJECT-NEXT-MILESTONE.md)
 Security: display only. Uses the milestone list staff already loaded.
 Next: none.
 
+### ADMIN-FILE-CREATED
+
+Dependencies: ADMIN-FILE-VISIBILITY, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff file shows its recorded instant in Polish UTC words.
+A missing or unreadable instant fails the file list map. The raw
+timestamp stays off the row. Storage keys and the client subject stay
+off the row. No new store or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-FILE-CREATED.md`](./ADMIN-FILE-CREATED.md).
+Security: display only. Uses createdAt already returned by Core API.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

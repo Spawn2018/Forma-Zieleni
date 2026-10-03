@@ -89,6 +89,7 @@ export type AdminFileRow = {
   mimeType: string;
   sizeBytes: number;
   visibleToClient: boolean;
+  createdAt: string;
 };
 
 export type AdminFileList =
@@ -1683,6 +1684,7 @@ type FileApiItem = {
   mimeType?: unknown;
   sizeBytes?: unknown;
   clientSubject?: unknown;
+  createdAt?: unknown;
   storageKey?: unknown;
   url?: unknown;
   bytes?: unknown;
@@ -1707,6 +1709,8 @@ export function mapFilePage(body: unknown): AdminFileList {
     if (Object.hasOwn(file, 'storageKey') || Object.hasOwn(file, 'url') || Object.hasOwn(file, 'bytes') || Object.hasOwn(file, 'price')) {
       return { status: 'error' };
     }
+    const createdAt = requireAdminCreatedAt(file.createdAt);
+    if (createdAt === null) return { status: 'error' };
     rows.push({
       id: file.id,
       projectId: file.projectId,
@@ -1714,6 +1718,7 @@ export function mapFilePage(body: unknown): AdminFileList {
       mimeType: file.mimeType,
       sizeBytes: file.sizeBytes,
       visibleToClient: file.clientSubject !== null,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -3231,6 +3236,8 @@ function fileListNode(
               byteCountLabel(file.sizeBytes),
               ' · ',
               file.visibleToClient ? 'widoczny dla klienta' : 'tylko personel',
+              ' · ',
+              adminCreatedAtLabel(file.createdAt),
             ].join(''),
           ),
           createElement(

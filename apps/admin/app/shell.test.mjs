@@ -539,6 +539,8 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         mimeType: 'application/pdf',
         sizeBytes: 2048,
         clientSubject: 'client-a',
+        createdAt: '2026-09-24T12:30:00.000Z',
+        updatedAt: '2026-09-24T12:40:00.000Z',
       }],
     }),
     {
@@ -550,8 +552,23 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         mimeType: 'application/pdf',
         sizeBytes: 2048,
         visibleToClient: true,
+        createdAt: '2026-09-24T12:30:00.000Z',
       }],
     },
+  );
+  assert.equal(
+    mapFilePage({
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+        clientSubject: 'client-a',
+        createdAt: 'wczoraj',
+      }],
+    }).status,
+    'error',
   );
   assert.deepEqual(
     mapFilePage({
@@ -562,6 +579,7 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         mimeType: 'application/pdf',
         sizeBytes: 2048,
         clientSubject: null,
+        createdAt: '2026-09-24T12:30:00.000Z',
       }],
     }).items?.[0]?.visibleToClient,
     false,
@@ -625,6 +643,7 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         mimeType: 'application/pdf',
         sizeBytes: 2048,
         visibleToClient: true,
+        createdAt: '2026-09-24T12:30:00.000Z',
       }],
     },
     fileProjectQuery: 'pr8k2n4p6q8r0s2t',
@@ -632,7 +651,8 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
   }));
   assert.match(filteredFileHtml, /Pokaż pliki projektu/);
   assert.match(filteredFileHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
-  assert.match(filteredFileHtml, /plan\.pdf · projekt pr8k2n4p6q8r0s2t · application\/pdf · 2 048 B · widoczny dla klienta/);
+  assert.match(filteredFileHtml, /plan\.pdf · projekt pr8k2n4p6q8r0s2t · application\/pdf · 2 048 B · widoczny dla klienta · 24 września 2026, 12:30 UTC/);
+  assert.equal(filteredFileHtml.includes('2026-09-24T12:30:00.000Z'), false);
   assert.equal(filteredFileHtml.includes('2048 B'), false);
   assert.equal(filteredFileHtml.includes('2 KB'), false);
   assert.equal(formatByteCount(1048576), '1 048 576 B');
@@ -883,6 +903,7 @@ test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty
         mimeType: 'application/octet-stream',
         sizeBytes: bytes.byteLength,
         visibleToClient: true,
+        createdAt: '2026-09-24T12:30:00.000Z',
       }],
     },
   }));
@@ -926,6 +947,7 @@ test('staff files sort by Polish name and keep a hidden file', () => {
           mimeType: 'application/pdf',
           sizeBytes: 10,
           visibleToClient: false,
+          createdAt: '2026-09-24T12:30:00.000Z',
         },
         {
           id: 'fl8k2n4p6q8r0s2t',
@@ -934,6 +956,7 @@ test('staff files sort by Polish name and keep a hidden file', () => {
           mimeType: 'application/pdf',
           sizeBytes: 11,
           visibleToClient: true,
+          createdAt: '2026-09-24T12:30:00.000Z',
         },
         {
           id: 'fl8k2n4p6q8r0s2u',
@@ -942,6 +965,7 @@ test('staff files sort by Polish name and keep a hidden file', () => {
           mimeType: 'application/pdf',
           sizeBytes: 12,
           visibleToClient: true,
+          createdAt: '2026-09-24T12:30:00.000Z',
         },
       ],
     },
