@@ -1321,6 +1321,20 @@ Contract: [`PORTAL-PROJECT-SITE.md`](./PORTAL-PROJECT-SITE.md).
 Security: uses the site list the portal already loaded. No mutation.
 Next: none.
 
+### ADMIN-FILE-PROJECT-FILTER
+
+Dependencies: ADMIN-FILE-VISIBILITY, ADMIN-MILESTONE-PROJECT-FILTER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can show files for one opaque project id. An invalid id is
+not sent to Core API. Clearing the filter shows the full list again.
+No new store, byte path, or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-FILE-PROJECT-FILTER.md`](./ADMIN-FILE-PROJECT-FILTER.md).
+Security: read-only. Uses the existing file list query.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

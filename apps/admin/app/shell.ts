@@ -239,6 +239,9 @@ export type AdminHome =
       decisionProjectQuery?: string;
       decisionProjectId?: string | null;
       decisionFilterInvalid?: boolean;
+      fileProjectQuery?: string;
+      fileProjectId?: string | null;
+      fileFilterInvalid?: boolean;
     };
 
 /**
@@ -1559,13 +1562,18 @@ export function mapFilePage(body: unknown): AdminFileList {
 export async function fetchAdminFiles(input: {
   base: string;
   cookie?: string;
+  projectId?: string;
   fetchImpl?: typeof fetch;
 }): Promise<AdminFileList> {
+  const filter = adminFileProjectFilter(input.projectId);
+  if (filter.state === 'invalid') return { status: 'error' };
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = { accept: 'application/json' };
     if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/files?limit=50', input.base), {
+    const url = new URL('/v1/files?limit=50', input.base);
+    if (filter.state === 'project') url.searchParams.set('projectId', filter.projectId);
+    const response = await fetchImpl(url, {
       credentials: 'include',
       headers,
     });
@@ -2269,6 +2277,11 @@ export function adminDecisionLogProjectFilter(value: string | null | undefined):
 }
 
 /** Empty means the full list. A filled id must already be an opaque project id. */
+export function adminFileProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
+  return adminMilestoneProjectFilter(value);
+}
+
+/** Empty means the full list. A filled id must already be an opaque project id. */
 export function adminMilestoneProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return { state: 'all' };
@@ -2835,21 +2848,46 @@ function fileBytesControls(file: AdminFileRow): ReactNode {
   );
 }
 
-function fileListNode(files: AdminFileList): ReactNode {
-  if (files.status === 'empty') {
-    return createElement('p', null, 'Brak plików do pokazania.');
-  }
-  if (files.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać listy plików.');
-  }
-  if (files.status === 'error') {
-    return createElement('p', null, 'Listy plików nie udało się pobrać. Odśwież stronę.');
-  }
+function fileProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
-    'section',
-    { className: 'admin-files', 'aria-label': 'Pliki' },
-    createElement('h2', null, 'Pliki'),
+    'form',
+    { method: 'get', className: 'admin-file-filter' },
     createElement(
+      'label',
+      { className: 'admin-file-filter-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'fileProject',
+        autoComplete: 'off',
+        spellCheck: false,
+        defaultValue: query,
+      }),
+    ),
+    createElement('button', { type: 'submit' }, 'Pokaż pliki projektu'),
+    projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
+  );
+}
+
+function fileListNode(
+  files: AdminFileList,
+  filter: { query: string; projectId: string | null; invalid: boolean },
+): ReactNode {
+  let body: ReactNode;
+  if (filter.invalid) {
+    body = createElement(
+      'p',
+      { className: 'admin-file-filter-invalid' },
+      'Id projektu jest niepoprawne. Lista plików nie została pobrana.',
+    );
+  } else if (files.status === 'empty') {
+    body = createElement('p', null, 'Brak plików do pokazania.');
+  } else if (files.status === 'forbidden') {
+    body = createElement('p', null, 'To konto nie może odczytać listy plików.');
+  } else if (files.status === 'error') {
+    body = createElement('p', null, 'Listy plików nie udało się pobrać. Odśwież stronę.');
+  } else {
+    body = createElement(
       'ul',
       { className: 'admin-file-list' },
       ...files.items.map((file) =>
@@ -2912,7 +2950,17 @@ function fileListNode(files: AdminFileList): ReactNode {
           fileBytesControls(file),
         ),
       ),
-    ),
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'admin-files', 'aria-label': 'Pliki' },
+    createElement('h2', null, 'Pliki'),
+    fileProjectFilterForm(filter.query, filter.projectId),
+    filter.projectId
+      ? createElement('p', { className: 'admin-file-filter-active' }, `Filtr projektu: ${filter.projectId}`)
+      : null,
+    body,
   );
 }
 
@@ -3458,7 +3506,11 @@ export function adminShell(home: AdminHome): ReactNode {
       invalid: home.decisionFilterInvalid === true,
     }),
     createDecisionLogForm(),
-    fileListNode(home.files),
+    fileListNode(home.files, {
+      query: home.fileProjectQuery ?? '',
+      projectId: home.fileProjectId ?? null,
+      invalid: home.fileFilterInvalid === true,
+    }),
     createFileForm(),
   );
 }

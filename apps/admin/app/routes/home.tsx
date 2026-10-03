@@ -5,6 +5,7 @@ import type { Route } from './+types/home';
 import {
   ADMIN_FILE_BYTES_MAX,
   adminDecisionLogProjectFilter,
+  adminFileProjectFilter,
   adminMilestoneProjectFilter,
   adminShell,
   advanceAdminContractLifecycle,
@@ -69,6 +70,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   const searchParams = new URL(request.url).searchParams;
   const milestoneFilter = adminMilestoneProjectFilter(searchParams.get('milestoneProject'));
   const decisionFilter = adminDecisionLogProjectFilter(searchParams.get('decisionProject'));
+  const fileFilter = adminFileProjectFilter(searchParams.get('fileProject'));
   const home = await resolveAdminHome({
     async probe() {
       const headers: Record<string, string> = { accept: 'application/json' };
@@ -99,7 +101,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       return fetchAdminProjects({ base, cookie });
     },
     async loadFiles() {
-      return fetchAdminFiles({ base, cookie });
+      if (fileFilter.state === 'invalid') return { status: 'empty' };
+      return fetchAdminFiles({
+        base,
+        cookie,
+        projectId: fileFilter.state === 'project' ? fileFilter.projectId : undefined,
+      });
     },
     async loadPaymentSchedules() {
       return fetchAdminPaymentSchedules({ base, cookie });
@@ -147,6 +154,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
     decisionProjectQuery: decisionFilter.state === 'all' ? '' : searchParams.get('decisionProject')?.trim() ?? '',
     decisionProjectId: decisionFilter.state === 'project' ? decisionFilter.projectId : null,
     decisionFilterInvalid: decisionFilter.state === 'invalid',
+    fileProjectQuery: fileFilter.state === 'all' ? '' : searchParams.get('fileProject')?.trim() ?? '',
+    fileProjectId: fileFilter.state === 'project' ? fileFilter.projectId : null,
+    fileFilterInvalid: fileFilter.state === 'invalid',
   };
 }
 

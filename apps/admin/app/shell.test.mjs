@@ -44,6 +44,7 @@ import {
   fetchAdminDecisionLog,
   fetchAdminSiteIntelligence,
   adminDecisionLogProjectFilter,
+  adminFileProjectFilter,
   adminMilestoneProjectFilter,
   fetchAdminMilestones,
   fetchAdminOffers,
@@ -510,6 +511,58 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
     fetchImpl: async () => new Response('', { status: 403 }),
   });
   assert.deepEqual(forbidden, { status: 'forbidden' });
+
+  const filteredFiles = await fetchAdminFiles({
+    base: 'http://127.0.0.1:8787',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    fetchImpl: async (url) => {
+      assert.match(String(url), /\/v1\/files\?limit=50&projectId=pr8k2n4p6q8r0s2t$/);
+      return new Response(JSON.stringify({ items: [] }), { status: 200 });
+    },
+  });
+  assert.deepEqual(filteredFiles, { status: 'empty' });
+  const refusedFiles = await fetchAdminFiles({
+    base: 'http://127.0.0.1:8787',
+    projectId: 'project1',
+    fetchImpl: async () => {
+      assert.fail('an invalid project id must not call Core API');
+      return new Response('', { status: 500 });
+    },
+  });
+  assert.deepEqual(refusedFiles, { status: 'error' });
+  assert.deepEqual(adminFileProjectFilter('pr8k2n4p6q8r0s2t'), {
+    state: 'project',
+    projectId: 'pr8k2n4p6q8r0s2t',
+  });
+  const filteredFileHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    files: {
+      status: 'ready',
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+        visibleToClient: true,
+      }],
+    },
+    fileProjectQuery: 'pr8k2n4p6q8r0s2t',
+    fileProjectId: 'pr8k2n4p6q8r0s2t',
+  }));
+  assert.match(filteredFileHtml, /Pokaż pliki projektu/);
+  assert.match(filteredFileHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
+  assert.match(filteredFileHtml, /plan\.pdf/);
+  const invalidFileHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    files: { status: 'empty' },
+    fileProjectQuery: 'project1',
+    fileFilterInvalid: true,
+  }));
+  assert.match(invalidFileHtml, /Id projektu jest niepoprawne\. Lista plików nie została pobrana\./);
+  assert.equal(invalidFileHtml.includes('plan.pdf'), false);
 
   const created = await createAdminFile({
     base: 'http://127.0.0.1:8787',
