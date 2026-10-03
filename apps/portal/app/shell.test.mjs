@@ -669,6 +669,49 @@ test('signed-in portal renders client milestones without payment or signing', as
   );
 });
 
+test('a milestone row names its own project', () => {
+  assert.deepEqual(mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: '   ',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: null,
+      createdAt: '2026-09-24T18:00:00.000Z',
+    }],
+  }), { status: 'error' });
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    milestones: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ms8k2n4p6q8r0s2t',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          title: 'Koncepcja',
+          status: 'planned',
+          dueAt: null,
+          createdAt: '2026-09-24T18:00:00.000Z',
+        },
+        {
+          id: 'ms8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          title: 'Sadzenie',
+          status: 'active',
+          dueAt: '2026-11-01T10:00:00.000Z',
+          createdAt: '2026-09-24T19:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const first = html.slice(html.indexOf('Koncepcja'), html.indexOf('Sadzenie'));
+  const second = html.slice(html.indexOf('Sadzenie'));
+  assert.match(first, /Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t/);
+  assert.equal(first.includes('pj8k2n4p6q8r0s2u'), false);
+  assert.match(second, /Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u/);
+  assert.equal(second.includes('pj8k2n4p6q8r0s2t'), false);
+});
+
 test('a project card names the earliest open milestone and skips done work', () => {
   const milestones = [
     {

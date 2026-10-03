@@ -500,7 +500,9 @@ export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
       dueAt?: unknown;
       createdAt?: unknown;
     };
-    if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string') return { status: 'error' };
+    if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string' || !milestone.projectId.trim()) {
+      return { status: 'error' };
+    }
     if (typeof milestone.title !== 'string' || typeof milestone.createdAt !== 'string') return { status: 'error' };
     if (!isPortalMilestoneStatus(milestone.status)) return { status: 'error' };
     if (!Object.hasOwn(milestone, 'dueAt')) return { status: 'error' };
@@ -1173,6 +1175,8 @@ function milestoneListNode(milestones: PortalMilestoneList): ReactNode {
               milestoneStatusLabel(milestone.status),
               ' · ',
               portalMilestoneDueLabel(milestone.dueAt) ?? 'termin nieczytelny',
+              ' · projekt ',
+              milestone.projectId,
             ].join(''),
           ),
         ),

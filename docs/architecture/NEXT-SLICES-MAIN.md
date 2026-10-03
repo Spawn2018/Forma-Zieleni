@@ -1351,6 +1351,20 @@ Contract: [`MILESTONE-DUE-LABELS.md`](./MILESTONE-DUE-LABELS.md).
 Security: display only. No new due field and no mutation.
 Next: none.
 
+### PORTAL-MILESTONE-PROJECT
+
+Dependencies: PORTAL-MILESTONE-VIEW, PORTAL-PROJECT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a milestone row names the project id already stored on that
+milestone. Another milestone’s project stays off the row. A blank project
+id fails the list map. No new store or payment field.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-MILESTONE-PROJECT.md`](./PORTAL-MILESTONE-PROJECT.md).
+Security: display only. Uses the milestone projection the portal already maps.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

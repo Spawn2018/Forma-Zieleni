@@ -601,6 +601,14 @@ row('FZ-REQ-PORTAL-019', 'A portal milestone shows its due instant in Polish UTC
   executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'PORTAL-PROJECT-NEXT-MILESTONE'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-020', 'A portal milestone row names the project id already stored on that milestone. Another milestone’s project stays off the row. A blank project id fails the list map. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The row prints the project id the milestone projection already kept. The separate project list stays.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'MILESTONE_PROJECT',
+  executableSlice: 'PORTAL-MILESTONE-PROJECT',
+  executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'PORTAL-PROJECT-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
