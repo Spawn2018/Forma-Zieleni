@@ -23,6 +23,7 @@ import {
   portalContractStatusLabel,
   comparePortalFiles,
   comparePortalGardens,
+  comparePortalOffers,
   comparePortalSites,
   comparePortalMilestones,
   formatByteCount,
@@ -1000,6 +1001,44 @@ test('portal gardens order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/portal-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
+});
+
+test('portal offers order by the recorded instant', () => {
+  assert.equal(
+    comparePortalOffers(
+      { id: 'of8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'of8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    offers: {
+      status: 'ready',
+      items: [
+        {
+          id: 'of8k2n4p6q8r0s2w',
+          opportunityId: 'op8k2n4p6q8r0s2t',
+          status: 'draft',
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'of8k2n4p6q8r0s2u',
+          opportunityId: 'op8k2n4p6q8r0s2t',
+          status: 'draft',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'of8k2n4p6q8r0s2t',
+          opportunityId: 'op8k2n4p6q8r0s2u',
+          status: 'draft',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/portal-offer-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['of8k2n4p6q8r0s2t', 'of8k2n4p6q8r0s2u', 'of8k2n4p6q8r0s2w']);
 });
 
 test('portal site records order by the recorded instant', () => {

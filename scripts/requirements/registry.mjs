@@ -689,6 +689,14 @@ row('FZ-REQ-PORTAL-030', 'A client milestone shows its recorded instant in Polis
   executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'RECORD-CREATED-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-031', 'The client offer list orders offers by the earlier recorded instant. The same instant stays in id order. Every offer stays. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of offers the client already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PORTAL_OFFER_ORDER',
+  executableSlice: 'PORTAL-OFFER-ORDER',
+  executableWhenComplete: ['PORTAL-OFFER-VIEW', 'RECORD-CREATED-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

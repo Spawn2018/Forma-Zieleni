@@ -964,7 +964,7 @@ function offerListNode(offers: PortalOfferList, contracts: PortalContractList): 
     createElement(
       'ul',
       { className: 'portal-offer-list' },
-      ...offers.items.map((offer) =>
+      ...[...offers.items].sort(comparePortalOffers).map((offer) =>
         createElement(
           'li',
           { key: offer.id, className: 'portal-offer' },
@@ -1160,6 +1160,16 @@ function projectListNode(
       ),
     ),
   );
+}
+
+/** Earlier recorded instant first. The same instant stays in id order. Every offer stays. */
+export function comparePortalOffers(
+  left: Pick<PortalOfferRow, 'id' | 'createdAt'>,
+  right: Pick<PortalOfferRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
 }
 
 /** Earlier recorded instant first. The same instant stays in id order. Every site record stays. */
