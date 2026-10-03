@@ -1029,6 +1029,42 @@ test('portal file projection is read-only, empty without grant, and BOLA-isolate
   assert.equal(portalNamed.name, 'układ.pdf');
   assert.equal(Object.hasOwn(portalNamed, 'updatedAt'), false);
   assert.equal(Object.hasOwn(portalNamed, 'storageKey'), false);
+
+  const hiddenByPortal = await app.request(`/v1/files/${file.id}/visibility`, json({ visible: false }, {
+    ...bearer(portal),
+    'idempotency-key': 'file-hide-portal',
+  }));
+  assert.equal(hiddenByPortal.status, 403);
+  const hiddenWithSubject = await app.request(`/v1/files/${file.id}/visibility`, json({
+    visible: false,
+    clientSubject: 'other-client',
+  }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-hide-subject',
+  }));
+  assert.equal(hiddenWithSubject.status, 400);
+  const hidden = await app.request(`/v1/files/${file.id}/visibility`, json({ visible: false }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-hide',
+  }));
+  assert.equal(hidden.status, 200);
+  assert.equal((await hidden.json()).clientSubject, null);
+  assert.equal((await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portal) })).status, 404);
+  const shown = await app.request(`/v1/files/${file.id}/visibility`, json({ visible: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-show',
+  }));
+  assert.equal(shown.status, 200);
+  const shownBody = await shown.json();
+  assert.equal(shownBody.clientSubject, file.clientSubject);
+  assert.equal(shownBody.name, 'układ.pdf');
+  assert.equal((await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portal) })).status, 200);
+  assert.equal((await app.request(`/v1/portal/files/${file.id}`, { headers: bearer(portalOther) })).status, 404);
+  const absent = await app.request(`/v1/files/${staffFile.id}/visibility`, json({ visible: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'file-show-absent',
+  }));
+  assert.equal(absent.status, 400);
 });
 
 test('staff can store and download local private file bytes; portal cannot', async () => {

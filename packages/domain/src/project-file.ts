@@ -133,3 +133,46 @@ export function reviseProjectFileName(
     updatedAt: at,
   };
 }
+
+const FORBIDDEN_VISIBILITY_KEYS = new Set([
+  'payment',
+  'provider',
+  'signing',
+  'storageKey',
+  'bytes',
+  'url',
+  'path',
+  'bucket',
+  'secret',
+  'email',
+  'phone',
+  'name',
+  'clientSubject',
+]);
+
+/**
+ * Staff shows the file to the project's client, or hides it.
+ * The subject is copied from the project. A caller cannot name a subject.
+ * Name, bytes, mime type, and size stay put.
+ */
+export function reviseProjectFileVisibility(
+  file: ProjectFile,
+  project: Project,
+  visible: boolean,
+  at: string,
+  surface: Record<string, unknown> = {},
+): ProjectFile {
+  for (const key of Object.keys(surface)) {
+    if (FORBIDDEN_VISIBILITY_KEYS.has(key)) throw new Error('PROJECT_FILE_SURFACE_FORBIDDEN');
+  }
+  if (file.projectId !== project.id) throw new Error('PROJECT_FILE_PROJECT_MISMATCH');
+  const nextSubject = visible ? project.clientSubject : null;
+  if (visible && !nextSubject) throw new Error('PROJECT_FILE_CLIENT_ABSENT');
+  if (nextSubject === file.clientSubject) return file;
+  if (at < file.updatedAt) throw new Error('PROJECT_FILE_AT_INVALID');
+  return {
+    ...file,
+    clientSubject: nextSubject,
+    updatedAt: at,
+  };
+}

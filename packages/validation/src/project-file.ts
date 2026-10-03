@@ -86,3 +86,28 @@ export function validateProjectFileNameRequest(
   }
   return { ok: true, value: { name: body.name } };
 }
+
+export type ProjectFileVisibilityRequest = { visible: boolean };
+
+export function validateProjectFileVisibilityRequest(
+  value: unknown,
+): { ok: true; value: ProjectFileVisibilityRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  if (Object.hasOwn(body, 'storageKey') || Object.hasOwn(body, 'bytes') || Object.hasOwn(body, 'url') || Object.hasOwn(body, 'path')) {
+    return { ok: false, errors: [{ field: 'storageKey', reason: 'BINARY_PAYLOAD_FORBIDDEN' }] };
+  }
+  for (const key of ['payment', 'provider', 'signing', 'clientSubject', 'name']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'visible');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.visible !== 'boolean') {
+    return { ok: false, errors: [{ field: 'visible', reason: 'BOOLEAN_REQUIRED' }] };
+  }
+  return { ok: true, value: { visible: body.visible } };
+}

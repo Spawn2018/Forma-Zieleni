@@ -21,6 +21,7 @@ import {
   createAdminOpportunity,
   createAdminFile,
   reviseAdminFileName,
+  reviseAdminFileVisibility,
   createAdminGarden,
   createAdminDecisionLogEntry,
   reviseAdminDecisionLogSummary,
@@ -428,6 +429,7 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         name: 'plan.pdf',
         mimeType: 'application/pdf',
         sizeBytes: 2048,
+        clientSubject: 'client-a',
       }],
     }),
     {
@@ -438,8 +440,34 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
         name: 'plan.pdf',
         mimeType: 'application/pdf',
         sizeBytes: 2048,
+        visibleToClient: true,
       }],
     },
+  );
+  assert.deepEqual(
+    mapFilePage({
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+        clientSubject: null,
+      }],
+    }).items?.[0]?.visibleToClient,
+    false,
+  );
+  assert.equal(
+    mapFilePage({
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048,
+      }],
+    }).status,
+    'error',
   );
 
   const empty = await fetchAdminFiles({
@@ -516,6 +544,20 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
     },
   });
   assert.deepEqual(blankName, { ok: false, reason: 'error' });
+
+  const hidden = await reviseAdminFileVisibility({
+    base: 'http://127.0.0.1:8787',
+    fileId: 'fl8k2n4p6q8r0s2t',
+    visible: false,
+    idempotencyKey: 'admin-file-hide',
+    async fetchImpl(url, init) {
+      assert.match(String(url), /\/v1\/files\/fl8k2n4p6q8r0s2t\/visibility$/);
+      assert.equal(init?.method, 'POST');
+      assert.deepEqual(JSON.parse(String(init?.body)), { visible: false });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(hidden, { ok: true });
 
   assert.deepEqual(
     await createAdminFile({
@@ -675,10 +717,15 @@ test('putAdminFileBytes and fetchAdminFileBytes stay on Core API with real empty
         name: 'notes.bin',
         mimeType: 'application/octet-stream',
         sizeBytes: bytes.byteLength,
+        visibleToClient: true,
       }],
     },
   }));
   assert.match(markup, /Popraw nazwę/);
+  assert.match(markup, /widoczny dla klienta/);
+  assert.match(markup, /Ukryj przed klientem/);
+  assert.match(markup, /name="visible" value="false"/);
+  assert.equal(markup.includes('clientSubject'), false);
   assert.match(markup, /name="fileId" value="fl8k2n4p6q8r0s2t"/);
   assert.match(markup, /Pobierz «notes\.bin»/);
   assert.match(markup, /\/files\/fl8k2n4p6q8r0s2t\/content/);

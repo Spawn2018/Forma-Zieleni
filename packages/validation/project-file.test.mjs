@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateProjectFileCreateRequest } from './src/project-file.ts';
+import { validateProjectFileCreateRequest, validateProjectFileVisibilityRequest } from './src/project-file.ts';
 
 test('validateProjectFileCreateRequest accepts metadata-only bodies', () => {
   const ok = validateProjectFileCreateRequest({
@@ -30,4 +30,13 @@ test('validateProjectFileCreateRequest rejects binary and unknown fields', () =>
     path: '/tmp/x',
   });
   assert.equal(unknown.ok, false);
+});
+
+test('validateProjectFileVisibilityRequest accepts only a boolean', () => {
+  const ok = validateProjectFileVisibilityRequest({ visible: false });
+  assert.equal(ok.ok, true);
+  if (ok.ok) assert.equal(ok.value.visible, false);
+  assert.equal(validateProjectFileVisibilityRequest({ visible: 'false' }).ok, false);
+  assert.equal(validateProjectFileVisibilityRequest({ visible: true, clientSubject: 'other' }).ok, false);
+  assert.equal(validateProjectFileVisibilityRequest({ visible: true, bytes: 'abc' }).ok, false);
 });

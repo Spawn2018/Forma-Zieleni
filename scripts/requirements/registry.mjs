@@ -600,6 +600,14 @@ row('FZ-REQ-ADMIN-021', 'Staff can correct a project file display name after cre
   executableWhenComplete: ['ADMIN-CRM-FILE', 'PORTAL-FILE-PROJECTION'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-022', 'Staff can show a project file to the project client or hide it. The subject is copied from the project. A request cannot name a subject. Name, bytes, and size stay. A hidden file leaves the portal. A project without a client cannot be shown a file.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-file.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts visible to POST /v1/files/{fileId}/visibility. The panel shows a label, not the subject.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'FILE_VISIBILITY',
+  executableSlice: 'ADMIN-FILE-VISIBILITY',
+  executableWhenComplete: ['ADMIN-FILE-NAME-REVISE', 'PORTAL-FILE-DOWNLOAD'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

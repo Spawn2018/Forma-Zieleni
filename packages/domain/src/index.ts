@@ -249,6 +249,7 @@ export {
   createProjectFile,
   projectFileForPortal,
   reviseProjectFileName,
+  reviseProjectFileVisibility,
 } from './project-file.ts';
 export type {
   CreateProjectFileInput,

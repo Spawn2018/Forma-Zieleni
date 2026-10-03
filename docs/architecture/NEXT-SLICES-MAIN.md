@@ -1218,6 +1218,23 @@ Contract: [`ADMIN-FILE-NAME-REVISE.md`](./ADMIN-FILE-NAME-REVISE.md).
 Security: uses existing `files:create`. The portal cannot rename a file.
 Next: none.
 
+### ADMIN-FILE-VISIBILITY
+
+Dependencies: ADMIN-FILE-NAME-REVISE, PORTAL-FILE-DOWNLOAD.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can show a project file to the project's client or hide
+it. The subject is copied from the project. A request cannot name a
+subject. Name, bytes, and size stay. A hidden file leaves the portal.
+A project without a client cannot be shown a file.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`,
+`packages/domain/project-file.test.mjs`.
+Contract: [`ADMIN-FILE-VISIBILITY.md`](./ADMIN-FILE-VISIBILITY.md).
+Security: uses existing `files:create`. The portal cannot change
+visibility. The audit records the boolean, not the subject.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

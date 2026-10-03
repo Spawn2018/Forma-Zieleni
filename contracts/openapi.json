@@ -1835,6 +1835,66 @@
         }
       }
     },
+    "/files/{fileId}/visibility": {
+      "post": {
+        "tags": [
+          "Files"
+        ],
+        "operationId": "reviseProjectFileVisibility",
+        "summary": "Show a project file to its client or hide it",
+        "description": "Staff sets visibility. The client subject is copied from the project when showing the file, and cleared when hiding it. The request cannot name a subject. Name, bytes, and size stay unchanged. A hidden file disappears from the portal.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectFileId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectFileVisibilityRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project file visibility revised",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectFile"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/files/{fileId}/content": {
       "put": {
         "tags": [
@@ -4967,6 +5027,19 @@
           }
         },
         "description": "A corrected file display name. Bytes, storage, and payment fields are not accepted."
+      },
+      "ProjectFileVisibilityRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "visible"
+        ],
+        "properties": {
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "description": "Show the file to the project's client, or hide it. A client subject is not accepted."
       },
       "ProjectFile": {
         "type": "object",

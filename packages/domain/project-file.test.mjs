@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createProjectFile, projectFileForPortal, reviseProjectFileName } from './src/project-file.ts';
+import { createProjectFile, projectFileForPortal, reviseProjectFileName, reviseProjectFileVisibility } from './src/project-file.ts';
 
 const project = {
   id: 'jabcdefghijklmnop',
@@ -69,6 +69,39 @@ test('file name revision keeps bytes and refuses storage fields', () => {
   );
   assert.equal(projectFileForPortal(renamed, 'client-a')?.name, 'układ.pdf');
   assert.equal(Object.hasOwn(projectFileForPortal(renamed, 'client-a') ?? {}, 'updatedAt'), false);
+});
+
+test('file visibility uses the project client and refuses a supplied subject', () => {
+  const file = createProjectFile(
+    'uabcdefghijklmnopqt',
+    project,
+    { name: 'plan.pdf', mimeType: 'application/pdf', sizeBytes: 1024 },
+    '2026-09-24T00:00:00.000Z',
+  );
+  const hidden = reviseProjectFileVisibility(file, project, false, '2026-09-24T01:00:00.000Z');
+  assert.equal(hidden.clientSubject, null);
+  assert.equal(hidden.name, file.name);
+  assert.equal(hidden.sizeBytes, file.sizeBytes);
+  assert.equal(projectFileForPortal(hidden, 'client-a'), null);
+  assert.equal(reviseProjectFileVisibility(hidden, project, false, '2026-09-24T02:00:00.000Z'), hidden);
+  const shown = reviseProjectFileVisibility(hidden, project, true, '2026-09-24T02:00:00.000Z');
+  assert.equal(shown.clientSubject, 'client-a');
+  assert.equal(projectFileForPortal(shown, 'client-b'), null);
+  const staffProject = { ...project, clientSubject: null };
+  const staffFile = createProjectFile(
+    'uabcdefghijklmnopqu',
+    staffProject,
+    { name: 'staff.pdf', mimeType: 'application/pdf', sizeBytes: 8, clientSubject: null },
+    '2026-09-24T00:00:00.000Z',
+  );
+  assert.throws(
+    () => reviseProjectFileVisibility(staffFile, staffProject, true, '2026-09-24T01:00:00.000Z'),
+    /PROJECT_FILE_CLIENT_ABSENT/,
+  );
+  assert.throws(
+    () => reviseProjectFileVisibility(file, project, false, '2026-09-24T01:00:00.000Z', { clientSubject: 'other' }),
+    /PROJECT_FILE_SURFACE_FORBIDDEN/,
+  );
 });
 
 test('rejects guessable file ids', () => {

@@ -76,6 +76,7 @@ export type AdminFileRow = {
   name: string;
   mimeType: string;
   sizeBytes: number;
+  visibleToClient: boolean;
 };
 
 export type AdminFileList =
@@ -1404,6 +1405,7 @@ type FileApiItem = {
   name?: unknown;
   mimeType?: unknown;
   sizeBytes?: unknown;
+  clientSubject?: unknown;
   storageKey?: unknown;
   url?: unknown;
   bytes?: unknown;
@@ -1421,6 +1423,10 @@ export function mapFilePage(body: unknown): AdminFileList {
     if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
     if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };
     if (typeof file.sizeBytes !== 'number' || !Number.isInteger(file.sizeBytes) || file.sizeBytes < 0) return { status: 'error' };
+    if (!Object.hasOwn(file, 'clientSubject')) return { status: 'error' };
+    if (file.clientSubject !== null && (typeof file.clientSubject !== 'string' || !file.clientSubject.trim())) {
+      return { status: 'error' };
+    }
     if (Object.hasOwn(file, 'storageKey') || Object.hasOwn(file, 'url') || Object.hasOwn(file, 'bytes') || Object.hasOwn(file, 'price')) {
       return { status: 'error' };
     }
@@ -1430,6 +1436,7 @@ export function mapFilePage(body: unknown): AdminFileList {
       name: file.name,
       mimeType: file.mimeType,
       sizeBytes: file.sizeBytes,
+      visibleToClient: file.clientSubject !== null,
     });
   }
   return { status: 'ready', items: rows };
@@ -1524,6 +1531,39 @@ export async function reviseAdminFileName(input: {
         credentials: 'include',
         headers,
         body: JSON.stringify({ name }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export async function reviseAdminFileVisibility(input: {
+  base: string;
+  fileId: string;
+  visible: boolean;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/files/${encodeURIComponent(input.fileId)}/visibility`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ visible: input.visible }),
       },
     );
     if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
@@ -2590,7 +2630,32 @@ function fileListNode(files: AdminFileList): ReactNode {
           createElement(
             'p',
             { className: 'admin-file-meta' },
-            [file.name, ' · projekt ', file.projectId, ' · ', file.mimeType, ' · ', String(file.sizeBytes), ' B'].join(''),
+            [
+              file.name,
+              ' · projekt ',
+              file.projectId,
+              ' · ',
+              file.mimeType,
+              ' · ',
+              String(file.sizeBytes),
+              ' B · ',
+              file.visibleToClient ? 'widoczny dla klienta' : 'tylko personel',
+            ].join(''),
+          ),
+          createElement(
+            'form',
+            { method: 'post', className: 'admin-file-visibility' },
+            createElement('input', { type: 'hidden', name: 'fileId', value: file.id }),
+            createElement('input', {
+              type: 'hidden',
+              name: 'visible',
+              value: file.visibleToClient ? 'false' : 'true',
+            }),
+            createElement(
+              'button',
+              { type: 'submit', name: 'intent', value: 'set-file-visibility' },
+              file.visibleToClient ? 'Ukryj przed klientem' : 'Pokaż klientowi',
+            ),
           ),
           createElement(
             'form',

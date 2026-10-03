@@ -11,6 +11,7 @@ import {
   createAdminOpportunity,
   createAdminFile,
   reviseAdminFileName,
+  reviseAdminFileVisibility,
   capacityDecisionMessage,
   closeAdminCapacityWindow,
   createAdminCapacityWindow,
@@ -594,6 +595,28 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       fileId: fileId.trim(),
       name: name.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'set-file-visibility') {
+    const fileId = form.get('fileId');
+    const visible = form.get('visible');
+    if (typeof fileId !== 'string' || !fileId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (visible !== 'true' && visible !== 'false') {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await reviseAdminFileVisibility({
+      base,
+      fileId: fileId.trim(),
+      visible: visible === 'true',
       idempotencyKey: randomUUID(),
       cookie,
     });
