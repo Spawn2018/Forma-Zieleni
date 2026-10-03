@@ -569,6 +569,14 @@ row('FZ-REQ-PORTAL-015', 'A portal client sees Polish labels for offer, contract
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-PROJECTION', 'PORTAL-OFFER-PROJECTION'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-016', 'A portal project card names the garden already loaded for that project. A garden of another project stays off the card. A failed garden read is not shown as an empty garden. No live garden, twin, or new store is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The card uses the portal garden list the client already loaded. The separate garden list stays.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PROJECT_GARDEN',
+  executableSlice: 'PORTAL-PROJECT-GARDEN',
+  executableWhenComplete: ['PORTAL-GARDEN-VIEW', 'PORTAL-PROJECT-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

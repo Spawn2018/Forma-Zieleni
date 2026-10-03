@@ -23,6 +23,7 @@ import {
   portalContractStatusLabel,
   portalOfferStatusLabel,
   portalProjectFiles,
+  portalProjectGarden,
   portalProjectStatusLabel,
   portalErrorMessage,
   portalOriginAllowed,
@@ -784,6 +785,50 @@ test('a project card lists only that project’s files', () => {
   }));
   assert.match(failed, /Listy plików nie udało się pobrać\./);
   assert.equal(failed.includes('Pliki: brak'), false);
+});
+
+test('a project card names only that project’s garden', () => {
+  const gardens = [
+    {
+      id: 'gd8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      createdAt: '2026-09-24T13:00:00.000Z',
+    },
+    {
+      id: 'gd8k2n4p6q8r0s2u',
+      projectId: 'pj8k2n4p6q8r0s2u',
+      createdAt: '2026-09-24T13:10:00.000Z',
+    },
+  ];
+  assert.equal(portalProjectGarden('pj8k2n4p6q8r0s2t', gardens)?.id, 'gd8k2n4p6q8r0s2t');
+  assert.equal(portalProjectGarden('pj8k2n4p6q8r0s2v', gardens), null);
+  const project = {
+    id: 'pj8k2n4p6q8r0s2t',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    status: 'delivered',
+    createdAt: '2026-09-24T12:00:00.000Z',
+  };
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    gardens: { status: 'ready', items: gardens },
+  }));
+  const gardenLine = html.match(/portal-project-garden">([^<]+)/)?.[1] ?? '';
+  assert.equal(gardenLine, 'Ogród: gd8k2n4p6q8r0s2t');
+  assert.equal(gardenLine.includes('gd8k2n4p6q8r0s2u'), false);
+  const missing = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    gardens: { status: 'empty' },
+  }));
+  assert.match(missing, /Ogród: brak/);
+  const failed = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    gardens: { status: 'error' },
+  }));
+  assert.match(failed, /Ogrodu nie udało się odczytać\./);
+  assert.equal(failed.includes('Ogród: brak'), false);
 });
 
 test('the route module keeps an error boundary and does not invent CRM facts', () => {

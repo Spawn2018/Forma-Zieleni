@@ -84,6 +84,14 @@ export type PortalGardenList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+/** The garden already loaded for one project, or null. */
+export function portalProjectGarden(
+  projectId: string,
+  gardens: readonly PortalGardenRow[],
+): PortalGardenRow | null {
+  return gardens.find((garden) => garden.projectId === projectId) ?? null;
+}
+
 export type PortalSiteFinding = {
   id: string;
   code: string;
@@ -885,6 +893,15 @@ function projectNextMilestoneLine(projectId: string, milestones: PortalMilestone
   return ['Następny: ', next.title, ' · ', milestoneStatusLabel(next.status), ' · ', next.dueAt ?? 'bez terminu'].join('');
 }
 
+function projectGardenLine(projectId: string, gardens: PortalGardenList): string {
+  if (gardens.status === 'error') return 'Ogrodu nie udało się odczytać.';
+  if (gardens.status === 'forbidden') return 'To konto nie może odczytać ogrodu.';
+  if (gardens.status !== 'ready') return 'Ogród: brak';
+  const garden = portalProjectGarden(projectId, gardens.items);
+  if (!garden) return 'Ogród: brak';
+  return `Ogród: ${garden.id}`;
+}
+
 function projectFileNodes(projectId: string, files: PortalFileList): ReactNode {
   if (files.status === 'error') {
     return createElement('p', { className: 'portal-project-files' }, 'Listy plików nie udało się pobrać.');
@@ -917,6 +934,7 @@ function projectListNode(
   projects: PortalProjectList,
   milestones: PortalMilestoneList,
   files: PortalFileList,
+  gardens: PortalGardenList,
 ): ReactNode {
   if (projects.status !== 'ready') {
     return listStateNode(
@@ -947,6 +965,11 @@ function projectListNode(
             'p',
             { className: 'portal-project-next' },
             projectNextMilestoneLine(project.id, milestones),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-project-garden' },
+            projectGardenLine(project.id, gardens),
           ),
           projectFileNodes(project.id, files),
         ),
@@ -1151,7 +1174,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
     contractListNode(home.contracts),
-    projectListNode(home.projects, home.milestones, home.files),
+    projectListNode(home.projects, home.milestones, home.files, home.gardens),
     fileListNode(home.files),
     gardenListNode(home.gardens),
     siteListNode(home.siteIntelligence),

@@ -1278,6 +1278,20 @@ Contract: [`ADMIN-STATUS-LABELS.md`](./ADMIN-STATUS-LABELS.md).
 Security: read-only labels. Lifecycle posts still send the machine status.
 Next: none.
 
+### PORTAL-PROJECT-GARDEN
+
+Dependencies: PORTAL-GARDEN-VIEW, PORTAL-PROJECT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a project card names the garden already loaded for that project.
+A garden of another project stays off the card. A failed garden read is
+not shown as an empty garden. No live garden, twin, or new store.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-GARDEN.md`](./PORTAL-PROJECT-GARDEN.md).
+Security: uses the garden list the portal already loaded. No mutation.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.
