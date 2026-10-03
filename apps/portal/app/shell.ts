@@ -1161,6 +1161,16 @@ function projectListNode(
   );
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every site record stays. */
+export function comparePortalSites(
+  left: Pick<PortalSiteRow, 'id' | 'createdAt'>,
+  right: Pick<PortalSiteRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 /** Earlier recorded instant first. The same instant stays in id order. Every garden stays. */
 export function comparePortalGardens(
   left: Pick<PortalGardenRow, 'id' | 'createdAt'>,
@@ -1220,7 +1230,7 @@ function siteListNode(sites: PortalSiteList): ReactNode {
     createElement(
       'ul',
       { className: 'portal-site-list' },
-      ...sites.items.map((record) =>
+      ...[...sites.items].sort(comparePortalSites).map((record) =>
         createElement(
           'li',
           { key: record.id, className: 'portal-site-record' },

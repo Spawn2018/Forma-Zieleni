@@ -23,6 +23,7 @@ import {
   portalContractStatusLabel,
   comparePortalFiles,
   comparePortalGardens,
+  comparePortalSites,
   comparePortalMilestones,
   formatByteCount,
   portalContractProjectLine,
@@ -978,6 +979,52 @@ test('portal gardens order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/portal-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
+});
+
+test('portal site records order by the recorded instant', () => {
+  assert.equal(
+    comparePortalSites(
+      { id: 'si8k2n4p6q8r0s2u', createdAt: '2026-09-24T15:00:00.000Z' },
+      { id: 'si8k2n4p6q8r0s2t', createdAt: '2026-09-24T15:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    siteIntelligence: {
+      status: 'ready',
+      items: [
+        {
+          id: 'si8k2n4p6q8r0s2w',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          observationIds: [],
+          constraints: [],
+          opportunities: [],
+          createdAt: '2026-09-25T15:00:00.000Z',
+        },
+        {
+          id: 'si8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          observationIds: [],
+          constraints: [{ id: 'sc8k2n4p6q8r0s2u', code: 'slope' }],
+          opportunities: [],
+          createdAt: '2026-09-24T15:00:00.000Z',
+        },
+        {
+          id: 'si8k2n4p6q8r0s2t',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          observationIds: [],
+          constraints: [],
+          opportunities: [{ id: 'so8k2n4p6q8r0s2t', code: 'shade' }],
+          createdAt: '2026-09-24T15:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/portal-site-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['si8k2n4p6q8r0s2t', 'si8k2n4p6q8r0s2u', 'si8k2n4p6q8r0s2w']);
+  assert.match(html, /Ograniczenia: slope/);
+  assert.match(html, /Możliwości: shade/);
 });
 
 test('a file row names its own project', () => {
