@@ -6,6 +6,8 @@ import {
   adminContractStatusLabel,
   adminErrorMessage,
   adminOfferStatusLabel,
+  adminSiteObservationKindLabel,
+  adminSiteSourceStageLabel,
   adminProjectStatusLabel,
   adminOriginAllowed,
   adminSessionCookiePresent,
@@ -1331,8 +1333,19 @@ test('staff site UI lists rules codes and records one synthetic observation', as
   }));
   assert.match(html, /Ustalenia o terenie/);
   assert.match(html, /slope-steep/);
+  assert.match(html, /si8k2n4p6q8r0s2t · projekt pr8k2n4p6q8r0s2t · reguły/);
+  assert.equal(html.includes('RULES'), false);
   assert.match(html, /Możliwości: brak/);
   assert.match(html, /Zapisz obserwację/);
+  assert.match(html, /<option value="slope"[^>]*>spadek<\/option>/);
+  assert.match(html, /<option value="topography"[^>]*>ukształtowanie<\/option>/);
+  assert.match(html, /<option value="soil"[^>]*>gleba<\/option>/);
+  assert.match(html, /<option value="sun"[^>]*>nasłonecznienie<\/option>/);
+  assert.match(html, /<option value="aspect"[^>]*>wystawa<\/option>/);
+  assert.match(html, /<option value="surroundings"[^>]*>otoczenie<\/option>/);
+  assert.match(html, /<option value="climate"[^>]*>klimat<\/option>/);
+  assert.equal(adminSiteObservationKindLabel('slope'), 'spadek');
+  assert.equal(adminSiteSourceStageLabel('RULES'), 'reguły');
   assert.equal(html.includes('client-subject-opaque'), false);
   const fetched = await fetchAdminSiteIntelligence({
     base: 'http://admin.test',

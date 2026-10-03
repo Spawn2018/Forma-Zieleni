@@ -1335,6 +1335,20 @@ Contract: [`ADMIN-FILE-PROJECT-FILTER.md`](./ADMIN-FILE-PROJECT-FILTER.md).
 Security: read-only. Uses the existing file list query.
 Next: none.
 
+### ADMIN-SITE-LABELS
+
+Dependencies: ADMIN-SITE-STAFF, ADMIN-STATUS-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff see Polish words for the seven observation kinds and for the
+RULES stage. The option value stays the machine kind. An unknown stage is
+already rejected by the list map and is not printed.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-SITE-LABELS.md`](./ADMIN-SITE-LABELS.md).
+Security: display only. The observation post still sends the existing kind.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

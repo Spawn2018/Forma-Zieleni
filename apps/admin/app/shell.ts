@@ -171,6 +171,42 @@ export const SITE_OBSERVATION_KINDS = [
 
 export type SiteObservationKind = (typeof SITE_OBSERVATION_KINDS)[number];
 
+/** Polish words for the closed observation kinds. The posted value stays the machine kind. */
+export function adminSiteObservationKindLabel(kind: SiteObservationKind): string {
+  switch (kind) {
+    case 'slope':
+      return 'spadek';
+    case 'topography':
+      return 'ukształtowanie';
+    case 'soil':
+      return 'gleba';
+    case 'sun':
+      return 'nasłonecznienie';
+    case 'aspect':
+      return 'wystawa';
+    case 'surroundings':
+      return 'otoczenie';
+    case 'climate':
+      return 'klimat';
+    default: {
+      const unreachable: never = kind;
+      return unreachable;
+    }
+  }
+}
+
+/** The only stored site stage is RULES. An unknown stage never becomes a label. */
+export function adminSiteSourceStageLabel(stage: AdminSiteRow['sourceStage']): string {
+  switch (stage) {
+    case 'RULES':
+      return 'reguły';
+    default: {
+      const unreachable: never = stage;
+      return unreachable;
+    }
+  }
+}
+
 export type AdminSiteFinding = {
   id: string;
   code: string;
@@ -2560,7 +2596,7 @@ function siteListNode(records: AdminSiteList): ReactNode {
           createElement(
             'p',
             { className: 'admin-site-meta' },
-            [record.id, ' · projekt ', record.projectId, ' · ', record.sourceStage].join(''),
+            [record.id, ' · projekt ', record.projectId, ' · ', adminSiteSourceStageLabel(record.sourceStage)].join(''),
           ),
           createElement('p', { className: 'admin-site-constraints' }, siteCodes('Ograniczenia', record.constraints)),
           createElement('p', { className: 'admin-site-opportunities' }, siteCodes('Możliwości', record.opportunities)),
@@ -2612,7 +2648,9 @@ function createSiteObservationForm(): ReactNode {
       createElement(
         'select',
         { name: 'kind', required: true, defaultValue: 'slope' },
-        ...SITE_OBSERVATION_KINDS.map((kind) => createElement('option', { key: kind, value: kind }, kind)),
+        ...SITE_OBSERVATION_KINDS.map((kind) =>
+          createElement('option', { key: kind, value: kind }, adminSiteObservationKindLabel(kind)),
+        ),
       ),
     ),
     createElement(
