@@ -848,6 +848,14 @@ row('FZ-REQ-ADMIN-039', 'A staff decision-log entry shows its recorded instant i
   executableWhenComplete: ['ADMIN-DECISION-LOG', 'RECORD-CREATED-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-040', 'The staff capacity list orders windows by earlier start. The same start stays in id order. A closed window stays on the list. No new store, calendar, or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The order is a display sort of windows staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'CAPACITY_WINDOW_ORDER',
+  executableSlice: 'CAPACITY-WINDOW-ORDER',
+  executableWhenComplete: ['CAPACITY-STAFF', 'CAPACITY-WINDOW-CLOSE'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

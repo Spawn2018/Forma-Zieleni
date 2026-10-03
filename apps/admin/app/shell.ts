@@ -3479,6 +3479,16 @@ export function capacityDecisionMessage(decision: AdminCapacityDecision): string
   return 'Rodzaj terminu nie pasuje do zapisanych okien.';
 }
 
+/** Earlier start first. Same start stays in id order. Closed windows stay. */
+export function compareAdminCapacityWindows(
+  left: Pick<AdminCapacityWindowRow, 'id' | 'startsAt'>,
+  right: Pick<AdminCapacityWindowRow, 'id' | 'startsAt'>,
+): number {
+  if (left.startsAt !== right.startsAt) return left.startsAt < right.startsAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function capacityWindowListNode(windows: AdminCapacityWindowList): ReactNode {
   if (windows.status === 'empty') {
     return createElement('p', null, 'Brak okien dyspozycyjności do pokazania.');
@@ -3496,7 +3506,7 @@ function capacityWindowListNode(windows: AdminCapacityWindowList): ReactNode {
     createElement(
       'ul',
       { className: 'admin-capacity-window-list' },
-      ...windows.items.map((window) =>
+      ...[...windows.items].sort(compareAdminCapacityWindows).map((window) =>
         createElement(
           'li',
           { key: window.id, className: 'admin-capacity-window' },

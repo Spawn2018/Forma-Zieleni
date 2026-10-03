@@ -1543,6 +1543,20 @@ Security: display only. Uses createdAt already returned by Core API.
 The actor id stays off the list.
 Next: none.
 
+### CAPACITY-WINDOW-ORDER
+
+Dependencies: CAPACITY-STAFF, CAPACITY-WINDOW-CLOSE.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff capacity list orders windows by earlier start. The same
+start stays in id order. A closed window stays on the list. No new store,
+calendar, or payment field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`CAPACITY-WINDOW-ORDER.md`](./CAPACITY-WINDOW-ORDER.md).
+Security: display sort only. Uses windows staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

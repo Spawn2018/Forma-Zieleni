@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  compareAdminCapacityWindows,
   compareAdminFiles,
   compareAdminMilestones,
   formatByteCount,
@@ -2195,6 +2196,51 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
   assert.match(closedHtml, /zamknięte 2 czerwca 2026, 08:00 UTC/);
   assert.equal(closedHtml.includes('2026-06-02T08:00:00.000Z'), false);
   assert.equal(closedHtml.includes('Zamknij okno'), false);
+  assert.equal(
+    compareAdminCapacityWindows(
+      { id: 'wcapacitywindow02', startsAt: '2026-06-02T08:00:00.000Z' },
+      { id: 'wcapacitywindow01', startsAt: '2026-06-02T08:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const orderedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    capacityWindows: {
+      status: 'ready',
+      items: [
+        {
+          id: 'wcapacitywindow02',
+          actorId: 'staffdesignerana1',
+          kind: 'start',
+          startsAt: '2026-06-02T08:00:00.000Z',
+          endsAt: '2026-06-02T12:00:00.000Z',
+          closedAt: null,
+        },
+        {
+          id: 'wcapacitywindow03',
+          actorId: 'staffdesignerana1',
+          kind: 'consultation',
+          startsAt: '2026-06-01T08:00:00.000Z',
+          endsAt: '2026-06-01T12:00:00.000Z',
+          closedAt: '2026-06-01T13:00:00.000Z',
+        },
+        {
+          id: 'wcapacitywindow01',
+          actorId: 'staffdesignerana1',
+          kind: 'consultation',
+          startsAt: '2026-06-02T08:00:00.000Z',
+          endsAt: '2026-06-02T10:00:00.000Z',
+          closedAt: null,
+        },
+      ],
+    },
+  }));
+  const rows = [...orderedHtml.matchAll(/admin-capacity-window-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(rows[0].includes('zamknięte 1 czerwca 2026, 13:00 UTC'), true);
+  assert.equal(rows[1].startsWith('konsultacja'), true);
+  assert.equal(rows[2].startsWith('start prac'), true);
+  assert.equal(rows.length, 3);
   assert.deepEqual(mapCapacityWindowPage({
     items: [{
       id: 'wcapacitywindow01',
