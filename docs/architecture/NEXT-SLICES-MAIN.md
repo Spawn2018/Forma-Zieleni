@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### PORTAL-CONTRACT-ORDER
+
+Dependencies: PORTAL-CONTRACT-VIEW, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the client contract list orders contracts by the earlier recorded
+instant. The same instant stays in id order. Every contract stays. No new
+store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-CONTRACT-ORDER.md`](./PORTAL-CONTRACT-ORDER.md).
+Security: display sort only. Uses contracts the client already loaded.
+Next: none.
+
 ### ADMIN-PAYMENT-INSTALLMENT-ORDER
 
 Dependencies: ADMIN-PAYMENT-INSTALLMENT-DUE.

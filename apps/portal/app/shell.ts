@@ -1015,7 +1015,7 @@ function contractListNode(contracts: PortalContractList, projects: PortalProject
     createElement(
       'ul',
       { className: 'portal-contract-list' },
-      ...contracts.items.map((contract) =>
+      ...[...contracts.items].sort(comparePortalContracts).map((contract) =>
         createElement(
           'li',
           { key: contract.id, className: 'portal-contract' },
@@ -1160,6 +1160,16 @@ function projectListNode(
       ),
     ),
   );
+}
+
+/** Earlier recorded instant first. The same instant stays in id order. Every contract stays. */
+export function comparePortalContracts(
+  left: Pick<PortalContractRow, 'id' | 'createdAt'>,
+  right: Pick<PortalContractRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
 }
 
 /** Earlier recorded instant first. The same instant stays in id order. Every offer stays. */
