@@ -1453,6 +1453,20 @@ Contract: [`ADMIN-GARDEN-PROJECT-FILTER.md`](./ADMIN-GARDEN-PROJECT-FILTER.md).
 Security: read filter only. Uses the existing garden list query.
 Next: none.
 
+### PORTAL-FILE-PROJECT
+
+Dependencies: PORTAL-FILE-DOWNLOAD, PORTAL-PROJECT-FILES.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a file row names the project id already stored on that file.
+Another file’s project stays off the row. A blank project id fails the
+list map. No new store or payment field.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-FILE-PROJECT.md`](./PORTAL-FILE-PROJECT.md).
+Security: display only. Uses the file projection the portal already maps.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

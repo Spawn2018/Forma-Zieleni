@@ -641,6 +641,14 @@ row('FZ-REQ-PORTAL-024', 'A portal offer, contract, project, file, garden, and s
   executableWhenComplete: ['PORTAL-PROJECT-VIEW', 'MILESTONE-DUE-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-025', 'A portal file row names the project id already stored on that file. Another file’s project stays off the row. A blank project id fails the list map. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The file line uses the project id the portal already mapped. The stored file stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'FILE_PROJECT',
+  executableSlice: 'PORTAL-FILE-PROJECT',
+  executableWhenComplete: ['PORTAL-FILE-DOWNLOAD', 'PORTAL-PROJECT-FILES'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

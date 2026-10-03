@@ -830,6 +830,48 @@ test('a milestone row names its own project', () => {
   ]);
 });
 
+test('a file row names its own project', () => {
+  assert.equal(mapPortalFilePage({
+    items: [{
+      id: 'fl8k2n4p6q8r0s2t',
+      projectId: '   ',
+      name: 'plan.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 12,
+      createdAt: '2026-09-24T12:30:00.000Z',
+    }],
+  }).status, 'error');
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    files: {
+      status: 'ready',
+      items: [
+        {
+          id: 'fl8k2n4p6q8r0s2t',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          name: 'plan.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 2048,
+          createdAt: '2026-09-24T12:30:00.000Z',
+        },
+        {
+          id: 'fl8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2u',
+          name: 'rzut.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 12,
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const lines = [...html.matchAll(/portal-file-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(lines[0].endsWith('· projekt pj8k2n4p6q8r0s2t'), true);
+  assert.equal(lines[0].includes('pj8k2n4p6q8r0s2u'), false);
+  assert.equal(lines[1].endsWith('· projekt pj8k2n4p6q8r0s2u'), true);
+  assert.equal(lines[1].includes('pj8k2n4p6q8r0s2t'), false);
+});
+
 test('a file size stays an exact grouped byte count', () => {
   assert.equal(formatByteCount(0), '0 B');
   assert.equal(formatByteCount(999), '999 B');

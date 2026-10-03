@@ -353,7 +353,9 @@ export function mapPortalFilePage(body: unknown): PortalFileList {
   for (const item of items) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const file = item as FileApiItem;
-    if (typeof file.id !== 'string' || typeof file.projectId !== 'string') return { status: 'error' };
+    if (typeof file.id !== 'string' || typeof file.projectId !== 'string' || !file.projectId.trim()) {
+      return { status: 'error' };
+    }
     if (typeof file.name !== 'string' || typeof file.mimeType !== 'string') return { status: 'error' };
     if (typeof file.sizeBytes !== 'number' || !Number.isFinite(file.sizeBytes)) return { status: 'error' };
     const createdAt = requirePortalCreatedAt(file.createdAt);
@@ -1277,6 +1279,8 @@ function fileListNode(files: PortalFileList): ReactNode {
               byteCountLabel(file.sizeBytes),
               ' · ',
               portalCreatedAtLabel(file.createdAt),
+              ' · projekt ',
+              file.projectId,
             ].join(''),
           ),
           createElement(
