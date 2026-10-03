@@ -3000,6 +3000,16 @@ function decisionLogProjectFilterForm(query: string, projectId: string | null): 
   );
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every entry stays. */
+export function compareAdminDecisionLog(
+  left: Pick<AdminDecisionLogRow, 'id' | 'createdAt'>,
+  right: Pick<AdminDecisionLogRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function decisionLogNode(
   entries: AdminDecisionLogList,
   milestones: AdminMilestoneList,
@@ -3022,7 +3032,7 @@ function decisionLogNode(
     body = createElement(
       'ul',
       { className: 'admin-decision-log-list' },
-      ...entries.items.map((entry) =>
+      ...[...entries.items].sort(compareAdminDecisionLog).map((entry) =>
         createElement(
           'li',
           { key: entry.id, className: 'admin-decision-log-entry' },

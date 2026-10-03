@@ -1617,6 +1617,20 @@ Contract: [`ADMIN-PROJECT-GARDEN.md`](./ADMIN-PROJECT-GARDEN.md).
 Security: display only. Uses the garden list staff already loaded.
 Next: none.
 
+### ADMIN-DECISION-LOG-ORDER
+
+Dependencies: ADMIN-DECISION-LOG-CREATED, ADMIN-DECISION-LOG.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff decision log orders entries by the earlier recorded
+instant. The same instant stays in id order. Every entry stays. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG-ORDER.md`](./ADMIN-DECISION-LOG-ORDER.md).
+Security: display sort only. Uses entries staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

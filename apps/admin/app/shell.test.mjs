@@ -8,6 +8,7 @@ import {
   adminProjectGardenLine,
   adminProjectNextMilestoneLine,
   nextOpenAdminMilestone,
+  compareAdminDecisionLog,
   compareAdminCapacityWindows,
   compareAdminFiles,
   compareAdminMilestones,
@@ -1441,6 +1442,55 @@ test('a staff project names only the garden already loaded for it', () => {
     'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
   );
   assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
+});
+
+test('staff decision log orders entries by the recorded instant', () => {
+  assert.equal(
+    compareAdminDecisionLog(
+      { id: 'dl8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'dl8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: {
+      status: 'ready',
+      items: [
+        {
+          id: 'dl8k2n4p6q8r0s2w',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          kind: 'change_order',
+          summary: 'Późniejsza zmiana.',
+          relatedMilestoneId: null,
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'dl8k2n4p6q8r0s2u',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          kind: 'decision',
+          summary: 'Druga tego samego dnia.',
+          relatedMilestoneId: null,
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'dl8k2n4p6q8r0s2t',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          kind: 'decision',
+          summary: 'Pierwsza tego samego dnia.',
+          relatedMilestoneId: null,
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const summaries = [...html.matchAll(/admin-decision-log-summary">([^<]+)/g)].map((match) => match[1]);
+  assert.deepEqual(summaries, [
+    'Pierwsza tego samego dnia.',
+    'Druga tego samego dnia.',
+    'Późniejsza zmiana.',
+  ]);
 });
 
 test('staff decision log lists a change and refuses a payment field', async () => {
