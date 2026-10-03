@@ -2345,7 +2345,21 @@ function createOfferForm(): ReactNode {
   );
 }
 
-function contractListNode(contracts: AdminContractList): ReactNode {
+/** Projects already loaded for this contract. A failed project read is not “no project”. */
+export function adminContractProjectLine(contractId: string, projects: AdminProjectList): string {
+  if (projects.status === 'error') return 'Projektu nie udało się odczytać.';
+  if (projects.status === 'forbidden') return 'To konto nie może odczytać listy projektów.';
+  if (projects.status !== 'ready') return 'Projekt: brak';
+  const matched = projects.items
+    .filter((item) => item.contractId === contractId)
+    .map((item) => item.id)
+    .sort();
+  if (matched.length === 0) return 'Projekt: brak';
+  if (matched.length === 1) return `Projekt: ${matched[0]}`;
+  return `Projekty: ${matched.join(', ')}`;
+}
+
+function contractListNode(contracts: AdminContractList, projects: AdminProjectList): ReactNode {
   if (contracts.status === 'empty') {
     return createElement('p', null, 'Brak umów do pokazania.');
   }
@@ -2379,6 +2393,11 @@ function contractListNode(contracts: AdminContractList): ReactNode {
               ' · ',
               adminCreatedAtLabel(contract.createdAt),
             ].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'admin-contract-project' },
+            adminContractProjectLine(contract.id, projects),
           ),
           nextStatus
             ? createElement(
@@ -3909,7 +3928,7 @@ export function adminShell(home: AdminHome): ReactNode {
     createOpportunityForm(),
     offerListNode(home.offers, home.contracts),
     createOfferForm(),
-    contractListNode(home.contracts),
+    contractListNode(home.contracts, home.projects),
     createContractForm(),
     paymentScheduleListNode(home.paymentSchedules),
     createPaymentScheduleForm(),

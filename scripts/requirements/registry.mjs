@@ -912,6 +912,14 @@ row('FZ-REQ-ADMIN-047', 'A staff offer names the contracts already loaded for th
   executableWhenComplete: ['ADMIN-COMMERCIAL-CREATED'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-048', 'A staff contract names the projects already loaded for that contract. Another contract’s project stays off the row. A failed or forbidden project read is not shown as no project. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The names are a display of projects staff already loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'CONTRACT_PROJECT',
+  executableSlice: 'ADMIN-CONTRACT-PROJECT',
+  executableWhenComplete: ['ADMIN-COMMERCIAL-CREATED', 'ADMIN-PROJECT-CREATED'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
