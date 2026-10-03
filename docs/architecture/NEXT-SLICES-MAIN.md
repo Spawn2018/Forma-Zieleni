@@ -833,6 +833,20 @@ Tests: `packages/domain/payment.test.mjs`,
 Security: staff session only; portal 403; no provider secrets.
 Next: PORTAL-OFFER-VIEW.
 
+### ADMIN-PAYMENT-SCHEDULE-ORDER
+
+Dependencies: ADMIN-PAYMENT-SCHEDULE-CREATED.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff payment schedule list orders schedules by the earlier
+recorded instant. The same instant stays in id order. Every schedule stays.
+No provider, charge, or new amount.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-PAYMENT-SCHEDULE-ORDER.md`](./ADMIN-PAYMENT-SCHEDULE-ORDER.md).
+Security: display sort only. Uses the instant already on the loaded schedule.
+Next: none.
+
 ### PORTAL-PROJECT-ORDER
 
 Dependencies: PORTAL-PROJECT-VIEW, RECORD-CREATED-LABELS.

@@ -3014,6 +3014,16 @@ export function compareAdminPaymentInstallments(
   return left.id < right.id ? -1 : 1;
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every schedule stays. */
+export function compareAdminPaymentSchedules(
+  left: Pick<AdminPaymentScheduleRow, 'id' | 'createdAt'>,
+  right: Pick<AdminPaymentScheduleRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 /** Earlier recorded instant first. The same instant stays in id order. Every project stays. */
 export function compareAdminProjects(
   left: Pick<AdminProjectRow, 'id' | 'createdAt'>,
@@ -3993,7 +4003,7 @@ function paymentScheduleListNode(schedules: AdminPaymentScheduleList): ReactNode
     createElement(
       'ul',
       { className: 'admin-payment-schedule-list' },
-      ...schedules.items.map((schedule) =>
+      ...[...schedules.items].sort(compareAdminPaymentSchedules).map((schedule) =>
         createElement(
           'li',
           { key: schedule.id, className: 'admin-payment-schedule' },

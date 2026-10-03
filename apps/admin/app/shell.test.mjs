@@ -14,6 +14,7 @@ import {
   compareAdminDecisionLog,
   compareAdminGardens,
   compareAdminContracts,
+  compareAdminPaymentSchedules,
   compareAdminProjects,
   compareAdminPaymentInstallments,
   compareAdminOffers,
@@ -1664,6 +1665,48 @@ test('a staff payment schedule shows its recorded instant', () => {
   const meta = html.match(/admin-payment-schedule-meta">([^<]+)/)?.[1] ?? '';
   assert.equal(meta, 'ps8k2n4p6q8r0s2t · umowa ct8k2n4p6q8r0s2t · PLN · 24 września 2026, 15:00 UTC');
   assert.equal(meta.includes('2026-09-24T15:00:00.000Z'), false);
+});
+
+test('staff payment schedules order by the recorded instant', () => {
+  assert.equal(
+    compareAdminPaymentSchedules(
+      { id: 'ps8k2n4p6q8r0s2u', createdAt: '2026-09-24T15:00:00.000Z' },
+      { id: 'ps8k2n4p6q8r0s2t', createdAt: '2026-09-24T15:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    paymentSchedules: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ps8k2n4p6q8r0s2w',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          currency: 'PLN',
+          createdAt: '2026-09-25T15:00:00.000Z',
+          installments: [{ id: 'pi8k2n4p6q8r0s2c', sequence: 1, amountMinor: 30000, status: 'scheduled', dueAt: null }],
+        },
+        {
+          id: 'ps8k2n4p6q8r0s2u',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          currency: 'PLN',
+          createdAt: '2026-09-24T15:00:00.000Z',
+          installments: [{ id: 'pi8k2n4p6q8r0s2b', sequence: 1, amountMinor: 20000, status: 'due', dueAt: null }],
+        },
+        {
+          id: 'ps8k2n4p6q8r0s2t',
+          contractId: 'ct8k2n4p6q8r0s2u',
+          currency: 'PLN',
+          createdAt: '2026-09-24T15:00:00.000Z',
+          installments: [{ id: 'pi8k2n4p6q8r0s2a', sequence: 1, amountMinor: 10000, status: 'recorded', dueAt: null }],
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-payment-schedule-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['ps8k2n4p6q8r0s2t', 'ps8k2n4p6q8r0s2u', 'ps8k2n4p6q8r0s2w']);
 });
 
 test('staff installments order by sequence', () => {
