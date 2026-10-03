@@ -1731,6 +1731,20 @@ Contract: [`ADMIN-GARDEN-ORDER.md`](./ADMIN-GARDEN-ORDER.md).
 Security: display sort only. Uses gardens staff already loaded.
 Next: none.
 
+### ADMIN-MILESTONE-LABELS
+
+Dependencies: ADMIN-MILESTONE-STATUS, ADMIN-STATUS-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff milestone shows its status in Polish. The labels are
+zaplanowany, w toku, and zrobiony. An unknown status token rejects the
+list. The raw token is not shown. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-MILESTONE-LABELS.md`](./ADMIN-MILESTONE-LABELS.md).
+Security: display only. The lifecycle post still sends the machine status.
+Next: none.
+
 ### ADMIN-MILESTONE-CREATED
 
 Dependencies: ADMIN-MILESTONE-STAFF, RECORD-CREATED-LABELS.

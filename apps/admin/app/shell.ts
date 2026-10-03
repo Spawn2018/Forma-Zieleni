@@ -163,11 +163,13 @@ export type AdminCapacityDecision =
   | { ok: true; windowId: string }
   | { ok: false; reason: 'CAPACITY_EMPTY' | 'CAPACITY_OUTSIDE' | 'CAPACITY_KIND_MISMATCH' };
 
+export type AdminMilestoneStatus = 'planned' | 'active' | 'done';
+
 export type AdminMilestoneRow = {
   id: string;
   projectId: string;
   title: string;
-  status: string;
+  status: AdminMilestoneStatus;
   dueAt: string | null;
   createdAt: string;
 };
@@ -1019,7 +1021,7 @@ export function mapMilestonePage(body: unknown): AdminMilestoneList {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return { status: 'error' };
     const milestone = item as MilestoneApiItem;
     if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string') return { status: 'error' };
-    if (typeof milestone.title !== 'string' || typeof milestone.status !== 'string') return { status: 'error' };
+    if (typeof milestone.title !== 'string' || !isAdminMilestoneStatus(milestone.status)) return { status: 'error' };
     if (milestone.dueAt !== null && (typeof milestone.dueAt !== 'string' || formatUtcInstantPl(milestone.dueAt) === null)) {
       return { status: 'error' };
     }
@@ -1133,17 +1135,55 @@ export async function createAdminMilestone(input: {
   }
 }
 
-/** Next staff milestone status, or null when the milestone is done. */
-export function nextAdminMilestoneStatus(status: string): string | null {
-  if (status === 'planned') return 'active';
-  if (status === 'active') return 'done';
-  return null;
+const ADMIN_MILESTONE_STATUSES = ['planned', 'active', 'done'] as const;
+
+function isAdminMilestoneStatus(status: unknown): status is AdminMilestoneStatus {
+  return typeof status === 'string' && (ADMIN_MILESTONE_STATUSES as readonly string[]).includes(status);
 }
 
-function milestoneAdvanceLabel(nextStatus: string): string {
-  if (nextStatus === 'active') return 'Rozpocznij';
-  if (nextStatus === 'done') return 'Oznacz jako zrobiony';
-  return 'Dalej';
+/** Same words the portal shows. An unknown token is not a label. */
+export function adminMilestoneStatusLabel(status: AdminMilestoneStatus): string {
+  switch (status) {
+    case 'planned':
+      return 'zaplanowany';
+    case 'active':
+      return 'w toku';
+    case 'done':
+      return 'zrobiony';
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+/** Next staff milestone status, or null when the milestone is done. */
+export function nextAdminMilestoneStatus(status: AdminMilestoneStatus): 'active' | 'done' | null {
+  switch (status) {
+    case 'planned':
+      return 'active';
+    case 'active':
+      return 'done';
+    case 'done':
+      return null;
+    default: {
+      const unreachable: never = status;
+      return unreachable;
+    }
+  }
+}
+
+function milestoneAdvanceLabel(nextStatus: 'active' | 'done'): string {
+  switch (nextStatus) {
+    case 'active':
+      return 'Rozpocznij';
+    case 'done':
+      return 'Oznacz jako zrobiony';
+    default: {
+      const unreachable: never = nextStatus;
+      return unreachable;
+    }
+  }
 }
 
 const UTC_INSTANT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?Z$/;
@@ -1214,13 +1254,6 @@ export function formatByteCount(value: number): string | null {
 
 function byteCountLabel(value: number): string {
   return formatByteCount(value) ?? 'rozmiar nieczytelny';
-}
-
-function milestoneStatusLabel(status: string): string {
-  if (status === 'planned') return 'zaplanowany';
-  if (status === 'active') return 'w toku';
-  if (status === 'done') return 'zrobiony';
-  return status;
 }
 
 export async function advanceAdminMilestoneStatus(input: {
@@ -2549,7 +2582,7 @@ export function adminProjectNextMilestoneLine(projectId: string, milestones: Adm
   const next = nextOpenAdminMilestone(projectId, milestones.items);
   if (!next) return 'Otwarte kamienie milowe: brak';
   const due = adminMilestoneDueLabel(next.dueAt) ?? 'termin nieczytelny';
-  return `Następny: ${next.title} · ${milestoneStatusLabel(next.status)} · ${due}`;
+  return `Następny: ${next.title} · ${adminMilestoneStatusLabel(next.status)} · ${due}`;
 }
 
 function polishCount(count: number, one: string, few: string, many: string): string {
@@ -2768,7 +2801,7 @@ function milestoneListNode(
             [
               milestone.title,
               ' · ',
-              milestoneStatusLabel(milestone.status),
+              adminMilestoneStatusLabel(milestone.status),
               ' · ',
               adminMilestoneDueLabel(milestone.dueAt) ?? 'termin nieczytelny',
               ' · ',

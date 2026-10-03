@@ -1000,6 +1000,14 @@ row('FZ-REQ-ADMIN-055', 'A staff milestone shows its recorded instant in Polish 
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'RECORD-CREATED-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-056', 'A staff milestone shows its status in Polish. The labels are zaplanowany, w toku, and zrobiony. An unknown status token rejects the list. The raw token is not shown. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The label is a display of the status staff already loaded. The lifecycle post still sends the machine status.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_LABELS',
+  executableSlice: 'ADMIN-MILESTONE-LABELS',
+  executableWhenComplete: ['ADMIN-MILESTONE-STATUS', 'ADMIN-STATUS-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

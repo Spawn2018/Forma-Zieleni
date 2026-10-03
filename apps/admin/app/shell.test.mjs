@@ -81,6 +81,7 @@ import {
   mapOpportunityPage,
   mapProjectPage,
   nextAdminContractLifecycleStatus,
+  adminMilestoneStatusLabel,
   nextAdminMilestoneStatus,
   putAdminFileBytes,
   qualifyAdminLead,
@@ -2363,6 +2364,9 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   assert.match(html, /Nowy tytuł/);
   assert.match(html, /Nowy termin \(UTC\)/);
   assert.equal(html.includes('Usuń termin'), false);
+  assert.equal(adminMilestoneStatusLabel('planned'), 'zaplanowany');
+  assert.equal(adminMilestoneStatusLabel('active'), 'w toku');
+  assert.equal(adminMilestoneStatusLabel('done'), 'zrobiony');
   assert.equal(nextAdminMilestoneStatus('planned'), 'active');
   assert.equal(nextAdminMilestoneStatus('active'), 'done');
   assert.equal(nextAdminMilestoneStatus('done'), null);
@@ -2618,6 +2622,16 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
       status: 'planned',
       dueAt: null,
       createdAt: 'wczoraj',
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2u',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'paused',
+      dueAt: null,
+      createdAt: '2026-09-24T12:00:00.000Z',
     }],
   }), { status: 'error' });
   const advanced = await advanceAdminMilestoneStatus({
