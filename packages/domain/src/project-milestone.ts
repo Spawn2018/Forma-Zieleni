@@ -232,6 +232,28 @@ export function reviseProjectMilestoneDue(
   };
 }
 
+/**
+ * Staff corrects the title. Status and due instant stay put.
+ * The same title is returned unchanged. No payment or signing fields.
+ */
+export function reviseProjectMilestoneTitle(
+  milestone: ProjectMilestone,
+  title: string,
+  at: string,
+  surface: Record<string, unknown> = {},
+): ProjectMilestone {
+  assertNoForbiddenSurface({ title, ...surface });
+  const updated = assertInstant(at, 'MILESTONE_AT_INVALID');
+  if (updated < milestone.updatedAt) throw new Error('MILESTONE_AT_INVALID');
+  const next = assertTitle(title);
+  if (next === milestone.title) return milestone;
+  return {
+    ...milestone,
+    title: next,
+    updatedAt: updated,
+  };
+}
+
 export function createDecisionLogEntry(
   id: string,
   project: Project,

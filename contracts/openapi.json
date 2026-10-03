@@ -2277,6 +2277,66 @@
         }
       }
     },
+    "/milestones/{milestoneId}/title": {
+      "post": {
+        "tags": [
+          "Milestones"
+        ],
+        "operationId": "reviseProjectMilestoneTitle",
+        "summary": "Correct a milestone title",
+        "description": "Staff replaces the title. Status and the due instant stay unchanged. A blank title and a payment or signing field are refused. The portal reads the new title and still omits updatedAt.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMilestoneTitleRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Milestone title revised",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMilestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/decision-log": {
       "get": {
         "tags": [
@@ -5290,6 +5350,21 @@
           }
         },
         "description": "A milestone due revision. Payment and signing fields are not accepted."
+      },
+      "ProjectMilestoneTitleRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "description": "A corrected milestone title. Status, due instant, payment, and signing fields are not accepted."
       },
       "ProjectMilestone": {
         "type": "object",

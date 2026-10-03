@@ -25,6 +25,7 @@ import {
   parseAdminMilestoneDueAt,
   parseAdminMilestoneDueRevision,
   reviseAdminMilestoneDue,
+  reviseAdminMilestoneTitle,
   createAdminPaymentSchedule,
   createAdminProject,
   deliverAdminProject,
@@ -520,6 +521,28 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       milestoneId: milestoneId.trim(),
       dueAt,
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'revise-milestone-title') {
+    const milestoneId = form.get('milestoneId');
+    const title = form.get('title');
+    if (typeof milestoneId !== 'string' || !milestoneId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (typeof title !== 'string' || !title.trim() || title.trim().length > 200) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await reviseAdminMilestoneTitle({
+      base,
+      milestoneId: milestoneId.trim(),
+      title: title.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

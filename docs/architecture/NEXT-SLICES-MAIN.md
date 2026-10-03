@@ -1249,6 +1249,21 @@ Contract: [`ADMIN-MILESTONE-PROJECT-FILTER.md`](./ADMIN-MILESTONE-PROJECT-FILTER
 Security: read-only. Uses the existing milestone list query. No new store.
 Next: none.
 
+### ADMIN-MILESTONE-TITLE-REVISE
+
+Dependencies: ADMIN-MILESTONE-DUE-REVISE, PORTAL-MILESTONE-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can replace a milestone title. Status and the due instant
+stay unchanged. A blank title and a payment or signing field are refused.
+The portal shows the new title and still omits updatedAt.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`,
+`packages/domain/project-milestone.test.mjs`.
+Contract: [`ADMIN-MILESTONE-TITLE-REVISE.md`](./ADMIN-MILESTONE-TITLE-REVISE.md).
+Security: uses existing `milestones:create`. The portal cannot rename a milestone.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

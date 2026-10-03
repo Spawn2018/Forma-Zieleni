@@ -126,6 +126,28 @@ export function validateProjectMilestoneDueRequest(
   return { ok: true, value: { dueAt: body.dueAt } };
 }
 
+export type ProjectMilestoneTitleRequest = { title: string };
+
+export function validateProjectMilestoneTitleRequest(
+  value: unknown,
+): { ok: true; value: ProjectMilestoneTitleRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  for (const key of ['payment', 'provider', 'signing', 'price', 'amountPln', 'status', 'dueAt']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'title');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.title !== 'string') {
+    return { ok: false, errors: [{ field: 'title', reason: 'STRING_REQUIRED' }] };
+  }
+  return { ok: true, value: { title: body.title } };
+}
+
 export function validateDecisionLogCreateRequest(
   value: unknown,
 ): { ok: true; value: DecisionLogCreateRequest } | { ok: false; errors: FieldError[] } {

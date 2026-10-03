@@ -269,6 +269,7 @@ export {
   projectMilestoneForPortal,
   reviseDecisionLogSummary,
   reviseProjectMilestoneDue,
+  reviseProjectMilestoneTitle,
 } from './project-milestone.ts';
 export type {
   CreateDecisionLogEntryInput,

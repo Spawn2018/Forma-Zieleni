@@ -121,7 +121,7 @@ export type StoredReply = {
 
 export type OutboxMessage = {
   id: string;
-  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'file.name_revised' | 'file.visibility_revised';
+  eventType: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'milestone.title_revised' | 'decision_log.summary_revised' | 'file.name_revised' | 'file.visibility_revised';
   leadId: string;
   payload: {
     leadId: string;
@@ -135,6 +135,8 @@ export type OutboxMessage = {
     fromStatus?: string;
     dueAt?: string | null;
     previousDueAt?: string | null;
+    title?: string;
+    previousTitle?: string;
     summary?: string;
     previousSummary?: string;
     entryId?: string;
@@ -149,7 +151,7 @@ export type OutboxMessage = {
 
 export type AuditEvent = {
   id: string;
-  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'decision_log.summary_revised' | 'file.name_revised' | 'file.visibility_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
+  action: 'lead.captured' | 'lead.qualified' | 'opportunity.created' | 'offer.created' | 'contract.created' | 'contract.lifecycle_advanced' | 'project.created' | 'project.delivered' | 'milestone.status_advanced' | 'milestone.due_revised' | 'milestone.title_revised' | 'decision_log.summary_revised' | 'file.name_revised' | 'file.visibility_revised' | 'payment.schedule_created' | 'payment.schedule_replaced' | 'payment.installment_transitioned' | 'payment.sandbox_intent_created' | 'payment.sandbox_webhook_confirmed' | 'signing.sandbox_envelope_created' | 'signing.sandbox_webhook_completed';
   actorId: string | null;
   leadId: string;
   at: string;
@@ -166,6 +168,8 @@ export type AuditEvent = {
     fromStatus?: string;
     dueAt?: string | null;
     previousDueAt?: string | null;
+    title?: string;
+    previousTitle?: string;
     summary?: string;
     previousSummary?: string;
     entryId?: string;

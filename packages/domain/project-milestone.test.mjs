@@ -8,6 +8,7 @@ import { createProject } from './src/project.ts';
 import {
   advanceProjectMilestone,
   reviseProjectMilestoneDue,
+  reviseProjectMilestoneTitle,
   createDecisionLogEntry,
   createProjectMilestone,
   reviseDecisionLogSummary,
@@ -196,6 +197,28 @@ test('milestone due revision sets or clears the instant and keeps status', () =>
     () => reviseProjectMilestoneDue(milestone, '2026-10-03T08:00:00.000Z', '2026-09-24T19:00:00.000Z', { payment: true }),
     /MILESTONE_SURFACE_FORBIDDEN/,
   );
+});
+
+test('milestone title revision keeps status and due instant', () => {
+  const project = plannedProject('client-a');
+  const milestone = createProjectMilestone(
+    'm7k2n4p6q8r0s2t5',
+    project,
+    { title: 'Koncepcja', dueAt: '2026-10-03T08:00:00.000Z' },
+    AT,
+  );
+  const revised = reviseProjectMilestoneTitle(milestone, '  Koncepcja ogrodu  ', '2026-09-24T19:00:00.000Z');
+  assert.equal(revised.title, 'Koncepcja ogrodu');
+  assert.equal(revised.status, 'planned');
+  assert.equal(revised.dueAt, milestone.dueAt);
+  assert.equal(revised.createdAt, milestone.createdAt);
+  assert.equal(reviseProjectMilestoneTitle(revised, 'Koncepcja ogrodu', '2026-09-24T20:00:00.000Z'), revised);
+  assert.throws(() => reviseProjectMilestoneTitle(milestone, '   ', '2026-09-24T19:00:00.000Z'), /MILESTONE_TITLE_INVALID/);
+  assert.throws(
+    () => reviseProjectMilestoneTitle(milestone, 'Inny tytuł', '2026-09-24T19:00:00.000Z', { payment: true }),
+    /MILESTONE_SURFACE_FORBIDDEN/,
+  );
+  assert.equal(projectMilestoneForPortal(revised, project, 'client-a')?.title, 'Koncepcja ogrodu');
 });
 
 test('decision log summary revision keeps kind and refuses a payment field', () => {

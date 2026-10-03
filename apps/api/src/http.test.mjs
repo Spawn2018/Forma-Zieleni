@@ -2159,4 +2159,31 @@ test('portal milestone projection follows the owning project subject (BOLA)', as
   const portalCleared = await (await app.request(`/v1/portal/milestones/${milestone.id}`, { headers: bearer(portal) })).json();
   assert.equal(portalCleared.dueAt, null);
   assert.equal(Object.hasOwn(portalCleared, 'updatedAt'), false);
+
+  const blankTitle = await app.request(`/v1/milestones/${milestone.id}/title`, json({ title: '   ' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-title-blank',
+  }));
+  assert.equal(blankTitle.status, 400);
+  const paidTitle = await app.request(`/v1/milestones/${milestone.id}/title`, json({ title: 'Inny', payment: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-title-pay',
+  }));
+  assert.equal(paidTitle.status, 400);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}/title`, json({ title: 'Koncepcja ogrodu' }, {
+    ...bearer(portal),
+    'idempotency-key': 'pms-title-portal',
+  }))).status, 403);
+  const titled = await app.request(`/v1/milestones/${milestone.id}/title`, json({ title: 'Koncepcja ogrodu' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-title-set',
+  }));
+  assert.equal(titled.status, 200);
+  const titledBody = await titled.json();
+  assert.equal(titledBody.title, 'Koncepcja ogrodu');
+  assert.equal(titledBody.status, 'done');
+  assert.equal(titledBody.dueAt, null);
+  const portalTitled = await (await app.request(`/v1/portal/milestones/${milestone.id}`, { headers: bearer(portal) })).json();
+  assert.equal(portalTitled.title, 'Koncepcja ogrodu');
+  assert.equal(Object.hasOwn(portalTitled, 'updatedAt'), false);
 });

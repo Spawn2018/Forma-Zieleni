@@ -26,6 +26,7 @@ export {
   validateProjectMilestoneCreateRequest,
   validateProjectMilestoneDueRequest,
   validateProjectMilestoneStatusRequest,
+  validateProjectMilestoneTitleRequest,
 } from './project-milestone.ts';
 export type {
   DecisionLogCreateRequest,
@@ -33,6 +34,7 @@ export type {
   ProjectMilestoneCreateRequest,
   ProjectMilestoneDueRequest,
   ProjectMilestoneStatusRequest,
+  ProjectMilestoneTitleRequest,
 } from './project-milestone.ts';
 export {
   validatePaymentInstallmentTransitionRequest,

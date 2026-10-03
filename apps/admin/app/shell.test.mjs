@@ -30,6 +30,7 @@ import {
   parseAdminMilestoneDueAt,
   parseAdminMilestoneDueRevision,
   reviseAdminMilestoneDue,
+  reviseAdminMilestoneTitle,
   createAdminProject,
   deliverAdminProject,
   fetchAdminContracts,
@@ -1345,6 +1346,8 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   assert.match(html, /name="dueAt"/);
   assert.match(html, /Puste pole zostawia kamień bez terminu/);
   assert.match(html, /Zapisz termin/);
+  assert.match(html, /Popraw tytuł/);
+  assert.match(html, /Nowy tytuł/);
   assert.match(html, /Nowy termin \(UTC\)/);
   assert.equal(html.includes('Usuń termin'), false);
   assert.equal(nextAdminMilestoneStatus('planned'), 'active');
@@ -1487,6 +1490,29 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   });
   assert.deepEqual(clearedDue, { ok: true });
+  const retitled = await reviseAdminMilestoneTitle({
+    base: 'http://admin.test',
+    milestoneId: 'ms8k2n4p6q8r0s2t',
+    title: '  Koncepcja ogrodu  ',
+    idempotencyKey: 'ms-title',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/milestones\/ms8k2n4p6q8r0s2t\/title$/);
+      assert.deepEqual(JSON.parse(String(init?.body)), { title: 'Koncepcja ogrodu' });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(retitled, { ok: true });
+  const blankTitle = await reviseAdminMilestoneTitle({
+    base: 'http://admin.test',
+    milestoneId: 'ms8k2n4p6q8r0s2t',
+    title: '   ',
+    idempotencyKey: 'ms-title-blank',
+    fetchImpl: async () => {
+      assert.fail('a blank title must not call Core API');
+      return new Response('{}', { status: 500 });
+    },
+  });
+  assert.deepEqual(blankTitle, { ok: false, reason: 'error' });
   const datedHtml = renderToStaticMarkup(adminShell({
     state: 'signed-in',
     ...emptyCrm,
