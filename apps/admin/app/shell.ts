@@ -236,6 +236,9 @@ export type AdminHome =
       milestoneProjectQuery?: string;
       milestoneProjectId?: string | null;
       milestoneFilterInvalid?: boolean;
+      decisionProjectQuery?: string;
+      decisionProjectId?: string | null;
+      decisionFilterInvalid?: boolean;
     };
 
 /**
@@ -1382,13 +1385,18 @@ export function mapDecisionLogPage(body: unknown): AdminDecisionLogList {
 export async function fetchAdminDecisionLog(input: {
   base: string;
   cookie?: string;
+  projectId?: string;
   fetchImpl?: typeof fetch;
 }): Promise<AdminDecisionLogList> {
+  const filter = adminDecisionLogProjectFilter(input.projectId);
+  if (filter.state === 'invalid') return { status: 'error' };
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = { accept: 'application/json' };
     if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/decision-log?limit=50', input.base), {
+    const url = new URL('/v1/decision-log?limit=50', input.base);
+    if (filter.state === 'project') url.searchParams.set('projectId', filter.projectId);
+    const response = await fetchImpl(url, {
       credentials: 'include',
       headers,
     });
@@ -2256,6 +2264,11 @@ export type AdminMilestoneProjectFilter =
   | { state: 'invalid' };
 
 /** Empty means the full list. A filled id must already be an opaque project id. */
+export function adminDecisionLogProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
+  return adminMilestoneProjectFilter(value);
+}
+
+/** Empty means the full list. A filled id must already be an opaque project id. */
 export function adminMilestoneProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return { state: 'all' };
@@ -2604,21 +2617,46 @@ function decisionKindLabel(kind: DecisionLogKind): string {
   return unreachable;
 }
 
-function decisionLogNode(entries: AdminDecisionLogList): ReactNode {
-  if (entries.status === 'empty') {
-    return createElement('p', null, 'Brak wpisów w dzienniku decyzji.');
-  }
-  if (entries.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać dziennika decyzji.');
-  }
-  if (entries.status === 'error') {
-    return createElement('p', null, 'Dziennika decyzji nie udało się pobrać. Odśwież stronę.');
-  }
+function decisionLogProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
-    'section',
-    { className: 'admin-decision-log', 'aria-label': 'Dziennik decyzji' },
-    createElement('h2', null, 'Dziennik decyzji'),
+    'form',
+    { method: 'get', className: 'admin-decision-filter' },
     createElement(
+      'label',
+      { className: 'admin-decision-filter-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'decisionProject',
+        autoComplete: 'off',
+        spellCheck: false,
+        defaultValue: query,
+      }),
+    ),
+    createElement('button', { type: 'submit' }, 'Pokaż wpisy projektu'),
+    projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
+  );
+}
+
+function decisionLogNode(
+  entries: AdminDecisionLogList,
+  filter: { query: string; projectId: string | null; invalid: boolean },
+): ReactNode {
+  let body: ReactNode;
+  if (filter.invalid) {
+    body = createElement(
+      'p',
+      { className: 'admin-decision-filter-invalid' },
+      'Id projektu jest niepoprawne. Dziennik decyzji nie został pobrany.',
+    );
+  } else if (entries.status === 'empty') {
+    body = createElement('p', null, 'Brak wpisów w dzienniku decyzji.');
+  } else if (entries.status === 'forbidden') {
+    body = createElement('p', null, 'To konto nie może odczytać dziennika decyzji.');
+  } else if (entries.status === 'error') {
+    body = createElement('p', null, 'Dziennika decyzji nie udało się pobrać. Odśwież stronę.');
+  } else {
+    body = createElement(
       'ul',
       { className: 'admin-decision-log-list' },
       ...entries.items.map((entry) =>
@@ -2661,7 +2699,17 @@ function decisionLogNode(entries: AdminDecisionLogList): ReactNode {
           ),
         ),
       ),
-    ),
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'admin-decision-log', 'aria-label': 'Dziennik decyzji' },
+    createElement('h2', null, 'Dziennik decyzji'),
+    decisionLogProjectFilterForm(filter.query, filter.projectId),
+    filter.projectId
+      ? createElement('p', { className: 'admin-decision-filter-active' }, `Filtr projektu: ${filter.projectId}`)
+      : null,
+    body,
   );
 }
 
@@ -3404,7 +3452,11 @@ export function adminShell(home: AdminHome): ReactNode {
     createGardenForm(),
     siteListNode(home.siteIntelligence),
     createSiteObservationForm(),
-    decisionLogNode(home.decisionLog),
+    decisionLogNode(home.decisionLog, {
+      query: home.decisionProjectQuery ?? '',
+      projectId: home.decisionProjectId ?? null,
+      invalid: home.decisionFilterInvalid === true,
+    }),
     createDecisionLogForm(),
     fileListNode(home.files),
     createFileForm(),

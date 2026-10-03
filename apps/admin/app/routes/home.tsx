@@ -4,6 +4,7 @@ import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
   ADMIN_FILE_BYTES_MAX,
+  adminDecisionLogProjectFilter,
   adminMilestoneProjectFilter,
   adminShell,
   advanceAdminContractLifecycle,
@@ -65,7 +66,9 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   const base = apiOrigin();
   if (!base) return resolveAdminHome({});
   const cookie = request.headers.get('cookie') ?? '';
-  const milestoneFilter = adminMilestoneProjectFilter(new URL(request.url).searchParams.get('milestoneProject'));
+  const searchParams = new URL(request.url).searchParams;
+  const milestoneFilter = adminMilestoneProjectFilter(searchParams.get('milestoneProject'));
+  const decisionFilter = adminDecisionLogProjectFilter(searchParams.get('decisionProject'));
   const home = await resolveAdminHome({
     async probe() {
       const headers: Record<string, string> = { accept: 'application/json' };
@@ -124,7 +127,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       return fetchAdminSiteIntelligence({ base, cookie });
     },
     async loadDecisionLog() {
-      return fetchAdminDecisionLog({ base, cookie });
+      if (decisionFilter.state === 'invalid') return { status: 'empty' };
+      return fetchAdminDecisionLog({
+        base,
+        cookie,
+        projectId: decisionFilter.state === 'project' ? decisionFilter.projectId : undefined,
+      });
     },
     async loadProposals() {
       return fetchAdminProposals({ base, cookie });
@@ -133,9 +141,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   if (home.state !== 'signed-in') return home;
   return {
     ...home,
-    milestoneProjectQuery: milestoneFilter.state === 'all' ? '' : new URL(request.url).searchParams.get('milestoneProject')?.trim() ?? '',
+    milestoneProjectQuery: milestoneFilter.state === 'all' ? '' : searchParams.get('milestoneProject')?.trim() ?? '',
     milestoneProjectId: milestoneFilter.state === 'project' ? milestoneFilter.projectId : null,
     milestoneFilterInvalid: milestoneFilter.state === 'invalid',
+    decisionProjectQuery: decisionFilter.state === 'all' ? '' : searchParams.get('decisionProject')?.trim() ?? '',
+    decisionProjectId: decisionFilter.state === 'project' ? decisionFilter.projectId : null,
+    decisionFilterInvalid: decisionFilter.state === 'invalid',
   };
 }
 

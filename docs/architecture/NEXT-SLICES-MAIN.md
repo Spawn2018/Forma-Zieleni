@@ -1292,6 +1292,20 @@ Contract: [`PORTAL-PROJECT-GARDEN.md`](./PORTAL-PROJECT-GARDEN.md).
 Security: uses the garden list the portal already loaded. No mutation.
 Next: none.
 
+### ADMIN-DECISION-LOG-PROJECT-FILTER
+
+Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-PROJECT-FILTER.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can show decision-log entries for one opaque project id.
+An invalid id is not sent to Core API. Clearing the filter shows the full
+list again. No new store, payment, or contact field.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG-PROJECT-FILTER.md`](./ADMIN-DECISION-LOG-PROJECT-FILTER.md).
+Security: read-only. Uses the existing decision-log list query.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

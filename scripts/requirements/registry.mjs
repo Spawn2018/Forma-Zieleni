@@ -648,6 +648,14 @@ row('FZ-REQ-ADMIN-025', 'Staff see the same Polish offer, contract, and project 
   executableWhenComplete: ['PORTAL-STATUS-LABELS', 'ADMIN-PROJECT-DELIVER'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-026', 'Staff can limit the decision log to one opaque project id. An invalid id is not sent to Core API. The unfiltered list stays available. No new store, payment, or contact field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The panel sends the existing projectId query on GET /v1/decision-log. A bad id shows an error and does not fetch.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'DECISION_LOG_PROJECT_FILTER',
+  executableSlice: 'ADMIN-DECISION-LOG-PROJECT-FILTER',
+  executableWhenComplete: ['ADMIN-DECISION-LOG', 'ADMIN-MILESTONE-PROJECT-FILTER'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

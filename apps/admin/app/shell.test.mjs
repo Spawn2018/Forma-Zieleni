@@ -43,6 +43,7 @@ import {
   fetchAdminGardens,
   fetchAdminDecisionLog,
   fetchAdminSiteIntelligence,
+  adminDecisionLogProjectFilter,
   adminMilestoneProjectFilter,
   fetchAdminMilestones,
   fetchAdminOffers,
@@ -1120,6 +1121,7 @@ test('staff decision log lists a change and refuses a payment field', async () =
   assert.match(html, /Sadzimy żywopłot wzdłuż granicy/);
   assert.match(html, /zmiana zakresu/);
   assert.match(html, /bez kamienia milowego/);
+  assert.match(html, /Pokaż wpisy projektu/);
   assert.match(html, /Zapisz wpis/);
   assert.match(html, /Popraw treść/);
   assert.match(html, /name="entryId" value="dl8k2n4p6q8r0s2t"/);
@@ -1134,6 +1136,46 @@ test('staff decision log lists a change and refuses a payment field', async () =
     },
   });
   assert.deepEqual(fetched, { status: 'empty' });
+  const filtered = await fetchAdminDecisionLog({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    fetchImpl: async (url) => {
+      assert.match(String(url), /\/v1\/decision-log\?limit=50&projectId=pr8k2n4p6q8r0s2t$/);
+      return new Response(JSON.stringify({ items: [], nextCursor: null }), { status: 200 });
+    },
+  });
+  assert.deepEqual(filtered, { status: 'empty' });
+  const refused = await fetchAdminDecisionLog({
+    base: 'http://admin.test',
+    projectId: 'project1',
+    fetchImpl: async () => {
+      assert.fail('an invalid project id must not call Core API');
+      return new Response('', { status: 500 });
+    },
+  });
+  assert.deepEqual(refused, { status: 'error' });
+  assert.deepEqual(adminDecisionLogProjectFilter('pr8k2n4p6q8r0s2t'), {
+    state: 'project',
+    projectId: 'pr8k2n4p6q8r0s2t',
+  });
+  const filteredHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: mapped,
+    decisionProjectQuery: 'pr8k2n4p6q8r0s2t',
+    decisionProjectId: 'pr8k2n4p6q8r0s2t',
+  }));
+  assert.match(filteredHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
+  assert.match(filteredHtml, /Pokaż wszystkie/);
+  const invalidHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    decisionLog: { status: 'empty' },
+    decisionProjectQuery: 'project1',
+    decisionFilterInvalid: true,
+  }));
+  assert.match(invalidHtml, /Id projektu jest niepoprawne\. Dziennik decyzji nie został pobrany\./);
+  assert.equal(invalidHtml.includes('Sadzimy żywopłot'), false);
   const created = await createAdminDecisionLogEntry({
     base: 'http://admin.test',
     projectId: 'pr8k2n4p6q8r0s2t',
