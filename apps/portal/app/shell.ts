@@ -908,7 +908,21 @@ function offerListNode(offers: PortalOfferList): ReactNode {
   );
 }
 
-function contractListNode(contracts: PortalContractList): ReactNode {
+/** Projects already loaded for this contract. A failed project read is not “no project”. */
+export function portalContractProjectLine(contractId: string, projects: PortalProjectList): string {
+  if (projects.status === 'error') return 'Projektu nie udało się odczytać.';
+  if (projects.status === 'forbidden') return 'To konto nie może odczytać listy projektów.';
+  if (projects.status !== 'ready') return 'Projekt: brak';
+  const matched = projects.items
+    .filter((item) => item.contractId === contractId)
+    .map((item) => item.id)
+    .sort();
+  if (matched.length === 0) return 'Projekt: brak';
+  if (matched.length === 1) return `Projekt: ${matched[0]}`;
+  return `Projekty: ${matched.join(', ')}`;
+}
+
+function contractListNode(contracts: PortalContractList, projects: PortalProjectList): ReactNode {
   if (contracts.status !== 'ready') {
     return listStateNode(
       contracts,
@@ -933,6 +947,11 @@ function contractListNode(contracts: PortalContractList): ReactNode {
             'p',
             { className: 'portal-contract-meta' },
             [contract.id, ' · ', portalContractStatusLabel(contract.status), ' · ', contract.createdAt].join(''),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-contract-project' },
+            portalContractProjectLine(contract.id, projects),
           ),
         ),
       ),
@@ -1264,7 +1283,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('h1', null, 'Portal klienta'),
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
-    contractListNode(home.contracts),
+    contractListNode(home.contracts, home.projects),
     projectListNode(home.projects, home.milestones, home.files, home.gardens, home.siteIntelligence),
     fileListNode(home.files),
     gardenListNode(home.gardens),

@@ -21,6 +21,7 @@ import {
   mapPortalSitePage,
   nextOpenPortalMilestone,
   portalContractStatusLabel,
+  portalContractProjectLine,
   portalMilestoneDueLabel,
   portalOfferStatusLabel,
   portalProjectFiles,
@@ -667,6 +668,86 @@ test('signed-in portal renders client milestones without payment or signing', as
     }),
     { status: 'forbidden' },
   );
+});
+
+test('a contract names only the projects already loaded for it', () => {
+  const projects = {
+    status: 'ready',
+    items: [
+      {
+        id: 'pj8k2n4p6q8r0s2u',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'delivered',
+        createdAt: '2026-09-24T13:00:00.000Z',
+      },
+      {
+        id: 'pj8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'planned',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      },
+      {
+        id: 'pj8k2n4p6q8r0s2v',
+        contractId: 'ct8k2n4p6q8r0s2u',
+        status: 'planned',
+        createdAt: '2026-09-24T14:00:00.000Z',
+      },
+    ],
+  };
+  assert.equal(
+    portalContractProjectLine('ct8k2n4p6q8r0s2t', projects),
+    'Projekty: pj8k2n4p6q8r0s2t, pj8k2n4p6q8r0s2u',
+  );
+  assert.equal(portalContractProjectLine('ct8k2n4p6q8r0s2v', projects), 'Projekt: brak');
+  assert.equal(portalContractProjectLine('ct8k2n4p6q8r0s2t', { status: 'error' }), 'Projektu nie udało się odczytać.');
+  assert.equal(
+    portalContractProjectLine('ct8k2n4p6q8r0s2t', { status: 'forbidden' }),
+    'To konto nie może odczytać listy projektów.',
+  );
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    contracts: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ct8k2n4p6q8r0s2t',
+          offerId: 'of8k2n4p6q8r0s2t',
+          status: 'sent',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'ct8k2n4p6q8r0s2u',
+          offerId: 'of8k2n4p6q8r0s2u',
+          status: 'draft',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+      ],
+    },
+    projects,
+  }));
+  const first = html.slice(html.indexOf('ct8k2n4p6q8r0s2t'), html.indexOf('ct8k2n4p6q8r0s2u'));
+  const second = html.slice(html.indexOf('ct8k2n4p6q8r0s2u'));
+  assert.equal(
+    first.match(/portal-contract-project">([^<]+)/)?.[1],
+    'Projekty: pj8k2n4p6q8r0s2t, pj8k2n4p6q8r0s2u',
+  );
+  assert.equal(first.includes('pj8k2n4p6q8r0s2v'), false);
+  assert.equal(second.match(/portal-contract-project">([^<]+)/)?.[1], 'Projekt: pj8k2n4p6q8r0s2v');
+  const failed = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    contracts: {
+      status: 'ready',
+      items: [{
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'sent',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    projects: { status: 'error' },
+  }));
+  assert.match(failed, /Projektu nie udało się odczytać\./);
+  assert.equal(failed.includes('Projekt: brak'), false);
 });
 
 test('a milestone row names its own project', () => {

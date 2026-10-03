@@ -1380,6 +1380,21 @@ Contract: [`CAPACITY-WINDOW-LABELS.md`](./CAPACITY-WINDOW-LABELS.md).
 Security: display only. No calendar provider and no new window field.
 Next: none.
 
+### PORTAL-CONTRACT-PROJECT
+
+Dependencies: PORTAL-CONTRACT-VIEW, PORTAL-PROJECT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a contract names the projects already loaded for that contract.
+Another contract’s project stays off the row. A failed or forbidden
+project read is not shown as no project. More than one project is listed
+in id order. No new store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-CONTRACT-PROJECT.md`](./PORTAL-CONTRACT-PROJECT.md).
+Security: display only. Uses the project list the portal already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

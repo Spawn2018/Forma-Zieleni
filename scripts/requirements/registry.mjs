@@ -609,6 +609,14 @@ row('FZ-REQ-PORTAL-020', 'A portal milestone row names the project id already st
   executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'PORTAL-PROJECT-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-021', 'A portal contract names the projects already loaded for that contract. Another contract’s project stays off the row. A failed project read is not shown as no project. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The contract uses the project list the client already loaded. More than one project is listed in id order.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CONTRACT_PROJECT',
+  executableSlice: 'PORTAL-CONTRACT-PROJECT',
+  executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
