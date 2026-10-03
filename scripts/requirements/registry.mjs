@@ -577,6 +577,14 @@ row('FZ-REQ-PORTAL-016', 'A portal project card names the garden already loaded 
   executableWhenComplete: ['PORTAL-GARDEN-VIEW', 'PORTAL-PROJECT-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-017', 'A portal project card counts the site constraints and opportunities already loaded for that project. Another project’s findings stay off the card. A failed site read is not shown as an empty site. No new store or invented conclusion is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The card uses the portal site list the client already loaded. The separate site list stays.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PROJECT_SITE',
+  executableSlice: 'PORTAL-PROJECT-SITE',
+  executableWhenComplete: ['PORTAL-SITE-VIEW', 'PORTAL-PROJECT-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

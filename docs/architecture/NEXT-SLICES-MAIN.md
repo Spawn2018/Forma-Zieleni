@@ -1306,6 +1306,21 @@ Contract: [`ADMIN-DECISION-LOG-PROJECT-FILTER.md`](./ADMIN-DECISION-LOG-PROJECT-
 Security: read-only. Uses the existing decision-log list query.
 Next: none.
 
+### PORTAL-PROJECT-SITE
+
+Dependencies: PORTAL-SITE-VIEW, PORTAL-PROJECT-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a project card counts the site constraints and opportunities already
+loaded for that project. Another project’s findings stay off the card.
+A failed site read is not shown as an empty site. No new store or invented
+conclusion.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-SITE.md`](./PORTAL-PROJECT-SITE.md).
+Security: uses the site list the portal already loaded. No mutation.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

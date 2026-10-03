@@ -24,6 +24,7 @@ import {
   portalOfferStatusLabel,
   portalProjectFiles,
   portalProjectGarden,
+  portalProjectSite,
   portalProjectStatusLabel,
   portalErrorMessage,
   portalOriginAllowed,
@@ -829,6 +830,60 @@ test('a project card names only that project’s garden', () => {
   }));
   assert.match(failed, /Ogrodu nie udało się odczytać\./);
   assert.equal(failed.includes('Ogród: brak'), false);
+});
+
+test('a project card counts only that project’s site findings', () => {
+  const sites = [
+    {
+      id: 'si8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      observationIds: [],
+      constraints: [{ id: 'sc8k2n4p6q8r0s2t', code: 'slope' }],
+      opportunities: [
+        { id: 'so8k2n4p6q8r0s2t', code: 'sun' },
+        { id: 'so8k2n4p6q8r0s2u', code: 'shelter' },
+      ],
+      createdAt: '2026-09-24T13:00:00.000Z',
+    },
+    {
+      id: 'si8k2n4p6q8r0s2u',
+      projectId: 'pj8k2n4p6q8r0s2u',
+      observationIds: [],
+      constraints: [{ id: 'sc8k2n4p6q8r0s2u', code: 'water' }],
+      opportunities: [],
+      createdAt: '2026-09-24T13:10:00.000Z',
+    },
+  ];
+  assert.equal(portalProjectSite('pj8k2n4p6q8r0s2t', sites)?.id, 'si8k2n4p6q8r0s2t');
+  assert.equal(portalProjectSite('pj8k2n4p6q8r0s2v', sites), null);
+  const project = {
+    id: 'pj8k2n4p6q8r0s2t',
+    contractId: 'ct8k2n4p6q8r0s2t',
+    status: 'delivered',
+    createdAt: '2026-09-24T12:00:00.000Z',
+  };
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    siteIntelligence: { status: 'ready', items: sites },
+  }));
+  const siteLine = html.match(/portal-project-site">([^<]+)/)?.[1] ?? '';
+  assert.equal(siteLine, 'Teren: 1 ograniczenie · 2 możliwości');
+  assert.equal(siteLine.includes('water'), false);
+  assert.equal(siteLine.includes('si8k2n4p6q8r0s2u'), false);
+  const missing = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    siteIntelligence: { status: 'empty' },
+  }));
+  assert.match(missing, /Teren: brak/);
+  const failed = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: { status: 'ready', items: [project] },
+    siteIntelligence: { status: 'error' },
+  }));
+  assert.match(failed, /Ustaleń o terenie nie udało się odczytać\./);
+  assert.equal(failed.includes('Teren: brak'), false);
 });
 
 test('the route module keeps an error boundary and does not invent CRM facts', () => {

@@ -92,6 +92,14 @@ export function portalProjectGarden(
   return gardens.find((garden) => garden.projectId === projectId) ?? null;
 }
 
+/** The site record already loaded for one project, or null. */
+export function portalProjectSite(
+  projectId: string,
+  records: readonly PortalSiteRow[],
+): PortalSiteRow | null {
+  return records.find((record) => record.projectId === projectId) ?? null;
+}
+
 export type PortalSiteFinding = {
   id: string;
   code: string;
@@ -902,6 +910,28 @@ function projectGardenLine(projectId: string, gardens: PortalGardenList): string
   return `Ogród: ${garden.id}`;
 }
 
+function polishCount(count: number, one: string, few: string, many: string): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (count === 1) return `1 ${one}`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} ${few}`;
+  return `${count} ${many}`;
+}
+
+function projectSiteLine(projectId: string, sites: PortalSiteList): string {
+  if (sites.status === 'error') return 'Ustaleń o terenie nie udało się odczytać.';
+  if (sites.status === 'forbidden') return 'To konto nie może odczytać ustaleń o terenie.';
+  if (sites.status !== 'ready') return 'Teren: brak';
+  const record = portalProjectSite(projectId, sites.items);
+  if (!record) return 'Teren: brak';
+  return [
+    'Teren: ',
+    polishCount(record.constraints.length, 'ograniczenie', 'ograniczenia', 'ograniczeń'),
+    ' · ',
+    polishCount(record.opportunities.length, 'możliwość', 'możliwości', 'możliwości'),
+  ].join('');
+}
+
 function projectFileNodes(projectId: string, files: PortalFileList): ReactNode {
   if (files.status === 'error') {
     return createElement('p', { className: 'portal-project-files' }, 'Listy plików nie udało się pobrać.');
@@ -935,6 +965,7 @@ function projectListNode(
   milestones: PortalMilestoneList,
   files: PortalFileList,
   gardens: PortalGardenList,
+  sites: PortalSiteList,
 ): ReactNode {
   if (projects.status !== 'ready') {
     return listStateNode(
@@ -970,6 +1001,11 @@ function projectListNode(
             'p',
             { className: 'portal-project-garden' },
             projectGardenLine(project.id, gardens),
+          ),
+          createElement(
+            'p',
+            { className: 'portal-project-site' },
+            projectSiteLine(project.id, sites),
           ),
           projectFileNodes(project.id, files),
         ),
@@ -1174,7 +1210,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
     contractListNode(home.contracts),
-    projectListNode(home.projects, home.milestones, home.files, home.gardens),
+    projectListNode(home.projects, home.milestones, home.files, home.gardens, home.siteIntelligence),
     fileListNode(home.files),
     gardenListNode(home.gardens),
     siteListNode(home.siteIntelligence),
