@@ -1527,6 +1527,20 @@ Contract: [`FILE-LIST-ORDER.md`](./FILE-LIST-ORDER.md).
 Security: display sort only. Uses files already loaded.
 Next: none.
 
+### PORTAL-MILESTONE-CREATED
+
+Dependencies: PORTAL-MILESTONE-VIEW, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a client milestone shows its recorded instant in Polish UTC
+words. An unreadable instant rejects the list. The raw timestamp is not
+shown. No new store, price, or signature.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-MILESTONE-CREATED.md`](./PORTAL-MILESTONE-CREATED.md).
+Security: display only. Uses the instant already on the loaded milestone.
+Next: none.
+
 ### PORTAL-SITE-ORDER
 
 Dependencies: PORTAL-SITE-VIEW.

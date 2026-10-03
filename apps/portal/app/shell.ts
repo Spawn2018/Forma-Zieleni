@@ -531,7 +531,8 @@ export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
     if (typeof milestone.id !== 'string' || typeof milestone.projectId !== 'string' || !milestone.projectId.trim()) {
       return { status: 'error' };
     }
-    if (typeof milestone.title !== 'string' || typeof milestone.createdAt !== 'string') return { status: 'error' };
+    const createdAt = requirePortalCreatedAt(milestone.createdAt);
+    if (typeof milestone.title !== 'string' || createdAt === null) return { status: 'error' };
     if (!isPortalMilestoneStatus(milestone.status)) return { status: 'error' };
     if (!Object.hasOwn(milestone, 'dueAt')) return { status: 'error' };
     if (milestone.dueAt !== null && (typeof milestone.dueAt !== 'string' || formatUtcInstantPl(milestone.dueAt) === null)) {
@@ -544,7 +545,7 @@ export function mapPortalMilestonePage(body: unknown): PortalMilestoneList {
       title: milestone.title,
       status: milestone.status,
       dueAt: milestone.dueAt,
-      createdAt: milestone.createdAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -1291,6 +1292,8 @@ function milestoneListNode(milestones: PortalMilestoneList): ReactNode {
               portalMilestoneDueLabel(milestone.dueAt) ?? 'termin nieczytelny',
               ' · projekt ',
               milestone.projectId,
+              ' · ',
+              portalCreatedAtLabel(milestone.createdAt),
             ].join(''),
           ),
         ),

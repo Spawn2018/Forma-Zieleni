@@ -681,6 +681,14 @@ row('FZ-REQ-PORTAL-029', 'The client site list orders site records by the earlie
   executableWhenComplete: ['PORTAL-SITE-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-030', 'A client milestone shows its recorded instant in Polish UTC words. An unreadable instant rejects the list. The raw timestamp is not shown. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The instant is already on the milestone the client loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'PORTAL_MILESTONE_CREATED',
+  executableSlice: 'PORTAL-MILESTONE-CREATED',
+  executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'RECORD-CREATED-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

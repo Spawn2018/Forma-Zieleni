@@ -1010,6 +1010,18 @@
       "notes": "Classified. Not rewritten for style."
     },
     {
+      "path": "docs/architecture/PORTAL-MILESTONE-CREATED.md",
+      "docType": "DOCUMENT",
+      "audience": "developer",
+      "owner": "ENGINEERING",
+      "canonical": false,
+      "currentState": "CURRENT",
+      "freshnessClass": "SLOW-CHANGING",
+      "discovery": "docs/architecture/README.md",
+      "action": "KEEP",
+      "notes": "Classified. Not rewritten for style."
+    },
+    {
       "path": "docs/architecture/PORTAL-MILESTONE-PROJECT.md",
       "docType": "DOCUMENT",
       "audience": "developer",

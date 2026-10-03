@@ -665,6 +665,8 @@ test('signed-in portal renders client milestones without payment or signing', as
   assert.match(ready, /Sadzenie/);
   assert.match(ready, /zaplanowany/);
   assert.match(ready, /bez terminu/);
+  assert.match(ready, /24 września 2026, 18:00 UTC/);
+  assert.equal(ready.includes('2026-09-24T18:00:00.000Z'), false);
   assert.equal(ready.toLowerCase().includes('payment'), false);
   assert.equal(ready.toLowerCase().includes('signing'), false);
   for (const phrase of commercialLeak) {
@@ -893,9 +895,28 @@ test('a milestone row names its own project', () => {
   }));
   const lines = [...html.matchAll(/portal-milestone-meta">([^<]+)/g)].map((match) => match[1]);
   assert.deepEqual(lines, [
-    'Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u',
-    'Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t',
+    'Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u · 24 września 2026, 19:00 UTC',
+    'Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t · 24 września 2026, 18:00 UTC',
   ]);
+  assert.deepEqual(mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: null,
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapPortalMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      title: 'Koncepcja',
+      status: 'planned',
+      dueAt: null,
+      createdAt: 'wczoraj',
+    }],
+  }), { status: 'error' });
 });
 
 test('portal files sort by Polish name and keep every row', () => {
