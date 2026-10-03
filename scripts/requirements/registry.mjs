@@ -553,6 +553,14 @@ row('FZ-REQ-PORTAL-013', 'An authenticated client can download the bytes of thei
   executableWhenComplete: ['PORTAL-FILE-PROJECTION', 'FILE-BYTES-LOCAL'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-014', 'A portal project card lists the files already loaded for that project, with the existing download link. A file of another project stays off the card. A failed file read is not shown as an empty list.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'portalProjectFiles keeps list order and the project id. No new store or public URL.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'CLIENT_UI',
+  executableSlice: 'PORTAL-PROJECT-FILES',
+  executableWhenComplete: ['PORTAL-FILE-DOWNLOAD'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

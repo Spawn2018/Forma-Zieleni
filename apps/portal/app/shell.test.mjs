@@ -20,6 +20,7 @@ import {
   mapPortalProjectPage,
   mapPortalSitePage,
   nextOpenPortalMilestone,
+  portalProjectFiles,
   portalErrorMessage,
   portalOriginAllowed,
   portalSessionCookiePresent,
@@ -259,7 +260,9 @@ test('signed-in portal renders client-safe project and file projections without 
   assert.match(html, /Twoje pliki/);
   assert.match(html, /plan\.pdf/);
   assert.match(html, /Pobierz «plan\.pdf»/);
+  assert.match(html, /portal-project-files/);
   assert.match(html, /href="\/files\/fl8k2n4p6q8r0s2t\/content"/);
+  assert.equal(html.includes('Pliki: brak'), false);
   assert.match(html, /application\/pdf/);
   assert.match(html, /2048/);
   for (const phrase of commercialLeak) {
@@ -703,6 +706,59 @@ test('a project card names the earliest open milestone and skips done work', () 
     milestones: { status: 'error' },
   }));
   assert.match(failed, /Kamieni milowych nie udało się odczytać\./);
+});
+
+test('a project card lists only that project’s files', () => {
+  const files = [
+    {
+      id: 'fl8k2n4p6q8r0s2t',
+      projectId: 'pj8k2n4p6q8r0s2t',
+      name: 'plan.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 2048,
+      createdAt: '2026-09-24T12:30:00.000Z',
+    },
+    {
+      id: 'fl8k2n4p6q8r0s2u',
+      projectId: 'pj8k2n4p6q8r0s2u',
+      name: 'inny.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: 12,
+      createdAt: '2026-09-24T12:40:00.000Z',
+    },
+  ];
+  assert.deepEqual(portalProjectFiles('pj8k2n4p6q8r0s2t', files).map((file) => file.name), ['plan.pdf']);
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pj8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'active',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    files: { status: 'ready', items: files },
+  }));
+  const projectCard = html.slice(html.indexOf('portal-project"'), html.indexOf('portal-files'));
+  assert.match(projectCard, /Pobierz «plan\.pdf»/);
+  assert.equal(projectCard.includes('inny.pdf'), false);
+  const failed = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    projects: {
+      status: 'ready',
+      items: [{
+        id: 'pj8k2n4p6q8r0s2t',
+        contractId: 'ct8k2n4p6q8r0s2t',
+        status: 'active',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
+    },
+    files: { status: 'error' },
+  }));
+  assert.match(failed, /Listy plików nie udało się pobrać\./);
+  assert.equal(failed.includes('Pliki: brak'), false);
 });
 
 test('the route module keeps an error boundary and does not invent CRM facts', () => {

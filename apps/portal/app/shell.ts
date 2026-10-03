@@ -58,6 +58,14 @@ export type PortalFileList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+/** Files already loaded for one project, in list order. */
+export function portalProjectFiles(
+  projectId: string,
+  files: readonly PortalFileRow[],
+): PortalFileRow[] {
+  return files.filter((file) => file.projectId === projectId);
+}
+
 export type PortalGardenRow = {
   id: string;
   projectId: string;
@@ -808,7 +816,39 @@ function projectNextMilestoneLine(projectId: string, milestones: PortalMilestone
   return ['Następny: ', next.title, ' · ', milestoneStatusLabel(next.status), ' · ', next.dueAt ?? 'bez terminu'].join('');
 }
 
-function projectListNode(projects: PortalProjectList, milestones: PortalMilestoneList): ReactNode {
+function projectFileNodes(projectId: string, files: PortalFileList): ReactNode {
+  if (files.status === 'error') {
+    return createElement('p', { className: 'portal-project-files' }, 'Listy plików nie udało się pobrać.');
+  }
+  if (files.status === 'forbidden') {
+    return createElement('p', { className: 'portal-project-files' }, 'To konto nie może odczytać listy plików.');
+  }
+  const matched = files.status === 'ready' ? portalProjectFiles(projectId, files.items) : [];
+  if (matched.length === 0) {
+    return createElement('p', { className: 'portal-project-files' }, 'Pliki: brak');
+  }
+  return createElement(
+    'ul',
+    { className: 'portal-project-files' },
+    ...matched.map((file) =>
+      createElement(
+        'li',
+        { key: file.id },
+        createElement(
+          'a',
+          { href: `/files/${encodeURIComponent(file.id)}/content` },
+          `Pobierz «${file.name}»`,
+        ),
+      ),
+    ),
+  );
+}
+
+function projectListNode(
+  projects: PortalProjectList,
+  milestones: PortalMilestoneList,
+  files: PortalFileList,
+): ReactNode {
   if (projects.status !== 'ready') {
     return listStateNode(
       projects,
@@ -839,6 +879,7 @@ function projectListNode(projects: PortalProjectList, milestones: PortalMileston
             { className: 'portal-project-next' },
             projectNextMilestoneLine(project.id, milestones),
           ),
+          projectFileNodes(project.id, files),
         ),
       ),
     ),
@@ -1041,7 +1082,7 @@ export function portalShell(home: PortalHome): ReactNode {
     createElement('p', null, 'Jesteś zalogowany.'),
     offerListNode(home.offers),
     contractListNode(home.contracts),
-    projectListNode(home.projects, home.milestones),
+    projectListNode(home.projects, home.milestones, home.files),
     fileListNode(home.files),
     gardenListNode(home.gardens),
     siteListNode(home.siteIntelligence),

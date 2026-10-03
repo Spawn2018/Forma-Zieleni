@@ -1262,6 +1262,20 @@ Contract: [`PORTAL-FILE-DOWNLOAD.md`](./PORTAL-FILE-DOWNLOAD.md).
 Security: uses existing `files:portal-read` and the local private byte store.
 Next: none.
 
+### PORTAL-PROJECT-FILES
+
+Dependencies: PORTAL-FILE-DOWNLOAD.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a project card lists the files already loaded for that project,
+with the existing download link. A file of another project stays off the
+card. A failed file read is not shown as an empty list.
+Tests: `apps/portal/app/shell.test.mjs`.
+Contract: [`PORTAL-PROJECT-FILES.md`](./PORTAL-PROJECT-FILES.md).
+Security: uses the file list the portal already loaded. No new byte route.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
