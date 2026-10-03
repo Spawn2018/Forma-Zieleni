@@ -12,6 +12,7 @@ import {
   adminProjectNextMilestoneLine,
   nextOpenAdminMilestone,
   compareAdminDecisionLog,
+  compareAdminGardens,
   compareAdminCapacityWindows,
   compareAdminFiles,
   compareAdminMilestones,
@@ -1445,6 +1446,42 @@ test('a staff project names only the garden already loaded for it', () => {
     'Ogrody: gd8k2n4p6q8r0s2t, gd8k2n4p6q8r0s2u',
   );
   assert.equal(project.includes('gd8k2n4p6q8r0s2v'), false);
+});
+
+test('staff gardens order by the recorded instant', () => {
+  assert.equal(
+    compareAdminGardens(
+      { id: 'gd8k2n4p6q8r0s2u', createdAt: '2026-09-24T13:00:00.000Z' },
+      { id: 'gd8k2n4p6q8r0s2t', createdAt: '2026-09-24T13:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    gardens: {
+      status: 'ready',
+      items: [
+        {
+          id: 'gd8k2n4p6q8r0s2w',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          createdAt: '2026-09-25T13:00:00.000Z',
+        },
+        {
+          id: 'gd8k2n4p6q8r0s2u',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+        {
+          id: 'gd8k2n4p6q8r0s2t',
+          projectId: 'pr8k2n4p6q8r0s2u',
+          createdAt: '2026-09-24T13:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-garden-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['gd8k2n4p6q8r0s2t', 'gd8k2n4p6q8r0s2u', 'gd8k2n4p6q8r0s2w']);
 });
 
 test('a staff contract names only the projects already loaded for it', () => {

@@ -2831,6 +2831,16 @@ function gardenProjectFilterForm(query: string, projectId: string | null): React
   );
 }
 
+/** Earlier recorded instant first. The same instant stays in id order. Every garden stays. */
+export function compareAdminGardens(
+  left: Pick<AdminGardenRow, 'id' | 'createdAt'>,
+  right: Pick<AdminGardenRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function gardenListNode(
   gardens: AdminGardenList,
   filter: { query: string; projectId: string | null; invalid: boolean },
@@ -2852,7 +2862,7 @@ function gardenListNode(
     body = createElement(
       'ul',
       { className: 'admin-garden-list' },
-      ...gardens.items.map((garden) =>
+      ...[...gardens.items].sort(compareAdminGardens).map((garden) =>
         createElement(
           'li',
           { key: garden.id, className: 'admin-garden' },

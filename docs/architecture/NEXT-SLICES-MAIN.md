@@ -1675,6 +1675,20 @@ Contract: [`ADMIN-CONTRACT-PROJECT.md`](./ADMIN-CONTRACT-PROJECT.md).
 Security: display only. Uses the project list staff already loaded.
 Next: none.
 
+### ADMIN-GARDEN-ORDER
+
+Dependencies: ADMIN-GARDEN-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: the staff garden list orders gardens by the earlier recorded
+instant. The same instant stays in id order. Every garden stays. No new
+store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-GARDEN-ORDER.md`](./ADMIN-GARDEN-ORDER.md).
+Security: display sort only. Uses gardens staff already loaded.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
