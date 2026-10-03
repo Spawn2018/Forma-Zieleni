@@ -1746,6 +1746,21 @@ Contract: [`ADMIN-LEAD-LABELS.md`](./ADMIN-LEAD-LABELS.md).
 Security: display only. Uses the status already on the loaded lead.
 Next: none.
 
+### ADMIN-LEAD-QUALIFICATION-LABELS
+
+Dependencies: ADMIN-LEAD-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff lead shows its qualification result in Polish. The labels
+are oczekuje, zakwalifikowana, niezakwalifikowana, and wymaga przeglądu.
+An unknown result token rejects the list. A missing result stays pending.
+No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-LEAD-QUALIFICATION-LABELS.md`](./ADMIN-LEAD-QUALIFICATION-LABELS.md).
+Security: display only. Uses the result already on the loaded lead.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

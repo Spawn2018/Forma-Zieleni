@@ -17,12 +17,15 @@ export const ADMIN_LEAD_STATUSES = [
 ] as const;
 export type AdminLeadStatus = (typeof ADMIN_LEAD_STATUSES)[number];
 
+export const ADMIN_QUALIFICATION_RESULTS = ['pending', 'qualified', 'unqualified', 'needs_review'] as const;
+export type AdminQualificationResult = (typeof ADMIN_QUALIFICATION_RESULTS)[number];
+
 export type AdminLeadRow = {
   id: string;
   status: AdminLeadStatus;
   contactName: string;
   locality: string | null;
-  qualificationResult: string;
+  qualificationResult: AdminQualificationResult;
 };
 
 export type AdminLeadList =
@@ -362,6 +365,7 @@ export function mapLeadPage(body: unknown): AdminLeadList {
     const locality = lead.property && typeof lead.property.locality === 'string' ? lead.property.locality : null;
     const qualificationResult =
       lead.qualification && typeof lead.qualification.result === 'string' ? lead.qualification.result : 'pending';
+    if (!isAdminQualificationResult(qualificationResult)) return { status: 'error' };
     rows.push({
       id: lead.id,
       status: lead.status,
@@ -636,6 +640,28 @@ export async function createAdminContract(input: {
     return { ok: true };
   } catch {
     return { ok: false, reason: 'error' };
+  }
+}
+
+function isAdminQualificationResult(result: string): result is AdminQualificationResult {
+  return (ADMIN_QUALIFICATION_RESULTS as readonly string[]).includes(result);
+}
+
+/** Polish words for the qualification results the domain already stores. An unknown token is not a label. */
+export function adminLeadQualificationLabel(result: AdminQualificationResult): string {
+  switch (result) {
+    case 'pending':
+      return 'oczekuje';
+    case 'qualified':
+      return 'zakwalifikowana';
+    case 'unqualified':
+      return 'niezakwalifikowana';
+    case 'needs_review':
+      return 'wymaga przeglądu';
+    default: {
+      const unreachable: never = result;
+      return unreachable;
+    }
   }
 }
 
@@ -2250,7 +2276,7 @@ function leadListNode(leads: AdminLeadList): ReactNode {
             [
               lead.locality ?? 'bez miejscowości',
               adminLeadStatusLabel(lead.status),
-              lead.qualificationResult,
+              adminLeadQualificationLabel(lead.qualificationResult),
             ].join(' · '),
           ),
           lead.qualificationResult === 'pending' || lead.qualificationResult === 'needs_review'
