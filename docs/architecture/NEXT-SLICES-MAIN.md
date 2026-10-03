@@ -1395,6 +1395,20 @@ Contract: [`PORTAL-CONTRACT-PROJECT.md`](./PORTAL-CONTRACT-PROJECT.md).
 Security: display only. Uses the project list the portal already loaded.
 Next: none.
 
+### MILESTONE-LIST-ORDER
+
+Dependencies: PORTAL-MILESTONE-VIEW, ADMIN-MILESTONE-STAFF, MILESTONE-DUE-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff and the client see milestones with an earlier due first, a
+missing due last, and the same due in id order. A done row stays in the
+list. The sort copies the loaded rows. No new store or payment field.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`MILESTONE-LIST-ORDER.md`](./MILESTONE-LIST-ORDER.md).
+Security: display order only. No mutation and no local-zone shift.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

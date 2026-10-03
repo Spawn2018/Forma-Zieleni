@@ -21,6 +21,7 @@ import {
   mapPortalSitePage,
   nextOpenPortalMilestone,
   portalContractStatusLabel,
+  comparePortalMilestones,
   portalContractProjectLine,
   portalMilestoneDueLabel,
   portalOfferStatusLabel,
@@ -785,12 +786,53 @@ test('a milestone row names its own project', () => {
       ],
     },
   }));
-  const first = html.slice(html.indexOf('Koncepcja'), html.indexOf('Sadzenie'));
-  const second = html.slice(html.indexOf('Sadzenie'));
-  assert.match(first, /Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t/);
-  assert.equal(first.includes('pj8k2n4p6q8r0s2u'), false);
-  assert.match(second, /Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u/);
-  assert.equal(second.includes('pj8k2n4p6q8r0s2t'), false);
+  const lines = [...html.matchAll(/portal-milestone-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.deepEqual(lines, [
+    'Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u',
+    'Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t',
+  ]);
+});
+
+test('portal milestones sort by due and keep a done row', () => {
+  const rows = [
+    { id: 'ms8k2n4p6q8r0s2u', dueAt: '2026-11-01T10:00:00.000Z' },
+    { id: 'ms8k2n4p6q8r0s2t', dueAt: '2026-11-01T10:00:00.000Z' },
+    { id: 'ms8k2n4p6q8r0s2v', dueAt: null },
+    { id: 'ms8k2n4p6q8r0s2w', dueAt: '2026-10-01T10:00:00.000Z' },
+  ];
+  assert.deepEqual([...rows].sort(comparePortalMilestones).map((row) => row.id), [
+    'ms8k2n4p6q8r0s2w',
+    'ms8k2n4p6q8r0s2t',
+    'ms8k2n4p6q8r0s2u',
+    'ms8k2n4p6q8r0s2v',
+  ]);
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    milestones: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ms8k2n4p6q8r0s2u',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          title: 'Później',
+          status: 'done',
+          dueAt: '2026-12-01T10:00:00.000Z',
+          createdAt: '2026-09-24T18:00:00.000Z',
+        },
+        {
+          id: 'ms8k2n4p6q8r0s2t',
+          projectId: 'pj8k2n4p6q8r0s2t',
+          title: 'Wcześniej',
+          status: 'planned',
+          dueAt: '2026-10-01T10:00:00.000Z',
+          createdAt: '2026-09-24T18:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const titles = [...html.matchAll(/portal-milestone-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(titles[0].startsWith('Wcześniej · zaplanowany'), true);
+  assert.equal(titles[1].startsWith('Później · zrobiony'), true);
 });
 
 test('a project card names the earliest open milestone and skips done work', () => {

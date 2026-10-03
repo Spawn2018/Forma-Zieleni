@@ -137,21 +137,28 @@ export type PortalMilestoneList =
   | { status: 'error' }
   | { status: 'forbidden' };
 
+/** Earlier due first. No due last. Same due stays in id order. Done rows are not removed. */
+export function comparePortalMilestones(
+  left: Pick<PortalMilestoneRow, 'id' | 'dueAt'>,
+  right: Pick<PortalMilestoneRow, 'id' | 'dueAt'>,
+): number {
+  if (left.dueAt !== right.dueAt) {
+    if (left.dueAt === null) return 1;
+    if (right.dueAt === null) return -1;
+    if (left.dueAt < right.dueAt) return -1;
+    return 1;
+  }
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 /** Earliest open milestone for one project. Done rows and other projects are skipped. */
 export function nextOpenPortalMilestone(
   projectId: string,
   milestones: readonly PortalMilestoneRow[],
 ): PortalMilestoneRow | null {
   const open = milestones.filter((item) => item.projectId === projectId && item.status !== 'done');
-  open.sort((left, right) => {
-    if (left.dueAt === right.dueAt) {
-      if (left.id === right.id) return 0;
-      return left.id < right.id ? -1 : 1;
-    }
-    if (left.dueAt === null) return 1;
-    if (right.dueAt === null) return -1;
-    return left.dueAt < right.dueAt ? -1 : 1;
-  });
+  open.sort(comparePortalMilestones);
   return open[0] ?? null;
 }
 
@@ -1181,7 +1188,7 @@ function milestoneListNode(milestones: PortalMilestoneList): ReactNode {
     createElement(
       'ul',
       { className: 'portal-milestone-list' },
-      ...milestones.items.map((milestone) =>
+      ...[...milestones.items].sort(comparePortalMilestones).map((milestone) =>
         createElement(
           'li',
           { key: milestone.id, className: 'portal-milestone' },

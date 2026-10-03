@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   adminContractStatusLabel,
   adminErrorMessage,
+  compareAdminMilestones,
   adminDecisionMilestoneLine,
   adminMilestoneDueLabel,
   adminOfferStatusLabel,
@@ -1726,6 +1727,47 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   }));
   assert.match(datedHtml, /Usuń termin/);
   assert.match(datedHtml, /Sadzenie · zaplanowany · 3 października 2026, 08:00 UTC/);
+  const orderedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: {
+      status: 'ready',
+      items: [
+        {
+          id: 'ms8k2n4p6q8r0s2u',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          title: 'Później',
+          status: 'done',
+          dueAt: '2026-12-01T08:00:00.000Z',
+        },
+        {
+          id: 'ms8k2n4p6q8r0s2w',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          title: 'Bez terminu',
+          status: 'planned',
+          dueAt: null,
+        },
+        {
+          id: 'ms8k2n4p6q8r0s2t',
+          projectId: 'pr8k2n4p6q8r0s2t',
+          title: 'Wcześniej',
+          status: 'planned',
+          dueAt: '2026-10-03T08:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const orderedTitles = [...orderedHtml.matchAll(/admin-milestone-meta">([^<]+)/g)].map((match) => match[1]);
+  assert.equal(orderedTitles[0].startsWith('Wcześniej · zaplanowany'), true);
+  assert.equal(orderedTitles[1].startsWith('Później · zrobiony'), true);
+  assert.equal(orderedTitles[2].startsWith('Bez terminu · zaplanowany'), true);
+  assert.deepEqual(
+    compareAdminMilestones(
+      { id: 'ms8k2n4p6q8r0s2u', dueAt: '2026-10-03T08:00:00.000Z' },
+      { id: 'ms8k2n4p6q8r0s2t', dueAt: '2026-10-03T08:00:00.000Z' },
+    ),
+    1,
+  );
   assert.equal(datedHtml.includes('Sadzenie · zaplanowany · 2026-10-03T08:00:00.000Z'), false);
   assert.equal(adminMilestoneDueLabel(null), 'bez terminu');
   assert.equal(adminMilestoneDueLabel('2026-02-31T00:00:00.000Z'), null);

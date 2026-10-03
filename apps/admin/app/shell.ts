@@ -2392,6 +2392,21 @@ function milestoneProjectFilterForm(query: string, projectId: string | null): Re
   );
 }
 
+/** Earlier due first. No due last. Same due stays in id order. Done rows are not removed. */
+export function compareAdminMilestones(
+  left: { id: string; dueAt: string | null },
+  right: { id: string; dueAt: string | null },
+): number {
+  if (left.dueAt !== right.dueAt) {
+    if (left.dueAt === null) return 1;
+    if (right.dueAt === null) return -1;
+    if (left.dueAt < right.dueAt) return -1;
+    return 1;
+  }
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
 function milestoneListNode(
   milestones: AdminMilestoneList,
   filter: { query: string; projectId: string | null; invalid: boolean },
@@ -2413,7 +2428,7 @@ function milestoneListNode(
     body = createElement(
       'ul',
       { className: 'admin-milestone-list' },
-      ...milestones.items.map((milestone) => {
+      ...[...milestones.items].sort(compareAdminMilestones).map((milestone) => {
         const nextStatus = nextAdminMilestoneStatus(milestone.status);
         return createElement(
           'li',

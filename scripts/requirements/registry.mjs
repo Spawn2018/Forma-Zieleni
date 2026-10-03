@@ -617,6 +617,14 @@ row('FZ-REQ-PORTAL-021', 'A portal contract names the projects already loaded fo
   executableWhenComplete: ['PORTAL-CONTRACT-VIEW', 'PORTAL-PROJECT-VIEW'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-022', 'A portal milestone list shows an earlier due before a later due, and a missing due last. The same due stays in id order. A done row stays in the list. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The list copies the loaded rows and sorts them. The stored order and the due instant stay unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'MILESTONE_LIST_ORDER',
+  executableSlice: 'MILESTONE-LIST-ORDER',
+  executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
@@ -734,6 +742,14 @@ row('FZ-REQ-ADMIN-031', 'Staff read a capacity window in the same Polish UTC wor
   depth: 'CAPACITY_WINDOW_LABELS',
   executableSlice: 'CAPACITY-WINDOW-LABELS',
   executableWhenComplete: ['CAPACITY-WINDOW-CLOSE', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-032', 'Staff see milestones in the same due order as the portal: earlier due first, missing due last, same due in id order. A done row stays in the list. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The staff list copies the loaded rows and sorts them. The stored order and the due instant stay unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_LIST_ORDER',
+  executableSlice: 'MILESTONE-LIST-ORDER',
+  executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'MILESTONE-DUE-LABELS'],
   safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
