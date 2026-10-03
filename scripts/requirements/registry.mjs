@@ -560,6 +560,14 @@ row('FZ-REQ-ADMIN-015', 'Staff can list and create decision-log entries in apps/
   executableSlice: 'ADMIN-DECISION-LOG',
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PROJECT-MILESTONE-DOMAIN'],
 });
+row('FZ-REQ-ADMIN-017', 'Staff can advance a project milestone one status step in apps/admin. Planned becomes active, then done. A skip, a backward step, and a payment or signing field are refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts the next status to POST /v1/milestones/{milestoneId}/status. Portal still reads the projection and cannot advance status.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_STATUS',
+  executableSlice: 'ADMIN-MILESTONE-STATUS',
+  executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'PORTAL-MILESTONE-VIEW'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-016', 'Staff can mark a planned project delivered in apps/admin through the existing Core API. A delivered project has no second deliver control. No payment or signing field is sent.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'Admin UI posts an empty body to POST /v1/projects/{projectId}/deliver only when status is planned. Garden linkage still requires Core API delivery rules.', {
   productCapability: 'ADMIN',
   depth: 'PROJECT_DELIVER',

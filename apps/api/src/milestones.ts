@@ -1,18 +1,20 @@
 import { createHash } from 'node:crypto';
 import {
+  advanceProjectMilestone,
   assertOpaqueMilestoneId,
   assertOpaqueDecisionLogId,
   assertOpaqueProjectId,
   createDecisionLogEntry,
   createProjectMilestone,
   projectMilestoneForPortal,
+  type MilestoneStatus,
   type PortalMilestoneProjection,
   type ProjectDecisionLogEntry,
   type ProjectMilestone,
 } from '@forma-zieleni/domain';
 import type { Actor } from './auth.ts';
 import { ApiFailure, badRequest } from './errors.ts';
-import { newDecisionLogId, newMilestoneId } from './ids.ts';
+import { newDecisionLogId, newMilestoneId, newOpaqueId } from './ids.ts';
 import { decodeCursor, encodeCursor, requestHash } from './leads.ts';
 import type { DecisionLogListQuery, LeadStore, MilestoneListQuery, SortField, StoredReply } from './store.ts';
 
@@ -147,6 +149,83 @@ export async function createMilestoneRecord(
       'milestone.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: milestone },
+      at,
+    );
+    return milestone;
+  });
+}
+
+export async function advanceMilestoneStatus(
+  store: LeadStore,
+  milestoneId: string,
+  nextStatus: MilestoneStatus,
+  actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<ProjectMilestone> {
+  const hash = requestHash({ scope: 'milestone.status', milestoneId, status: nextStatus });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'milestone.status', idempotencyKey, hash);
+    if (replay) return replay.responseBody as ProjectMilestone;
+    const current = await tx.findMilestone(milestoneId);
+    if (!current) throw new ApiFailure(404, 'MILESTONE_NOT_FOUND', 'Milestone was not found.');
+    const project = await tx.findProject(current.projectId);
+    if (!project) throw new ApiFailure(404, 'PROJECT_NOT_FOUND', 'Project was not found.');
+    const contract = await tx.findContract(project.contractId);
+    if (!contract) throw new ApiFailure(404, 'CONTRACT_NOT_FOUND', 'Contract was not found.');
+    const offer = await tx.findOffer(contract.offerId);
+    if (!offer) throw new ApiFailure(404, 'OFFER_NOT_FOUND', 'Offer was not found.');
+    const opportunity = await tx.findOpportunity(offer.opportunityId);
+    if (!opportunity) throw new ApiFailure(404, 'OPPORTUNITY_NOT_FOUND', 'Opportunity was not found.');
+    let milestone: ProjectMilestone;
+    try {
+      milestone = advanceProjectMilestone(current, nextStatus, at);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'MILESTONE_TRANSITION_FORBIDDEN') {
+        throw new ApiFailure(409, 'MILESTONE_TRANSITION_FORBIDDEN', 'Milestone status transition is not allowed.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_STATUS_INVALID') {
+        throw badRequest('MILESTONE_STATUS_INVALID', 'Milestone status is not valid.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_AT_INVALID') {
+        throw badRequest('MILESTONE_AT_INVALID', 'Milestone time is not valid.');
+      }
+      if (error instanceof Error && error.message === 'MILESTONE_SURFACE_FORBIDDEN') {
+        throw badRequest('MILESTONE_SURFACE_FORBIDDEN', 'Forbidden milestone fields.');
+      }
+      throw error;
+    }
+    await tx.saveMilestone(milestone);
+    await tx.insertOutbox({
+      id: newOpaqueId('o'),
+      eventType: 'milestone.status_advanced',
+      leadId: opportunity.leadId,
+      payload: {
+        leadId: opportunity.leadId,
+        projectId: milestone.projectId,
+        milestoneId: milestone.id,
+        fromStatus: current.status,
+        status: milestone.status,
+      },
+      at,
+    });
+    await tx.insertAudit({
+      id: newOpaqueId('a'),
+      action: 'milestone.status_advanced',
+      actorId: actor.actorId,
+      leadId: opportunity.leadId,
+      at,
+      metadata: {
+        status: milestone.status,
+        projectId: milestone.projectId,
+        milestoneId: milestone.id,
+        fromStatus: current.status,
+      },
+    });
+    await tx.saveIdempotency(
+      'milestone.status',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: milestone },
       at,
     );
     return milestone;

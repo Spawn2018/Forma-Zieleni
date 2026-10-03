@@ -6,8 +6,10 @@ import { createOffer } from './src/offer.ts';
 import { createContract } from './src/contract.ts';
 import { createProject } from './src/project.ts';
 import {
+  advanceProjectMilestone,
   createDecisionLogEntry,
   createProjectMilestone,
+  nextMilestoneStatus,
   projectMilestoneForPortal,
 } from './src/project-milestone.ts';
 
@@ -147,4 +149,27 @@ test('portal milestone projection follows the owning project and omits staff fie
   assert.equal(projectMilestoneForPortal(milestone, owned, 'portal-other'), null);
   assert.equal(projectMilestoneForPortal(milestone, plannedProject(), 'portal-ola'), null);
   assert.equal(projectMilestoneForPortal(milestone, null, 'portal-ola'), null);
+});
+
+test('milestone status advances one step and refuses a skip or a payment field', () => {
+  const project = plannedProject();
+  const milestone = createProjectMilestone('m7k2n4p6q8r0s2t4', project, { title: 'Koncepcja' }, AT);
+  assert.equal(nextMilestoneStatus('planned'), 'active');
+  assert.equal(nextMilestoneStatus('done'), null);
+  const active = advanceProjectMilestone(milestone, 'active', '2026-09-24T19:00:00.000Z');
+  assert.equal(active.status, 'active');
+  assert.equal(active.createdAt, milestone.createdAt);
+  assert.equal(active.updatedAt, '2026-09-24T19:00:00.000Z');
+  const done = advanceProjectMilestone(active, 'done', '2026-09-24T20:00:00.000Z');
+  assert.equal(done.status, 'done');
+  assert.throws(() => advanceProjectMilestone(milestone, 'done', '2026-09-24T19:00:00.000Z'), /MILESTONE_TRANSITION_FORBIDDEN/);
+  assert.throws(() => advanceProjectMilestone(done, 'active', '2026-09-24T21:00:00.000Z'), /MILESTONE_TRANSITION_FORBIDDEN/);
+  assert.throws(
+    () => advanceProjectMilestone(milestone, 'active', '2026-09-24T19:00:00.000Z', { payment: true }),
+    /MILESTONE_SURFACE_FORBIDDEN/,
+  );
+  assert.throws(
+    () => advanceProjectMilestone(milestone, 'active', '2026-09-24T17:00:00.000Z'),
+    /MILESTONE_AT_INVALID/,
+  );
 });

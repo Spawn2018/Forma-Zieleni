@@ -256,11 +256,13 @@ export type {
 export {
   DECISION_LOG_KINDS,
   MILESTONE_STATUSES,
+  advanceProjectMilestone,
   assertOpaqueDecisionLogId,
   assertOpaqueMilestoneActorId,
   assertOpaqueMilestoneId,
   createDecisionLogEntry,
   createProjectMilestone,
+  nextMilestoneStatus,
   projectMilestoneForPortal,
 } from './project-milestone.ts';
 export type {

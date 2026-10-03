@@ -365,6 +365,12 @@ class MemoryTx implements LeadTx {
     this.state.milestones.push(clone(milestone));
   }
 
+  async saveMilestone(milestone: ProjectMilestone): Promise<void> {
+    const index = this.state.milestones.findIndex(item => item.id === milestone.id);
+    if (index < 0) throw new Error('MILESTONE_MISSING');
+    this.state.milestones[index] = clone(milestone);
+  }
+
   async findMilestone(id: string): Promise<ProjectMilestone | null> {
     return clone(this.state.milestones.find(item => item.id === id) ?? null);
   }

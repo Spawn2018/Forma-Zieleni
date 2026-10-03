@@ -1136,6 +1136,22 @@ Security: capability `milestones:portal-read`. Ownership is the linked
 project's client subject. The portal does not create a milestone.
 Next: none.
 
+### ADMIN-MILESTONE-STATUS
+
+Dependencies: ADMIN-MILESTONE-STAFF, PORTAL-MILESTONE-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can move a milestone from planned to active, then from
+active to done. A finished milestone has no second control. Skipping
+a step is refused. Payment and signing fields are refused. The portal
+sees the new status and still does not see updatedAt.
+Tests: `apps/admin/app/shell.test.mjs`, `apps/api/src/http.test.mjs`.
+Contract: [`ADMIN-MILESTONE-STATUS.md`](./ADMIN-MILESTONE-STATUS.md).
+Security: uses existing `milestones:create`. The portal cannot advance
+a status.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

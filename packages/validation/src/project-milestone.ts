@@ -9,6 +9,8 @@ import {
 
 export type FieldError = { field: string; reason: string };
 
+export type ProjectMilestoneStatusRequest = { status: MilestoneStatus };
+
 export type ProjectMilestoneCreateRequest = {
   projectId: string;
   title: string;
@@ -74,6 +76,26 @@ export function validateProjectMilestoneCreateRequest(
   } catch {
     return { ok: false, errors: [{ field: 'projectId', reason: 'PROJECT_ID_INVALID' }] };
   }
+}
+
+export function validateProjectMilestoneStatusRequest(
+  value: unknown,
+): { ok: true; value: ProjectMilestoneStatusRequest } | { ok: false; errors: FieldError[] } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  for (const key of ['payment', 'provider', 'signing', 'price', 'amountPln']) {
+    if (Object.hasOwn(body, key)) {
+      return { ok: false, errors: [{ field: key, reason: 'FORBIDDEN_FIELD' }] };
+    }
+  }
+  const extra = Object.keys(body).filter(key => key !== 'status');
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  if (typeof body.status !== 'string' || !(MILESTONE_STATUSES as readonly string[]).includes(body.status)) {
+    return { ok: false, errors: [{ field: 'status', reason: 'MILESTONE_STATUS_INVALID' }] };
+  }
+  return { ok: true, value: { status: body.status as MilestoneStatus } };
 }
 
 export function validateDecisionLogCreateRequest(

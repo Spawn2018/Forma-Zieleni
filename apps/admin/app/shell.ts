@@ -859,6 +859,59 @@ export async function createAdminMilestone(input: {
   }
 }
 
+/** Next staff milestone status, or null when the milestone is done. */
+export function nextAdminMilestoneStatus(status: string): string | null {
+  if (status === 'planned') return 'active';
+  if (status === 'active') return 'done';
+  return null;
+}
+
+function milestoneAdvanceLabel(nextStatus: string): string {
+  if (nextStatus === 'active') return 'Rozpocznij';
+  if (nextStatus === 'done') return 'Oznacz jako zrobiony';
+  return 'Dalej';
+}
+
+function milestoneStatusLabel(status: string): string {
+  if (status === 'planned') return 'zaplanowany';
+  if (status === 'active') return 'w toku';
+  if (status === 'done') return 'zrobiony';
+  return status;
+}
+
+export async function advanceAdminMilestoneStatus(input: {
+  base: string;
+  milestoneId: string;
+  status: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(
+      new URL(`/v1/milestones/${encodeURIComponent(input.milestoneId)}/status`, input.base),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: JSON.stringify({ status: input.status }),
+      },
+    );
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
 const GARDEN_FORBIDDEN = [
   'twinDatabase',
   'liveTwinUi',
@@ -1930,8 +1983,9 @@ function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
     createElement(
       'ul',
       { className: 'admin-milestone-list' },
-      ...milestones.items.map((milestone) =>
-        createElement(
+      ...milestones.items.map((milestone) => {
+        const nextStatus = nextAdminMilestoneStatus(milestone.status);
+        return createElement(
           'li',
           { key: milestone.id, className: 'admin-milestone' },
           createElement(
@@ -1940,15 +1994,28 @@ function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
             [
               milestone.title,
               ' · ',
-              milestone.status,
+              milestoneStatusLabel(milestone.status),
               ' · ',
               milestone.dueAt ?? 'bez terminu',
               ' · ',
               milestone.projectId,
             ].join(''),
           ),
-        ),
-      ),
+          nextStatus
+            ? createElement(
+                'form',
+                { method: 'post', className: 'admin-milestone-status' },
+                createElement('input', { type: 'hidden', name: 'milestoneId', value: milestone.id }),
+                createElement('input', { type: 'hidden', name: 'status', value: nextStatus }),
+                createElement(
+                  'button',
+                  { type: 'submit', name: 'intent', value: 'advance-milestone-status' },
+                  milestoneAdvanceLabel(nextStatus),
+                ),
+              )
+            : null,
+        );
+      }),
     ),
   );
 }

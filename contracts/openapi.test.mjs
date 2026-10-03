@@ -155,6 +155,12 @@ test('mutations require idempotency and public capture has no bearer requirement
     '#/components/parameters/IdempotencyKey',
     '#/components/parameters/RequestId',
   ]);
+  assert.deepEqual(spec.paths['/milestones/{milestoneId}/status'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/milestones/{milestoneId}/status'].post.parameters.map(p => p.$ref), [
+    '#/components/parameters/MilestoneId',
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
   assert.deepEqual(spec.paths['/decision-log'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/decision-log'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/decision-log'].post.parameters.map(p => p.$ref), [

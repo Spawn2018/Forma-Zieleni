@@ -15,6 +15,7 @@ import {
   createAdminGarden,
   createAdminDecisionLogEntry,
   createAdminSiteObservation,
+  advanceAdminMilestoneStatus,
   createAdminMilestone,
   createAdminPaymentSchedule,
   createAdminProject,
@@ -415,6 +416,28 @@ export async function action({ request }: Route.ActionArgs) {
       base,
       projectId: projectId.trim(),
       title: title.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'advance-milestone-status') {
+    const milestoneId = form.get('milestoneId');
+    const status = form.get('status');
+    if (typeof milestoneId !== 'string' || !milestoneId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    if (status !== 'active' && status !== 'done') {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await advanceAdminMilestoneStatus({
+      base,
+      milestoneId: milestoneId.trim(),
+      status,
       idempotencyKey: randomUUID(),
       cookie,
     });

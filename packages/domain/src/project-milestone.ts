@@ -178,6 +178,38 @@ export function createProjectMilestone(
   };
 }
 
+const MILESTONE_TRANSITIONS: Readonly<Partial<Record<MilestoneStatus, MilestoneStatus>>> = {
+  planned: 'active',
+  active: 'done',
+};
+
+/** Next staff status, or null when the milestone is already done. */
+export function nextMilestoneStatus(status: MilestoneStatus): MilestoneStatus | null {
+  return MILESTONE_TRANSITIONS[status] ?? null;
+}
+
+/**
+ * Staff advance planned → active → done.
+ * Skipping and going backward are refused. No payment or signing fields.
+ */
+export function advanceProjectMilestone(
+  milestone: ProjectMilestone,
+  nextStatus: MilestoneStatus,
+  at: string,
+  surface: Record<string, unknown> = {},
+): ProjectMilestone {
+  assertNoForbiddenSurface({ status: nextStatus, ...surface });
+  if (!MILESTONE_STATUSES.includes(nextStatus)) throw new Error('MILESTONE_STATUS_INVALID');
+  if (nextMilestoneStatus(milestone.status) !== nextStatus) throw new Error('MILESTONE_TRANSITION_FORBIDDEN');
+  const updated = assertInstant(at, 'MILESTONE_AT_INVALID');
+  if (updated < milestone.updatedAt) throw new Error('MILESTONE_AT_INVALID');
+  return {
+    ...milestone,
+    status: nextStatus,
+    updatedAt: updated,
+  };
+}
+
 export function createDecisionLogEntry(
   id: string,
   project: Project,

@@ -1870,4 +1870,43 @@ test('portal milestone projection follows the owning project subject (BOLA)', as
   assert.equal(otherList.items.length, 0);
   assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(portal) })).status, 403);
   assert.equal((await app.request(`/v1/milestones/${milestone.id}`, { headers: bearer(staff) })).status, 200);
+
+  const skipped = await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'done' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-skip',
+  }));
+  assert.equal(skipped.status, 409);
+  const forbidden = await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'active', payment: true }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-pay',
+  }));
+  assert.equal(forbidden.status, 400);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'active' }, {
+    ...bearer(portal),
+    'idempotency-key': 'pms-status-portal',
+  }))).status, 403);
+  const started = await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'active' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-active',
+  }));
+  assert.equal(started.status, 200);
+  assert.equal((await started.json()).status, 'active');
+  const replay = await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'active' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-active',
+  }));
+  assert.equal(replay.status, 200);
+  const finished = await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'done' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-done',
+  }));
+  assert.equal(finished.status, 200);
+  assert.equal((await finished.json()).status, 'done');
+  const portalAfter = await (await app.request('/v1/portal/milestones', { headers: bearer(portal) })).json();
+  assert.equal(portalAfter.items[0].status, 'done');
+  assert.equal(Object.hasOwn(portalAfter.items[0], 'updatedAt'), false);
+  assert.equal((await app.request(`/v1/milestones/${milestone.id}/status`, json({ status: 'active' }, {
+    ...bearer(staff),
+    'idempotency-key': 'pms-status-back',
+  }))).status, 409);
 });

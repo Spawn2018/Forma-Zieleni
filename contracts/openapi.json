@@ -2003,6 +2003,69 @@
         }
       }
     },
+    "/milestones/{milestoneId}/status": {
+      "post": {
+        "tags": [
+          "Milestones"
+        ],
+        "operationId": "advanceProjectMilestoneStatus",
+        "summary": "Advance a milestone one status step",
+        "description": "Staff advance planned to active, then active to done. Skipping a step is refused. Payment and signing fields are refused.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MilestoneId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectMilestoneStatusAdvance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Milestone status advanced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMilestone"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
     "/decision-log": {
       "get": {
         "tags": [
@@ -4851,6 +4914,19 @@
             "nullable": true
           }
         }
+      },
+      "ProjectMilestoneStatusAdvance": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/MilestoneStatus"
+          }
+        },
+        "description": "One forward milestone status. Payment and signing fields are not accepted."
       },
       "ProjectMilestone": {
         "type": "object",

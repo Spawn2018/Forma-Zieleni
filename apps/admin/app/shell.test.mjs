@@ -8,6 +8,7 @@ import {
   adminSessionCookiePresent,
   adminShell,
   advanceAdminContractLifecycle,
+  advanceAdminMilestoneStatus,
   capacityDecisionMessage,
   createAdminCapacityWindow,
   decideAdminCapacity,
@@ -46,6 +47,7 @@ import {
   mapOpportunityPage,
   mapProjectPage,
   nextAdminContractLifecycleStatus,
+  nextAdminMilestoneStatus,
   putAdminFileBytes,
   qualifyAdminLead,
   fetchAdminSigningSandbox,
@@ -867,6 +869,8 @@ test('the route module keeps an error boundary and wires Core API CRM lead/oppor
   assert.match(home, /fetchAdminProjects/);
   assert.match(home, /fetchAdminMilestones/);
   assert.match(home, /createAdminMilestone/);
+  assert.match(home, /advanceAdminMilestoneStatus/);
+  assert.match(home, /advance-milestone-status/);
   assert.match(home, /fetchAdminGardens/);
   assert.match(home, /createAdminGarden/);
   assert.match(home, /fetchAdminSiteIntelligence/);
@@ -1224,8 +1228,32 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   }));
   assert.match(html, /Kamienie milowe/);
   assert.match(html, /Sadzenie/);
+  assert.match(html, /zaplanowany/);
   assert.match(html, /bez terminu/);
+  assert.match(html, /Rozpocznij/);
+  assert.match(html, /name="milestoneId" value="ms8k2n4p6q8r0s2t"/);
+  assert.match(html, /name="status" value="active"/);
   assert.match(html, /Zapisz kamień milowy/);
+  assert.equal(nextAdminMilestoneStatus('planned'), 'active');
+  assert.equal(nextAdminMilestoneStatus('active'), 'done');
+  assert.equal(nextAdminMilestoneStatus('done'), null);
+  const doneHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: {
+      status: 'ready',
+      items: [{
+        id: 'ms8k2n4p6q8r0s2u',
+        projectId: 'pr8k2n4p6q8r0s2t',
+        title: 'Sadzenie',
+        status: 'done',
+        dueAt: null,
+      }],
+    },
+  }));
+  assert.match(doneHtml, /zrobiony/);
+  assert.equal(doneHtml.includes('Rozpocznij'), false);
+  assert.equal(doneHtml.includes('Oznacz jako zrobiony'), false);
   const fetched = await fetchAdminMilestones({
     base: 'http://admin.test',
     cookie: 'better-auth.session_token=abc',
@@ -1251,6 +1279,20 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   });
   assert.deepEqual(created, { ok: true });
+  const advanced = await advanceAdminMilestoneStatus({
+    base: 'http://admin.test',
+    milestoneId: 'ms8k2n4p6q8r0s2t',
+    status: 'active',
+    idempotencyKey: 'ms-status-1',
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/v1\/milestones\/ms8k2n4p6q8r0s2t\/status$/);
+      assert.equal(init?.method, 'POST');
+      assert.equal(init?.headers?.['idempotency-key'], 'ms-status-1');
+      assert.deepEqual(JSON.parse(String(init?.body)), { status: 'active' });
+      return new Response('{}', { status: 200 });
+    },
+  });
+  assert.deepEqual(advanced, { ok: true });
 });
 
 test('staff approval UI reviews synthetic proposals without Owner or spend gates', async () => {

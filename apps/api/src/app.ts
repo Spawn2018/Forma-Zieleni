@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueCapacityWindowId, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectMilestoneCreateRequest, validateProjectMilestoneStatusRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listPortalContracts, listVisibleContracts, parseContractListQuery, readContract, readPortalContract } from './contracts.ts';
@@ -12,6 +12,7 @@ import { createCapacityWindowRecord, decideCapacityPromise, listVisibleCapacityW
 import { createGardenRecord, listPortalGardens, listVisibleGardens, parseGardenListQuery, readGarden, readPortalGarden } from './gardens.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import {
+  advanceMilestoneStatus,
   createDecisionLogRecord,
   createMilestoneRecord,
   listPortalMilestones,
@@ -921,6 +922,23 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const milestone = await readMilestone(options.store, pathMilestoneId(c.req.param('milestoneId')));
     if (!milestone) throw new ApiFailure(404, 'MILESTONE_NOT_FOUND', 'Milestone was not found.');
+    return c.json(milestone);
+  });
+
+  app.post('/v1/milestones/:milestoneId/status', async c => {
+    const actor = await requireActor(c, options.authenticator, 'milestones:create');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateProjectMilestoneStatusRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'MILESTONE_INVALID', 'Milestone status could not be accepted.', parsed.errors);
+    const milestone = await advanceMilestoneStatus(
+      options.store,
+      pathMilestoneId(c.req.param('milestoneId')),
+      parsed.value.status,
+      actor,
+      key,
+      now(),
+    );
     return c.json(milestone);
   });
 
