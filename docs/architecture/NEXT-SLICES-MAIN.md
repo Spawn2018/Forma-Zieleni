@@ -1703,6 +1703,20 @@ Contract: [`ADMIN-GARDEN-ORDER.md`](./ADMIN-GARDEN-ORDER.md).
 Security: display sort only. Uses gardens staff already loaded.
 Next: none.
 
+### ADMIN-MILESTONE-CREATED
+
+Dependencies: ADMIN-MILESTONE-STAFF, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff milestone shows its recorded instant in Polish UTC
+words. An unreadable instant rejects the list. The raw timestamp is not
+shown. No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-MILESTONE-CREATED.md`](./ADMIN-MILESTONE-CREATED.md).
+Security: display only. Uses the instant already on the loaded milestone.
+Next: none.
+
 ### ADMIN-SITE-CREATED
 
 Dependencies: ADMIN-SITE-STAFF, RECORD-CREATED-LABELS.

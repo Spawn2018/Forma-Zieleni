@@ -1375,6 +1375,7 @@ test('a staff project names the earliest open milestone and skips done work', ()
       title: 'Odbiór',
       status: 'done',
       dueAt: '2026-10-01T10:00:00.000Z',
+      createdAt: '2026-09-20T10:00:00.000Z',
     },
     {
       id: 'ms8k2n4p6q8r0s2w',
@@ -1382,6 +1383,7 @@ test('a staff project names the earliest open milestone and skips done work', ()
       title: 'Sadzenie',
       status: 'planned',
       dueAt: '2026-11-02T10:00:00.000Z',
+      createdAt: '2026-09-21T10:00:00.000Z',
     },
     {
       id: 'ms8k2n4p6q8r0s2x',
@@ -1389,6 +1391,7 @@ test('a staff project names the earliest open milestone and skips done work', ()
       title: 'Koncepcja',
       status: 'planned',
       dueAt: '2026-10-15T10:00:00.000Z',
+      createdAt: '2026-09-22T10:00:00.000Z',
     },
     {
       id: 'ms8k2n4p6q8r0s2y',
@@ -1396,6 +1399,7 @@ test('a staff project names the earliest open milestone and skips done work', ()
       title: 'Inny projekt',
       status: 'planned',
       dueAt: '2026-10-02T10:00:00.000Z',
+      createdAt: '2026-09-23T10:00:00.000Z',
     },
   ];
   assert.equal(nextOpenAdminMilestone('pr8k2n4p6q8r0s2t', milestones)?.title, 'Koncepcja');
@@ -1868,6 +1872,7 @@ test('staff decision log lists a change and refuses a payment field', async () =
         title: 'Sadzenie',
         status: 'planned',
         dueAt: null,
+        createdAt: '2026-09-24T12:00:00.000Z',
       },
       {
         id: 'ms8k2n4p6q8r0s2u',
@@ -1875,6 +1880,7 @@ test('staff decision log lists a change and refuses a payment field', async () =
         title: 'Inny kamień',
         status: 'done',
         dueAt: null,
+        createdAt: '2026-09-24T13:00:00.000Z',
       },
     ],
   };
@@ -2331,6 +2337,9 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     }],
   });
   assert.equal(mapped.status, 'ready');
+  if (mapped.status === 'ready') {
+    assert.equal(mapped.items[0].createdAt, '2026-09-24T12:00:00.000Z');
+  }
   const html = renderToStaticMarkup(adminShell({
     state: 'signed-in',
     ...emptyCrm,
@@ -2340,6 +2349,8 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   assert.match(html, /Sadzenie/);
   assert.match(html, /zaplanowany/);
   assert.match(html, /bez terminu/);
+  assert.match(html, /24 września 2026, 12:00 UTC/);
+  assert.equal(html.includes('2026-09-24T12:00:00.000Z'), false);
   assert.match(html, /Rozpocznij/);
   assert.match(html, /name="milestoneId" value="ms8k2n4p6q8r0s2t"/);
   assert.match(html, /name="status" value="active"/);
@@ -2366,6 +2377,7 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
         title: 'Sadzenie',
         status: 'done',
         dueAt: null,
+        createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },
   }));
@@ -2526,6 +2538,7 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
         title: 'Sadzenie',
         status: 'planned',
         dueAt: '2026-10-03T08:00:00.000Z',
+        createdAt: '2026-09-24T12:00:00.000Z',
       }],
     },
   }));
@@ -2543,6 +2556,7 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
           title: 'Później',
           status: 'done',
           dueAt: '2026-12-01T08:00:00.000Z',
+          createdAt: '2026-09-24T12:00:00.000Z',
         },
         {
           id: 'ms8k2n4p6q8r0s2w',
@@ -2550,6 +2564,7 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
           title: 'Bez terminu',
           status: 'planned',
           dueAt: null,
+          createdAt: '2026-09-24T13:00:00.000Z',
         },
         {
           id: 'ms8k2n4p6q8r0s2t',
@@ -2557,6 +2572,7 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
           title: 'Wcześniej',
           status: 'planned',
           dueAt: '2026-10-03T08:00:00.000Z',
+          createdAt: '2026-09-24T11:00:00.000Z',
         },
       ],
     },
@@ -2582,6 +2598,26 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
       title: 'Sadzenie',
       status: 'planned',
       dueAt: 'jutro',
+      createdAt: '2026-09-24T12:00:00.000Z',
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2u',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: null,
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapMilestonePage({
+    items: [{
+      id: 'ms8k2n4p6q8r0s2u',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      title: 'Sadzenie',
+      status: 'planned',
+      dueAt: null,
+      createdAt: 'wczoraj',
     }],
   }), { status: 'error' });
   const advanced = await advanceAdminMilestoneStatus({

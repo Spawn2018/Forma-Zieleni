@@ -976,6 +976,14 @@ row('FZ-REQ-ADMIN-054', 'A staff lead shows its qualification result in Polish. 
   executableWhenComplete: ['ADMIN-LEAD-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-055', 'A staff milestone shows its recorded instant in Polish UTC words. An unreadable instant rejects the list. The raw timestamp is not shown. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The instant is already on the milestone staff loaded.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_CREATED',
+  executableSlice: 'ADMIN-MILESTONE-CREATED',
+  executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'RECORD-CREATED-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

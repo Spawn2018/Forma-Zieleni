@@ -169,6 +169,7 @@ export type AdminMilestoneRow = {
   title: string;
   status: string;
   dueAt: string | null;
+  createdAt: string;
 };
 
 export type AdminMilestoneList =
@@ -1001,6 +1002,7 @@ type MilestoneApiItem = {
   title?: unknown;
   status?: unknown;
   dueAt?: unknown;
+  createdAt?: unknown;
   payment?: unknown;
   signing?: unknown;
   price?: unknown;
@@ -1021,6 +1023,8 @@ export function mapMilestonePage(body: unknown): AdminMilestoneList {
     if (milestone.dueAt !== null && (typeof milestone.dueAt !== 'string' || formatUtcInstantPl(milestone.dueAt) === null)) {
       return { status: 'error' };
     }
+    const createdAt = requireAdminCreatedAt(milestone.createdAt);
+    if (createdAt === null) return { status: 'error' };
     if (
       Object.hasOwn(milestone, 'payment')
       || Object.hasOwn(milestone, 'signing')
@@ -1035,6 +1039,7 @@ export function mapMilestonePage(body: unknown): AdminMilestoneList {
       title: milestone.title,
       status: milestone.status,
       dueAt: milestone.dueAt,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2768,6 +2773,8 @@ function milestoneListNode(
               adminMilestoneDueLabel(milestone.dueAt) ?? 'termin nieczytelny',
               ' · ',
               milestone.projectId,
+              ' · ',
+              adminCreatedAtLabel(milestone.createdAt),
             ].join(''),
           ),
           createElement(
