@@ -17,6 +17,7 @@ import {
   createAdminSiteObservation,
   advanceAdminMilestoneStatus,
   createAdminMilestone,
+  parseAdminMilestoneDueAt,
   createAdminPaymentSchedule,
   createAdminProject,
   deliverAdminProject,
@@ -412,10 +413,19 @@ export async function action({ request }: Route.ActionArgs) {
     if (typeof title !== 'string' || !title.trim()) {
       return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
     }
+    const dueAt = form.get('dueAt');
+    if (typeof dueAt !== 'string') {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const parsedDue = parseAdminMilestoneDueAt(dueAt);
+    if (!parsedDue.ok) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
     const result = await createAdminMilestone({
       base,
       projectId: projectId.trim(),
       title: title.trim(),
+      ...(parsedDue.dueAt ? { dueAt: parsedDue.dueAt } : {}),
       idempotencyKey: randomUUID(),
       cookie,
     });

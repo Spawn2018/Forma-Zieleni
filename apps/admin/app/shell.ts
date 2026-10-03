@@ -829,10 +829,29 @@ export async function fetchAdminMilestones(input: {
   }
 }
 
+const MILESTONE_DUE_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+
+/** Empty stays omitted. A filled term must already be a UTC instant. */
+export function parseAdminMilestoneDueAt(
+  value: string,
+): { ok: true; dueAt?: string } | { ok: false } {
+  const trimmed = value.trim();
+  if (!trimmed) return { ok: true };
+  if (!MILESTONE_DUE_INSTANT.test(trimmed)) return { ok: false };
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) return { ok: false };
+  const fraction = trimmed.match(/\.(\d+)Z$/)?.[1];
+  const milliseconds = fraction ? fraction.padEnd(3, '0') : '000';
+  const canonical = `${parsed.toISOString().slice(0, 19)}.${milliseconds}Z`;
+  if (trimmed !== canonical && trimmed !== parsed.toISOString()) return { ok: false };
+  return { ok: true, dueAt: trimmed };
+}
+
 export async function createAdminMilestone(input: {
   base: string;
   projectId: string;
   title: string;
+  dueAt?: string;
   idempotencyKey: string;
   cookie?: string;
   fetchImpl?: typeof fetch;
@@ -849,7 +868,11 @@ export async function createAdminMilestone(input: {
       method: 'POST',
       credentials: 'include',
       headers,
-      body: JSON.stringify({ projectId: input.projectId, title: input.title }),
+      body: JSON.stringify({
+        projectId: input.projectId,
+        title: input.title,
+        ...(input.dueAt ? { dueAt: input.dueAt } : {}),
+      }),
     });
     if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
     if (!response.ok) return { ok: false, reason: 'error' };
@@ -2049,6 +2072,19 @@ function createMilestoneForm(): ReactNode {
         autoComplete: 'off',
       }),
     ),
+    createElement(
+      'label',
+      { className: 'admin-create-milestone-due' },
+      'Termin (UTC)',
+      createElement('input', {
+        type: 'text',
+        name: 'dueAt',
+        autoComplete: 'off',
+        spellCheck: false,
+        placeholder: '2026-10-03T08:00:00.000Z',
+      }),
+    ),
+    createElement('p', { className: 'admin-create-milestone-due-note' }, 'Puste pole zostawia kamień bez terminu.'),
     createElement('button', { type: 'submit', name: 'intent', value: 'create-milestone' }, 'Zapisz kamień milowy'),
   );
 }

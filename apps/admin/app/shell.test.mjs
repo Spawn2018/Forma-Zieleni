@@ -23,6 +23,7 @@ import {
   createAdminDecisionLogEntry,
   createAdminSiteObservation,
   createAdminMilestone,
+  parseAdminMilestoneDueAt,
   createAdminProject,
   deliverAdminProject,
   fetchAdminContracts,
@@ -1234,6 +1235,9 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
   assert.match(html, /name="milestoneId" value="ms8k2n4p6q8r0s2t"/);
   assert.match(html, /name="status" value="active"/);
   assert.match(html, /Zapisz kamień milowy/);
+  assert.match(html, /Termin \(UTC\)/);
+  assert.match(html, /name="dueAt"/);
+  assert.match(html, /Puste pole zostawia kamień bez terminu/);
   assert.equal(nextAdminMilestoneStatus('planned'), 'active');
   assert.equal(nextAdminMilestoneStatus('active'), 'done');
   assert.equal(nextAdminMilestoneStatus('done'), null);
@@ -1279,6 +1283,28 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   });
   assert.deepEqual(created, { ok: true });
+  assert.deepEqual(parseAdminMilestoneDueAt('  '), { ok: true });
+  assert.deepEqual(parseAdminMilestoneDueAt('jutro'), { ok: false });
+  assert.deepEqual(parseAdminMilestoneDueAt('2026-10-03T08:00:00.000Z'), {
+    ok: true,
+    dueAt: '2026-10-03T08:00:00.000Z',
+  });
+  const dated = await createAdminMilestone({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    title: 'Sadzenie',
+    dueAt: '2026-10-03T08:00:00.000Z',
+    idempotencyKey: 'ms-due-1',
+    fetchImpl: async (_url, init) => {
+      assert.deepEqual(JSON.parse(String(init?.body)), {
+        projectId: 'pr8k2n4p6q8r0s2t',
+        title: 'Sadzenie',
+        dueAt: '2026-10-03T08:00:00.000Z',
+      });
+      return new Response('{}', { status: 201 });
+    },
+  });
+  assert.deepEqual(dated, { ok: true });
   const advanced = await advanceAdminMilestoneStatus({
     base: 'http://admin.test',
     milestoneId: 'ms8k2n4p6q8r0s2t',

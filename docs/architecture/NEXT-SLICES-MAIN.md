@@ -1152,6 +1152,22 @@ Security: uses existing `milestones:create`. The portal cannot advance
 a status.
 Next: none.
 
+### ADMIN-MILESTONE-DUE
+
+Dependencies: ADMIN-MILESTONE-STAFF, PORTAL-MILESTONE-VIEW.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can leave the due field empty or send one UTC instant
+on create. An empty field is omitted. A non-instant does not leave
+the admin action. Payment and signing fields stay off the form.
+The portal shows the instant or `bez terminu`.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-MILESTONE-DUE.md`](./ADMIN-MILESTONE-DUE.md).
+Security: uses existing `milestones:create`. The portal cannot set
+the date.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |
