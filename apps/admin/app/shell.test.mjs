@@ -14,6 +14,7 @@ import {
   compareAdminDecisionLog,
   compareAdminGardens,
   compareAdminContracts,
+  compareAdminProjects,
   compareAdminPaymentInstallments,
   compareAdminOffers,
   compareAdminSites,
@@ -1693,6 +1694,45 @@ test('staff contracts order by the recorded instant', () => {
   }));
   const ids = [...html.matchAll(/admin-contract-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
   assert.deepEqual(ids, ['ct8k2n4p6q8r0s2t', 'ct8k2n4p6q8r0s2u', 'ct8k2n4p6q8r0s2w']);
+});
+
+test('staff projects order by the recorded instant', () => {
+  assert.equal(
+    compareAdminProjects(
+      { id: 'pr8k2n4p6q8r0s2u', createdAt: '2026-09-24T12:00:00.000Z' },
+      { id: 'pr8k2n4p6q8r0s2t', createdAt: '2026-09-24T12:00:00.000Z' },
+    ) > 0,
+    true,
+  );
+  const html = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    projects: {
+      status: 'ready',
+      items: [
+        {
+          id: 'pr8k2n4p6q8r0s2w',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          status: 'planned',
+          createdAt: '2026-09-25T12:00:00.000Z',
+        },
+        {
+          id: 'pr8k2n4p6q8r0s2u',
+          contractId: 'ct8k2n4p6q8r0s2t',
+          status: 'delivered',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+        {
+          id: 'pr8k2n4p6q8r0s2t',
+          contractId: 'ct8k2n4p6q8r0s2u',
+          status: 'planned',
+          createdAt: '2026-09-24T12:00:00.000Z',
+        },
+      ],
+    },
+  }));
+  const ids = [...html.matchAll(/admin-project-meta">([^<]+)/g)].map((match) => match[1].split(' · ')[0]);
+  assert.deepEqual(ids, ['pr8k2n4p6q8r0s2t', 'pr8k2n4p6q8r0s2u', 'pr8k2n4p6q8r0s2w']);
 });
 
 test('staff offers order by the recorded instant', () => {

@@ -2687,7 +2687,7 @@ function projectListNode(
     createElement(
       'ul',
       { className: 'admin-project-list' },
-      ...projects.items.map((project) =>
+      ...[...projects.items].sort(compareAdminProjects).map((project) =>
         createElement(
           'li',
           { key: project.id, className: 'admin-project' },
@@ -3005,6 +3005,16 @@ export function compareAdminPaymentInstallments(
   right: Pick<AdminPaymentInstallmentRow, 'id' | 'sequence'>,
 ): number {
   if (left.sequence !== right.sequence) return left.sequence < right.sequence ? -1 : 1;
+  if (left.id === right.id) return 0;
+  return left.id < right.id ? -1 : 1;
+}
+
+/** Earlier recorded instant first. The same instant stays in id order. Every project stays. */
+export function compareAdminProjects(
+  left: Pick<AdminProjectRow, 'id' | 'createdAt'>,
+  right: Pick<AdminProjectRow, 'id' | 'createdAt'>,
+): number {
+  if (left.createdAt !== right.createdAt) return left.createdAt < right.createdAt ? -1 : 1;
   if (left.id === right.id) return 0;
   return left.id < right.id ? -1 : 1;
 }
