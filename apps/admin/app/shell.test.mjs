@@ -6,6 +6,7 @@ import {
   adminContractStatusLabel,
   adminErrorMessage,
   compareAdminMilestones,
+  formatByteCount,
   adminDecisionMilestoneLine,
   adminMilestoneDueLabel,
   adminOfferStatusLabel,
@@ -558,7 +559,11 @@ test('mapFilePage and Core API file fetch/create stay truthful', async () => {
   }));
   assert.match(filteredFileHtml, /Pokaż pliki projektu/);
   assert.match(filteredFileHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
-  assert.match(filteredFileHtml, /plan\.pdf/);
+  assert.match(filteredFileHtml, /plan\.pdf · projekt pr8k2n4p6q8r0s2t · application\/pdf · 2 048 B · widoczny dla klienta/);
+  assert.equal(filteredFileHtml.includes('2048 B'), false);
+  assert.equal(filteredFileHtml.includes('2 KB'), false);
+  assert.equal(formatByteCount(1048576), '1 048 576 B');
+  assert.equal(formatByteCount(-1), null);
   const invalidFileHtml = renderToStaticMarkup(adminShell({
     state: 'signed-in',
     ...emptyCrm,

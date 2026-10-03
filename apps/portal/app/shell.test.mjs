@@ -22,6 +22,7 @@ import {
   nextOpenPortalMilestone,
   portalContractStatusLabel,
   comparePortalMilestones,
+  formatByteCount,
   portalContractProjectLine,
   portalMilestoneDueLabel,
   portalOfferStatusLabel,
@@ -274,7 +275,9 @@ test('signed-in portal renders client-safe project and file projections without 
   assert.match(html, /href="\/files\/fl8k2n4p6q8r0s2t\/content"/);
   assert.equal(html.includes('Pliki: brak'), false);
   assert.match(html, /application\/pdf/);
-  assert.match(html, /2048/);
+  assert.match(html, /2 048 B/);
+  assert.equal(html.includes('2048 B'), false);
+  assert.equal(html.includes('2 KB'), false);
   for (const phrase of commercialLeak) {
     assert.equal(html.toLowerCase().includes(phrase), false, phrase);
   }
@@ -791,6 +794,31 @@ test('a milestone row names its own project', () => {
     'Sadzenie · w toku · 1 listopada 2026, 10:00 UTC · projekt pj8k2n4p6q8r0s2u',
     'Koncepcja · zaplanowany · bez terminu · projekt pj8k2n4p6q8r0s2t',
   ]);
+});
+
+test('a file size stays an exact grouped byte count', () => {
+  assert.equal(formatByteCount(0), '0 B');
+  assert.equal(formatByteCount(999), '999 B');
+  assert.equal(formatByteCount(2048), '2 048 B');
+  assert.equal(formatByteCount(1048576), '1 048 576 B');
+  assert.equal(formatByteCount(1.5), null);
+  assert.equal(formatByteCount(-1), null);
+  const html = renderToStaticMarkup(portalShell({
+    ...emptySignedIn,
+    files: {
+      status: 'ready',
+      items: [{
+        id: 'fl8k2n4p6q8r0s2t',
+        projectId: 'pj8k2n4p6q8r0s2t',
+        name: 'plan.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 1.5,
+        createdAt: '2026-09-24T12:30:00.000Z',
+      }],
+    },
+  }));
+  assert.match(html, /plan\.pdf · application\/pdf · rozmiar nieczytelny ·/);
+  assert.equal(html.includes('1.5'), false);
 });
 
 test('portal milestones sort by due and keep a done row', () => {

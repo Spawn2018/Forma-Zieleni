@@ -625,6 +625,14 @@ row('FZ-REQ-PORTAL-022', 'A portal milestone list shows an earlier due before a 
   executableWhenComplete: ['PORTAL-MILESTONE-VIEW', 'MILESTONE-DUE-LABELS'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-PORTAL-023', 'A portal file shows its exact byte count with a space every three digits. The count is not rounded into kilobytes. A non-integer size is unreadable and is not printed raw. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/portal/app/shell.ts', 'apps/portal/app/shell.test.mjs', '', 'NONE', 'The file line uses the loaded sizeBytes. The stored integer stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'PORTAL',
+  depth: 'FILE_BYTE_LABELS',
+  executableSlice: 'FILE-BYTE-LABELS',
+  executableWhenComplete: ['PORTAL-FILE-DOWNLOAD'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-011', 'Staff approval UI exercises Agnieszka approval domain actions and cannot override Owner or spend gates.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/approvals.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'UI over synthetic domain Fabric proposals. No spend/price/live-publish intents.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
@@ -750,6 +758,14 @@ row('FZ-REQ-ADMIN-032', 'Staff see milestones in the same due order as the porta
   depth: 'MILESTONE_LIST_ORDER',
   executableSlice: 'MILESTONE-LIST-ORDER',
   executableWhenComplete: ['ADMIN-MILESTONE-STAFF', 'MILESTONE-DUE-LABELS'],
+  safePreblockerWork: true,
+});
+row('FZ-REQ-ADMIN-033', 'Staff see a file’s exact byte count with a space every three digits, including the upload hint. The count is not rounded into kilobytes. A non-integer size is unreadable. The create request still posts the raw integer. No new store or payment field is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The file line and the upload hint use the loaded sizeBytes. The stored integer stays unchanged.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'FILE_BYTE_LABELS',
+  executableSlice: 'FILE-BYTE-LABELS',
+  executableWhenComplete: ['ADMIN-FILE-VISIBILITY', 'PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {

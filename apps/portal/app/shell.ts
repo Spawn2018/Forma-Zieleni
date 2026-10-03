@@ -628,6 +628,23 @@ export function portalMilestoneDueLabel(dueAt: string | null): string | null {
   return formatUtcInstantPl(dueAt);
 }
 
+/** Exact byte count. A space separates each group of three digits. Never rounds into KB. */
+export function formatByteCount(value: number): string | null {
+  if (!Number.isSafeInteger(value) || value < 0) return null;
+  const digits = String(value);
+  let grouped = '';
+  for (let index = 0; index < digits.length; index += 1) {
+    const remaining = digits.length - index;
+    if (index > 0 && remaining % 3 === 0) grouped += ' ';
+    grouped += digits[index];
+  }
+  return `${grouped} B`;
+}
+
+function byteCountLabel(value: number): string {
+  return formatByteCount(value) ?? 'rozmiar nieczytelny';
+}
+
 function milestoneStatusLabel(status: PortalMilestoneStatus): string {
   switch (status) {
     case 'planned':
@@ -1240,8 +1257,8 @@ function fileListNode(files: PortalFileList): ReactNode {
               ' · ',
               file.mimeType,
               ' · ',
-              String(file.sizeBytes),
-              ' B · ',
+              byteCountLabel(file.sizeBytes),
+              ' · ',
               file.createdAt,
             ].join(''),
           ),

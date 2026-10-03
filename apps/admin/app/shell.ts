@@ -1063,6 +1063,23 @@ export function adminMilestoneDueLabel(dueAt: string | null): string | null {
   return formatUtcInstantPl(dueAt);
 }
 
+/** Exact byte count. A space separates each group of three digits. Never rounds into KB. */
+export function formatByteCount(value: number): string | null {
+  if (!Number.isSafeInteger(value) || value < 0) return null;
+  const digits = String(value);
+  let grouped = '';
+  for (let index = 0; index < digits.length; index += 1) {
+    const remaining = digits.length - index;
+    if (index > 0 && remaining % 3 === 0) grouped += ' ';
+    grouped += digits[index];
+  }
+  return `${grouped} B`;
+}
+
+function byteCountLabel(value: number): string {
+  return formatByteCount(value) ?? 'rozmiar nieczytelny';
+}
+
 function milestoneStatusLabel(status: string): string {
   if (status === 'planned') return 'zaplanowany';
   if (status === 'active') return 'w toku';
@@ -2949,7 +2966,7 @@ function fileBytesControls(file: AdminFileRow): ReactNode {
       createElement(
         'p',
         { id: hintId, className: 'admin-upload-file-bytes-hint' },
-        `Wgrywany plik musi mieć dokładnie ${String(file.sizeBytes)} B.`,
+        `Wgrywany plik musi mieć dokładnie ${byteCountLabel(file.sizeBytes)}.`,
       ),
       createElement(
         'button',
@@ -3016,8 +3033,8 @@ function fileListNode(
               ' · ',
               file.mimeType,
               ' · ',
-              String(file.sizeBytes),
-              ' B · ',
+              byteCountLabel(file.sizeBytes),
+              ' · ',
               file.visibleToClient ? 'widoczny dla klienta' : 'tylko personel',
             ].join(''),
           ),

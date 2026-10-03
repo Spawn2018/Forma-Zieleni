@@ -1409,6 +1409,21 @@ Contract: [`MILESTONE-LIST-ORDER.md`](./MILESTONE-LIST-ORDER.md).
 Security: display order only. No mutation and no local-zone shift.
 Next: none.
 
+### FILE-BYTE-LABELS
+
+Dependencies: PORTAL-FILE-DOWNLOAD, ADMIN-FILE-VISIBILITY.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff and the client read a file size as an exact byte count with
+a space every three digits. The count is not rounded into kilobytes. A
+non-integer size is unreadable and is not printed raw. The staff upload
+hint uses the same words. Create still posts the raw integer.
+Tests: `apps/portal/app/shell.test.mjs`, `apps/admin/app/shell.test.mjs`.
+Contract: [`FILE-BYTE-LABELS.md`](./FILE-BYTE-LABELS.md).
+Security: display only. No new file field and no byte rewrite.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
