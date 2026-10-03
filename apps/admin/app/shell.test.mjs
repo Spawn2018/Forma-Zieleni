@@ -205,6 +205,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             id: 'of8k2n4p6q8r0s2t',
             opportunityId: 'op8k2n4p6q8r0s2t',
             status: 'draft',
+            createdAt: '2026-09-24T12:00:00.000Z',
           },
         ],
       },
@@ -215,6 +216,7 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
             id: 'ct8k2n4p6q8r0s2t',
             offerId: 'of8k2n4p6q8r0s2t',
             status: 'draft',
+            createdAt: '2026-09-24T13:30:00.000Z',
           },
         ],
       },
@@ -289,6 +291,10 @@ test('signed-in lead list renders empty, error, forbidden, and real rows without
   assert.equal(ready.toLowerCase().includes('price'), false);
   assert.equal(ready.toLowerCase().includes('płatność'), false);
   assert.equal(ready.toLowerCase().includes('podpis'), false);
+  assert.match(ready, /24 września 2026, 12:00 UTC/);
+  assert.match(ready, /24 września 2026, 13:30 UTC/);
+  assert.equal(ready.includes('2026-09-24T12:00:00.000Z'), false);
+  assert.equal(ready.includes('2026-09-24T13:30:00.000Z'), false);
 });
 
 test('mapContractPage and Core API contract fetch/create stay truthful', async () => {
@@ -298,9 +304,38 @@ test('mapContractPage and Core API contract fetch/create stay truthful', async (
     mapContractPage({
       items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'draft' }],
     }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapContractPage({
+      items: [{
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: 'wczoraj',
+        updatedAt: '2026-09-24T13:30:00.000Z',
+      }],
+    }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapContractPage({
+      items: [{
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T13:30:00.000Z',
+        updatedAt: '2026-09-24T14:00:00.000Z',
+      }],
+    }),
     {
       status: 'ready',
-      items: [{ id: 'ct8k2n4p6q8r0s2t', offerId: 'of8k2n4p6q8r0s2t', status: 'draft' }],
+      items: [{
+        id: 'ct8k2n4p6q8r0s2t',
+        offerId: 'of8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T13:30:00.000Z',
+      }],
     },
   );
   assert.deepEqual(
@@ -901,9 +936,27 @@ test('mapOfferPage and Core API offer fetch/create stay truthful', async () => {
     mapOfferPage({
       items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft' }],
     }),
+    { status: 'error' },
+  );
+  assert.deepEqual(
+    mapOfferPage({
+      items: [{
+        id: 'of8k2n4p6q8r0s2t',
+        opportunityId: 'op8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T12:00:00.000Z',
+        updatedAt: '2026-09-24T12:05:00.000Z',
+        clientSubject: 'client-1',
+      }],
+    }),
     {
       status: 'ready',
-      items: [{ id: 'of8k2n4p6q8r0s2t', opportunityId: 'op8k2n4p6q8r0s2t', status: 'draft' }],
+      items: [{
+        id: 'of8k2n4p6q8r0s2t',
+        opportunityId: 'op8k2n4p6q8r0s2t',
+        status: 'draft',
+        createdAt: '2026-09-24T12:00:00.000Z',
+      }],
     },
   );
   assert.deepEqual(

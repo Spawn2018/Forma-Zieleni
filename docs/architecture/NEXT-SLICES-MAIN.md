@@ -1497,6 +1497,21 @@ Contract: [`PORTAL-OFFER-CONTRACT.md`](./PORTAL-OFFER-CONTRACT.md).
 Security: display only. Uses the contract list the portal already loaded.
 Next: none.
 
+### ADMIN-COMMERCIAL-CREATED
+
+Dependencies: RECORD-CREATED-LABELS, ADMIN-STATUS-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff offer and a staff contract show the recorded instant in
+Polish UTC words. A missing or unreadable instant fails that list map.
+The raw timestamp is not printed. Extra staff fields stay off the row.
+No new store, price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-COMMERCIAL-CREATED.md`](./ADMIN-COMMERCIAL-CREATED.md).
+Security: display only. Uses createdAt already returned by Core API.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.

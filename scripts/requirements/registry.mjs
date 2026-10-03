@@ -816,6 +816,14 @@ row('FZ-REQ-ADMIN-036', 'Staff can filter the site-intelligence list by an opaqu
   executableWhenComplete: ['ADMIN-SITE-STAFF', 'ADMIN-GARDEN-PROJECT-FILTER'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-037', 'A staff offer and a staff contract show the recorded instant in Polish UTC words. A missing or unreadable instant fails that list map. The raw timestamp is not printed. Staff fields other than the recorded instant stay off the row. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The staff list uses createdAt already returned by Core API. The stored instant is not shifted into a local zone.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'COMMERCIAL_CREATED',
+  executableSlice: 'ADMIN-COMMERCIAL-CREATED',
+  executableWhenComplete: ['RECORD-CREATED-LABELS', 'ADMIN-STATUS-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

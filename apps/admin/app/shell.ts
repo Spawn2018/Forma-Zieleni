@@ -41,6 +41,7 @@ export type AdminOfferRow = {
   id: string;
   opportunityId: string;
   status: AdminOfferStatus;
+  createdAt: string;
 };
 
 export type AdminOfferList =
@@ -56,6 +57,7 @@ export type AdminContractRow = {
   id: string;
   offerId: string;
   status: AdminContractStatus;
+  createdAt: string;
 };
 
 export type AdminContractList =
@@ -448,6 +450,7 @@ type OfferApiItem = {
   id?: unknown;
   opportunityId?: unknown;
   status?: unknown;
+  createdAt?: unknown;
   price?: unknown;
 };
 
@@ -460,12 +463,16 @@ export function mapOfferPage(body: unknown): AdminOfferList {
   for (const item of items) {
     const offer = item as OfferApiItem;
     if (typeof offer.id !== 'string' || typeof offer.opportunityId !== 'string') return { status: 'error' };
-    if (typeof offer.status !== 'string' || !isAdminOfferStatus(offer.status)) return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(offer.createdAt);
+    if (typeof offer.status !== 'string' || !isAdminOfferStatus(offer.status) || createdAt === null) {
+      return { status: 'error' };
+    }
     if (Object.hasOwn(offer, 'price')) return { status: 'error' };
     rows.push({
       id: offer.id,
       opportunityId: offer.opportunityId,
       status: offer.status,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -525,6 +532,7 @@ type ContractApiItem = {
   id?: unknown;
   offerId?: unknown;
   status?: unknown;
+  createdAt?: unknown;
 };
 
 export function mapContractPage(body: unknown): AdminContractList {
@@ -536,11 +544,15 @@ export function mapContractPage(body: unknown): AdminContractList {
   for (const item of items) {
     const contract = item as ContractApiItem;
     if (typeof contract.id !== 'string' || typeof contract.offerId !== 'string') return { status: 'error' };
-    if (typeof contract.status !== 'string' || !isAdminContractStatus(contract.status)) return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(contract.createdAt);
+    if (typeof contract.status !== 'string' || !isAdminContractStatus(contract.status) || createdAt === null) {
+      return { status: 'error' };
+    }
     rows.push({
       id: contract.id,
       offerId: contract.offerId,
       status: contract.status,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2249,7 +2261,15 @@ function offerListNode(offers: AdminOfferList): ReactNode {
           createElement(
             'p',
             { className: 'admin-offer-meta' },
-            [offer.id, ' · szansa ', offer.opportunityId, ' · ', adminOfferStatusLabel(offer.status)].join(''),
+            [
+              offer.id,
+              ' · szansa ',
+              offer.opportunityId,
+              ' · ',
+              adminOfferStatusLabel(offer.status),
+              ' · ',
+              adminCreatedAtLabel(offer.createdAt),
+            ].join(''),
           ),
         ),
       ),
@@ -2303,7 +2323,15 @@ function contractListNode(contracts: AdminContractList): ReactNode {
           createElement(
             'p',
             { className: 'admin-contract-meta' },
-            [contract.id, ' · oferta ', contract.offerId, ' · ', adminContractStatusLabel(contract.status)].join(''),
+            [
+              contract.id,
+              ' · oferta ',
+              contract.offerId,
+              ' · ',
+              adminContractStatusLabel(contract.status),
+              ' · ',
+              adminCreatedAtLabel(contract.createdAt),
+            ].join(''),
           ),
           nextStatus
             ? createElement(
