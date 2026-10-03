@@ -840,6 +840,14 @@ row('FZ-REQ-ADMIN-038', 'The staff file list orders files by Polish name. Number
   executableWhenComplete: ['ADMIN-FILE-VISIBILITY', 'PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-039', 'A staff decision-log entry shows its recorded instant in Polish UTC words. A missing or unreadable instant fails the list map. The raw timestamp and the recording actor id stay off the row. No new store, price, or signature is added.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The entry uses createdAt already returned by Core API. The stored instant is not shifted into a local zone.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'DECISION_LOG_CREATED',
+  executableSlice: 'ADMIN-DECISION-LOG-CREATED',
+  executableWhenComplete: ['ADMIN-DECISION-LOG', 'RECORD-CREATED-LABELS'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',

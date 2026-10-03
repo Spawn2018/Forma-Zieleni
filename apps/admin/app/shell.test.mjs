@@ -1346,6 +1346,29 @@ test('staff decision log lists a change and refuses a payment field', async () =
   assert.match(html, /Popraw treść/);
   assert.match(html, /name="entryId" value="dl8k2n4p6q8r0s2t"/);
   assert.equal(html.includes('ac8k2n4p6q8r0s2t'), false);
+  assert.match(html, /24 września 2026, 12:00 UTC/);
+  assert.equal(html.includes('2026-09-24T12:00:00.000Z'), false);
+  assert.deepEqual(mapDecisionLogPage({
+    items: [{
+      id: 'dl8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      kind: 'decision',
+      summary: 'Sadzimy żywopłot wzdłuż granicy.',
+      recordedByActorId: 'ac8k2n4p6q8r0s2t',
+      relatedMilestoneId: null,
+    }],
+  }), { status: 'error' });
+  assert.deepEqual(mapDecisionLogPage({
+    items: [{
+      id: 'dl8k2n4p6q8r0s2t',
+      projectId: 'pr8k2n4p6q8r0s2t',
+      kind: 'decision',
+      summary: 'Sadzimy żywopłot wzdłuż granicy.',
+      recordedByActorId: 'ac8k2n4p6q8r0s2t',
+      relatedMilestoneId: null,
+      createdAt: 'wczoraj',
+    }],
+  }), { status: 'error' });
   const fetched = await fetchAdminDecisionLog({
     base: 'http://admin.test',
     cookie: 'better-auth.session_token=abc',

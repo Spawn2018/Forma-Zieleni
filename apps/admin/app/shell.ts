@@ -249,6 +249,7 @@ export type AdminDecisionLogRow = {
   kind: DecisionLogKind;
   summary: string;
   relatedMilestoneId: string | null;
+  createdAt: string;
 };
 
 export type AdminDecisionLogList =
@@ -1515,9 +1516,13 @@ export function mapDecisionLogPage(body: unknown): AdminDecisionLogList {
       summary?: unknown;
       recordedByActorId?: unknown;
       relatedMilestoneId?: unknown;
+      createdAt?: unknown;
     };
     const kind = decisionLogKind(entry.kind);
-    if (typeof entry.id !== 'string' || typeof entry.projectId !== 'string' || !kind) return { status: 'error' };
+    const createdAt = requireAdminCreatedAt(entry.createdAt);
+    if (typeof entry.id !== 'string' || typeof entry.projectId !== 'string' || !kind || createdAt === null) {
+      return { status: 'error' };
+    }
     if (typeof entry.summary !== 'string' || entry.summary.trim().length === 0) return { status: 'error' };
     if (typeof entry.recordedByActorId !== 'string') return { status: 'error' };
     if (entry.relatedMilestoneId !== null && typeof entry.relatedMilestoneId !== 'string') return { status: 'error' };
@@ -1528,6 +1533,7 @@ export function mapDecisionLogPage(body: unknown): AdminDecisionLogList {
       kind,
       summary: entry.summary,
       relatedMilestoneId: entry.relatedMilestoneId,
+      createdAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2962,6 +2968,8 @@ function decisionLogNode(
               entry.projectId,
               ' · ',
               adminDecisionMilestoneLine(entry.relatedMilestoneId, milestones),
+              ' · ',
+              adminCreatedAtLabel(entry.createdAt),
             ].join(''),
           ),
           createElement(

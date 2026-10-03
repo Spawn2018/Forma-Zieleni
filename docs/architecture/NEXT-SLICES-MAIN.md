@@ -1527,6 +1527,22 @@ Contract: [`FILE-LIST-ORDER.md`](./FILE-LIST-ORDER.md).
 Security: display sort only. Uses files already loaded.
 Next: none.
 
+### ADMIN-DECISION-LOG-CREATED
+
+Dependencies: ADMIN-DECISION-LOG, RECORD-CREATED-LABELS.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: a staff decision-log entry shows its recorded instant in Polish
+UTC words. A missing or unreadable instant fails the list map. The raw
+timestamp and the recording actor id stay off the row. No new store,
+price, or signature.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-DECISION-LOG-CREATED.md`](./ADMIN-DECISION-LOG-CREATED.md).
+Security: display only. Uses createdAt already returned by Core API.
+The actor id stays off the list.
+Next: none.
+
 ### ADMIN-DECISION-LOG-MILESTONE
 
 Dependencies: ADMIN-DECISION-LOG, ADMIN-MILESTONE-STAFF.
