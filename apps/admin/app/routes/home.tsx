@@ -4,6 +4,7 @@ import { data, redirect } from 'react-router';
 import type { Route } from './+types/home';
 import {
   ADMIN_FILE_BYTES_MAX,
+  adminMilestoneProjectFilter,
   adminShell,
   advanceAdminContractLifecycle,
   createAdminContract,
@@ -63,7 +64,8 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
   const base = apiOrigin();
   if (!base) return resolveAdminHome({});
   const cookie = request.headers.get('cookie') ?? '';
-  return resolveAdminHome({
+  const milestoneFilter = adminMilestoneProjectFilter(new URL(request.url).searchParams.get('milestoneProject'));
+  const home = await resolveAdminHome({
     async probe() {
       const headers: Record<string, string> = { accept: 'application/json' };
       if (cookie) headers.cookie = cookie;
@@ -107,7 +109,12 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       return fetchAdminSigningSandbox({ base, cookie, contractId });
     },
     async loadMilestones() {
-      return fetchAdminMilestones({ base, cookie });
+      if (milestoneFilter.state === 'invalid') return { status: 'empty' };
+      return fetchAdminMilestones({
+        base,
+        cookie,
+        projectId: milestoneFilter.state === 'project' ? milestoneFilter.projectId : undefined,
+      });
     },
     async loadGardens() {
       return fetchAdminGardens({ base, cookie });
@@ -122,6 +129,13 @@ export async function loader({ request }: Route.LoaderArgs): Promise<AdminHome> 
       return fetchAdminProposals({ base, cookie });
     },
   });
+  if (home.state !== 'signed-in') return home;
+  return {
+    ...home,
+    milestoneProjectQuery: milestoneFilter.state === 'all' ? '' : new URL(request.url).searchParams.get('milestoneProject')?.trim() ?? '',
+    milestoneProjectId: milestoneFilter.state === 'project' ? milestoneFilter.projectId : null,
+    milestoneFilterInvalid: milestoneFilter.state === 'invalid',
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {

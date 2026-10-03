@@ -39,6 +39,7 @@ import {
   fetchAdminGardens,
   fetchAdminDecisionLog,
   fetchAdminSiteIntelligence,
+  adminMilestoneProjectFilter,
   fetchAdminMilestones,
   fetchAdminOffers,
   fetchAdminOpportunities,
@@ -1376,6 +1377,50 @@ test('staff milestone UI lists a title and refuses a payment field', async () =>
     },
   });
   assert.deepEqual(fetched, { status: 'empty' });
+  assert.deepEqual(adminMilestoneProjectFilter(''), { state: 'all' });
+  assert.deepEqual(adminMilestoneProjectFilter('  pr8k2n4p6q8r0s2t  '), {
+    state: 'project',
+    projectId: 'pr8k2n4p6q8r0s2t',
+  });
+  assert.deepEqual(adminMilestoneProjectFilter('project1'), { state: 'invalid' });
+  const filtered = await fetchAdminMilestones({
+    base: 'http://admin.test',
+    projectId: 'pr8k2n4p6q8r0s2t',
+    fetchImpl: async (url) => {
+      assert.equal(new URL(String(url)).searchParams.get('projectId'), 'pr8k2n4p6q8r0s2t');
+      return new Response(JSON.stringify({ items: [], nextCursor: null }), { status: 200 });
+    },
+  });
+  assert.deepEqual(filtered, { status: 'empty' });
+  const refused = await fetchAdminMilestones({
+    base: 'http://admin.test',
+    projectId: 'project1',
+    fetchImpl: async () => {
+      assert.fail('an invalid project id must not call Core API');
+      return new Response('', { status: 500 });
+    },
+  });
+  assert.deepEqual(refused, { status: 'error' });
+  const filteredHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: { status: 'empty' },
+    milestoneProjectQuery: 'pr8k2n4p6q8r0s2t',
+    milestoneProjectId: 'pr8k2n4p6q8r0s2t',
+  }));
+  assert.match(filteredHtml, /Pokaż kamienie projektu/);
+  assert.match(filteredHtml, /Filtr projektu: pr8k2n4p6q8r0s2t/);
+  assert.match(filteredHtml, /Pokaż wszystkie/);
+  assert.match(filteredHtml, /value="pr8k2n4p6q8r0s2t"/);
+  const invalidHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    milestones: { status: 'empty' },
+    milestoneProjectQuery: 'project1',
+    milestoneFilterInvalid: true,
+  }));
+  assert.match(invalidHtml, /Id projektu jest niepoprawne\. Kamienie milowe nie zostały pobrane\./);
+  assert.equal(invalidHtml.includes('Brak kamieni milowych do pokazania.'), false);
   const created = await createAdminMilestone({
     base: 'http://admin.test',
     projectId: 'pr8k2n4p6q8r0s2t',

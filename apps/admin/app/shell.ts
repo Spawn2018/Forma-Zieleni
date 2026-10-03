@@ -224,6 +224,9 @@ export type AdminHome =
       siteIntelligence: AdminSiteList;
       decisionLog: AdminDecisionLogList;
       proposals: AdminProposalList;
+      milestoneProjectQuery?: string;
+      milestoneProjectId?: string | null;
+      milestoneFilterInvalid?: boolean;
     };
 
 /**
@@ -813,13 +816,18 @@ export function mapMilestonePage(body: unknown): AdminMilestoneList {
 export async function fetchAdminMilestones(input: {
   base: string;
   cookie?: string;
+  projectId?: string;
   fetchImpl?: typeof fetch;
 }): Promise<AdminMilestoneList> {
+  const filter = adminMilestoneProjectFilter(input.projectId);
+  if (filter.state === 'invalid') return { status: 'error' };
   const fetchImpl = input.fetchImpl ?? fetch;
   try {
     const headers: Record<string, string> = { accept: 'application/json' };
     if (input.cookie) headers.cookie = input.cookie;
-    const response = await fetchImpl(new URL('/v1/milestones?limit=50', input.base), {
+    const url = new URL('/v1/milestones?limit=50', input.base);
+    if (filter.state === 'project') url.searchParams.set('projectId', filter.projectId);
+    const response = await fetchImpl(url, {
       credentials: 'include',
       headers,
     });
@@ -2142,21 +2150,63 @@ function projectListNode(projects: AdminProjectList): ReactNode {
   );
 }
 
-function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
-  if (milestones.status === 'empty') {
-    return createElement('p', null, 'Brak kamieni milowych do pokazania.');
+const OPAQUE_PROJECT_ID = /^[a-z][a-z0-9]{15,63}$/;
+
+export type AdminMilestoneProjectFilter =
+  | { state: 'all' }
+  | { state: 'project'; projectId: string }
+  | { state: 'invalid' };
+
+/** Empty means the full list. A filled id must already be an opaque project id. */
+export function adminMilestoneProjectFilter(value: string | null | undefined): AdminMilestoneProjectFilter {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) return { state: 'all' };
+  if (!OPAQUE_PROJECT_ID.test(trimmed) || /^(?:project|prj|id)\d+$/i.test(trimmed)) {
+    return { state: 'invalid' };
   }
-  if (milestones.status === 'forbidden') {
-    return createElement('p', null, 'To konto nie może odczytać listy kamieni milowych.');
-  }
-  if (milestones.status === 'error') {
-    return createElement('p', null, 'Listy kamieni milowych nie udało się pobrać. Odśwież stronę.');
-  }
+  return { state: 'project', projectId: trimmed };
+}
+
+function milestoneProjectFilterForm(query: string, projectId: string | null): ReactNode {
   return createElement(
-    'section',
-    { className: 'admin-milestones', 'aria-label': 'Kamienie milowe' },
-    createElement('h2', null, 'Kamienie milowe'),
+    'form',
+    { method: 'get', className: 'admin-milestone-filter' },
     createElement(
+      'label',
+      { className: 'admin-milestone-filter-project' },
+      'Id projektu',
+      createElement('input', {
+        type: 'text',
+        name: 'milestoneProject',
+        autoComplete: 'off',
+        spellCheck: false,
+        defaultValue: query,
+      }),
+    ),
+    createElement('button', { type: 'submit' }, 'Pokaż kamienie projektu'),
+    projectId ? createElement('a', { href: '/' }, 'Pokaż wszystkie') : null,
+  );
+}
+
+function milestoneListNode(
+  milestones: AdminMilestoneList,
+  filter: { query: string; projectId: string | null; invalid: boolean },
+): ReactNode {
+  let body: ReactNode;
+  if (filter.invalid) {
+    body = createElement(
+      'p',
+      { className: 'admin-milestone-filter-invalid' },
+      'Id projektu jest niepoprawne. Kamienie milowe nie zostały pobrane.',
+    );
+  } else if (milestones.status === 'empty') {
+    body = createElement('p', null, 'Brak kamieni milowych do pokazania.');
+  } else if (milestones.status === 'forbidden') {
+    body = createElement('p', null, 'To konto nie może odczytać listy kamieni milowych.');
+  } else if (milestones.status === 'error') {
+    body = createElement('p', null, 'Listy kamieni milowych nie udało się pobrać. Odśwież stronę.');
+  } else {
+    body = createElement(
       'ul',
       { className: 'admin-milestone-list' },
       ...milestones.items.map((milestone) => {
@@ -2221,7 +2271,17 @@ function milestoneListNode(milestones: AdminMilestoneList): ReactNode {
           ),
         );
       }),
-    ),
+    );
+  }
+  return createElement(
+    'section',
+    { className: 'admin-milestones', 'aria-label': 'Kamienie milowe' },
+    createElement('h2', null, 'Kamienie milowe'),
+    milestoneProjectFilterForm(filter.query, filter.projectId),
+    filter.projectId
+      ? createElement('p', { className: 'admin-milestone-filter-active' }, `Filtr projektu: ${filter.projectId}`)
+      : null,
+    body,
   );
 }
 
@@ -3213,7 +3273,11 @@ export function adminShell(home: AdminHome): ReactNode {
     signingSandboxNode(home.signingSandbox),
     projectListNode(home.projects),
     createProjectForm(),
-    milestoneListNode(home.milestones),
+    milestoneListNode(home.milestones, {
+      query: home.milestoneProjectQuery ?? '',
+      projectId: home.milestoneProjectId ?? null,
+      invalid: home.milestoneFilterInvalid === true,
+    }),
     createMilestoneForm(),
     gardenListNode(home.gardens),
     createGardenForm(),

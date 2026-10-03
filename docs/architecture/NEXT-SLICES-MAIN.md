@@ -1235,6 +1235,20 @@ Security: uses existing `files:create`. The portal cannot change
 visibility. The audit records the boolean, not the subject.
 Next: none.
 
+### ADMIN-MILESTONE-PROJECT-FILTER
+
+Dependencies: ADMIN-MILESTONE-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can limit the milestone list to one opaque project id.
+An empty filter shows the full list. An invalid id does not call Core
+API and is not shown as an empty list.
+Tests: `apps/admin/app/shell.test.mjs`.
+Contract: [`ADMIN-MILESTONE-PROJECT-FILTER.md`](./ADMIN-MILESTONE-PROJECT-FILTER.md).
+Security: read-only. Uses the existing milestone list query. No new store.
+Next: none.
+
 ### PORTAL-PROJECT-NEXT-MILESTONE
 
 Dependencies: PORTAL-MILESTONE-VIEW.

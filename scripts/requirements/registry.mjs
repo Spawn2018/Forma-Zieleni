@@ -608,6 +608,14 @@ row('FZ-REQ-ADMIN-022', 'Staff can show a project file to the project client or 
   executableWhenComplete: ['ADMIN-FILE-NAME-REVISE', 'PORTAL-FILE-DOWNLOAD'],
   safePreblockerWork: true,
 });
+row('FZ-REQ-ADMIN-023', 'Staff can limit the milestone list to one opaque project id. An empty filter shows the full list. An invalid id does not call Core API and is not shown as an empty list. Other lists stay unfiltered.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'apps/admin/app/shell.ts', 'apps/admin/app/shell.test.mjs', '', 'NONE', 'The panel GETs milestoneProject. Core API already accepts projectId on GET /v1/milestones. No new store.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'ADMIN',
+  depth: 'MILESTONE_PROJECT_FILTER',
+  executableSlice: 'ADMIN-MILESTONE-PROJECT-FILTER',
+  executableWhenComplete: ['ADMIN-MILESTONE-STAFF'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-ADMIN-020', 'Staff can correct a decision-log summary after create. Kind, project, actor, and related milestone stay unchanged. A blank summary and a payment or contact field are refused. The portal still does not read the log.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts summary to POST /v1/decision-log/{entryId}/summary. The recording actor id stays off the list.', {
   blockerClass: 'INTERNAL',
   productCapability: 'ADMIN',
