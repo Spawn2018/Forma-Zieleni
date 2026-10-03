@@ -214,6 +214,7 @@ export {
   assertOpaqueCapacityActorId,
   assertOpaqueCapacityWindowId,
   assertPromisedDateInsideCapacity,
+  closeCapacityWindow,
   createCapacityWindow,
   decidePromisedDate,
 } from './capacity.ts';

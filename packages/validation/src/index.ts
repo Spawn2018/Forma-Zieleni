@@ -53,6 +53,7 @@ export { validateSiteIntelligenceCreateRequest } from './site-intelligence.ts';
 export type { SiteIntelligenceCreateRequest } from './site-intelligence.ts';
 export {
   validateCapacityDecisionRequest,
+  validateCapacityWindowCloseRequest,
   validateCapacityWindowCreateRequest,
 } from './capacity.ts';
 export type {

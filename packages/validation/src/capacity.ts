@@ -130,3 +130,19 @@ export function validateCapacityDecisionRequest(
     return { ok: false, errors: [{ field: 'actorId', reason: 'CAPACITY_ACTOR_ID_INVALID' }] };
   }
 }
+
+/** Empty body. Callers cannot move the range or attach a calendar field. */
+export function validateCapacityWindowCloseRequest(
+  value: unknown,
+): { ok: true; value: Record<string, never> } | { ok: false; errors: FieldError[] } {
+  if (value === undefined || value === null) return { ok: true, value: {} };
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, errors: [{ field: '', reason: 'BODY_REQUIRED' }] };
+  }
+  const body = value as Record<string, unknown>;
+  const surface = rejectSurface(body);
+  if (surface) return { ok: false, errors: surface };
+  const extra = Object.keys(body);
+  if (extra.length) return { ok: false, errors: extra.map(field => ({ field, reason: 'UNKNOWN_FIELD' })) };
+  return { ok: true, value: {} };
+}

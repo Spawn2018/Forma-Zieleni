@@ -1,4 +1,5 @@
 import {
+  closeCapacityWindow,
   createCapacityWindow,
   decidePromisedDate,
   type CapacityDecision,
@@ -103,6 +104,36 @@ export async function createCapacityWindowRecord(
       'capacity.create',
       idempotencyKey,
       { requestHash: hash, responseStatus: 201, responseBody: window },
+      at,
+    );
+    return window;
+  });
+}
+
+export async function closeCapacityWindowRecord(
+  store: LeadStore,
+  windowId: string,
+  _actor: Actor,
+  idempotencyKey: string,
+  at: string,
+): Promise<CapacityWindow> {
+  const hash = requestHash({ scope: 'capacity.close', windowId });
+  return store.transaction(async tx => {
+    const replay = await replayOrReserve(tx, 'capacity.close', idempotencyKey, hash);
+    if (replay) return replay.responseBody as CapacityWindow;
+    const current = await tx.findCapacityWindow(windowId);
+    if (!current) throw new ApiFailure(404, 'CAPACITY_WINDOW_NOT_FOUND', 'Capacity window was not found.');
+    let window: CapacityWindow;
+    try {
+      window = closeCapacityWindow(current, at);
+    } catch (error) {
+      asCapacityError(error);
+    }
+    if (window !== current) await tx.saveCapacityWindow(window);
+    await tx.saveIdempotency(
+      'capacity.close',
+      idempotencyKey,
+      { requestHash: hash, responseStatus: 200, responseBody: window },
       at,
     );
     return window;

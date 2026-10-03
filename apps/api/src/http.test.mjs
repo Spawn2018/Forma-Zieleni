@@ -1840,6 +1840,7 @@ test('capacity windows are staff-only and refuse a promised instant outside the 
   const window = await created.json();
   assert.equal(window.actorId, actorId);
   assert.equal(window.kind, 'consultation');
+  assert.equal(window.closedAt, null);
   assert.equal(Object.hasOwn(window, 'email'), false);
 
   const replay = await app.request('/v1/capacity-windows', json(windowBody, {
@@ -1889,6 +1890,44 @@ test('capacity windows are staff-only and refuse a promised instant outside the 
   assert.equal(page.items[0].id, window.id);
   assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(staff) })).status, 200);
   assert.equal((await app.request(`/v1/capacity-windows/${window.id}`, { headers: bearer(portal) })).status, 403);
+
+  assert.equal((await app.request(`/v1/capacity-windows/${window.id}/close`, json({}, bearer(portal)))).status, 403);
+  const refused = await app.request(`/v1/capacity-windows/${window.id}/close`, json({ email: 'a@b.c' }, {
+    'idempotency-key': 'cap-close-mail',
+    ...bearer(staff),
+  }));
+  assert.equal(refused.status, 400);
+  const closed = await app.request(`/v1/capacity-windows/${window.id}/close`, json({}, {
+    'idempotency-key': 'cap-close-1',
+    ...bearer(staff),
+  }));
+  assert.equal(closed.status, 200);
+  const closedBody = await closed.json();
+  assert.equal(typeof closedBody.closedAt, 'string');
+  assert.equal(closedBody.startsAt, window.startsAt);
+  assert.equal(closedBody.endsAt, window.endsAt);
+  const replayClose = await app.request(`/v1/capacity-windows/${window.id}/close`, json({}, {
+    'idempotency-key': 'cap-close-1',
+    ...bearer(staff),
+  }));
+  assert.equal(replayClose.status, 200);
+  assert.equal((await replayClose.json()).closedAt, closedBody.closedAt);
+  const again = await app.request(`/v1/capacity-windows/${window.id}/close`, json({}, {
+    'idempotency-key': 'cap-close-2',
+    ...bearer(staff),
+  }));
+  assert.equal(again.status, 200);
+  assert.equal((await again.json()).closedAt, closedBody.closedAt);
+  const afterClose = await app.request('/v1/capacity-decisions', json({
+    kind: 'consultation',
+    promisedAt: '2026-06-01T09:00:00.000Z',
+    actorId,
+  }, bearer(staff)));
+  assert.deepEqual(await afterClose.json(), { ok: false, reason: 'CAPACITY_EMPTY' });
+  assert.equal((await app.request('/v1/capacity-windows/wmissingwindow000/close', json({}, {
+    'idempotency-key': 'cap-close-missing',
+    ...bearer(staff),
+  }))).status, 404);
 });
 
 test('portal milestone projection follows the owning project subject (BOLA)', async () => {

@@ -106,6 +106,7 @@ export interface Database {
     kind: string;
     starts_at: Date;
     ends_at: Date;
+    closed_at: Date | null;
     created_at: Date;
     updated_at: Date;
   };
@@ -1336,6 +1337,19 @@ ALTER TABLE actor_capability ADD CONSTRAINT actor_capability_known
   },
 };
 
+const capacityWindowCloseMigration: Migration = {
+  async up(db) {
+    await sql.raw(`
+ALTER TABLE capacity_window ADD COLUMN closed_at timestamptz;
+    `).execute(db);
+  },
+  async down(db) {
+    await sql.raw(`
+ALTER TABLE capacity_window DROP COLUMN IF EXISTS closed_at;
+    `).execute(db);
+  },
+};
+
 const provider: MigrationProvider = {
   async getMigrations() {
     return {
@@ -1361,6 +1375,7 @@ const provider: MigrationProvider = {
       '020_capacity_window': capacityWindowMigration,
       '021_portal_contract_projection': portalContractMigration,
       '022_portal_milestone_projection': portalMilestoneMigration,
+      '023_capacity_window_close': capacityWindowCloseMigration,
     };
   },
 };

@@ -3000,6 +3000,47 @@
         }
       }
     },
+    "/capacity-windows/{windowId}/close": {
+      "post": {
+        "tags": ["Capacity"],
+        "operationId": "closeCapacityWindow",
+        "security": [{ "bearerAuth": [] }],
+        "description": "Close a staff capacity window. The row stays. A second close keeps the first instant. A closed window does not authorize a promised date.",
+        "parameters": [
+          {
+            "name": "windowId",
+            "in": "path",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/OpaqueId" }
+          },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/RequestId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CapacityWindowClose" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Capacity window closed.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CapacityWindow" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
     "/capacity-decisions": {
       "post": {
         "tags": ["Capacity"],
@@ -5606,16 +5647,23 @@
         },
         "description": "Staff capacity window. No calendar provider and no customer fields."
       },
+      "CapacityWindowClose": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "description": "Empty body. Callers cannot move the range or attach a calendar field."
+      },
       "CapacityWindow": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "actorId", "kind", "startsAt", "endsAt", "createdAt", "updatedAt"],
+        "required": ["id", "actorId", "kind", "startsAt", "endsAt", "closedAt", "createdAt", "updatedAt"],
         "properties": {
           "id": { "$ref": "#/components/schemas/OpaqueId" },
           "actorId": { "$ref": "#/components/schemas/OpaqueId" },
           "kind": { "type": "string", "enum": ["consultation", "start"] },
           "startsAt": { "type": "string", "format": "date-time" },
           "endsAt": { "type": "string", "format": "date-time" },
+          "closedAt": { "type": ["string", "null"], "format": "date-time" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
         }

@@ -226,6 +226,7 @@ export interface LeadTx {
   findSigningEnvelope(id: string): Promise<SigningSandboxEnvelope | null>;
   findSigningEnvelopeByContract(contractId: string): Promise<SigningSandboxEnvelope | null>;
   insertCapacityWindow(window: CapacityWindow): Promise<void>;
+  saveCapacityWindow(window: CapacityWindow): Promise<void>;
   findCapacityWindow(id: string): Promise<CapacityWindow | null>;
   listCapacityWindows(query: CapacityListQuery): Promise<CapacityWindow[]>;
   insertGarden(garden: Garden): Promise<void>;

@@ -464,6 +464,14 @@ row('FZ-REQ-CRM-CAPACITY-002', 'Staff can record capacity windows and see a refu
   executableSlice: 'CAPACITY-STAFF',
   executableWhenComplete: ['CAPACITY-DOMAIN', 'ADMIN-APP'],
 });
+row('FZ-REQ-CRM-CAPACITY-003', 'Staff can close a capacity window. The row stays. A second close keeps the first instant. A closed window does not authorize a promised date. The range and actor stay unchanged. A calendar or customer field is refused.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/capacity.ts', 'apps/api/src/http.test.mjs', '', 'NONE', 'Admin posts an empty body to POST /v1/capacity-windows/{windowId}/close. Migration 023 adds nullable closed_at. Portal cannot close a window.', {
+  blockerClass: 'INTERNAL',
+  productCapability: 'CAPACITY',
+  depth: 'STAFF_HTTP',
+  executableSlice: 'CAPACITY-WINDOW-CLOSE',
+  executableWhenComplete: ['CAPACITY-STAFF'],
+  safePreblockerWork: true,
+});
 row('FZ-REQ-PROJECT-003', 'Project milestones and a decision/change-order log are owned by Core API without payment or signing providers.', 'DONE_AT_MAX_DEPTH', 'TESTED', 'TESTED', CURRENT, 'packages/domain/src/project-milestone.ts', 'packages/domain/project-milestone.test.mjs', '', 'NONE', 'Evidence: OpenAPI + HTTP create/list with BOLA. Staff milestones:* capabilities. No payment/signing providers.', {
   productCapability: 'PROJECT',
   depth: 'MILESTONE',

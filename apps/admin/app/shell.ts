@@ -110,6 +110,7 @@ export type AdminCapacityWindowRow = {
   kind: 'consultation' | 'start';
   startsAt: string;
   endsAt: string;
+  closedAt: string | null;
 };
 
 export type AdminCapacityWindowList =
@@ -2690,10 +2691,12 @@ export function mapCapacityWindowPage(body: unknown): AdminCapacityWindowList {
       kind?: unknown;
       startsAt?: unknown;
       endsAt?: unknown;
+      closedAt?: unknown;
     };
     if (typeof window.id !== 'string' || typeof window.actorId !== 'string') return { status: 'error' };
     if (window.kind !== 'consultation' && window.kind !== 'start') return { status: 'error' };
     if (typeof window.startsAt !== 'string' || typeof window.endsAt !== 'string') return { status: 'error' };
+    if (window.closedAt !== null && typeof window.closedAt !== 'string') return { status: 'error' };
     if ('email' in (item as object) || 'name' in (item as object) || 'phone' in (item as object)) {
       return { status: 'error' };
     }
@@ -2703,6 +2706,7 @@ export function mapCapacityWindowPage(body: unknown): AdminCapacityWindowList {
       kind: window.kind,
       startsAt: window.startsAt,
       endsAt: window.endsAt,
+      closedAt: window.closedAt,
     });
   }
   return { status: 'ready', items: rows };
@@ -2757,6 +2761,35 @@ export async function createAdminCapacityWindow(input: {
         startsAt: input.startsAt,
         endsAt: input.endsAt,
       }),
+    });
+    if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
+    if (!response.ok) return { ok: false, reason: 'error' };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
+
+export async function closeAdminCapacityWindow(input: {
+  base: string;
+  windowId: string;
+  idempotencyKey: string;
+  cookie?: string;
+  fetchImpl?: typeof fetch;
+}): Promise<{ ok: true } | { ok: false; reason: 'forbidden' | 'error' }> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  try {
+    const headers: Record<string, string> = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'idempotency-key': input.idempotencyKey,
+    };
+    if (input.cookie) headers.cookie = input.cookie;
+    const response = await fetchImpl(new URL(`/v1/capacity-windows/${input.windowId}/close`, input.base), {
+      method: 'POST',
+      credentials: 'include',
+      headers,
+      body: '{}',
     });
     if (response.status === 401 || response.status === 403) return { ok: false, reason: 'forbidden' };
     if (!response.ok) return { ok: false, reason: 'error' };
@@ -2841,8 +2874,25 @@ function capacityWindowListNode(windows: AdminCapacityWindowList): ReactNode {
           createElement(
             'p',
             { className: 'admin-capacity-window-meta' },
-            [window.kind === 'consultation' ? 'konsultacja' : 'start prac', ' · ', window.actorId, ' · ', window.startsAt, ' – ', window.endsAt].join(''),
+            [
+              window.kind === 'consultation' ? 'konsultacja' : 'start prac',
+              ' · ',
+              window.actorId,
+              ' · ',
+              window.startsAt,
+              ' – ',
+              window.endsAt,
+              window.closedAt ? ' · zamknięte' : '',
+            ].join(''),
           ),
+          window.closedAt
+            ? null
+            : createElement(
+                'form',
+                { method: 'post', className: 'admin-close-capacity-window' },
+                createElement('input', { type: 'hidden', name: 'capacityWindowId', value: window.id }),
+                createElement('button', { type: 'submit', name: 'intent', value: 'close-capacity-window' }, 'Zamknij okno'),
+              ),
         ),
       ),
     ),

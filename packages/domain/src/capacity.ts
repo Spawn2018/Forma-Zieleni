@@ -11,6 +11,7 @@ export type CapacityWindow = {
   kind: CapacityKind;
   startsAt: string;
   endsAt: string;
+  closedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -90,9 +91,22 @@ export function createCapacityWindow(
     kind,
     startsAt: start,
     endsAt: end,
+    closedAt: null,
     createdAt: created,
     updatedAt: created,
   };
+}
+
+/** Withdraw a window. The row stays. A second close keeps the first instant. */
+export function closeCapacityWindow(
+  window: CapacityWindow,
+  at: string,
+  surface: Record<string, unknown> = {},
+): CapacityWindow {
+  assertNoCalendarSurface(surface);
+  if (window.closedAt !== null) return window;
+  const closed = assertInstant(at, 'CAPACITY_AT_INVALID');
+  return { ...window, closedAt: closed, updatedAt: closed };
 }
 
 /**
@@ -110,17 +124,18 @@ export function decidePromisedDate(
   const instant = assertInstant(promisedAt, 'CAPACITY_PROMISE_INVALID');
   const ms = Date.parse(instant);
   const actor = actorId === undefined ? null : assertOpaqueCapacityActorId(actorId);
-  const matching = windows.filter((window) => {
+  const available = windows.filter((window) => window.closedAt === null);
+  const matching = available.filter((window) => {
     if (window.kind !== kind) return false;
     if (actor !== null && window.actorId !== actor) return false;
     return true;
   });
   if (matching.length === 0) {
-    if (windows.length === 0) return { ok: false, reason: 'CAPACITY_EMPTY' };
-    if (actor !== null && windows.some((window) => window.kind === kind)) {
+    if (available.length === 0) return { ok: false, reason: 'CAPACITY_EMPTY' };
+    if (actor !== null && available.some((window) => window.kind === kind)) {
       return { ok: false, reason: 'CAPACITY_EMPTY' };
     }
-    return windows.some((window) => window.kind === kind)
+    return available.some((window) => window.kind === kind)
       ? { ok: false, reason: 'CAPACITY_OUTSIDE' }
       : { ok: false, reason: 'CAPACITY_KIND_MISMATCH' };
   }

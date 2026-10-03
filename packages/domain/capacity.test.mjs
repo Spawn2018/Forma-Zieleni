@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   assertPromisedDateInsideCapacity,
+  closeCapacityWindow,
   createCapacityWindow,
   decidePromisedDate,
 } from './src/capacity.ts';
@@ -131,5 +132,30 @@ test('actor-scoped promises ignore another staff window and reject calendar-norm
   assert.throws(
     () => createCapacityWindow('cwindowopaque0032', ACTOR, 'consultation', '2026-02-30T08:00:00.000Z', '2026-02-30T12:00:00.000Z', AT),
     /CAPACITY_START_INVALID|CAPACITY_END_INVALID/,
+  );
+});
+
+test('a closed capacity window no longer authorizes a promised instant', () => {
+  const window = createCapacityWindow(
+    'cwindowopaque0040',
+    ACTOR,
+    'consultation',
+    '2026-10-01T08:00:00.000Z',
+    '2026-10-01T12:00:00.000Z',
+    AT,
+  );
+  assert.equal(window.closedAt, null);
+  const closed = closeCapacityWindow(window, '2026-10-02T08:00:00.000Z');
+  assert.equal(closed.closedAt, '2026-10-02T08:00:00.000Z');
+  assert.equal(closed.startsAt, window.startsAt);
+  assert.equal(closed.endsAt, window.endsAt);
+  assert.equal(closeCapacityWindow(closed, '2026-10-03T08:00:00.000Z'), closed);
+  assert.deepEqual(
+    decidePromisedDate([closed], 'consultation', '2026-10-01T09:00:00.000Z'),
+    { ok: false, reason: 'CAPACITY_EMPTY' },
+  );
+  assert.throws(
+    () => closeCapacityWindow(window, AT, { calendar: 'x' }),
+    /CAPACITY_CALENDAR_SURFACE_FORBIDDEN/,
   );
 });

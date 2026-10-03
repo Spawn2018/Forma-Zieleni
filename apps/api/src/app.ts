@@ -2,13 +2,13 @@ import { randomBytes } from 'node:crypto';
 import { getConnInfo } from '@hono/node-server/conninfo';
 import { Hono } from 'hono';
 import { assertNoClientSuppliedAuthority, assertOpaqueCapacityWindowId, assertOpaqueContractId, assertOpaqueGardenId, assertOpaqueLeadId, assertOpaqueOfferId, assertOpaqueOpportunityId, assertOpaqueProjectFileId, assertOpaqueProjectId, assertOpaqueSiteIntelligenceId, compileMarketingPlan, decideDraftRead } from '@forma-zieleni/domain';
-import { problem, validateCapacityDecisionRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateDecisionLogSummaryRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectFileNameRequest, validateProjectMilestoneCreateRequest, validateProjectMilestoneDueRequest, validateProjectMilestoneStatusRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
+import { problem, validateCapacityDecisionRequest, validateCapacityWindowCloseRequest, validateCapacityWindowCreateRequest, validateContractCreateRequest, validateContractLifecycleAdvanceRequest, validateDecisionLogCreateRequest, validateDecisionLogSummaryRequest, validateGardenCreateRequest, validateLeadCaptureRequest, validateLeadQualifyRequest, validateOfferCreateRequest, validateOpportunityCreateRequest, validatePaymentInstallmentTransitionRequest, validatePaymentScheduleCreateRequest, validatePaymentScheduleReplaceRequest, validateProjectCreateRequest, validateProjectDeliverRequest, validateProjectFileCreateRequest, validateProjectFileNameRequest, validateProjectMilestoneCreateRequest, validateProjectMilestoneDueRequest, validateProjectMilestoneStatusRequest, validateSiteIntelligenceCreateRequest } from '@forma-zieleni/validation';
 import { allows, type Capability, type SessionAuthenticator } from './auth.ts';
 import { ApiFailure, badRequest, PersistenceFailure } from './errors.ts';
 import { advanceContractLifecycleStatus, createContractFromOffer, listPortalContracts, listVisibleContracts, parseContractListQuery, readContract, readPortalContract } from './contracts.ts';
 import { createProjectFileRecord, listPortalProjectFiles, listVisibleProjectFiles, parseProjectFileListQuery, readPortalProjectFile, readProjectFile, reviseProjectFileNameRecord } from './files.ts';
 import { FILE_BYTES_MAX, readProjectFileBytes, storeProjectFileBytes } from './file-bytes.ts';
-import { createCapacityWindowRecord, decideCapacityPromise, listVisibleCapacityWindows, parseCapacityListQuery, readCapacityWindow } from './capacity.ts';
+import { closeCapacityWindowRecord, createCapacityWindowRecord, decideCapacityPromise, listVisibleCapacityWindows, parseCapacityListQuery, readCapacityWindow } from './capacity.ts';
 import { createGardenRecord, listPortalGardens, listVisibleGardens, parseGardenListQuery, readGarden, readPortalGarden } from './gardens.ts';
 import { captureLead, listVisibleLeads, parseListQuery, qualifyExistingLead, readLead } from './leads.ts';
 import {
@@ -837,6 +837,22 @@ export function createApp(options: AppOptions): Hono<{ Variables: Vars }> {
     c.set('actorId', actor.actorId);
     const window = await readCapacityWindow(options.store, pathCapacityWindowId(c.req.param('windowId')));
     if (!window) throw new ApiFailure(404, 'CAPACITY_WINDOW_NOT_FOUND', 'Capacity window was not found.');
+    return c.json(window);
+  });
+
+  app.post('/v1/capacity-windows/:windowId/close', async c => {
+    const actor = await requireActor(c, options.authenticator, 'capacity:write');
+    c.set('actorId', actor.actorId);
+    const key = idempotencyKey(c.req.header('idempotency-key'));
+    const parsed = validateCapacityWindowCloseRequest(await readJson(c.req.raw));
+    if (!parsed.ok) throw new ApiFailure(400, 'CAPACITY_INVALID', 'Capacity window could not be closed.', parsed.errors);
+    const window = await closeCapacityWindowRecord(
+      options.store,
+      pathCapacityWindowId(c.req.param('windowId')),
+      actor,
+      key,
+      now(),
+    );
     return c.json(window);
   });
 

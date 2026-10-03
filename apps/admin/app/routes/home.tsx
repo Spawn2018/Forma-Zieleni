@@ -12,6 +12,7 @@ import {
   createAdminFile,
   reviseAdminFileName,
   capacityDecisionMessage,
+  closeAdminCapacityWindow,
   createAdminCapacityWindow,
   createAdminGarden,
   createAdminDecisionLogEntry,
@@ -622,6 +623,23 @@ export async function action({ request }: Route.ActionArgs) {
       kind,
       startsAt: startsAt.trim(),
       endsAt: endsAt.trim(),
+      idempotencyKey: randomUUID(),
+      cookie,
+    });
+    if (!result.ok) {
+      return data(result, { status: result.reason === 'forbidden' ? 403 : 502 });
+    }
+    return redirect('/');
+  }
+
+  if (intent === 'close-capacity-window') {
+    const windowId = form.get('capacityWindowId');
+    if (typeof windowId !== 'string' || !windowId.trim()) {
+      return data({ ok: false as const, reason: 'error' as const }, { status: 400 });
+    }
+    const result = await closeAdminCapacityWindow({
+      base,
+      windowId: windowId.trim(),
       idempotencyKey: randomUUID(),
       cookie,
     });

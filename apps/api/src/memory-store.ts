@@ -518,6 +518,12 @@ class MemoryTx implements LeadTx {
     this.state.capacityWindows.push(clone(window));
   }
 
+  async saveCapacityWindow(window: CapacityWindow): Promise<void> {
+    const index = this.state.capacityWindows.findIndex(item => item.id === window.id);
+    if (index < 0) throw new Error('CAPACITY_WINDOW_MISSING');
+    this.state.capacityWindows[index] = clone(window);
+  }
+
   async findCapacityWindow(id: string): Promise<CapacityWindow | null> {
     return clone(this.state.capacityWindows.find(item => item.id === id) ?? null);
   }

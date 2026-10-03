@@ -1232,6 +1232,22 @@ Contract: [`PORTAL-PROJECT-NEXT-MILESTONE.md`](./PORTAL-PROJECT-NEXT-MILESTONE.m
 Security: uses the milestone list the portal already loaded. No mutation.
 Next: none.
 
+### CAPACITY-WINDOW-CLOSE
+
+Dependencies: CAPACITY-STAFF.
+Gate: REVIEW.
+Status: COMPLETE.
+Autonomous: yes.
+Accept: staff can close a capacity window. The row stays. A second close
+keeps the first instant. A closed window does not authorize a promised
+date. The range and actor stay unchanged. A calendar or customer field
+is refused. The portal cannot close a window.
+Tests: `packages/domain/capacity.test.mjs`, `apps/api/src/http.test.mjs`,
+`apps/admin/app/shell.test.mjs`.
+Contract: [`CAPACITY-WINDOW-CLOSE.md`](./CAPACITY-WINDOW-CLOSE.md).
+Security: uses existing `capacity:write`. No calendar provider.
+Next: none.
+
 ## Deferred and Owner-gated (visible, not READY)
 
 | Item | Gate | Note |

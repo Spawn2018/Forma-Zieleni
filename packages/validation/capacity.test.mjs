@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateCapacityDecisionRequest, validateCapacityWindowCreateRequest } from './src/capacity.ts';
+import { validateCapacityDecisionRequest, validateCapacityWindowCloseRequest, validateCapacityWindowCreateRequest } from './src/capacity.ts';
 
 const actorId = 'staffdesignerana1';
 const windowBody = {
@@ -30,6 +30,15 @@ test('validateCapacityWindowCreateRequest rejects a reversed range and a guessab
     endsAt: '2026-06-01T07:00:00.000Z',
   }).ok, false);
   assert.equal(validateCapacityWindowCreateRequest({ ...windowBody, actorId: 'actor1' }).ok, false);
+});
+
+test('validateCapacityWindowCloseRequest accepts only an empty body', () => {
+  assert.equal(validateCapacityWindowCloseRequest({}).ok, true);
+  assert.equal(validateCapacityWindowCloseRequest(null).ok, true);
+  const mail = validateCapacityWindowCloseRequest({ email: 'a@b.c' });
+  assert.equal(mail.ok, false);
+  const range = validateCapacityWindowCloseRequest({ endsAt: '2026-06-01T13:00:00.000Z' });
+  assert.equal(range.ok, false);
 });
 
 test('validateCapacityDecisionRequest accepts a promised instant', () => {

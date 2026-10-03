@@ -5,6 +5,7 @@
     "GET /approvals/proposals",
     "GET /capacity-windows",
     "GET /capacity-windows/{windowId}",
+    "POST /capacity-windows/{windowId}/close",
     "GET /content/{contentId}",
     "GET /contracts",
     "GET /contracts/{contractId}",
@@ -234,6 +235,7 @@
     "kind",
     "startsAt",
     "endsAt",
+    "closedAt",
     "createdAt",
     "updatedAt"
   ],

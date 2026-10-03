@@ -103,6 +103,7 @@ function toCapacityWindow(row: Database['capacity_window']): CapacityWindow {
     kind: row.kind as CapacityWindow['kind'],
     startsAt: iso(row.starts_at),
     endsAt: iso(row.ends_at),
+    closedAt: row.closed_at ? iso(row.closed_at) : null,
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
   };
@@ -712,9 +713,18 @@ class PostgresTx implements LeadTx {
       kind: window.kind,
       starts_at: new Date(window.startsAt),
       ends_at: new Date(window.endsAt),
+      closed_at: window.closedAt ? new Date(window.closedAt) : null,
       created_at: new Date(window.createdAt),
       updated_at: new Date(window.updatedAt),
     }).execute();
+  }
+
+  async saveCapacityWindow(window: CapacityWindow): Promise<void> {
+    const result = await this.trx.updateTable('capacity_window').set({
+      closed_at: window.closedAt ? new Date(window.closedAt) : null,
+      updated_at: new Date(window.updatedAt),
+    }).where('id', '=', window.id).executeTakeFirst();
+    if (Number(result.numUpdatedRows ?? 0) === 0) throw new Error('CAPACITY_WINDOW_MISSING');
   }
 
   async findCapacityWindow(id: string): Promise<CapacityWindow | null> {

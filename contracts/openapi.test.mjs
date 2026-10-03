@@ -139,6 +139,12 @@ test('mutations require idempotency and public capture has no bearer requirement
     '#/components/parameters/RequestId',
   ]);
   assert.deepEqual(spec.paths['/capacity-windows/{windowId}'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-windows/{windowId}/close'].post.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/capacity-windows/{windowId}/close'].post.parameters.map(p => p.$ref ?? p.name), [
+    'windowId',
+    '#/components/parameters/IdempotencyKey',
+    '#/components/parameters/RequestId',
+  ]);
   assert.deepEqual(spec.paths['/capacity-decisions'].post.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/site-intelligence'].get.security, [{ bearerAuth: [] }]);
   assert.deepEqual(spec.paths['/site-intelligence'].post.security, [{ bearerAuth: [] }]);

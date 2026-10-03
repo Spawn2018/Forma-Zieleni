@@ -10,6 +10,7 @@ import {
   advanceAdminContractLifecycle,
   advanceAdminMilestoneStatus,
   capacityDecisionMessage,
+  closeAdminCapacityWindow,
   createAdminCapacityWindow,
   decideAdminCapacity,
   fetchAdminCapacityWindows,
@@ -1547,6 +1548,7 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
         kind: 'consultation',
         startsAt: '2026-06-01T08:00:00.000Z',
         endsAt: '2026-06-01T12:00:00.000Z',
+        closedAt: null,
       }],
     },
   }));
@@ -1554,6 +1556,7 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
   assert.match(html, /konsultacja/);
   assert.match(html, /staffdesignerana1/);
   assert.match(html, /Zapisz okno/);
+  assert.match(html, /Zamknij okno/);
   assert.match(html, /Sprawdź obiecany termin/);
   assert.equal(html.toLowerCase().includes('google'), false);
   assert.equal(html.toLowerCase().includes('calendar'), false);
@@ -1579,6 +1582,37 @@ test('capacity staff UI lists windows and explains a refusal without a calendar'
     }),
     { ok: true },
   );
+  assert.deepEqual(
+    await closeAdminCapacityWindow({
+      base: 'http://admin.test',
+      windowId: 'wcapacitywindow01',
+      idempotencyKey: 'cap-close-ui-1',
+      fetchImpl: async (url, init) => {
+        assert.match(String(url), /\/v1\/capacity-windows\/wcapacitywindow01\/close$/);
+        assert.equal(init?.method, 'POST');
+        assert.equal(init?.body, '{}');
+        return new Response('{}', { status: 200 });
+      },
+    }),
+    { ok: true },
+  );
+  const closedHtml = renderToStaticMarkup(adminShell({
+    state: 'signed-in',
+    ...emptyCrm,
+    capacityWindows: {
+      status: 'ready',
+      items: [{
+        id: 'wcapacitywindow01',
+        actorId: 'staffdesignerana1',
+        kind: 'consultation',
+        startsAt: '2026-06-01T08:00:00.000Z',
+        endsAt: '2026-06-01T12:00:00.000Z',
+        closedAt: '2026-06-02T08:00:00.000Z',
+      }],
+    },
+  }));
+  assert.match(closedHtml, /zamknięte/);
+  assert.equal(closedHtml.includes('Zamknij okno'), false);
   assert.deepEqual(
     await decideAdminCapacity({
       base: 'http://admin.test',
